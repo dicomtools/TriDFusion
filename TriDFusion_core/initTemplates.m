@@ -103,7 +103,8 @@ function initTemplates()
 
     end
 
-    catch
+    catch ME
+        logErrorToFile(ME);  
         progressBar(1, 'Error:initTemplates()');
     end
 

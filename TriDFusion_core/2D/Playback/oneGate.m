@@ -1,5 +1,5 @@
 function oneGate(sDirection)
-%function multiGate(mPlay)
+%function oneGate(sDirection)
 %Dispay 2D DICOM 4D Images Previous or Next Gate.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

@@ -33,6 +33,7 @@ function uiObject = uiAddVoiRoiPanelObject(sAction, aValue)
     persistent paObject; 
 
     if strcmpi('set', sAction)
+        
         paObject = aValue;            
     end      
     

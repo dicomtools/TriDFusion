@@ -27,6 +27,8 @@ function writeRTStructCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    try
+
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     
     bSubDir = false;
@@ -42,7 +44,7 @@ function writeRTStructCallback(hObject, ~)
         % load last data directory
         if exist(sMatFile, 'file')
                                     % lastDirMat mat file exists, load it
-           load('-mat', sMatFile);
+           load('-mat', sMatFile, 'exportDicomLastUsedDir');
            if exist('exportDicomLastUsedDir', 'var')
                sCurrentDir = exportDicomLastUsedDir;
            end
@@ -60,17 +62,9 @@ function writeRTStructCallback(hObject, ~)
         try
             exportDicomLastUsedDir = sOutDir;
             save(sMatFile, 'exportDicomLastUsedDir');
-        catch
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-    %        h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
-    %        if integrateToBrowser('get') == true
-    %            sLogo = './TriDFusion/logo.png';
-    %        else
-    %            sLogo = './logo.png';
-    %        end
-
-    %        javaFrame = get(h, 'JavaFrame');
-    %        javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
         end        
     end
     
@@ -78,6 +72,7 @@ function writeRTStructCallback(hObject, ~)
     aInputBuffer = inputBuffer('get');
 
     if exist('hObject', 'var')
+
         bShowSeriesDescriptionDialog = true;
     else
         bShowSeriesDescriptionDialog = false;
@@ -85,4 +80,11 @@ function writeRTStructCallback(hObject, ~)
 
     writeRtStruct(sOutDir, bSubDir, aInputBuffer{dSeriesOffset}, tInput(dSeriesOffset).atDicomInfo, dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), dSeriesOffset, bShowSeriesDescriptionDialog);
 
+    clear aInputBuffer;
+    clear tInput;
+
+    catch ME
+        logErrorToFile(ME);
+        progressBar(1, 'Error: writeRTStructCallback()' );    
+    end
 end

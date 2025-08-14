@@ -77,9 +77,10 @@ function importDicomdMaskCallback(~, ~)
         try
             importDicomLastUsedDir = sPath;
             save(sMatFile, 'importDicomLastUsedDir');
-        catch
+            
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-
         end        
         
 %        mainDir('set', sPathName);

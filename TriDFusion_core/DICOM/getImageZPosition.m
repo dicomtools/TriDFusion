@@ -6,7 +6,7 @@ function [dFirstZ, dLastZ] = getImageZPosition(atDicomInfo, aImage)
 
     aImageSize = size(aImage);
 
-    if numel(atDicomInfo) == 1
+    if isscalar(atDicomInfo)
 
 
         if strcmpi(atDicomInfo{1}.Modality, 'RTDOSE')
@@ -119,50 +119,5 @@ function [dFirstZ, dLastZ] = getImageZPosition(atDicomInfo, aImage)
         end
 
     end
-
-    function bFlip = isImageFlipped(tDicomInfo1)
-
-        sOrientation = getImageOrientation(tDicomInfo1.ImageOrientationPatient);
-
-        if strcmpi(tDicomInfo1.Modality, 'RTDOSE')
-
-            if ~isempty(tDicomInfo1.GridFrameOffsetVector)
-
-                dNbFrames = numel(tDicomInfo1.GridFrameOffsetVector);
-                
-                if dNbFrames >1            
-                    dSpacingBetweenSlices = tDicomInfo1.GridFrameOffsetVector(2)-tDicomInfo1.GridFrameOffsetVector(1);
-                else
-                    dSpacingBetweenSlices = 0;
-                end
-            else
-                dSpacingBetweenSlices =0;
-            end
-        else
-            dSpacingBetweenSlices = tDicomInfo1.SpacingBetweenSlices;
-        end
-
-
-        if      strcmpi(sOrientation, 'Sagittal')
-
-            dCurrentLocation = tDicomInfo1.ImagePositionPatient(1);
-            dNextLocation = dCurrentLocation-dSpacingBetweenSlices;
-
-        elseif  strcmpi(sOrientation, 'Coronal')
-
-            dCurrentLocation = tDicomInfo1.ImagePositionPatient(2);
-            dNextLocation = dCurrentLocation-dSpacingBetweenSlices;
-
-        else    % Axial
-            dCurrentLocation = tDicomInfo1.ImagePositionPatient(3);
-            dNextLocation = dCurrentLocation-dSpacingBetweenSlices;
-        end
-
-        if dCurrentLocation > dNextLocation  
-            
-            bFlip = true;
-        end
-    end
-
 
 end

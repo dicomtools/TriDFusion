@@ -66,7 +66,9 @@ function setMachineLearningPSMACallback(hObject, ~)
                            'Name', 'PSMA Machine Learning SUV Segmentation',...
                            'Toolbar','none'...               
                            );    
-            end
+             end
+
+            setObjectIcon(dlgMachineLearningPSMA);
 
             % Exclude organs from AI analysis
     
@@ -411,6 +413,21 @@ function setMachineLearningPSMACallback(hObject, ~)
         excludePSMASpleen('set', bObjectValue);
 
     end
+
+    function chkPSMAUrinaryBladderCallback(hObject, ~)  
+                
+        bObjectValue = get(chkPSMAUrinaryBladder, 'Value');
+        
+        if strcmpi(get(hObject, 'Style'), 'text')
+            
+            set(chkPSMAUrinaryBladder, 'Value', ~bObjectValue);
+        end        
+        
+        bObjectValue = get(chkPSMAUrinaryBladder, 'Value');
+
+        excludePSMAUrinaryBladder('set', bObjectValue);
+
+    end    
 
     function edtPSMASmalestVoiValueCallback(~, ~)
 

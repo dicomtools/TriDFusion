@@ -75,16 +75,16 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
         atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
     end
 
-    if get(uiSeriesPtr('get'), 'Value') ~= dNMSerieOffset
-        set(uiSeriesPtr('get'), 'Value', dNMSerieOffset);
+    if get(uiSeriesPtr('get'), 'Value') ~= dCTSerieOffset
+        set(uiSeriesPtr('get'), 'Value', dCTSerieOffset);
 
         setSeriesCallback();
     end
 
     try
 
-    roiFaceAlphaValue('set', 0.1);
-    set(uiSliderRoisFaceAlphaRoiPanelObject('get'), 'Value', roiFaceAlphaValue('get'));
+%    roiFaceAlphaValue('set', 0.1);
+%    set(uiSliderRoisFaceAlphaRoiPanelObject('get'), 'Value', roiFaceAlphaValue('get'));
 
     pixelEdge('set', bPixelEdge);
 
@@ -181,17 +181,19 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
 
                         nii = nii_tool('load', sNiiFileName);
 
-                        machineLearning3DMask('set', 'lungs', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
+                        aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
 
-                        aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+                        machineLearning3DMask('set', 'lungs', aMask, aColor, computeMaskVolume(nii.img, atCTMetaData));
 
-                        maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+                        % aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+                        aMask = aMask(:,:,end:-1:1);
+
+                        maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dCTSerieOffset, pixelEdge('get'));
 
                         clear aMask;
                    end
 
                 end
-
 
                 progressBar(4/7, 'Importing Liver mask, please wait.');
 
@@ -207,21 +209,31 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
 
                     nii = nii_tool('load', sNiiFileName);
 
-                    machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
+                    aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
 
-                    aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+                    machineLearning3DMask('set', 'liver', aMask, aColor, computeMaskVolume(nii.img, atCTMetaData));
 
-                    maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+                    % aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+                    aMask = aMask(:,:,end:-1:1);
+
+                    maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dCTSerieOffset, pixelEdge('get'));
 
                     clear aMask;
                 end
 
+                % Copy VOIs to NM
+
+                atVoiInput = voiTemplate('get', dCTSerieOffset);
+                for vv=1:numel(atVoiInput)
+                    copyRoiVoiToSerie(dCTSerieOffset, dNMSerieOffset, atVoiInput{vv}, false);
+                end
+
                 if bResampleSeries == true
-                    
+
                     if isInterpolated('get') == false
-                
+
                         isInterpolated('set', true);
-                    
+
                         setImageInterpolation(true);
                     end
 
@@ -249,27 +261,52 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
                     mipBuffer('set', aMip, dNMSerieOffset);
 
                     atRoi = roiTemplate('get', dNMSerieOffset);
+                    atVoi = voiTemplate('get', dNMSerieOffset);
 
-                    atResampledRoi = resampleROIs(aNMImage, atNMMetaData, aResampledNMImage, atResampledNMMeta, atRoi, true);
+                    [atResampledRoi, atResampledVoi] = resampleROIs(aNMImage, atNMMetaData, aResampledNMImage, atResampledNMMeta, atRoi, false, atVoi, dNMSerieOffset);
 
                     roiTemplate('set', dNMSerieOffset, atResampledRoi);
+                    voiTemplate('set', dNMSerieOffset, atResampledVoi);
 
-                    setQuantification(dNMSerieOffset);
-
-                    resampleAxes(aResampledNMImage, atResampledNMMeta);
-
-                    setImagesAspectRatio();
-                    
-                    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));       
-
-                    refreshImages();
-
-                    drawnow;
+                    % setQuantification(dNMSerieOffset);
+                    % 
+                    % resampleAxes(aResampledNMImage, atResampledNMMeta);
+                    % 
+                    % setImagesAspectRatio();
+                    % 
+                    % plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));
+                    % 
+                    % refreshImages();
+                    % 
+                    % drawnow;
 
                     % Increase image intensity
 
-                    dMax = max(aResampledNMImage, [], 'all')/5;
-                    dMin = min(aResampledNMImage, [], 'all');
+
+
+                    % sliderCorCallback();
+                    % sliderSagCallback();
+                    % sliderTraCallback();
+
+                    % Clear buffer
+
+                    clear aMip;
+                    clear refMip;
+                    clear aCTImage;
+                    clear aResampledNMImage;
+
+                end
+
+                if get(uiSeriesPtr('get'), 'Value') ~= dNMSerieOffset
+                    set(uiSeriesPtr('get'), 'Value', dNMSerieOffset);
+
+                    setSeriesCallback();
+                end
+
+                if bResampleSeries == true
+              
+                    dMax = max(dicomBuffer('get', [], dNMSerieOffset), [], 'all')/6;
+                    dMin = min(dicomBuffer('get', [], dNMSerieOffset), [], 'all');
 
                     windowLevel('set', 'max', dMax);
                     windowLevel('set', 'min' ,dMin);
@@ -281,6 +318,8 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
                     if isFusion('get') == false
 
                         set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+                        sliderAlphaValue('set', 0.65);
 
                         setFusionCallback();
                     end
@@ -301,20 +340,7 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
                     if link2DMip('get') == true && isVsplash('get') == false
                         set(axesMipfPtr('get', [], dCTSerieOffset), 'CLim', [dMin dMax]);
                     end
-
-                    sliderCorCallback();
-                    sliderSagCallback();
-                    sliderTraCallback();
-
-                    % Clear buffer
-
-                    clear aMip;
-                    clear refMip;
-                    clear aCTImage;
-                    clear aResampledNMImage;
-
                 end
-
             end
 
         elseif isunix % Linux is not yet supported
@@ -359,7 +385,8 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         progressBar( 1 , 'Error: setMachineLearning3DLungShunt()' );
     end
 

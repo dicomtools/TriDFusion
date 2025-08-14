@@ -27,10 +27,13 @@ function setMIPCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if numel(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
-       size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+    dSeriesOffset      = get(uiSeriesPtr('get'), 'Value');
+    dFusedSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
 
-%         try
+    if ~isempty(dicomBuffer('get', [], dSeriesOffset)) && ...
+       size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+        try
             
         sFusionBtnEnable = get(btnFusionPtr('get'), 'Enable');
            
@@ -45,21 +48,24 @@ function setMIPCallback(~, ~)
 
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+        % set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+        set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));
             
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnZoomPtr('get'), 'FontWeight', 'normal');
+        % set(btnZoomPtr('get'), 'FontWeight', 'normal');
+        set(btnZoomPtr('get'), 'CData', resizeTopBarIcon('zoom_grey.png'));
         zoomTool('set', false);
-        zoom(fiMainWindowPtr('get'), 'off');           
+        zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');           
 
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
-        set(btnPanPtr('get'), 'FontWeight', 'normal');
+        % set(btnPanPtr('get'), 'FontWeight', 'normal');
+        set(btnPanPtr('get'), 'CData', resizeTopBarIcon('pan_grey.png'));
         panTool('set', false);
-        pan(fiMainWindowPtr('get'), 'off');     
+        panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');     
 
         set(rotate3DMenu('get'), 'Checked', 'off');         
         rotate3DTool('set', false);
@@ -70,6 +76,7 @@ function setMIPCallback(~, ~)
         datacursormode(fiMainWindowPtr('get'), 'off');  
 
         setRoiToolbar('off');
+        setPlotEditToolbar('off');
 
         if multiFramePlayback('get') == true
             multiFramePlayback('set', false);
@@ -137,8 +144,9 @@ function setMIPCallback(~, ~)
                 
             set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnMIPPtr('get'), 'FontWeight', 'normal');
-                
+            % set(btnMIPPtr('get'), 'FontWeight', 'normal');
+            set(btnMIPPtr('get'), 'CData', resizeTopBarIcon('3d_mip_grey.png'));
+              
             if switchToIsoSurface('get') == false && ...
                switchTo3DMode('get')     == false           
 
@@ -317,28 +325,42 @@ function setMIPCallback(~, ~)
                 voi3DEnableList('set', '');
                 voi3DTransparencyList('set', '');
 
-                clearDisplay();
-                initDisplay(3);
+                bFusion = isFusion('get');
+
+                isFusion('set', false);
 
                 link2DMip('set', true);
 
                 set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
                 set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
-                set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
+                % set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
+                set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_white.png'));
+
+                clearDisplay();
+                initDisplay(3);
                
                 dicomViewerCore();
-                
-                % atMetaData = dicomMetaData('get');
-                atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
-                if isFusion('get')
-                    % tFuseInput     = inputTemplate('get');
-                    % iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
-                    % atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
-                    atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+                % atMetaData = dicomMetaData('get');
+                atMetaData = dicomMetaData('get', [], dSeriesOffset);
+
+                if bFusion == true
+
+                    atFuseMetaData = fusionMetaData('get', [], dFusedSeriesOffset);
 
                     setViewerDefaultColor(true, atMetaData, atFuseMetaData);
+
+                    link2DMip('set', false);
+        
+                    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+                    % set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+                    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
+
+                    setFusionCallback();
                 else
+
                     setViewerDefaultColor(true, atMetaData);
                 end
                 
@@ -354,6 +376,7 @@ function setMIPCallback(~, ~)
 %                end 
                 
                 setRoiToolbar('on');
+                setPlotEditToolbar('on');
                                 
                 % Reactivate main tool bar 
                 set(uiSeriesPtr('get'), 'Enable', 'on');                        
@@ -444,14 +467,14 @@ function setMIPCallback(~, ~)
       %          mipObject('set', '');
 
                 % atMetaData = dicomMetaData('get');
-                atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+                atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
                 if isFusion('get') == true
 
 % if 1                    
                     % tFuseInput     = inputTemplate('get');
-                    % iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
-                    atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                    % iFuseOffset    = dFusedSeriesOffset;
+                    atFuseMetaData = fusionMetaData('get', [], dFusedSeriesOffset);
 
                     if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
                         strcmpi(atMetaData{1}.Modality, 'pt')) && ...
@@ -487,7 +510,7 @@ function setMIPCallback(~, ~)
                 end
 %                end
 
-                mipObj = initVolShow(squeeze(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
+                mipObj = initVolShow(squeeze(dicomBuffer('get', [], dSeriesOffset)), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
 
                 if isempty(viewer3dObject('get'))
                     set(mipObj, 'InteractionsEnabled', true);
@@ -501,10 +524,10 @@ function setMIPCallback(~, ~)
 %                    getMipFusionAlphaMap('set', fusionBuffer('get'), 'auto');
 
                     % tFuseInput     = inputTemplate('get');
-                    % iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
+                    % iFuseOffset    = dFusedSeriesOffset;
                     % atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
                     % 
-                    atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                    atFuseMetaData = fusionMetaData('get', [], dFusedSeriesOffset);
 
 if 1
 
@@ -526,13 +549,13 @@ if 1
 end
                     
                  
-                    mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
+                    mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFusedSeriesOffset)), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
 
                     if isempty(viewer3dObject('get'))
                         set(mipFusionObj, 'InteractionsEnabled', false);
                     end
 
-                    [aAlphaMap, ~] = getMipFusionAlphaMap('get', fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), atFuseMetaData);
+                    [aAlphaMap, ~] = getMipFusionAlphaMap('get', fusionBuffer('get', [], dFusedSeriesOffset), atFuseMetaData);
                     mipFusionObj.Alphamap = aAlphaMap;
 
                     mipFusionObj.Colormap = get3DColorMap('one', colorMapMipFusionOffset('get'));
@@ -595,7 +618,7 @@ end
 
                     if isempty(viewer3dObject('get'))
            
-                        [aMap, sType] = getMipAlphaMap('get', dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value')));
+                        [aMap, sType] = getMipAlphaMap('get', dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset));
                         set(mipObj, 'Alphamap', aMap);
                         set(mipObj, 'Colormap', get3DColorMap('get', colorMapMipOffset('get') ));
     
@@ -617,12 +640,12 @@ end
                         if ~isempty(mipFusionObj) && isFusion('get') == true
     
                             % tFuseInput  = inputTemplate('get');
-                            % iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
+                            % iFuseOffset = dFusedSeriesOffset;
                             % atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
     
-                            atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                            atFuseMetaData = fusionMetaData('get', [], dFusedSeriesOffset);
     
-                            [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), atFuseMetaData);
+                            [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get', [], dFusedSeriesOffset), atFuseMetaData);
     
                             set(mipFusionObj, 'Alphamap', aFusionMap);
                             set(mipFusionObj, 'Colormap', get3DColorMap('get', colorMapMipFusionOffset('get') ));
@@ -684,9 +707,9 @@ end
                     end
 %                    getMipAlphaMap('set', dicomBuffer('get'), 'auto');
                     
-                    atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
-                    mipObj = initVolShow(squeeze(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
+                    mipObj = initVolShow(squeeze(dicomBuffer('get', [], dSeriesOffset)), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
 
                     if isempty(viewer3dObject('get'))
                         set(mipObj, 'InteractionsEnabled', false);
@@ -699,18 +722,18 @@ end
 %                        getMipFusionAlphaMap('set', fusionBuffer('get'), 'auto');
 
                         % tFuseInput     = inputTemplate('get');
-                        % iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
+                        % iFuseOffset    = dFusedSeriesOffset;
                         % atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
-                        atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                        atFuseMetaData = fusionMetaData('get', [], dFusedSeriesOffset);
 
-                        mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
+                        mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFusedSeriesOffset)), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
 
                         if isempty(viewer3dObject('get'))
 
                             set(mipFusionObj, 'InteractionsEnabled', false);
                         end
 
-                        [aAlphaMap, ~] = getMipFusionAlphaMap('get', fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), atFuseMetaData);
+                        [aAlphaMap, ~] = getMipFusionAlphaMap('get', fusionBuffer('get', [], dFusedSeriesOffset), atFuseMetaData);
 
                         colorMapMipFusionOffset('set', fusionColorMapOffset('get')); % Set 3D Mip from 2D
                         mipFusionObj.Colormap = get3DColorMap('one', colorMapMipFusionOffset('get'));
@@ -750,12 +773,12 @@ end
                             end
                             % 
                             % tFuseInput     = inputTemplate('get');
-                            % iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
+                            % iFuseOffset    = dFusedSeriesOffset;
                             % atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
-                            atFuseMetaData = dicomMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                            atFuseMetaData = dicomMetaData('get', [], dFusedSeriesOffset);
 
-                            [aMap, sType] = getMipFusionAlphaMap('get', fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), atFuseMetaData);
+                            [aMap, sType] = getMipFusionAlphaMap('get', fusionBuffer('get', [], dFusedSeriesOffset), atFuseMetaData);
 
                             [dMipAlphaOffset, sMipMapSliderEnable] = ui3DPanelGetMipAlphaMapType(sType, atFuseMetaData);
 
@@ -786,9 +809,9 @@ end
                             end
 
                             % atMetaData = dicomMetaData('get');
-                            atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+                            atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
-                            [aMap, sType] = getMipAlphaMap('get', dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), atMetaData);
+                            [aMap, sType] = getMipAlphaMap('get', dicomBuffer('get', [], dSeriesOffset), atMetaData);
 
                             [dMipAlphaOffset, sMipMapSliderEnable] = ui3DPanelGetMipAlphaMapType(sType, atMetaData);
 
@@ -827,11 +850,11 @@ end
             set(btnMIPPtr('get'), 'Enable', 'on');
             set(btnMIPPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnMIPPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            set(btnMIPPtr('get'), 'FontWeight', 'bold');
-            
+            % set(btnMIPPtr('get'), 'FontWeight', 'bold');
+            set(btnMIPPtr('get'), 'CData', resizeTopBarIcon('3d_mip_white.png'));
+           
             set(btn3DPtr('get'), 'Enable', 'on');
-            set(btnIsoSurfacePtr('get'), 'Enable', 'on');
-            
+            set(btnIsoSurfacePtr('get'), 'Enable', 'on');          
         end
 
         if switchTo3DMode('get') == false && ...
@@ -921,10 +944,11 @@ end
                 end
             end
         end
-% 
-%         catch
-%             progressBar(1, 'Error:setMIPCallback()');
-%         end
+
+        catch ME   
+            logErrorToFile(ME);
+            progressBar(1, 'Error:setMIPCallback()');
+        end
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;

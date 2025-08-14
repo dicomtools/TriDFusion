@@ -831,7 +831,8 @@ for i = 1:nRun
                 else
                     write_tsv(session_id,tsvfile,'acq_time',datestr(SubjectTable.AcquisitionDate,'yyyy-mm-dd'),'Comment',SubjectTable.Comment)
                 end
-            catch ME
+            catch ME   
+                logErrorToFile(ME);
                 fprintf(1, '\n')
                 warning(['Could not save sub-' char(SubjectTable{1,1}) '_sessions.tsv']);
                 errorMessage = sprintf('Error in function %s() at line %d.\nError Message: %s\n\n', ...
@@ -1971,7 +1972,8 @@ switch cmd
                 hs.src.Text = strtrim(evt.Data);
                 gui_callback([], [], 'set_src', fh);
             end
-        catch me
+        catch me   
+            logErrorToFile(me);
             errordlg(me.message);
         end
     case 'drop_dst' % Java drop dst
@@ -1984,7 +1986,8 @@ switch cmd
                 hs.dst.Text = strtrim(evt.Data);
                 gui_callback([], [], 'set_dst', fh);
             end
-        catch me
+        catch me   
+            logErrorToFile(me);
             errordlg(me.message);
         end
     otherwise
@@ -2491,7 +2494,8 @@ if isempty(which('parpool')) % for early matlab versions
         if matlabpool('size')<1 %#ok<*DPOOL>
             try
                 matlabpool; 
-            catch me
+            catch me   
+                logErrorToFile(me);
                 fprintf(2, '%s\n', me.message);
                 doParal = false;
             end
@@ -2507,7 +2511,8 @@ try
     if isempty(gcp('nocreate'))
         try
             parpool; 
-        catch me
+        catch me   
+            logErrorToFile(me);
             fprintf(2, '%s\n', me.message);
             doParal = false;
         end
@@ -2757,7 +2762,8 @@ webUrl = 'https://www.mathworks.com/matlabcentral/fileexchange/42997';
 if ~isdeployed
 try
     str = webread(verLink);
-catch me
+catch me   
+    logErrorToFile(me);
     try
         str = urlread(verLink); %#ok
     catch
@@ -2796,6 +2802,7 @@ catch
         unzip(fname, tmp); delete(fname);
         tdir = [tmp 'dicm2nii-master/'];
     catch me
+        logErrorToFile(me);
         errordlg(['Error in updating: ' me.message], mfile);
         web(webUrl, '-browser');
         return;
@@ -3018,6 +3025,7 @@ try
         warning(['CANNOT PREVIEW SCANNING INFOS: ' err.message])
     end
 catch err
+    logErrorToFile(err);
     warning(['CANNOT PREVIEW RUN: ' err.message])
 end
 

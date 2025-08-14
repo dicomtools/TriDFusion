@@ -31,30 +31,36 @@ function decreaseVoiPosition(sVoiTag, dDecreaseBySize)
 
     atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
-    atRoi = roiTemplate('get', dSeriesOffset);
-    atVoi = voiTemplate('get', dSeriesOffset);
+    atRoiInput = roiTemplate('get', dSeriesOffset);
+    atVoiInput = voiTemplate('get', dSeriesOffset);
 
-    if ~isempty(atRoi)        
+    % atRoiInputBack = roiTemplate('get', dSeriesOffset);
 
-        if isempty(atVoi)
+    dUID = generateUniqueNumber(false);
+
+    if ~isempty(atRoiInput)        
+
+        if isempty(atVoiInput)
             
             aTagOffset = 0;
         else
-            aTagOffset = strcmp( cellfun( @(atVoi) atVoi.Tag, atVoi, 'uni', false ), {sVoiTag} );
+            aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {sVoiTag} );
         end
         
         if aTagOffset(aTagOffset==1) % tag is a voi
 
-            dNbRoiTag = numel(atVoi{aTagOffset}.RoisTag);
+            dNbRoiTag = numel(atVoiInput{aTagOffset}.RoisTag);
 
             for tt=1:dNbRoiTag % Scan all tag
-                
-                aRoiTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {[atVoi{aTagOffset}.RoisTag{tt}]} );
+
+                 atRoiInputBack = atRoiInput;
+               
+                aRoiTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[atVoiInput{aTagOffset}.RoisTag{tt}]} );
                 dRoiTagOffset = find(aRoiTagOffset, 1);           
            
                 if ~isempty(dRoiTagOffset)
             
-                    switch atRoi{dRoiTagOffset}.Type
+                    switch atRoiInput{dRoiTagOffset}.Type
                         
                         case lower('images.roi.line')
                                        
@@ -66,7 +72,7 @@ function decreaseVoiPosition(sVoiTag, dDecreaseBySize)
                             
                                                                 
                         otherwise
-                        switch lower(atRoi{dRoiTagOffset}.Axe)
+                        switch lower(atRoiInput{dRoiTagOffset}.Axe)
             
                             case 'axe'
     
@@ -102,14 +108,14 @@ function decreaseVoiPosition(sVoiTag, dDecreaseBySize)
                         end                    
                         % Calculate the center of the ROI
 
-                        centerX = mean(atRoi{dRoiTagOffset}.Position(:, 1));
-                        centerY = mean(atRoi{dRoiTagOffset}.Position(:, 2));
+                        centerX = mean(atRoiInput{dRoiTagOffset}.Position(:, 1));
+                        centerY = mean(atRoiInput{dRoiTagOffset}.Position(:, 2));
                         
                         % Iterate through each vertex and move it closer to the center
 
-                        for i = 1:size(atRoi{dRoiTagOffset}.Position, 1)
-                            x = atRoi{dRoiTagOffset}.Position(i, 1);
-                            y = atRoi{dRoiTagOffset}.Position(i, 2);
+                        for i = 1:size(atRoiInput{dRoiTagOffset}.Position, 1)
+                            x = atRoiInput{dRoiTagOffset}.Position(i, 1);
+                            y = atRoiInput{dRoiTagOffset}.Position(i, 2);
                             
                             % Calculate the new position for the vertex
                             
@@ -119,19 +125,22 @@ function decreaseVoiPosition(sVoiTag, dDecreaseBySize)
                             new_x = x - (dDecreaseBySize/xPixelSize * sign(x - centerX)); 
                             new_y = y - (dDecreaseBySize/yPixelSize * sign(y - centerY)); 
 
-                            atRoi{dRoiTagOffset}.Position(i, 1) = new_x;
-                            atRoi{dRoiTagOffset}.Position(i, 2) = new_y;
+                            atRoiInput{dRoiTagOffset}.Position(i, 1) = new_x;
+                            atRoiInput{dRoiTagOffset}.Position(i, 2) = new_y;
                         end
     
-                        if isvalid(atRoi{dRoiTagOffset}.Object)                                   
-                            atRoi{dRoiTagOffset}.Object.Position = atRoi{dRoiTagOffset}.Position;
+                        if isvalid(atRoiInput{dRoiTagOffset}.Object)                                   
+                            atRoiInput{dRoiTagOffset}.Object.Position = atRoiInput{dRoiTagOffset}.Position;
+                            roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
                         end
                     end
                 end
             end
         end
 
-        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
+        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+        
+        enableUndoVoiRoiPanel();        
     end    
 
 end

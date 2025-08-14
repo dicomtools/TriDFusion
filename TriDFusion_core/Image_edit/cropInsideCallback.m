@@ -27,7 +27,9 @@ function cropInsideCallback(hObject,~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    im = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));  
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    im = dicomBuffer('get', [], dSeriesOffset);  
     if isempty(im)
         return;
     end
@@ -39,7 +41,7 @@ function cropInsideCallback(hObject,~)
         return;
     end
 
-    pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+    pAxe = getAxeFromMousePosition(dSeriesOffset);
 
     if isempty(pAxe)
         return;
@@ -51,7 +53,7 @@ function cropInsideCallback(hObject,~)
     drawnow;
 
     if size(im, 3) == 1
-        axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        axe = axePtr('get', [], dSeriesOffset);
         if ~isempty(axe)
             if pAxe == axe
                 
@@ -71,11 +73,11 @@ function cropInsideCallback(hObject,~)
             end
         end
     else
-        if ~isempty(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
-           ~isempty(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
-           ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))
+        if ~isempty(axes1Ptr('get', [], dSeriesOffset)) && ...
+           ~isempty(axes2Ptr('get', [], dSeriesOffset)) && ...
+           ~isempty(axes3Ptr('get', [], dSeriesOffset))
 
-            if pAxe == axes1Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')) 
+            if pAxe == axes1Ptr ('get', [], dSeriesOffset) 
                 
                 iCoronal = sliceNumber('get', 'coronal');
                 
@@ -95,7 +97,7 @@ function cropInsideCallback(hObject,~)
 %                                );   
             end
 
-            if pAxe == axes2Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')) 
+            if pAxe == axes2Ptr ('get', [], dSeriesOffset) 
                 
                 iSagittal = sliceNumber('get', 'sagittal');
                 
@@ -114,7 +116,7 @@ function cropInsideCallback(hObject,~)
 %                                );   
             end
 
-            if pAxe == axes3Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')) 
+            if pAxe == axes3Ptr ('get', [], dSeriesOffset) 
                  iAxial = sliceNumber('get', 'axial');
                  
                  aMask = createMask(hObject.UserData, im(:,:,iAxial));
@@ -137,14 +139,15 @@ function cropInsideCallback(hObject,~)
     
     modifiedMatrixValueMenuOption('set', true);
    
-    dicomBuffer('set', im);
+    dicomBuffer('set', im, dSeriesOffset);
 
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    setQuantification(iOffset);
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    setQuantification(dSeriesOffset);
 
     refreshImages();
 
-    catch
+    catch ME
+        logErrorToFile(ME);  
         progressBar(1, 'Error:cropInsideCallback()');
     end
 

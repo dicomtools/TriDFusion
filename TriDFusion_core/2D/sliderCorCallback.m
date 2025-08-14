@@ -27,31 +27,33 @@ function sliderCorCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if ~isempty(uiSliderCorPtr('get'))
-
-        if get(uiSliderCorPtr('get'), 'Value') >= 0 && ...
-           get(uiSliderCorPtr('get'), 'Value') <= 1 
-           % strcmpi(windowButton('get'), 'up')  
-
-%             windowButton('set', 'scrool');
-  
-            if get(uiSliderCorPtr('get'), 'Value') == 0
-                dSliceNumber = 1;
-            else
-                dSliceNumber = round(get(uiSliderCorPtr('get'), 'Value') * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1));
-            end
+    hSlider = uiSliderCorPtr('get');
+    if isempty(hSlider)
+        return;
+    end
     
-            if dSliceNumber < 0
-                dSliceNumber = 1;
-            end
+    sliderVal = round(get(hSlider, 'Value'));
+    seriesIdx = get(uiSeriesPtr('get'), 'Value');
+    buffer    = dicomBuffer('get', [], seriesIdx);
+    numSlices = size(buffer, 1);
     
-            sliceNumber('set', 'coronal', dSliceNumber); 
-            
+    % Check slider value is in range
+    if sliderVal >= 0 && sliderVal <= numSlices
+        if sliderVal == 1
+            dSliceNumber = 1;
+        else
+            dSliceNumber = round(sliderVal);
+        end
+    
+        % Clamp to valid slice range
+        dSliceNumber = max(1, min(dSliceNumber, numSlices));
+    
+        % Update only if changed
+        if dSliceNumber ~= sliceNumber('get', 'coronal')
+
+            sliceNumber('set', 'coronal', dSliceNumber);
             refreshImages();
-
-            % windowButton('set', 'up');
-         
-            % drawnow;
         end
     end
-end
+
+end    

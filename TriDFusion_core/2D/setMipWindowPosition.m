@@ -40,33 +40,33 @@ function setMipWindowPosition(uiMipWindow)
                 dXoffset = uiSegMainPanel.Position(3); 
                 dYoffset = addOnWidth('get')+30+15; 
                 dXsize   = getMainWindowSize('xsize')-uiSegMainPanel.Position(3);
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;
     
             elseif viewKernelPanel('get') == true
     
                 dXoffset = uiKernelMainPanel.Position(3); 
                 dYoffset = addOnWidth('get')+30+15; 
                 dXsize   = getMainWindowSize('xsize')-uiKernelMainPanel.Position(3);
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;
     
             elseif viewRoiPanel('get') == true
     
                 dXoffset = uiRoiMainPanel.Position(3); 
                 dYoffset = addOnWidth('get')+30+15; 
                 dXsize   = getMainWindowSize('xsize')-uiRoiMainPanel.Position(3);
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;
     
              else
                 dXoffset = 0;
                 dYoffset = addOnWidth('get')+30+15;
                 dXsize   = getMainWindowSize('xsize');
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;
              end 
         else
             dXoffset = (getMainWindowSize('xsize')/1.25);
             dYoffset = addOnWidth('get')+30+15;
             dXsize   = getMainWindowSize('xsize')/5;
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
+            dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;
         end    
         
         set(uiMipWindow, ...
@@ -82,7 +82,7 @@ function setMipWindowPosition(uiMipWindow)
             if isvalid(txtMip)
                 set(txtMip.Parent, ...
                     'Position', [5 ...
-                                 uiMipWindow.Position(4)-5 ...
+                                 uiMipWindow.Position(4)-5-30 ...
                                  70 ...
                                  30]...
                     );                   
@@ -112,5 +112,31 @@ function setMipWindowPosition(uiMipWindow)
                    );
             end
         end
+
+        chkUiMipWindowSelected = chkUiMipWindowSelectedPtr('get');
+        if ~isempty(chkUiMipWindowSelected) && ...
+           ~isempty(btnUiMipWindowFullScreen)
+            
+            if isFusion('get') == true && ...
+               isPanelFullScreen(btnUiMipWindowFullScreenPtr('get'))  
+    
+                set(chkUiMipWindowSelected, ...
+                    'Position', [dXsize-40 ...
+                                 30 ...
+                                 20 ...
+                                 20 ... 
+                                 ] ...
+                   );
+            else
+                set(chkUiMipWindowSelected, ...
+                    'Position', [dXsize-40 ...
+                                 10 ...
+                                 20 ...
+                                 20 ...
+                                 ] ...
+                   );
+            end
+        end
+
     end
 end

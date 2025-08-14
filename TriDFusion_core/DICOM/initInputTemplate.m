@@ -110,8 +110,14 @@ function [atInput, asSeriesDescription] = initInputTemplate(asFilesList, atDicom
                     sVolSeriesDate = extractBefore(sVolSeriesDate,'.');
                 end
                 try
+                    % Ensure acquisitionTime is valid
+                    if all(sVolSeriesDate == '0') || isempty(sVolSeriesDate)
+                        sVolSeriesDate = '00010101010101'; % Default to midnight if invalid
+                    end
+                          
                     sVolSeriesDate = datetime(sVolSeriesDate,'InputFormat','yyyyMMddHHmmss');
-                catch
+                catch ME   
+                    logErrorToFile(ME);
                     sVolSeriesDate = '';
                 end
             end

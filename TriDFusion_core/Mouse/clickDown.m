@@ -40,7 +40,9 @@ function clickDown(~, ~)
        switchToMIPMode('get')    == true
 
         windowButton('set', 'down');  
-     
+        
+        toolbarIconHover();
+  
         return;
     end
 
@@ -105,7 +107,10 @@ function clickDown(~, ~)
             if ~isempty(pRoiPtr)    
 
                 if pAxe == pRoiPtr.Parent
-
+                    
+                    roiTemplateBackup('set', dSeriesOffset, roiTemplate('get', dSeriesOffset));
+                    voiTemplateBackup('set', dSeriesOffset, voiTemplate('get', dSeriesOffset));
+                    
                     bBrush2DSameAxe = true;
                 end
             end
@@ -425,6 +430,14 @@ function clickDown(~, ~)
                                     adjZoom(pFigure.CurrentPoint(1, 1:2));
 
                                 else
+                                    % uiSliderSag = uiSliderSagPtr('get');
+                                    % uiSliderCor = uiSliderCorPtr('get');
+                                    % uiSliderTra = uiSliderTraPtr('get');
+    
+                                    % uiSliderSag.Callback = [];
+                                    % uiSliderCor.Callback = [];
+                                    % uiSliderTra.Callback = [];                                   
+
                                     setOverlayPatientInformation(dSeriesOffset);
                    
                                     triangulateImages();
@@ -457,7 +470,6 @@ function clickDown(~, ~)
                                 adjZoom(pFigure.CurrentPoint(1, 1:2));
 
                             else
-
                                 setOverlayPatientInformation(dSeriesOffset);
 
                                 triangulateImages();
@@ -483,7 +495,9 @@ function clickDown(~, ~)
         
                     % end
                 end
-            end      
+            end
+
+            toolbarIconHover();
         end
     % end
 end 

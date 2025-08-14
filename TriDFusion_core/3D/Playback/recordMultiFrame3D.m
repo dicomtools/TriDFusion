@@ -33,7 +33,8 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
 
         progressBar(1, 'Error: Require a 3D Volume!');  
         multiFrame3DRecord('set', false);
-        mRecord.State = 'off';
+        icon = get(mRecord, 'UserData');
+        set(mRecord, 'CData', icon.default);
         return;
     end             
 
@@ -51,13 +52,30 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
         sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('MFSC-%s', sSeriesDescription));
 
         if isempty(sSeriesDescription)
+            multiFrame3DRecord('set', false);
+            
+            icon = get(mRecord, 'UserData');
+            set(mRecord, 'CData', icon.default);            
             return;
         end
     end
 
-    setFigureToobarsVisible('off');
+    try
 
-    setFigureTopMenuVisible('off');
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+
+    ptrViewer3d = viewer3dObject('get');
+
+    if ~isempty(ptrViewer3d) % New volshow
+
+        setFigureToobarsVisible('off');
+
+        setFigureTopMenuVisible('off');
+
+        drawnow;
+        drawnow;
+    end
 
     volObj = volObject('get');
     isoObj = isoObject('get');                        
@@ -91,116 +109,152 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
         open(tClassVideoWriter);
     end
 
-    try
+    if isempty(ptrViewer3d) % Old volshow
 
-    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;
-
-    vec = linspace(0,2*pi(),120)';
-    
-    if ~isempty(mipObj)  
-        aCameraUpVector = mipObj.CameraUpVector;
-    end
-
-    if ~exist('aCameraPosition','var') && ~isempty(volObj)
+        vec = linspace(0,2*pi(),120)';
         
-        aCameraUpVector = volObj.CameraUpVector;
-    end
+        if ~isempty(mipObj)  
+            aCameraUpVector = mipObj.CameraUpVector;
+        end
     
-    if ~exist('aCameraPosition','var') && ~isempty(isoObj) 
+        if ~exist('aCameraPosition','var') && ~isempty(volObj)
+            
+            aCameraUpVector = volObj.CameraUpVector;
+        end
+        
+        if ~exist('aCameraPosition','var') && ~isempty(isoObj) 
+           
+            aCameraUpVector = isoObj.CameraUpVector;
+        end
+        
+        if ~exist('aCameraPosition','var') && ~isempty(voiObj)      
+            
+            aCameraUpVector = voiObj{1}.CameraUpVector;
+        end
+        
+        if     abs(aCameraUpVector(1)) > abs(aCameraUpVector(2)) && ...
+               abs(aCameraUpVector(1)) > abs(aCameraUpVector(3))
        
-        aCameraUpVector = isoObj.CameraUpVector;
-    end
+            aCameraUpVector = [round(aCameraUpVector(1)) 0 0];
     
-    if ~exist('aCameraPosition','var') && ~isempty(voiObj)      
-        
-        aCameraUpVector = voiObj{1}.CameraUpVector;
+        elseif abs(aCameraUpVector(2)) > abs(aCameraUpVector(1)) && ...
+               abs(aCameraUpVector(2)) > abs(aCameraUpVector(3))
+       
+            aCameraUpVector = [0 round(aCameraUpVector(2)) 0];
+        else
+            aCameraUpVector = [0 0 round(aCameraUpVector(3))];
+        end
     end
-    
-    if     abs(aCameraUpVector(1)) > abs(aCameraUpVector(2)) && ...
-           abs(aCameraUpVector(1)) > abs(aCameraUpVector(3))
-   
-        aCameraUpVector = [round(aCameraUpVector(1)) 0 0];
 
-    elseif abs(aCameraUpVector(2)) > abs(aCameraUpVector(1)) && ...
-           abs(aCameraUpVector(2)) > abs(aCameraUpVector(3))
-   
-        aCameraUpVector = [0 round(aCameraUpVector(2)) 0];
-    else
-        aCameraUpVector = [0 0 round(aCameraUpVector(3))];
-    end
-    
+
     for idx = 1:120
 
-       if ~multiFrame3DRecord('get')
+        if ~multiFrame3DRecord('get')
 
             multiFrame3DIndex('set', idxOffset);
             break;
-       end
-       
-        if     abs(round(aCameraUpVector(1))) == 1
-
-            myPosition = [zeros(size(vec)) multiFrame3DZoom('get')*sin(vec) multiFrame3DZoom('get')*cos(vec)];
-
-        elseif abs(round(aCameraUpVector(2))) == 1   
-
-            myPosition = [multiFrame3DZoom('get')*sin(vec) zeros(size(vec)) multiFrame3DZoom('get')*cos(vec)];           
-        else
-            myPosition = [multiFrame3DZoom('get')*cos(vec) multiFrame3DZoom('get')*sin(vec) zeros(size(vec))];
         end
 
-        if ~isempty(mipObj)                    
+        if isempty(ptrViewer3d) % Old volshow
 
-            mipObj.CameraPosition = myPosition(idxOffset,:);            
-            mipObj.CameraUpVector = aCameraUpVector;
-        end
-
-        if ~isempty(isoObj)                        
-
-            isoObj.CameraPosition = myPosition(idxOffset,:);
-            isoObj.CameraUpVector = aCameraUpVector;
-        end
-
-        if ~isempty(volObj)
-
-            volObj.CameraPosition = myPosition(idxOffset,:);
-            volObj.CameraUpVector = aCameraUpVector;
-        end
-        
-        if ~isempty(mipFusionObj)                    
-
-            mipFusionObj.CameraPosition = myPosition(idxOffset,:);  
-            mipFusionObj.CameraUpVector = aCameraUpVector;
-        end
-
-        if ~isempty(isoFusionObj)                        
-
-            isoFusionObj.CameraPosition = myPosition(idxOffset,:);
-            isoFusionObj.CameraUpVector = aCameraUpVector;
-        end
-
-        if ~isempty(volFusionObj)
-
-            volFusionObj.CameraPosition = myPosition(idxOffset,:);
-            volFusionObj.CameraUpVector = aCameraUpVector;
-        end
+            if     abs(round(aCameraUpVector(1))) == 1
             
-        if ~isempty(voiObj)
-
-            for ff=1:numel(voiObj)
-                voiObj{ff}.CameraPosition = myPosition(idxOffset,:);
-                voiObj{ff}.CameraUpVector = aCameraUpVector;
+                myPosition = [zeros(size(vec)) multiFrame3DZoom('get')*sin(vec) multiFrame3DZoom('get')*cos(vec)];
+            
+            elseif abs(round(aCameraUpVector(2))) == 1   
+            
+                myPosition = [multiFrame3DZoom('get')*sin(vec) zeros(size(vec)) multiFrame3DZoom('get')*cos(vec)];           
+            else
+                myPosition = [multiFrame3DZoom('get')*cos(vec) multiFrame3DZoom('get')*sin(vec) zeros(size(vec))];
             end
-        end  
+            
+            if ~isempty(mipObj)                    
+            
+                mipObj.CameraPosition = myPosition(idxOffset,:);            
+                mipObj.CameraUpVector = aCameraUpVector;
+            end
+            
+            if ~isempty(isoObj)                        
+            
+                isoObj.CameraPosition = myPosition(idxOffset,:);
+                isoObj.CameraUpVector = aCameraUpVector;
+            end
+            
+            if ~isempty(volObj)
+            
+                volObj.CameraPosition = myPosition(idxOffset,:);
+                volObj.CameraUpVector = aCameraUpVector;
+            end
+            
+            if ~isempty(mipFusionObj)                    
+            
+                mipFusionObj.CameraPosition = myPosition(idxOffset,:);  
+                mipFusionObj.CameraUpVector = aCameraUpVector;
+            end
+            
+            if ~isempty(isoFusionObj)                        
+            
+                isoFusionObj.CameraPosition = myPosition(idxOffset,:);
+                isoFusionObj.CameraUpVector = aCameraUpVector;
+            end
+            
+            if ~isempty(volFusionObj)
+            
+                volFusionObj.CameraPosition = myPosition(idxOffset,:);
+                volFusionObj.CameraUpVector = aCameraUpVector;
+            end
+                
+            if ~isempty(voiObj)
+            
+                for ff=1:numel(voiObj)
+                    voiObj{ff}.CameraPosition = myPosition(idxOffset,:);
+                    voiObj{ff}.CameraUpVector = aCameraUpVector;
+                end
+            end  
+        else
+
+            degreeAngle = ((idxOffset - 1) / (120 - 1)) * (360 - 1) + 1;
+    
+            set3DView(ptrViewer3d, degreeAngle, 1);
+
+        end
 
         idxOffset = idxOffset+1;
 
         if idxOffset >= 120
+            
             idxOffset =1;
         end
 
-        I = getframe(axePtr('get', [], get(uiSeriesPtr('get'), 'Value') ));
-        [indI,cm] = rgb2ind(I.cdata, 256);
+        if isempty(ptrViewer3d) % Old volshow
+
+            I = getframe(axePtr('get', [], get(uiSeriesPtr('get'), 'Value') ));
+            I = I.cdata;
+        else
+
+            I = getObjectFrame(axePtr('get', [], get(uiSeriesPtr('get'), 'Value') ));
+            I = hImg.CData;              % <-- direct!
+        end
+
+        if strcmpi('*.avi', sExtention) || ...
+           strcmpi('avi'  , sExtention) || ...
+           strcmpi('*.mp4', sExtention) || ...
+           strcmpi('mp4'  , sExtention) || ...   
+           strcmpi('*.gif', sExtention) || ...
+           strcmpi('gif'  , sExtention) 
+
+            if idx == 1 % We can't write different image size.
+                
+                aFirstImageSize = size(I);
+            else
+                if ~isequal(size(I), aFirstImageSize)
+    
+                    I = imresize3(I, aFirstImageSize);
+                end
+            end
+        end
+
+        [indI, cm] = rgb2ind(I, 256); % Convert to indexed image 
 
         if idx == 1
 
@@ -209,7 +263,12 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
                strcmpi('*.mp4', sExtention) || ...
                strcmpi('mp4'  , sExtention)
 
-                 writeVideo(tClassVideoWriter, I);
+                % if isempty(ptrViewer3d) % Old volshow
+                % 
+                %     writeVideo(tClassVideoWriter, I);
+                % else
+                    writeVideo(tClassVideoWriter, I);
+                % end
 
             elseif strcmpi('*.gif', sExtention) || ...
                    strcmpi('gif'  , sExtention) 
@@ -364,13 +423,20 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
         
     end             
   
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, sprintf('Error: recordMultiFrame3D()'));
     end
 
-    setFigureToobarsVisible('on');
+    if ~isempty(ptrViewer3d) % New volshow
 
-    setFigureTopMenuVisible('on');
+        setFigureToobarsVisible('on');
+
+        setFigureTopMenuVisible('on');
+
+        drawnow;
+        drawnow;        
+    end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;

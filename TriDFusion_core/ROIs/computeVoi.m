@@ -1,5 +1,5 @@
-function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied, bExpendVoi)
-%function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied, bExpendVoi)
+function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bMovementApplied, transM)
+%function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bMovementApplied, transM)
 %Compute VOI values from ROIs object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -31,10 +31,13 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if bModifiedMatrix  == false && ... 
-       bMovementApplied == false        % Can't use input buffer if movement have been applied
+       bMovementApplied == false && ...     
+       bSegmented       == false 
+
         imCDataVoi = imInput;
         % atMetaData = atInputMetaData;
         imMask = false(size(imInput));
+
     else
         imCDataVoi = imVoi;        
         % atMetaData = atVoiMetaData;
@@ -49,6 +52,7 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
     atRoiComputed = cell(1, dNbRoi);
 
     dNbCells = 0;
+    dNbRemovedCells = 0;
 
     for uu=1:numel(ptrVoiInput.RoisTag)
 
@@ -62,8 +66,11 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
         
         try
             [atRoiComputed{uu}, imCMask{uu}] = ...
-                computeRoi(imInput, atInputMetaData, imVoi, atVoiMetaData, tRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);                                      
-        catch
+                computeRoi(imInput, atInputMetaData, imVoi, atVoiMetaData, tRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bMovementApplied, transM);                                      
+
+        catch ME
+            logErrorToFile(ME);
+            
             tVoiComputed = [];
             atRoiComputed = [];
             return;
@@ -110,7 +117,8 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
 
             imCDataTemp =imCData{uu}(imCMask{uu}==1); 
             imCDataTemp = imCDataTemp(imCDataTemp>cropValue('get'));
-            dNbCells = dNbCells+numel(imCDataTemp);            
+            dNbCells = dNbCells+numel(imCDataTemp); 
+            dNbRemovedCells = dNbRemovedCells+atRoiComputed{uu}.removedCells;
         else
             dNbCells = dNbCells+numel(imCData{uu}(imCMask{uu}==1)); 
        end         
@@ -206,6 +214,11 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
         end
 
         tVoiComputed.volume = dNbCells * dVoxVolume;
+
+        if bSegmented      == true && ...
+           bModifiedMatrix == true 
+            tVoiComputed.removedVolume = dNbRemovedCells * dVoxVolume;
+        end
         
     else   
         dMean = mean(imCData, 'all');
@@ -248,7 +261,12 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
         tVoiComputed.sum  = sum(imCData, 'all');
     
         tVoiComputed.volume = dNbCells * dVoxVolume;
-    
+        
+        if bSegmented      == true && ...
+           bModifiedMatrix == true 
+            tVoiComputed.removedVolume = dNbRemovedCells * dVoxVolume;
+        end
+
     end
 
 %     tVoiComputed.maxDistance = computeVoiFarthestPoint(imMask, atMetaData);

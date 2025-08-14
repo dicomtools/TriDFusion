@@ -28,6 +28,7 @@ function setZoomCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
     if isempty(dicomBuffer('get'))
+        
         return;
     end     
     
@@ -38,14 +39,17 @@ function setZoomCallback(~, ~)
 
     if zoomTool('get')
 
+        zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');
+
         set(zoomMenu('get'), 'Checked', 'off');
 
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnZoomPtr('get'), 'FontWeight', 'normal');
-        
+
+        set(btnZoomPtr('get'), 'CData', resizeTopBarIcon('zoom_grey.png'));           
+       
         zoomTool('set', false);
-        zoom(fiMainWindowPtr('get'), 'off');           
+        % zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');           
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
@@ -54,25 +58,17 @@ function setZoomCallback(~, ~)
             rotate3d(fiMainWindowPtr('get'), 'on');
         else
 
-            % Restore the original colorbar limits after zooming     
-    
-            set(axeColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
-    
-            % Restore the original fusion colorbar limits after zooming     
-    
-            if isFusion('get') == true
-                set(axeFusionColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
-            end
-
             set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
-            
+
+            set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));           
+           
             if isMoveImageActivated('get') == true
+
                 set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
             end
         end
-        
+       
     else    
         set(zoomMenu('get'), 'Checked', 'on');
 
@@ -95,23 +91,35 @@ function setZoomCallback(~, ~)
 
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnTriangulatePtr('get'), 'FontWeight', 'normal');
+
+        set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_grey.png'));           
             
         set(btnZoomPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        set(btnZoomPtr('get'), 'FontWeight', 'bold');
+
+        set(btnZoomPtr('get'), 'CData', resizeTopBarIcon('zoom_white.png'));           
       
         zoomTool('set', true);
 
-        hCMZ = uicontextmenu(fiMainWindowPtr('get'));
-        uimenu('Parent',hCMZ,'Label','Zoom off', 'Callback',@setZoomCallback);
-        
-        hZoom = zoom(fiMainWindowPtr('get'));
+        % hCMZ = uicontextmenu(fiMainWindowPtr('get'));
+        % uimenu('Parent',hCMZ,'Label','Zoom off', 'Callback',@setZoomCallback);
+        % 
+        % hZoom = zoom(fiMainWindowPtr('get'));
+        % 
+        % set(hZoom, 'UIContextMenu', hCMZ);
 
-        set(hZoom, 'UIContextMenu', hCMZ);
+
+
         % set(hZoom, 'ActionPostCallback', @(obj, evd) adjustAxesToPanel(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), uiMipWindowPtr('get')));
+        % 
+        % fig    = fiMainWindowPtr('get');    % your figure handle
+        % hZoom  = zoom(fig);                 % get the zoom manager object
+        % hZoom.Enable = 'on';
+        % 
+        % hzm = hZoom.UIContextMenu; 
+        % uimenu(hzm, 'Label', 'Zoom off', 'Callback', @setZoomCallback);
 
-        zoom(fiMainWindowPtr('get'), 'on');                     
+        zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'on');
    end
 
     % % Custom function to adjust axes size based on panel and aspect ratio
@@ -146,4 +154,5 @@ function setZoomCallback(~, ~)
     %     % Set axes to fill the panel, maintaining proportions
     %     set(hAxes, 'Position', [0 0 1 1], 'DataAspectRatioMode', 'manual');
     % end          
+
 end  

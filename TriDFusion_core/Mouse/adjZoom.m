@@ -27,127 +27,109 @@ function adjZoom(dInitCoord)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    if ~strcmpi(get(fiMainWindowPtr('get'),'Pointer'), 'arrow') 
+        return;
+    end
+
     persistent pdInitialCoord;
 
+    % If initial coord is provided, set and return
     if exist('dInitCoord', 'var')
-
         multiFrameZoom('set', 'in', 1);
         multiFrameZoom('set', 'out', 1);
-
         pdInitialCoord = dInitCoord;
         return;
     end
 
+    % Determine which axes the mouse is over
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    
-    pFigure = fiMainWindowPtr('get');
-           
-    pAxe = getAxeFromMousePosition(dSeriesOffset);
+    pFigure         = fiMainWindowPtr('get');
+    pAxe            = getAxeFromMousePosition(dSeriesOffset);
 
     switch pAxe
-
         case axePtr('get', [], dSeriesOffset)
-
             axesHandle = axePtr('get', [], dSeriesOffset);
-
         case axes1Ptr('get', [], dSeriesOffset)
-
             axesHandle = axes1Ptr('get', [], dSeriesOffset);
-
         case axes2Ptr('get', [], dSeriesOffset)
-
             axesHandle = axes2Ptr('get', [], dSeriesOffset);
-            
         case axes3Ptr('get', [], dSeriesOffset)
-
             axesHandle = axes3Ptr('get', [], dSeriesOffset);
-            
         case axesMipPtr('get', [], dSeriesOffset)
-
             axesHandle = axesMipPtr('get', [], dSeriesOffset);
-            
         otherwise
-
             axesHandle = axes3Ptr('get', [], dSeriesOffset);
+    end
 
-    end 
- 
+    % Zoom coefficient
     dWLAdjCoe = 0.0050;
 
+    % Initialize starting point if empty
     if isempty(pdInitialCoord)
         pdInitialCoord = pFigure.CurrentPoint;
     end
 
+    % Compute mouse movement
     aPosDiff = pFigure.CurrentPoint(1, 1:2) - pdInitialCoord;
 
     if aPosDiff(2) > 0
-
+        % Zoom in
         multiFrameZoom('set', 'out', 1);
-
         if multiFrameZoom('get', 'axe') ~= axesHandle
             multiFrameZoom('set', 'in', 1);
         end
-    
-        dZFactor = multiFrameZoom('get', 'in')+dWLAdjCoe;
+        dZFactor = multiFrameZoom('get', 'in') + dWLAdjCoe;
         multiFrameZoom('set', 'in', dZFactor);
-        
     else
+        % Zoom out
         multiFrameZoom('set', 'in', 1);
-
-
-        if multiFrameZoom('get', 'axe') ~= pAxe
+        if multiFrameZoom('get', 'axe') ~= axesHandle
             multiFrameZoom('set', 'out', 1);
         end
-         
-        dZFactor = multiFrameZoom('get', 'out')-dWLAdjCoe;
-        multiFrameZoom('set', 'out', dZFactor);       
+        dZFactor = multiFrameZoom('get', 'out') - dWLAdjCoe;
+        multiFrameZoom('set', 'out', dZFactor);
     end
 
-
+    % Ensure plot view is initialized
     if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview'))
-
         initAxePlotView(axesHandle);
     end
 
-    % Get the current axes limits
-
+    % Get and sanitize limits
     xLim = get(axesHandle, 'XLim');
     yLim = get(axesHandle, 'YLim');
-
-    % Handle infinite limits by replacing with reasonable defaults
-    
     if any(isinf(xLim))
-       
-        xData = get(axesHandle.Children, 'XData');  % Assuming children are the plotted data
-        xLim = [min(cell2mat(xData),[],"all"), max(cell2mat(xData),[],"all")];      % Set to the range of the data
+        xData = get(axesHandle.Children, 'XData');
+        xLim = [min(cell2mat(xData), [], "all"), max(cell2mat(xData), [], "all")];
     end
-    
     if any(isinf(yLim))
-   
-        yData = get(axesHandle.Children, 'YData');  % Assuming children are the plotted data
-        yLim = [min(cell2mat(yData),[],"all"), max(cell2mat(yData),[],"all")];      % Set to the range of the data
-    end  
+        yData = get(axesHandle.Children, 'YData');
+        yLim = [min(cell2mat(yData), [], "all"), max(cell2mat(yData), [], "all")];
+    end
 
-    % Compute the center of the current axes
-
+    % Calculate new limits
     xCenter = mean(xLim);
     yCenter = mean(yLim);
-
-    % Calculate the new limits based on the zoom factor
-
-    newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
+    newXLim = xCenter + (xLim - xCenter) / dZFactor;
     newYLim = yCenter + (yLim - yCenter) / dZFactor;
 
-    % Apply the new limits to the axes
+    % Apply to active axes
     set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
-   
+
+    if linkCoronalWithSagittal('get') == true
+
+        % Mirror zoom between axes1 and axes2
+        axes1Handle = axes1Ptr('get', [], dSeriesOffset);
+        axes2Handle = axes2Ptr('get', [], dSeriesOffset);
+        if isequal(axesHandle, axes1Handle)
+            set(axes2Handle, 'XLim', newXLim, 'YLim', newYLim);
+        elseif isequal(axesHandle, axes2Handle)
+            set(axes1Handle, 'XLim', newXLim, 'YLim', newYLim);
+        end
+    end
+
+    % Store and redraw
     multiFrameZoom('set', 'axe', axesHandle);
-
-    % windowButton('set', 'down');  
-
-    % rightClickMenu('off');
-
     pdInitialCoord = pFigure.CurrentPoint(1, 1:2);
-    drawnow limitrate nocallbacks;
-      
+    % drawnow limitrate nocallbacks;
 end

@@ -35,11 +35,11 @@ function setColorbarIntensityMaxScaleValue(dYOffset, dRatio, bDefaultUnit, dSeri
     adLineMinYOffset = get(lineColorbarIntensityMinPtr('get'), 'YData');
     
     if dYOffset > adLineMinYOffset(1)
-        dYOffset=adLineMinYOffset(1)-0.0001;
+        dYOffset = adLineMinYOffset(1)-0.0001;
     end
 
     set(lineColorbarIntensityMaxPtr('get'), 'YData', [dYOffset dYOffset]);
-    set(textColorbarIntensityMaxPtr('get'), 'Position', [0 dYOffset 0]);
+    set(textColorbarIntensityMaxPtr('get'), 'Position', [0.1 dYOffset 0]);
 
 %     dYOffset = dYOffset-0.01; % Compensate for line width
     

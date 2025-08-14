@@ -1,6 +1,6 @@
 function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(refImage, atRefMetaData, dcmImage, atDcmMetaData, tRoi, Rsmp)
 %function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(refImage, atRefMetaData, dcmImage, atDcmMetaData, tRoi, Rsmp)
-%Comput ROI new position from a scaled image.
+%Compute ROI new position from a scaled image.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,334 +27,197 @@ function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(r
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    dimsRef = size(refImage);        
-    dimsDcm = size(dcmImage);
-
-    if ~exist('Rsmp', 'var')
-        Rsmp = [];
-    end
-    
     aRadius = [];
     aSemiAxes = [];
 
-    if strcmpi(tRoi.Type, 'images.roi.rectangle')
-        aNewPosition = zeros(size(tRoi.Position, 1),5);
-    else
-        aNewPosition = zeros(size(tRoi.Position, 1),3);
-    end
-    
-%    dcmMatrix = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness);
-%    refMatrix = TransformMatrix(atRefMetaData{1}, refSliceThickness);
-    
-%    dcmMatrix=getAffineXfm(atDcmMetaData);
-%    refMatrix=getAffineXfm(atRefMetaData);
-    
-%    f = dcmMatrix' /refMatrix';
-%    f(isnan(f))=0;
-%    f(isinf(f))=0;
-%    TF = affine3d(f);
-        
-%     if dcmSliceThickness == 0  
-%         dcmSliceThickness = 1;
-%     end
-      
-    if atDcmMetaData{1}.PixelSpacing(1) == 0 && ...
-       atDcmMetaData{1}.PixelSpacing(2) == 0 
-        for jj=1:numel(atDcmMetaData)
-            if atRefMetaData{1}.PixelSpacing(1) ~= 0
-                atDcmMetaData{1}.PixelSpacing(1) = atRefMetaData{1}.PixelSpacing(1);
-            else
-                atDcmMetaData{1}.PixelSpacing(1) =1;
-            end
+    % Extract metadata
+    dcmMeta = atDcmMetaData{1};
+    refMeta = atRefMetaData{1};
 
-            if atRefMetaData{1}.PixelSpacing(2) ~= 0
-                atDcmMetaData{1}.PixelSpacing(2) = atRefMetaData{1}.PixelSpacing(2);
-            else
-                atDcmMetaData{1}.PixelSpacing(2) =1;
-            end
-        end       
-    end
-    
-%     if refSliceThickness == 0  
-%         refSliceThickness = 1;
-%     end
-      
-    if atRefMetaData{1}.PixelSpacing(1) == 0 && ...
-       atRefMetaData{1}.PixelSpacing(2) == 0 
-        for jj=1:numel(atRefMetaData)
-            if atDcmMetaData{1}.PixelSpacing(1) ~= 0
-                atRefMetaData{1}.PixelSpacing(1) = atDcmMetaData{1}.PixelSpacing(1);
-            else
-                atRefMetaData{1}.PixelSpacing(1) = 1;
-            end
+    % Ensure nonzero spacing
+    dcmMeta.PixelSpacing(dcmMeta.PixelSpacing==0) = 1;
+    refMeta.PixelSpacing(refMeta.PixelSpacing==0) = 1;
 
-            if atDcmMetaData{1}.PixelSpacing(2) ~= 0
-                atRefMetaData{1}.PixelSpacing(2) = atDcmMetaData{1}.PixelSpacing(2);
-            else
-                atRefMetaData{1}.PixelSpacing(2) =1;
-            end
-        end       
+    % Slice thickness
+    dcmZ = computeSliceSpacing(atDcmMetaData);
+    if dcmZ == 0, dcmZ = dcmMeta.PixelSpacing(1); end
+    refZ = computeSliceSpacing(atRefMetaData);
+    if refZ == 0, refZ = refMeta.PixelSpacing(1); end
+
+    % Voxel→world affines
+    dcmOri   = reshape(dcmMeta.ImageOrientationPatient, [3,2]);
+    dcmBasis = [dcmOri, cross(dcmOri(:,1), dcmOri(:,2))];
+    dcmScale = diag([dcmMeta.PixelSpacing(:); dcmZ]);
+    A_dcm    = [dcmBasis * dcmScale, dcmMeta.ImagePositionPatient(:); 0 0 0 1];
+
+    refOri   = reshape(refMeta.ImageOrientationPatient, [3,2]);
+    refBasis = [refOri, cross(refOri(:,1), refOri(:,2))];
+    refScale = diag([refMeta.PixelSpacing(:); refZ]);
+    A_ref    = [refBasis * refScale, refMeta.ImagePositionPatient(:); 0 0 0 1];
+
+    % Voxel-to-voxel transform
+    transM = inv(A_ref) * A_dcm;
+
+    % Compute slice-center world coordinates
+    dcmZpos = computeZPosition(atDcmMetaData, dcmImage);
+    refZpos = computeZPosition(atRefMetaData, refImage);
+
+    dcmZpos = flip_if_needed(refZpos, dcmZpos);
+
+    % Extract ROI voxels in DCM space
+    N = size(tRoi.Position, 1);
+    switch lower(tRoi.Axe)
+        case {'axe','axes3'} % axial
+            xs = tRoi.Position(:,1);
+            ys = tRoi.Position(:,2);
+            zs = repmat(tRoi.SliceNb, N, 1);
+        case 'axes1'         % coronal (XZ)
+            xs = tRoi.Position(:,1);
+            ys = repmat(tRoi.SliceNb, N, 1);
+            zs = tRoi.Position(:,2);
+        case 'axes2'         % sagittal (YZ)
+            xs = repmat(tRoi.SliceNb, N, 1);
+            ys = tRoi.Position(:,1);
+            zs = tRoi.Position(:,2);
+       otherwise
+            error('Unknown Axe: %s', tRoi.Axe);
     end
 
-    dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
-    if dcmSliceThickness == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
-        dcmSliceThickness = atDcmMetaData{1}.PixelSpacing(1);
-    end
+    % Homogeneous zero-based voxel coords
+    
+    H0 = [xs'; ys'; zs'; ones(1,N)] - repmat([1;1;0;0], 1, N);
+    H2 = transM * H0;
+    Xf = H2(1,:) + 1;
+    Yf = H2(2,:) + 1;
 
-    refSliceThickness = computeSliceSpacing(atRefMetaData);
-    if refSliceThickness == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
-        refSliceThickness = atRefMetaData{1}.PixelSpacing(1);
-    end
-    
-    Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-    Rref = imref3d(dimsRef, atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
-       
-    % Set origin to the edge of first pixel
-    
-%    atDcmMetaData{1}.ImagePositionPatient(1) = atDcmMetaData{1}.ImagePositionPatient(1)-(atDcmMetaData{1}.PixelSpacing(1));
-%    atDcmMetaData{1}.ImagePositionPatient(2) = atDcmMetaData{1}.ImagePositionPatient(2)-(atDcmMetaData{1}.PixelSpacing(2));
-  
-%    atRefMetaData{1}.ImagePositionPatient(1) = atRefMetaData{1}.ImagePositionPatient(1)-(atRefMetaData{1}.PixelSpacing(1));
-%    atRefMetaData{1}.ImagePositionPatient(2) = atRefMetaData{1}.ImagePositionPatient(2)-(atRefMetaData{1}.PixelSpacing(2));     
-
-    % Set origin to the edge of first pixel. ImagePositionPatient is the
-    % coordinates of top left middle of first pixel.  
-
-if 1    
-    if ~((round(Rdcm.ImageExtentInWorldX) > round(Rref.ImageExtentInWorldX)) && ...
-        (round(Rdcm.ImageExtentInWorldY) > round(Rref.ImageExtentInWorldY))) && ...
-        ~((round(Rdcm.ImageExtentInWorldX) < round(Rref.ImageExtentInWorldX)) && ...
-          (round(Rdcm.ImageExtentInWorldY) < round(Rref.ImageExtentInWorldY)))   
-    
-        atDcmMetaData{1}.ImagePositionPatient(1) = -(atDcmMetaData{1}.PixelSpacing(1)/2);
-        atDcmMetaData{1}.ImagePositionPatient(2) = -(atDcmMetaData{1}.PixelSpacing(2)/2);
-  
-        atRefMetaData{1}.ImagePositionPatient(1) = -(atRefMetaData{1}.PixelSpacing(1)/2);
-        atRefMetaData{1}.ImagePositionPatient(2) = -(atRefMetaData{1}.PixelSpacing(2)/2);    
-    end
-end
-%    atDcmMetaData{1}.ImagePositionPatient(1) = 0;
-%    atDcmMetaData{1}.ImagePositionPatient(2) = 0;
-  
-%    atRefMetaData{1}.ImagePositionPatient(1) = 0;
-%    atRefMetaData{1}.ImagePositionPatient(2) = 0;  
-
-%    [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
-%    M(4,1)=0
-%    M(4,2)=0
-    
-%    TF = affine3d(M); 
-    
-    [Mdti,~] = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness);
-    [Mtf,~]  = TransformMatrix(atRefMetaData{1}, refSliceThickness);
-            
-    M=Mtf/Mdti;
-%    TF = invert(affine3d(M')); 
-      
-    xScale = M(2,2);
-    yScale = M(1,1);  
-    zScale = M(3,3);  
-%    zScale = 1;  
-           
-    a3DOffset = zeros(size(tRoi.Position, 1),3);
-        
     switch lower(tRoi.Axe)
 
-        case lower('axe')
+        case 'axe'
+            V = [Xf; Yf; 1];  
 
-            a3DOffset(:,1)= tRoi.Position(:,1);
-            a3DOffset(:,2)= tRoi.Position(:,2);
-            a3DOffset(:,3)= 1;
+        case 'axes3'
+            % Axial: match world Z
 
-        case lower('axes1')
+            zC = dcmZpos(tRoi.SliceNb);
+            [~,idx] = min(abs(refZpos - zC));
+            Zf = repmat(idx, 1, N);
 
-            a3DOffset(:,1)=tRoi.Position(:,1);
-            a3DOffset(:,2)=tRoi.SliceNb;
-            a3DOffset(:,3)=tRoi.Position(:,2);
+            V = [Xf; Yf; round(Zf)];        
 
-        case lower('axes2')
+        case 'axes1'
+            % Coronal: match world Z in Y direction
 
-            a3DOffset(:,1)=tRoi.SliceNb;
-            a3DOffset(:,2)=tRoi.Position(:,1);
-            a3DOffset(:,3)=tRoi.Position(:,2);
+            Zf = zeros(1,N);
+            for ii=1:N
 
-        case lower('axes3')
-         
-            a3DOffset(:,1)=tRoi.Position(:,1);
-            a3DOffset(:,2)=tRoi.Position(:,2);
-            a3DOffset(:,3)=tRoi.SliceNb;                
-    end
-                
-%    out = pctransform(pointCloud(a3DOffset), TF);
-    
-
-%    [outX, outY, outZ] = transformPointsForward(TF, a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); 
-
-%    Mdti  = getAffineXfm(atDcmMetaData, dcmSliceThickness);
-%    Mtf   = getAffineXfm(atRefMetaData, refSliceThickness);
-if 1    
-    transM = inv(Mtf) * Mdti;
-    [outX, outY, outZ]  = applyTransMatrix(transM, a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); 
-else
-    transM = inv(Mtf) * Mdti;
-   
-    transM = (Mdti'/Mtf')';
-
-
-    [outX, outY, outZ] = transformPointsForward(affine3d(transM'), a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3));
-
-end
-%    [~, ~, outZ]  = applyTransMatrix(transM', a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); 
-
-%    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', 'Linear');      
-%    dimsRsp = size(resampImage);         
-
-if 0 
-    if    (round(Rdcm.ImageExtentInWorldX) > round(Rref.ImageExtentInWorldX)) && ...
-          (round(Rdcm.ImageExtentInWorldY) > round(Rref.ImageExtentInWorldY))   
-
-        xMoveOffset = Rref.PixelExtentInWorldX/xScale;
-        yMoveOffset = Rref.PixelExtentInWorldY/yScale;
-
-
-    elseif(round(Rdcm.ImageExtentInWorldX) < round(Rref.ImageExtentInWorldX)) && ...
-          (round(Rdcm.ImageExtentInWorldY) < round(Rref.ImageExtentInWorldY))
-
-        xMoveOffset = -Rref.PixelExtentInWorldX/xScale;
-        yMoveOffset = -Rref.PixelExtentInWorldY/yScale;
-
-    else      
-         xMoveOffset = 0;
-         yMoveOffset = 0;        
-    end
-else
-%     xMoveOffset = (dimsDcm(1)-dimsRef(1))/2;
-%     yMoveOffset = (dimsDcm(2)-dimsRef(2))/2;
-     xMoveOffset = 0;
-     yMoveOffset = 0;
-end
-
-
-%    xMoveOffset = ((round(Rdcm.ImageExtentInWorldX)-round(Rref.ImageExtentInWorldX)/2))/(Rdcm.PixelExtentInWorldX/xScale)-(Rdcm.XWorldLimits(1)/5.6);
-%    yMoveOffset = ((round(Rdcm.ImageExtentInWorldY)-round(Rref.ImageExtentInWorldY)/2))/(Rdcm.PixelExtentInWorldY/yScale)-(Rdcm.YWorldLimits(1)/5.6);
-    
-    
-%    zMoveOffset = ((Rdcm.ImageExtentInWorldZ-Rref.ImageExtentInWorldZ)/2);
-         
-    switch lower(tRoi.Axe)
-
-        case lower('axe')
-
-            if strcmpi(tRoi.Type, 'images.roi.rectangle')
-
-                aNewPosition(1) = outX(:);
-                aNewPosition(2) = outY(:);
-                aNewPosition(3) = tRoi.Position(3)/xScale;
-                aNewPosition(4) = tRoi.Position(4)/yScale;
-                aNewPosition(5) = 1;
-            else
-                aNewPosition(:,1) = outX(:);
-                aNewPosition(:,2) = outY(:);
-                aNewPosition(:,3) = 1;
+                zC = dcmZpos(round(tRoi.Position(ii,2)));
+                [~,idx] = min(abs(refZpos - zC));
+                Zf(ii) = idx+1;
             end
 
-        case lower('axes1')
+            V = [Xf; Zf; round(Yf)];
 
-            if strcmpi(tRoi.Type, 'images.roi.rectangle')
+        case 'axes2'
+            % Sagittal: match world Z in Y direction
+        
+            Zf = zeros(1,N);
+            for ii=1:N
 
-                aNewPosition(1) = outX(:);
-                aNewPosition(2) = outZ(:);
-                aNewPosition(3) = tRoi.Position(3)/yScale;
-                aNewPosition(4) = tRoi.Position(4);
-                aNewPosition(5) = outY(:);
-            else
-                aNewPosition(:,1) = outX(:)-xMoveOffset;
-                aNewPosition(:,2) = outZ(:);
-                aNewPosition(:,3) = outY(:)-yMoveOffset;
+                zC = dcmZpos(round(tRoi.Position(ii,2)));
+                [~,idx] = min(abs(refZpos - zC));
+                Zf(ii) = idx+1;
             end
-
-        case lower('axes2')
-
-            if strcmpi(tRoi.Type, 'images.roi.rectangle')
-
-                aNewPosition(1) = outY(:);
-                aNewPosition(2) = outZ(:);
-                aNewPosition(3) = tRoi.Position(3)/xScale;
-                aNewPosition(4) = tRoi.Position(4);
-                aNewPosition(5) = outX(:);
-            else
-                aNewPosition(:,1) = outY(:)-yMoveOffset;
-                aNewPosition(:,2) = outZ(:);
-                aNewPosition(:,3) = outX(:)-xMoveOffset;
-            end
-
-        case lower('axes3')
             
-            if strcmpi(tRoi.Type, 'images.roi.rectangle')
-                
-%                if numel(refImage) > numel(dcmImage)
+            V = [ Yf;    Zf;  round(Xf) ];
 
-%                    aNewPosition(1) = out.Location(1);
-%                    aNewPosition(2) = out.Location(2);
-%                    aNewPosition(3) = tRoi.Position(3)*xScale;
-%                    aNewPosition(4) = tRoi.Position(4)*yScale;
-%                    aNewPosition(5) = out.Location(3);
-%                else
-                    aNewPosition(1) = outX(:)-xMoveOffset;
-                    aNewPosition(2) = outY(:)-yMoveOffset;
-                    aNewPosition(3) = tRoi.Position(3)/xScale;
-                    aNewPosition(4) = tRoi.Position(4)/yScale;
-                    aNewPosition(5) = outZ(:);                    
-%                end
-            else
-                    aNewPosition(:,1) = outX(:)-xMoveOffset;
-                    aNewPosition(:,2) = outY(:)-yMoveOffset;
-%                    aNewPosition(:,1) = outX(:);
-%                    aNewPosition(:,2) = outY(:);
-                    aNewPosition(:,3) = outZ(:);           
+        otherwise
+            error('Unsupported Axe: %s', tRoi.Axe);
+    end
 
-            end
+    if strcmpi(tRoi.Type, 'images.roi.rectangle') || ...
+       strcmpi(tRoi.Type, 'images.roi.circle') || ...
+       strcmpi(tRoi.Type, 'images.roi.ellipse')
+
+        if strcmpi(tRoi.Type, 'axes1') || ...
+           strcmpi(tRoi.Type, 'axes2') 
+    
+            scaleX = hypot(transM(1,1), transM(2,1));
+            scaleY = zs./Zf; 
+        else
+            scaleX = hypot(transM(1,1), transM(2,1));
+            scaleY = hypot(transM(1,2), transM(2,2)); 
+        end
     end
 
     switch lower(tRoi.Type)
 
-        case lower('images.roi.circle')
-
-            switch lower(tRoi.Axe)
-
-                case lower('axe')
-                    aRadius = tRoi.Radius/xScale;
-
-                case lower('axes1')
-                    aRadius = tRoi.Radius/zScale;
-
-                case lower('axes2')
-                    aRadius = tRoi.Radius/zScale;
-
-                case lower('axes3')
-                    aRadius = tRoi.Radius/xScale;
-            end
-
-
-        case lower('images.roi.ellipse')
-
-            switch lower(tRoi.Axe)
-
-                case lower('axe')
-                    aSemiAxes = tRoi.SemiAxes/xScale;
-
-                case lower('axes1')
-                    aSemiAxes = tRoi.SemiAxes/zScale;
-
-                case lower('axes2')
-                    aSemiAxes = tRoi.SemiAxes/zScale;
-
-                case lower('axes3')
-                    aSemiAxes = tRoi.SemiAxes/xScale;
-            end
-    end    
+        case 'images.roi.rectangle'
     
+            % Position [X Y Width Height Slice]
+            aNewPosition = zeros(N,5);
+            aNewPosition(:,1) = V(1,:)';
+            aNewPosition(:,2) = V(2,:)';
+            aNewPosition(:,3) = tRoi.Position(:,3) * scaleX;
+            aNewPosition(:,4) = tRoi.Position(:,4) * scaleY;
+            aNewPosition(:,5) = round(V(3,:)');
+
+        case 'images.roi.circle'
+
+            % Single radius: use average scaling of both axes
+            rPix = tRoi.Radius;
+            aRadius = rPix * ((scaleX + scaleY)/2);
+
+            aNewPosition = V';
+
+        case 'images.roi.ellipse'
+
+            rPixX = tRoi.SemiAxes(:,1);
+            rPixY = tRoi.SemiAxes(:,2);
+            aSemiAxes = [
+                rPixX * scaleX, ... % X semi-axis
+                rPixY * scaleY  ... % Y semi-axis
+            ];  
+
+            aNewPosition = V';
+
+        otherwise
+
+            aNewPosition = V';
+    end
 end
 
+function zPos = computeZPosition(atMetaData, aImage)
 
+    n = size(aImage,3);
+    meta0 = atMetaData{1}; meta0.PixelSpacing(meta0.PixelSpacing==0)=1;
+    iop   = meta0.ImageOrientationPatient;
+    normv = cross(iop(1:3),iop(4:6)); normv=normv/norm(normv);
+    if numel(atMetaData)==n
+        zPos=zeros(n,1);
+        for k=1:n, zPos(k)=normv'*atMetaData{k}.ImagePositionPatient(:); end
+    else
+        dZ = computeSliceSpacing(atMetaData);
+        if dZ == 0
+            dZ = meta0.PixelSpacing(1);
+        end
+        base = normv' * meta0.ImagePositionPatient(:);
+        zPos = base + (0:n-1)' * dZ;  
+
+        if isDicomImageFlipped(atMetaData)
+            zPos = flip(zPos);
+        end
+    end
+end
+
+function dcmZpos = flip_if_needed(refZpos, dcmZpos)
+
+    % Determine overall direction
+    upRef = refZpos(end) > refZpos(1);
+    upDcm = dcmZpos(end) > dcmZpos(1);
+
+    % If they differ, reverse the order of dcmZpos
+    if upRef ~= upDcm
+        dcmZpos = flip(dcmZpos);
+    end
+end
 

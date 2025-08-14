@@ -93,12 +93,16 @@ function [tRadionuclide, sMatFile] = xlsxToRadionuclideMat(sFileName)
          
         sMatFile = sprintf('%s/%s.mat', sKernelPath, sRadionuclideName);
 
-        if exist(sMatFile, 'file')                                       
+        if exist(sMatFile, 'file') 
+            
             delete(sMatFile);
         end
 
         save(sMatFile, 'tRadionuclide');
-    catch
+
+    catch ME   
+        logErrorToFile(ME);
+
         tRadionuclide = [];
         sMatFile = '';        
     end

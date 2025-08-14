@@ -37,9 +37,9 @@ function initRoi()
     
     % atVoi = voiTemplate('get', dSeriesOffset);
 
-    atDicomInfo = dicomMetaData('get', [], dSeriesOffset);
-
-    imRoi  = dicomBuffer('get', [], dSeriesOffset);
+    % atDicomInfo = dicomMetaData('get', [], dSeriesOffset);
+    % 
+    % imRoi  = dicomBuffer('get', [], dSeriesOffset);
 
     endLoop = numel(atRoi);
     for bb=1:numel(atRoi)

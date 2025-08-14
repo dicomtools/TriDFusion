@@ -27,9 +27,13 @@ function setPlaybackToolbar(sVisible)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tbPlayback = playbackMenuObject('get');
+    uiTopToolbar = uiTopToolbarPtr('get');
+    if isempty(uiTopToolbar)
+        return;
+    end
 
     mViewPlayback = viewPlaybackObject('get');
+
     if strcmp(sVisible, 'off')
         mViewPlayback.Checked = 'off';
         playback3DToolbar('set', false);
@@ -38,88 +42,123 @@ function setPlaybackToolbar(sVisible)
         playback3DToolbar('set', true);
     end
 
-    if isempty(tbPlayback)
+    acPlayback = playbackMenuObject('get');
+    if isempty(acPlayback)
 
+        setappdata(uiTopToolbar,'NextIconX',5);
+    
         sRootPath  = viewerRootPath('get');
         sIconsPath = sprintf('%s/icons/', sRootPath);
+    
+        % backward
+        mBackward = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'backward_grey.png'), ...
+            fullfile(sIconsPath,'backward_blue.png'), ...
+            fullfile(sIconsPath,'backward_white.png'), ...
+            'Backward', ...
+            'Backward', @playbackCallback, ...
+            'Separator', true, ... 
+            'SeparatorWidth', 2);
 
-        tbPlayback = uitoolbar(fiMainWindowPtr('get'));
-        playbackMenuObject('set', tbPlayback);
+        acPlayback{1} = mBackward;
 
-        if strcmp(sVisible, 'off')
-            tbPlayback.Visible = 'off';
-        else
-            tbPlayback.Visible = 'on';
-        end
+        % play
+        mPlay = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'play_grey.png'), ...
+            fullfile(sIconsPath,'play_green.png'), ...
+            fullfile(sIconsPath,'play_white.png'), ...
+            'Play', ...
+            'Play', @playbackCallback);   
+        acPlayback{2} = mPlay;
+    
+        % foward
+        mFoward = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'foward_grey.png'), ...
+            fullfile(sIconsPath,'foward_blue.png'), ...
+            fullfile(sIconsPath,'foward_white.png'), ...
+            'Foward', ...
+            'Foward', @playbackCallback);   
+        acPlayback{3} = mFoward;
+    
+        % record
+        mRecord = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'record_grey.png'), ...
+            fullfile(sIconsPath,'record_red.png'), ...
+            fullfile(sIconsPath,'record_white.png'), ...
+            'Record', ...
+            'Record', @playbackCallback); 
+         acPlayback{4} = mRecord;
+   
+        % Speed Down
+        mSpeedDown = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'arrow-down_grey.png'), ...
+            fullfile(sIconsPath,'arrow-down_orange.png'), ...
+            fullfile(sIconsPath,'arrow-down_white.png'), ...
+            'Speed-Down', ...
+            'Speed Down', @playbackCallback); 
+        acPlayback{5} = mSpeedDown;
+ 
+        % Speed Up
+        mSpeedUp = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'arrow-up_grey.png'), ...
+            fullfile(sIconsPath,'arrow-up_orange.png'), ...
+            fullfile(sIconsPath,'arrow-up_white.png'), ...
+            'Speed-Up', ...
+            'Speed Up', @playbackCallback);
+        acPlayback{6} = mSpeedUp;
+    
+        % Zoom Out
+        mZoomOut = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'zoom-out_grey.png'), ...
+            fullfile(sIconsPath,'zoom-out_blue.png'), ...
+            fullfile(sIconsPath,'zoom-out_white.png'), ...
+            'Zoom-Out', ...
+            'Zoom Out', @playbackCallback);
+        acPlayback{7} = mZoomOut;
+ 
+        % Zoom In
+        mZoomIn = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'zoom-in_grey.png'), ...
+            fullfile(sIconsPath,'zoom-in_blue.png'), ...
+            fullfile(sIconsPath,'zoom-in_white.png'), ...
+            'Zoom-In', ...
+            'Zoom In', @playbackCallback);
+        acPlayback{8} = mZoomIn;
+    
+        % Gate
+        mGate = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'time_grey.png'), ...
+            fullfile(sIconsPath,'time_light_grey.png'), ...
+            fullfile(sIconsPath,'time_white.png'), ...
+            'Gate', ...
+            'Gate', @playbackCallback); 
+        acPlayback{9} = mGate;
 
-        [img,~] = imread(sprintf('%s//backward.png', sIconsPath));
-        img = double(img)/255;
-
-        mBackward = uitoggletool(tbPlayback,'CData',img,'TooltipString','Backward');
-        mBackward.ClickedCallback = @playbackCallback;
-
-        [img,~] = imread(sprintf('%s//play.png', sIconsPath));
-        img = double(img)/255;
-
-        mPlay = uitoggletool(tbPlayback,'CData',img,'TooltipString','Play');
-        mPlay.ClickedCallback = @playbackCallback;
-
-        playIconMenuObject('set', mPlay);
-
-        [img,~] = imread(sprintf('%s//foward.png', sIconsPath));
-        img = double(img)/255;
-
-        mFoward = uitoggletool(tbPlayback,'CData',img,'TooltipString','Foward');
-        mFoward.ClickedCallback = @playbackCallback;
-
-        [img,~] = imread(sprintf('%s//record.png', sIconsPath));
-        img = double(img)/255;
-
-        mRecord = uitoggletool(tbPlayback,'CData',img,'TooltipString','Record');
-        mRecord.ClickedCallback = @playbackCallback;
-
-        recordIconMenuObject('set', mRecord);
-
-        % ---- %
-
-        [img,~] = imread(sprintf('%s//arrow-down.png', sIconsPath));
-        img = double(img)/255;
-
-        mSpeedDown = uitoggletool(tbPlayback,'CData',img,'TooltipString','Speed Down', 'Separator', 'on');
-        mSpeedDown.ClickedCallback = @playbackCallback;
-
-         [img,~] = imread(sprintf('%s//arrow-up.png', sIconsPath));
-       img = double(img)/255;
-
-        mSpeedUp = uitoggletool(tbPlayback,'CData',img,'TooltipString','Speed Up');
-        mSpeedUp.ClickedCallback = @playbackCallback;
-
-        % ---- %
-        [img,~] = imread(sprintf('%s//zoom-out.png', sIconsPath));
-        img = double(img)/255;
-
-        mZoomOut = uitoggletool(tbPlayback,'CData',img,'TooltipString','Zoom Out', 'Separator', 'on');
-        mZoomOut.ClickedCallback = @playbackCallback;
-
-        [img,~] = imread(sprintf('%s//zoom-in.png', sIconsPath));
-        img = double(img)/255;
-
-        mZoomIn = uitoggletool(tbPlayback,'CData',img,'TooltipString','Zoom In');
-        mZoomIn.ClickedCallback = @playbackCallback;
-
-        [img,~] = imread(sprintf('%s//gate.png', sIconsPath));
-        img = double(img)/255;
-
-        mGate = uitoggletool(tbPlayback,'CData',img,'TooltipString','Gate', 'Separator', 'on');
-        mGate.ClickedCallback = @playbackCallback;
         gateIconMenuObject('set', mGate);
 
+        playbackMenuObject('set', acPlayback);
+
+
     else
-        if strcmp(sVisible, 'off')
-            tbPlayback.Visible = 'off';
-        else
-            tbPlayback.Visible = 'on';
+        panelH = uiTopToolbarPtr('get');
+ 
+        bExit = false;
+        for i = 1:numel(acPlayback)
+            hBtn = acPlayback{i};
+            if ishghandle(hBtn)
+                if strcmpi(get(hBtn, 'Visible'), sVisible)
+                    bExit = true;
+                    break;
+                end
+            end
         end
+
+        if bExit == true
+            return;
+        end
+
+        setToolbarObjectVisibility(panelH, acPlayback, sVisible);        
+       
     end
 
     function playbackCallback(hObject, ~)
@@ -128,25 +167,30 @@ function setPlaybackToolbar(sVisible)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true
 
-            switch  hObject.TooltipString
+            sObjectTooltip = strjoin(strtrim(hObject.UserData.tooltip.String));
+
+            switch  sObjectTooltip
 
                 case 'Play'
 
                     if  multiFrame3DRecord('get') == false
+
+                        icon = get(mPlay, 'UserData');
+
                         if multiFrame3DPlayback('get') == false
 
-                            mPlay.State = 'on';
+                            set(mPlay, 'CData', icon.pressed);
+
                             multiFrame3DPlayback('set', true);
 
-                            if strcmpi(get(mGate, 'State'), 'on')
-%                                set(uiSeriesPtr('get'), 'Enable', 'off');
+                            if mGate.UserData.isSelected == true
+
                                 multiGate3D(mPlay);
                             else
                                 multiFrame3D(mPlay);
                             end
                         else
-%                            set(uiSeriesPtr('get'), 'Enable', 'on');
-                            mPlay.State = 'off';
+                            set(mPlay, 'CData', icon.default);
                             multiFrame3DPlayback('set', false);
                         end
                     end
@@ -156,57 +200,88 @@ function setPlaybackToolbar(sVisible)
 
                      if multiFrame3DPlayback('get') == false && ...
                         multiFrame3DRecord('get')   == false
-                         
-                         if strcmpi(get(mGate, 'State'), 'on')
 
-                            set(mFoward, 'Enable', 'off');
-                            oneGate3D(hObject.TooltipString);
-                            set(mFoward, 'Enable', 'on');
+                        origC   = get(mFoward, 'CData');
+                        
+                        % toggle it on-screen
+                        toggleToolbarIcon(mFoward);
+                        
+                        % force the figure to redraw NOW
+                        drawnow;
+                        
+                        % schedule a one-shot timer to restore the icon after 0.1 s
+                        t = timer( ...
+                            'StartDelay'   , 0.1, ...
+                            'ExecutionMode', 'singleShot', ...
+                            'TimerFcn'     , @(~,~) set(mFoward, 'CData', origC) ...
+                        );
+                        start(t);
+                     
+                        if mGate.UserData.isSelected == true
 
-                         else
-                             if multiFrame3DIndex('get') == 120
+                            oneGate3D(sObjectTooltip);
+                        else
+                            
+                            if multiFrame3DIndex('get') == 120
+
                                 multiFrame3DIndex('set', 1);
                              else
                                 multiFrame3DIndex('set', multiFrame3DIndex('get')+1);
                              end
 
-                             set(mFoward, 'Enable', 'off');
                              oneFrame3D();
-                             set(mFoward, 'Enable', 'on');
                         end
-                      end
 
-                      set(mFoward, 'State', 'off');
+                    end
+
 
                  case 'Backward'
 
                      if multiFrame3DPlayback('get') == false && ...
                         multiFrame3DRecord('get')   == false
-                        if strcmpi(get(mGate, 'State'), 'on')
 
-                            set(mBackward, 'Enable', 'off');
-                            oneGate3D(hObject.TooltipString);
-                            set(mBackward, 'Enable', 'on');
-                       else
+                        origC   = get(mBackward, 'CData');
+                        
+                        % toggle it on-screen
+                        toggleToolbarIcon(mBackward);
+                        
+                        % force the figure to redraw NOW
+                        drawnow;
+                        
+                        % schedule a one-shot timer to restore the icon after 0.1 s
+                        t = timer( ...
+                            'StartDelay'   , 0.1, ...
+                            'ExecutionMode', 'singleShot', ...
+                            'TimerFcn'     , @(~,~) set(mBackward, 'CData', origC) ...
+                        );
+                        start(t);
+
+                        if mGate.UserData.isSelected == true
+
+                            oneGate3D(sObjectTooltip);
+                        else
                             if multiFrame3DIndex('get') == 1
+
                                multiFrame3DIndex('set', 120);
                             else
                                multiFrame3DIndex('set', multiFrame3DIndex('get')-1);
                             end
 
-                            set(mBackward, 'Enable', 'off');
                             oneFrame3D();
-                            set(mBackward, 'Enable', 'on');
                         end
-                     end
+                    end
 
-                     set(mBackward, 'State', 'off');
+                     % set(mBackward, 'State', 'off');
 
                  case 'Record'
 
                     if multiFrame3DPlayback('get') == false
 
+                        icon = get(mRecord, 'UserData');
+
                         if multiFrame3DRecord('get') == false
+
+                            set(mRecord, 'CData', icon.pressed);
 
                             filter = {'*.avi';'*.mp4';'*.gif';'*.dcm';'*.jpg';'*.bmp';'*.png'};
                             info = dicomMetaData('get');
@@ -230,10 +305,9 @@ function setPlaybackToolbar(sVisible)
 
                             if file ~= 0
 
-                                set(mRecord, 'State', 'on');
                                 multiFrame3DRecord('set', true);
 
-                                if strcmpi(get(mGate, 'State'), 'on')
+                                if mGate.UserData.isSelected == true
 
 %                                    set(uiSeriesPtr('get'), 'Enable', 'off');
                                     recordMultiGate3D(mRecord, path, file, filter{indx});
@@ -242,13 +316,15 @@ function setPlaybackToolbar(sVisible)
                                 end
 
 %                                set(uiSeriesPtr('get'), 'Enable', 'on');
-                                set(mRecord, 'State', 'off');
                                 multiFrame3DRecord('set', false);
+                                set(mRecord, 'CData', icon.default);
 
                                 try
                                     animatedGifLastUsedDir = [path '/'];
                                     save(sMatFile, 'animatedGifLastUsedDir');
-                                catch
+                                    
+                                catch ME
+                                    logErrorToFile(ME); 
                                     progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
 %                                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                                    if integrateToBrowser('get') == true
@@ -261,29 +337,92 @@ function setPlaybackToolbar(sVisible)
 %                                    javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
                                 end
                             else
-                                set(mRecord, 'State', 'off');
+
+                                set(mRecord, 'CData', icon.default);
                             end
                         else
-                            set(mRecord, 'State', 'off');
                             multiFrame3DRecord('set', false);
+                            set(mRecord, 'CData', icon.default);
                         end
                     end
 
                 case 'Speed Down'
-                    set(mSpeedDown, 'State', 'off');
+
+                    origC   = get(mSpeedDown, 'CData');
+                    
+                    % toggle it on-screen
+                    toggleToolbarIcon(mSpeedDown);
+                    
+                    % force the figure to redraw NOW
+                    drawnow;
+                    
+                    % schedule a one-shot timer to restore the icon after 0.1 s
+                    t = timer( ...
+                        'StartDelay'   , 0.1, ...
+                        'ExecutionMode', 'singleShot', ...
+                        'TimerFcn'     , @(~,~) set(mSpeedDown, 'CData', origC) ...
+                    );
+                    start(t);
 
                     if multiFrame3DSpeed('get') < 2
+
                         multiFrame3DSpeed('set', multiFrame3DSpeed('get')+0.01);
                     end
 
+                    if isequal(mSpeedDown.CData, mSpeedDown.UserData.pressed)
+                        
+                        icon = get(mSpeedDown, 'UserData');
+                        set(mSpeedDown, 'CData', icon.default);
+                    end
+
                 case 'Speed Up'
-                    set(mSpeedUp, 'State', 'off');
+
+                    origC   = get(mSpeedUp, 'CData');
+                    
+                    % toggle it on-screen
+                    toggleToolbarIcon(mSpeedUp);
+                    
+                    % force the figure to redraw NOW
+                    drawnow;
+                    
+                    % schedule a one-shot timer to restore the icon after 0.1 s
+                    t = timer( ...
+                        'StartDelay'   , 0.1, ...
+                        'ExecutionMode', 'singleShot', ...
+                        'TimerFcn'     , @(~,~) set(mSpeedUp, 'CData', origC) ...
+                    );
+                    start(t);
+
                     if multiFrame3DSpeed('get') > 0.01
+
                         multiFrame3DSpeed('set', multiFrame3DSpeed('get')-0.01);
+                    end                   
+
+                    if isequal(mSpeedUp.CData, mSpeedUp.UserData.pressed)
+                        
+                        icon = get(mSpeedUp, 'UserData');
+                        set(mSpeedUp, 'CData', icon.default);
                     end
 
                 case 'Zoom In'
-                    set(mZoomIn, 'State', 'off');
+
+                    % grab the original icon
+                    origC = get(mZoomIn, 'CData');
+                    
+                    % toggle it on-screen
+                    toggleToolbarIcon(mZoomIn);
+
+                    % force the figure to redraw NOW
+                    drawnow;
+                    
+                    % schedule a one-shot timer to restore the icon after 0.1 s
+                    t = timer( ...
+                        'StartDelay'   , 0.1, ...
+                        'ExecutionMode', 'singleShot', ...
+                        'TimerFcn'     , @(~,~) set(mZoomIn, 'CData', origC) ...
+                    );
+                    start(t);
+
                     multiFrame3DZoom('set', multiFrame3DZoom('get')/1.2);
 
                     if multiFrame3DZoom('get') > 1.2
@@ -292,126 +431,213 @@ function setPlaybackToolbar(sVisible)
 
                     if multiFrame3DPlayback('get') == false && ...
                         multiFrame3DRecord('get')  == false
-                        set(mZoomIn, 'Enable', 'off');
                         zoom3D('in', 1.2);
-                        set(mZoomIn, 'Enable', 'on');
                     end
 
                     initGate3DObject('set', true);
 
+                    if isequal(mZoomIn.CData, mZoomIn.UserData.pressed)
+
+                        icon = get(mZoomIn, 'UserData');
+                        set(mZoomIn, 'CData', icon.default);
+                    end
+
                 case 'Zoom Out'
-                    set(mZoomOut, 'State', 'off');
+
+                    % grab the original icon
+                    origC = get(mZoomOut, 'CData');
+                    
+                    % toggle it on-screen
+                    toggleToolbarIcon(mZoomOut);
+
+                    % force the figure to redraw NOW
+                    drawnow;
+                    
+                    % schedule a one-shot timer to restore the icon after 0.1 s
+                    t = timer( ...
+                        'StartDelay'   , 0.1, ...
+                        'ExecutionMode', 'singleShot', ...
+                        'TimerFcn'     , @(~,~) set(mZoomOut, 'CData', origC) ...
+                    );
+                    start(t);
+
                     multiFrame3DZoom('set', multiFrame3DZoom('get')*1.2);
 
                      if multiFrame3DPlayback('get') == false && ...
                         multiFrame3DRecord('get')   == false
-                        set(mZoomOut, 'Enable', 'off');
                         zoom3D('out', 1.2);
-                        set(mZoomOut, 'Enable', 'on');
                      end
 
                      initGate3DObject('set', true);
 
-                case 'Gate'
+                     if isequal(mZoomOut.CData, mZoomOut.UserData.pressed)
 
-                    mPlay.State = 'off';
+                        icon = get(mZoomOut, 'UserData');
+                        set(mZoomOut, 'CData', icon.default);
+                     end
+
+                case 'Gate'
+                    
+                    icon = get(mGate, 'UserData');
+
                     multiFrame3DPlayback('set', false);
 
+                    multiFramePlayback('set', false); 
+
+                    if ~isequal(mGate.CData, mGate.UserData.pressed)
+                        mGate.UserData.isSelected = true;
+                        set(mGate, 'CData', icon.pressed);
+                    else
+                        mGate.UserData.isSelected = false;                       
+                        set(mGate, 'CData', icon.default);
+                    end
+
+                    mGate.UserData.selectedIcon = get(mGate,'CData');  
             end
         else
-            switch  hObject.TooltipString
+
+            sObjectTooltip = strjoin(strtrim(hObject.UserData.tooltip.String));
+
+            switch  sObjectTooltip
 
                 case 'Play'
 
                     if  multiFrameRecord('get') == false
 
-                        if multiFramePlayback('get') == false
+                        icon = get(mPlay, 'UserData');
 
-                            mPlay.State = 'on';
+                        if multiFramePlayback('get') == false
+    
+                            set(mPlay, 'CData', icon.pressed);
+
                             multiFramePlayback('set', true);
 
-                            if strcmpi(get(mGate, 'State'), 'on')
+                            if mGate.UserData.isSelected == true
 
                                 set(uiSeriesPtr('get'), 'Enable', 'off');
-                                multiGate(mPlay, gca(fiMainWindowPtr('get')));
+                                multiGate(mPlay);
                             else
                                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1
                                     multiFrameScreenCapture(mPlay);
                                 else
-                                    multiFrame(mPlay, gca(fiMainWindowPtr('get')));
+                                    multiFrame(mPlay);
                                 end
 
                             end
                         else
+                            set(mPlay, 'CData', icon.default);
+                            
                             set(uiSeriesPtr('get'), 'Enable', 'on');
-                            mPlay.State = 'off';
                             multiFramePlayback('set', false);   
                         end
                     end
 
                  case 'Foward'
 
-                     set(mFoward, 'State', 'off');
-
                      if multiFramePlayback('get') == false && ...
                         multiFrameRecord('get')   == false
 
-                        set(mFoward, 'Enable', 'off');
+                        origC   = get(mFoward, 'CData');
+                        
+                        % toggle it on-screen
+                        toggleToolbarIcon(mFoward);
+                        
+                        % force the figure to redraw NOW
+                        drawnow;
+                        
+                        % schedule a one-shot timer to restore the icon after 0.1 s
+                        t = timer( ...
+                            'StartDelay'   , 0.1, ...
+                            'ExecutionMode', 'singleShot', ...
+                            'TimerFcn'     , @(~,~) set(mFoward, 'CData', origC) ...
+                        );
+                        start(t);
 
-                        if strcmpi(get(mGate, 'State'), 'on')
+                        if mGate.UserData.isSelected == true
 
                             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
 
-                                oneGate(hObject.TooltipString);
+                                oneGate(sObjectTooltip);
                             end
                                
                         else
                             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1
+
                                 screenCaptureFrame('Next');
                             else
                                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
-                                    oneFrame(hObject.TooltipString);
+                                    
+                                    oneFrame(sObjectTooltip);
                                 end
                             end
                         end
-
-                        set(mFoward, 'Enable', 'on');
+                       
+                        if isequal(mFoward.CData, mFoward.UserData.pressed)
+    
+                            icon = get(mFoward, 'UserData');
+                            set(mFoward, 'CData', icon.default);
+                        end
                      end           
 
 
                  case 'Backward'
 
-                     set(mBackward, 'State', 'off');
+                     if multiFrame3DPlayback('get') == false && ...
+                        multiFrame3DRecord('get')   == false
 
-                         if multiFrame3DPlayback('get') == false && ...
-                            multiFrame3DRecord('get')   == false
+                        origC   = get(mBackward, 'CData');
+                        
+                        % toggle it on-screen
+                        toggleToolbarIcon(mBackward);
+                        
+                        % force the figure to redraw NOW
+                        drawnow;
+                        
+                        % schedule a one-shot timer to restore the icon after 0.1 s
+                        t = timer( ...
+                            'StartDelay'   , 0.1, ...
+                            'ExecutionMode', 'singleShot', ...
+                            'TimerFcn'     , @(~,~) set(mBackward, 'CData', origC) ...
+                        );
+                        start(t);
 
-                            set(mBackward, 'Enable', 'off');
+                        if mGate.UserData.isSelected == true
+                           
+                            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
 
-                            if strcmpi(get(mGate, 'State'), 'on')
-                               
-                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
-
-                                    oneGate(hObject.TooltipString);
-                                end
+                                oneGate(sObjectTooltip);
+                            end
+                        else
+                            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1
+                                screenCaptureFrame('Previous');
                             else
-                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1
-                                    screenCaptureFrame('Previous');
-                                else
-                                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
-                                        oneFrame(hObject.TooltipString);
-                                    end
+                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+                                    oneFrame(sObjectTooltip);
                                 end
                             end
+                        end
 
-                            set(mBackward, 'Enable', 'on');
-                         end                     
+                        if isequal(mBackward.CData, mBackward.UserData.pressed)
+    
+                            icon = get(mBackward, 'UserData');
+                            set(mBackward, 'CData', icon.default);
+                        end
+
+                     end                     
 
                  case 'Record'
 
                     if multiFramePlayback('get') == false
 
+                        icon = get(mRecord, 'UserData');
+
                         if multiFrameRecord('get') == false
+
+                            toggleToolbarIcon(mRecord);
+                            
+                            set(mRecord, 'CData', icon.pressed);
+                             
+                            drawnow;
 
                             filter = {'*.avi';'*.mp4';'*.gif';'*.dcm';'*.jpg';'*.bmp';'*.png'};
                             info = dicomMetaData('get');
@@ -437,72 +663,121 @@ function setPlaybackToolbar(sVisible)
 
                             if file ~= 0
 
-                                set(mRecord, 'State', 'on');
                                 multiFrameRecord('set', true);
 
-                                if strcmpi(get(mGate, 'State'), 'on')
+                                if mGate.UserData.isSelected == true
                                     set(uiSeriesPtr('get'), 'Enable', 'off');
-                                    recordMultiGate(mRecord, path, file, filter{indx}, gca(fiMainWindowPtr('get')));
+                                    recordMultiGate(mRecord, path, file, filter{indx});
                                 else
-                                    recordMultiFrame(mRecord, path, file, filter{indx}, gca(fiMainWindowPtr('get')));
+                                    recordMultiFrame(mRecord, path, file, filter{indx});
                                 end
 
                                 set(uiSeriesPtr('get'), 'Enable', 'on');
-                                set(mRecord, 'State', 'off');
                                 multiFrameRecord('set', false);
+                                set(mRecord, 'CData', icon.default);
 
                                 try
                                     animatedGifLastUsedDir = [path '/'];
                                     save(sMatFile, 'animatedGifLastUsedDir');
-                                catch
-                                    progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-%                                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
-%                                    if integrateToBrowser('get') == true
-%                                        sLogo = './TriDFusion/logo.png';
-%                                    else
-%                                        sLogo = './logo.png';
-%                                    end
 
-%                                    javaFrame = get(h, 'JavaFrame');
-%                                    javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
+                                catch ME
+                                    logErrorToFile(ME); 
+                                    progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
                                 end
                             else
-                                set(mRecord, 'State', 'off');
+
+                                set(mRecord, 'CData', icon.default);
                             end
                         else
-                            set(mRecord, 'State', 'off');
                             multiFrameRecord('set', false);
+                            set(mRecord, 'CData', icon.default);
                         end
                     end
 
                 case 'Speed Down'
-                    
-                    set(mSpeedDown, 'State', 'off');
 
+                    origC   = get(mSpeedDown, 'CData');
+                    
+                    % toggle it on-screen
+                    toggleToolbarIcon(mSpeedDown);
+                    
+                    % force the figure to redraw NOW
+                    drawnow;
+                    
+                    % schedule a one-shot timer to restore the icon after 0.1 s
+                    t = timer( ...
+                        'StartDelay'   , 0.1, ...
+                        'ExecutionMode', 'singleShot', ...
+                        'TimerFcn'     , @(~,~) set(mSpeedDown, 'CData', origC) ...
+                    );
+                    start(t);
+               
                     if multiFrameSpeed('get') < 2
+
                         multiFrameSpeed('set', multiFrameSpeed('get')+0.01);
+                    end
+
+                    if isequal(mSpeedDown.CData, mSpeedDown.UserData.pressed)
+
+                        icon = get(mSpeedDown, 'UserData');
+                        set(mSpeedDown, 'CData', icon.default);
                     end
 
                 case 'Speed Up'
 
-                    set(mSpeedUp, 'State', 'off');
+                    % grab the original icon
+                    origC = get(mSpeedUp, 'CData');
+                    
+                    % toggle it on-screen
+                    toggleToolbarIcon(mSpeedUp);
+
+                    % force the figure to redraw NOW
+                    drawnow;
+                    
+                    % schedule a one-shot timer to restore the icon after 0.1 s
+                    t = timer( ...
+                        'StartDelay'   , 0.1, ...
+                        'ExecutionMode', 'singleShot', ...
+                        'TimerFcn'     , @(~,~) set(mSpeedUp, 'CData', origC) ...
+                    );
+                    start(t);
 
                     if size(dicomBuffer('get'), 3) ~=1
 
                         if multiFrameSpeed('get') > 0.01
+
                             multiFrameSpeed('set', multiFrameSpeed('get')-0.01);
                         end
                     end
 
+                    if isequal(mSpeedUp.CData, mSpeedUp.UserData.pressed)
+
+                        icon = get(mSpeedUp, 'UserData');
+                        set(mSpeedUp, 'CData', icon.default);
+                    end
+ 
                 case 'Zoom In'
                     
-                    set(mZoomIn, 'State', 'off');
+                    % grab the original icon
+                    origC = get(mZoomIn, 'CData');
+                    
+                    % toggle it on-screen
+                    toggleToolbarIcon(mZoomIn);
+
+                    % force the figure to redraw NOW
+                    drawnow;
+                    
+                    % schedule a one-shot timer to restore the icon after 0.1 s
+                    t = timer( ...
+                        'StartDelay'   , 0.1, ...
+                        'ExecutionMode', 'singleShot', ...
+                        'TimerFcn'     , @(~,~) set(mZoomIn, 'CData', origC) ...
+                    );
+                    start(t);
 
                     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
                     pAxe = gca(fiMainWindowPtr('get'));
-
-                    set(mZoomIn, 'Enable', 'off');
 
                     multiFrameZoom('set', 'out', 1);
 
@@ -579,17 +854,35 @@ function setPlaybackToolbar(sVisible)
                     
                     multiFrameZoom('set', 'axe', axesHandle);
 
-                    set(mZoomIn, 'Enable', 'on');
+                    if isequal(mZoomIn.CData, mZoomIn.UserData.pressed)
+
+                        icon = get(mZoomIn, 'UserData');
+                        set(mZoomIn, 'CData', icon.default);
+                    end
 
                 case 'Zoom Out'
 
-                    set(mZoomOut, 'State', 'off');
+                    % grab the original icon
+                    origC = get(mZoomOut, 'CData');
+                    
+                    % toggle it on-screen
+                    toggleToolbarIcon(mZoomOut);
+
+                    % force the figure to redraw NOW
+                    drawnow;
+                    
+                    % schedule a one-shot timer to restore the icon after 0.1 s
+                    t = timer( ...
+                        'StartDelay'   , 0.1, ...
+                        'ExecutionMode', 'singleShot', ...
+                        'TimerFcn'     , @(~,~) set(mZoomOut, 'CData', origC) ...
+                    );
+                    start(t);
 
                     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
                     pAxe = gca(fiMainWindowPtr('get'));
 
-                    set(mZoomOut, 'Enable', 'off');
 
                     multiFrameZoom('set', 'in', 1);
 
@@ -671,23 +964,31 @@ function setPlaybackToolbar(sVisible)
                     
                     multiFrameZoom('set', 'axe', axesHandle);
 
-                    set(mZoomOut, 'Enable', 'on');                 
+                    if isequal(mZoomOut.CData, mZoomOut.UserData.pressed)
+
+                        icon = get(mZoomOut, 'UserData');
+                        set(mZoomOut, 'CData', icon.default);
+                    end
 
                 case 'Gate'
 
-                    mPlay.State = 'off';
-                    multiFramePlayback('set', false);
+                    icon = get(mGate, 'UserData');
 
+                    multiFrame3DPlayback('set', false);
+
+                    multiFramePlayback('set', false); 
+
+                    if ~isequal(mGate.CData, mGate.UserData.pressed)
+                        mGate.UserData.isSelected = true;
+                        set(mGate, 'CData', icon.pressed);
+                   else
+                        mGate.UserData.isSelected = false;                       
+                        set(mGate, 'CData', icon.default);
+                    end
+
+                    mGate.UserData.selectedIcon = get(mGate,'CData');           
              end
 
- %           set(mPlay     , 'State', 'off');
- %           set(mFoward   , 'State', 'off');
- %           set(mBackward , 'State', 'off');
- %           set(mRecord   , 'State', 'off');
- %           set(mSpeedDown, 'State', 'off');
- %           set(mSpeedUp  , 'State', 'off');
- %           set(mZoomIn   , 'State', 'off');
- %           set(mZoomOut  , 'State', 'off');
         end
 
     end

@@ -1,39 +1,58 @@
 function [sSeriesDescriptionReturnValue, bBypassDialogReturnValue] = getViewerSeriesDescriptionDialog(sSeriesDescription, bBypassDialog)
-%function [sSeriesDescriptionReturnValue, bBypassDialogReturnValue] = getViewerSeriesDescriptionDialog(sSeriesDescription, bBypassDialog)
-%Create a dialog and return a new label.
-%See TriDFuison.doc (or pdf) for more information about options.
+% function [sSeriesDescriptionReturnValue, bBypassDialogReturnValue] = getViewerSeriesDescriptionDialog(sSeriesDescription, bBypassDialog)
+% getViewerSeriesDescriptionDialog Create a dialog and return a new label.
 %
-%Note: option settings must fit on one line and can contain one semicolon at most.
-%Options can be strings, cell arrays of strings, or numerical arrays.
+%   [sSeriesDescriptionReturnValue, bBypassDialogReturnValue] =
+%   getViewerSeriesDescriptionDialog(sSeriesDescription, bBypassDialog) creates a
+%   modal dialog for editing the series description. Option settings must fit
+%   on one line and can contain one semicolon at most. Options can be strings,
+%   cell arrays of strings, or numerical arrays.
+%
+%   Inputs:
+%       sSeriesDescription - Initial series description (string).
+%       bBypassDialog      - (optional) Logical flag; if true, bypass the dialog.
+%
+%   Outputs:
+%       sSeriesDescriptionReturnValue - Updated series description.
+%       bBypassDialogReturnValue      - Logical flag indicating whether to
+%                                       bypass the dialog in future.
+%
+%See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
 % Copyright 2022, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+% along with TriDFusion.cIf not, see <http://www.gnu.org/licenses/>.
+
+    try
 
     if exist('bBypassDialog', 'var')
+
         if bBypassDialog == false
+
             dDialogYSize = 145;
         else
+            progressBar(1, 'Bypass: getViewerSeriesDescriptionDialog()');        
+
             bBypassDialogReturnValue = bBypassDialog;             
             sSeriesDescriptionReturnValue = sSeriesDescription;
             return;
@@ -42,21 +61,39 @@ function [sSeriesDescriptionReturnValue, bBypassDialogReturnValue] = getViewerSe
         dDialogYSize = 120;
     end
 
-    dlgRtStructSeriesDescription = ...
-        dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-380/2) ...
-                        (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-120/2) ...
-                        380 ...
-                        dDialogYSize ...
-                        ],...
-           'MenuBar', 'none',...
-           'Resize', 'off', ...    
-           'NumberTitle','off',...
-           'MenuBar', 'none',...
-           'Color', viewerBackgroundColor('get'), ...
-           'Name', 'Edit Label',...
-           'Toolbar','none'...   
-           );            
-           
+    if viewerUIFigure('get') == true
+
+        dlgRtStructSeriesDescription = ...
+            uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-380/2) ...
+                                  (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-120/2) ...
+                                  380 ...
+                                  dDialogYSize ...
+                                  ],...
+                   'Resize'     , 'off', ...
+                   'Color'      , viewerBackgroundColor('get'),...
+                   'WindowStyle', 'modal', ...
+                   'Name'       , 'Edit Series Description'...
+                   );
+    else
+
+        dlgRtStructSeriesDescription = ...
+            dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-380/2) ...
+                               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-120/2) ...
+                               380 ...
+                               dDialogYSize ...
+                               ],...
+               'MenuBar'    , 'none',...
+               'Resize'     , 'off', ...    
+               'NumberTitle', 'off',...
+               'MenuBar'    , 'none',...
+               'Color'      , viewerBackgroundColor('get'), ...
+               'Name'       , 'Edit Series Description',...
+               'Toolbar'    ,'none'...   
+               );  
+    end
+
+    setObjectIcon(dlgRtStructSeriesDescription);              
+
         axes(dlgRtStructSeriesDescription, ...
              'Units'   , 'pixels', ...
              'Position', get(dlgRtStructSeriesDescription, 'Position'), ...
@@ -117,7 +154,7 @@ function [sSeriesDescriptionReturnValue, bBypassDialogReturnValue] = getViewerSe
 
     % Cancel or Proceed
 
-    uicancelViewerSeriesDescription = ...
+    uiCancelViewerSeriesDescription = ...
         uicontrol(dlgRtStructSeriesDescription,...
                    'String','Cancel',...
                    'Position',[285 7 75 25],...
@@ -137,23 +174,24 @@ function [sSeriesDescriptionReturnValue, bBypassDialogReturnValue] = getViewerSe
     bBypassDialogReturnValue = false;             
     sSeriesDescriptionReturnValue = [];
     
-    waitfor(uicancelViewerSeriesDescription); 
-    
+    waitfor(uiCancelViewerSeriesDescription); 
+
+    catch ME
+        logErrorToFile(ME);
+        progressBar(1, 'Error: getViewerSeriesDescriptionDialog()' );        
+    end
+
     function chkBypassDialogCallback(hObject, ~)
         
-        if get(chkBypassDialog, 'Value') == 1
-           if strcmpi(hObject.Style, 'checkbox')
-                set(chkBypassDialog, 'Value', 1);
-            else
-                set(chkBypassDialog, 'Value', 0);
-           end            
+        if strcmpi(hObject.Style, 'checkbox')
+
+            bNewVal = get(chkBypassDialog, 'Value');
         else
-           if strcmpi(hObject.Style, 'checkbox')
-                set(chkBypassDialog, 'Value', 0);
-            else
-                set(chkBypassDialog, 'Value', 1);
-           end  
-        end         
+            bNewVal = ~get(chkBypassDialog, 'Value');
+        end       
+
+        set(chkBypassDialog, 'Value', bNewVal);
+
     end
     
     function cancelViewerSeriesDescriptionCallback(~, ~)
@@ -167,6 +205,7 @@ function [sSeriesDescriptionReturnValue, bBypassDialogReturnValue] = getViewerSe
         sSeriesDescriptionReturnValue = get(edtRtStructSeriesDescription, 'String');
         
         if exist('bBypassDialog', 'var')
+
             bBypassDialogReturnValue = get(chkBypassDialog, 'Value');
         end
 
@@ -174,6 +213,6 @@ function [sSeriesDescriptionReturnValue, bBypassDialogReturnValue] = getViewerSe
 
         cancelViewerSeriesDescriptionCallback(); 
 
-    end % okViewerSeriesDescriptionCallback()         
-          
+    end % okViewerSeriesDescriptionCallback()  
+
 end

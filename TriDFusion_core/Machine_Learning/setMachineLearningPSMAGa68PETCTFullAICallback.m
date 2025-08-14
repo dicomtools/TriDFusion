@@ -36,7 +36,7 @@ function setMachineLearningPSMAGa68PETCTFullAICallback(hObject, ~)
         if exist('hObject', 'var')
 
             DLG_PSMA_Ga68_PETCT_PERCENT_X = 380;
-            DLG_PSMA_Ga68_PETCT_PERCENT_Y = 215;
+            DLG_PSMA_Ga68_PETCT_PERCENT_Y = 240;
 
             if viewerUIFigure('get') == true
         
@@ -67,6 +67,32 @@ function setMachineLearningPSMAGa68PETCTFullAICallback(hObject, ~)
                            'Toolbar','none'...               
                            );    
             end
+
+            setObjectIcon(dlgPSMAGa68PETCTFullAISegmentation);
+
+            % Fast Segmentation
+
+                uicontrol(dlgPSMAGa68PETCTFullAISegmentation,...
+                          'style'   , 'text',...
+                          'Enable'  , 'Inactive',...
+                          'string'  , 'Fast Segmentation',...
+                          'horizontalalignment', 'left',...
+                          'BackgroundColor', viewerBackgroundColor('get'), ...
+                          'ForegroundColor', viewerForegroundColor('get'), ...
+                          'ButtonDownFcn'  , @chkPSMAGa68PETCTFullAIFastSegmentationCallback, ...
+                          'position', [40 190 150 20]...
+                          );
+
+            chkPSMAGa68PETCTFullAIFastSegmentation = ...
+                uicontrol(dlgPSMAGa68PETCTFullAISegmentation,...
+                          'style'   , 'checkbox',...
+                          'enable'  , 'on',...
+                          'value'   , machineLearningPSMAGa68FastSegmentation('get'),...
+                          'position', [20 190 20 20],...
+                          'BackgroundColor', viewerBackgroundColor('get'), ...
+                          'ForegroundColor', viewerForegroundColor('get'), ...                   
+                          'Callback', @chkPSMAGa68PETCTFullAIFastSegmentationCallback...
+                          );
 
             % Trainer with Dice and CE Loss
         
@@ -212,9 +238,24 @@ function setMachineLearningPSMAGa68PETCTFullAICallback(hObject, ~)
             tPSMAGa68PETCTFullAI.options.smoothMask           = machineLearningPSMAGa68SmoothMask('get');
             tPSMAGa68PETCTFullAI.options.smallestVoiValue     = machineLearningPSMAGa68SmallestVoiValue('get');
             tPSMAGa68PETCTFullAI.options.pixelEdge            = pixelEdge('get');
-    
+            tPSMAGa68PETCTFullAI.options.fastSegmentation     = machineLearningPSMAGa68FastSegmentation('get');
+  
             setMachineLearningPSMAGa68PETCTFullAI(sPredictScript, tPSMAGa68PETCTFullAI); 
         end
+    end
+
+    function chkPSMAGa68PETCTFullAIFastSegmentationCallback(hObject, ~)
+
+        bObjectValue = get(chkPSMAGa68PETCTFullAIFastSegmentation, 'Value');
+
+        if strcmpi(get(hObject, 'Style'), 'text')
+
+            set(chkPSMAGa68PETCTFullAIFastSegmentation, 'Value', ~bObjectValue);
+        end
+
+        bObjectValue = get(chkPSMAGa68PETCTFullAIFastSegmentation, 'Value');
+
+        machineLearningPSMAGa68FastSegmentation('set', bObjectValue);
     end
 
     function chkPSMAGa68PETCTFullAICELossCallback(hObject, ~)
@@ -301,11 +342,12 @@ function setMachineLearningPSMAGa68PETCTFullAICallback(hObject, ~)
 
         % Options
 
-        tPSMAGa68PETCTFullAI.options.CELossTrainer        =            get(chkPSMAGa68PETCTFullAICELoss, 'Value');
-        tPSMAGa68PETCTFullAI.options.classifySegmentation =            get(chkPSMAGa68PETCTFullAIClassifySegmentation, 'Value');
-        tPSMAGa68PETCTFullAI.options.smoothMask           =            get(chkPSMAGa68PETCTFullAISmoothMask, 'Value');
+        tPSMAGa68PETCTFullAI.options.CELossTrainer        = get(chkPSMAGa68PETCTFullAICELoss, 'Value');
+        tPSMAGa68PETCTFullAI.options.classifySegmentation = get(chkPSMAGa68PETCTFullAIClassifySegmentation, 'Value');
+        tPSMAGa68PETCTFullAI.options.smoothMask           = get(chkPSMAGa68PETCTFullAISmoothMask, 'Value');
         tPSMAGa68PETCTFullAI.options.smallestVoiValue     = str2double(get(edtPSMAGa68PETCTFullAISmallestVoiValue , 'String'));
-        tPSMAGa68PETCTFullAI.options.pixelEdge            =            get(chkPSMAGa68PETCTFullAIPixelEdge, 'Value');
+        tPSMAGa68PETCTFullAI.options.pixelEdge            = get(chkPSMAGa68PETCTFullAIPixelEdge, 'Value');
+        tPSMAGa68PETCTFullAI.options.fastSegmentation     = get(chkPSMAGa68PETCTFullAIFastSegmentation, 'value');
 
         delete(dlgPSMAGa68PETCTFullAISegmentation);
 

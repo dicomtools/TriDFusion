@@ -63,8 +63,33 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
     
     TF = affine3d(f);
        
-    Rdcm  = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-    Rref  = imref3d(dimsRef, atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+    % Rdcm  = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+    % Rref  = imref3d(dimsRef, atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+        % DICOM volume spatial reference
+    dcmMeta   = atDcmMetaData{1};
+    origin    = dcmMeta.ImagePositionPatient;     % [x0, y0, z0]
+    spacing   = dcmMeta.PixelSpacing;             % [rowSpacing; colSpacing]
+    % dimsDcm = [nRows, nCols, nSlices]
+    Rdcm = imref3d( dimsDcm, ...
+        ... % XWorldLimits along columns uses col‐spacing = spacing(2)
+        [ origin(1), origin(1) + (dimsDcm(2)-1) * spacing(2) ], ...
+        ... % YWorldLimits along rows uses row‐spacing = spacing(1)
+        [ origin(2), origin(2) + (dimsDcm(1)-1) * spacing(1) ], ...
+        ... % ZWorldLimits from first‐ to last‐slice center
+        [ origin(3), origin(3) + (dimsDcm(3)-1) * dcmSliceThickness ] );
+    
+    % Reference volume spatial reference
+    refMeta    = atRefMetaData{1};
+    originRef  = refMeta.ImagePositionPatient;    % [x0, y0, z0]
+    spacingRef = refMeta.PixelSpacing;            % [rowSpacing; colSpacing]
+    % dimsRef = [nRows, nCols, nSlices]
+    Rref = imref3d( dimsRef, ...
+        ... % XWorldLimits along columns
+        [ originRef(1), originRef(1) + (dimsRef(2)-1) * spacingRef(2) ], ...
+        ... % YWorldLimits along rows
+        [ originRef(2), originRef(2) + (dimsRef(1)-1) * spacingRef(1) ], ...
+        ... % ZWorldLimits from first‐ to last‐slice center
+        [ originRef(3), originRef(3) + (dimsRef(3)-1) * refSliceThickness ] );
 
     if (round(Rdcm.ImageExtentInWorldX) ~= round(Rref.ImageExtentInWorldX)) && ...
        (round(Rdcm.ImageExtentInWorldY) ~= round(Rref.ImageExtentInWorldY))
@@ -74,7 +99,23 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
     end
 
     if dRefOutputView == 2
-        [resampImage, ~] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));      
+        % Rref = imref3d(dimsRef, atRefMetaData{1}.PixelSpacing(2),
+        % atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+        % 
+        % Xlimits = [ atRefMetaData{1}.ImagePositionPatient(1), ...
+        %             atRefMetaData{1}.ImagePositionPatient(1) +
+        %             Rref.ImageExtentInWorldX ];
+        % Ylimits = [ atRefMetaData{1}.ImagePositionPatient(2), ...
+        %             atRefMetaData{1}.ImagePositionPatient(2) +
+        %             Rref.ImageExtentInWorldY ];
+        % Zlimits = [ atRefMetaData{1}.ImagePositionPatient(3), ...
+        %             atRefMetaData{1}.ImagePositionPatient(3) +
+        %             Rref.ImageExtentInWorldZ ];
+        % 
+        % Rout = imref3d( dimsRef, ...
+        %                Xlimits, ... Ylimits, ... Zlimits );
+        
+        [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
     else
         [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
     end
@@ -82,11 +123,12 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
     dimsRsp = size(resampImage);
 
     if dRefOutputView == true
+
         if dimsRsp(1)~=dimsRef(1) || ...
            dimsRsp(2)~=dimsRef(2) || ...     
            dimsRsp(3)~=dimsRef(3)
 
-            resampImage=imresize3(resampImage, [dimsRef(1) dimsRef(2) dimsRef(3)],'Method', 'nearest');
+            resampImage = imresize3(resampImage, [dimsRef(1) dimsRef(2) dimsRef(3)],'Method', 'nearest');
 %            dimsRsp = size(resampImage);
         end
     end

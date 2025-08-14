@@ -132,7 +132,8 @@
     
     initGate3DObject('set', true);        
    
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, 'Error:display3DVoiCallback()');                
     end
 

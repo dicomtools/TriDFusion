@@ -33,12 +33,12 @@ function setColorbarPosition(ptrColorbar)
 
     if isFusion('get')
 
-        aAxePosition = ptrColorbar.Parent.Position;
+        aAxePosition = ptrColorbar.Parent.Parent.Position;
         if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
 
             dXoffset = aAxePosition(3)-48;
             dYoffset = (aAxePosition(4)/2)-9;
-            dXsize   = 40;
+            dXsize   = 45;
             dYsize   = (aAxePosition(4)/2)+5;                
         else  
             if isVsplash('get') == true && ...
@@ -50,12 +50,12 @@ function setColorbarPosition(ptrColorbar)
 
                         dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
                         dYoffset = (aAxePosition(4)/2);
-                        dXsize   = 40;
+                        dXsize   = 45;
                         dYsize   = (aAxePosition(4)/2)-4; 
                     else
                         dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
                         dYoffset = 7+24;
-                        dXsize   = 40;
+                        dXsize   = 45;
                         dYsize   = aAxePosition(4)-11-24;                       
                     end
 
@@ -65,12 +65,12 @@ function setColorbarPosition(ptrColorbar)
 
                         dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
                         dYoffset = (aAxePosition(4)/2);
-                        dXsize   = 40;
+                        dXsize   = 45;
                         dYsize   = (aAxePosition(4)/2)-4; 
                     else
                         dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
                         dYoffset = 7+24;
-                        dXsize   = 40;
+                        dXsize   = 45;
                         dYsize   = aAxePosition(4)-11-24;                   
                     end
 
@@ -80,12 +80,12 @@ function setColorbarPosition(ptrColorbar)
 
                         dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
                         dYoffset = (aAxePosition(4)/2);
-                        dXsize   = 40;
+                        dXsize   = 45;
                         dYsize   = (aAxePosition(4)/2)-4;                     
                     else
                         dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
                         dYoffset = 7+24;
-                        dXsize   = 40;
+                        dXsize   = 45;
                         dYsize   = aAxePosition(4)-11-24;                       
                     end
                       
@@ -94,12 +94,12 @@ function setColorbarPosition(ptrColorbar)
                   
                         dXoffset = aAxePosition(3)-48;
                         dYoffset = aAxePosition(4)/2;
-                        dXsize   = 40;
+                        dXsize   = 45;
                         dYsize   = (aAxePosition(4)/2)-4; 
                     else
                         dXoffset = aAxePosition(3)-48;
                         dYoffset = 7+24;
-                        dXsize   = 40;
+                        dXsize   = 45;
                         dYsize   = aAxePosition(4)-11-24;                          
                     end
 
@@ -110,23 +110,23 @@ function setColorbarPosition(ptrColorbar)
 
                     dXoffset = aAxePosition(3)-48;
                     dYoffset = aAxePosition(4)/2;
-                    dXsize   = 40;                    
+                    dXsize   = 45;                    
                     dYsize   = (aAxePosition(4)/2)-4;                
                 else
                     dXoffset = aAxePosition(3)-48;
                     dYoffset = 7+24;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = aAxePosition(4)-11-24;                 
                 end
             end
         end        
     else
-        aAxePosition = ptrColorbar.Parent.Position;
+        aAxePosition = ptrColorbar.Parent.Parent.Position;
         if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
 
             dXoffset = aAxePosition(3)-48;
             dYoffset = 7;
-            dXsize   = 40;
+            dXsize   = 45;
             dYsize   = aAxePosition(4)-11; 
                     
         else  
@@ -137,38 +137,38 @@ function setColorbarPosition(ptrColorbar)
 
                     dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
                     dYoffset = 7;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = aAxePosition(4)-11;
 
                 elseif viewKernelPanel('get') == true 
 
                     dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
                     dYoffset = 7;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = aAxePosition(4)-11;
 
                 elseif viewRoiPanel('get') == true 
 
                     dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
                     dYoffset = 7;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = aAxePosition(4)-11;                        
                 else
                     dXoffset = aAxePosition(3)-48;
                     dYoffset = 7;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = aAxePosition(4)-11;  
                 end
             else  
                 dXoffset = aAxePosition(3)-48;
                 dYoffset = 7;
-                dXsize   = 40;
+                dXsize   = 45;
                 dYsize   = aAxePosition(4)-11; 
             end
         end
-    end
+    end   
 
-    set(ptrColorbar, ...
+    set(ptrColorbar.Parent, ...
         'Position', [dXoffset, ...            
                      dYoffset, ...
                      dXsize, ...
@@ -178,6 +178,13 @@ function setColorbarPosition(ptrColorbar)
     axeColorbar = axeColorbarPtr('get');
     if ~isempty(axeColorbar)
 
-        set(axeColorbar, 'Position', get(ptrColorbar, 'Position'));
-    end                  
+        set(axeColorbar, ...
+            'Position', [dXoffset, ...            
+                         dYoffset, ...
+                         dXsize, ...
+                         dYsize] ...   
+           );
+    end  
+
+    % drawnow;
 end

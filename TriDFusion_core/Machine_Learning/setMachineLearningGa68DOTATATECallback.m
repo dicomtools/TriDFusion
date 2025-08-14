@@ -68,6 +68,8 @@ function setMachineLearningGa68DOTATATECallback(hObject, ~)
                            );
             end
 
+            setObjectIcon(dlgGa68DOTATATE);
+
             axeAIGa68DOTATATE = ...
                axes(dlgGa68DOTATATE, ...
                      'Units'   , 'pixels', ...
@@ -78,8 +80,9 @@ function setMachineLearningGa68DOTATATECallback(hObject, ~)
                      'ZColor'  , viewerForegroundColor('get'),...
                      'Visible' , 'off'...
                      );
-           axeAIGa68DOTATATE.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-           axeAIGa68DOTATATE.Toolbar.Visible = 'off';
+           axeAIGa68DOTATATE.Interactions = [];
+           % axeAIGa68DOTATATE.Toolbar.Visible = 'off';
+           deleteAxesToolbar(axeAIGa68DOTATATE);
            disableDefaultInteractivity(axeAIGa68DOTATATE);
 
            % Other Organs

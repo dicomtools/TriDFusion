@@ -27,27 +27,16 @@ function initDcm4che3()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
     checkjava = which('org.dcm4che3.io.DicomInputStream');
+    
     if isempty(checkjava)
         
         sRootPath  = viewerRootPath('get');
         libpath = sprintf('%s/lib/',sRootPath); 
-        
-%        javaaddpath([libpath 'dcm4che-core-3.2.1.jar']);
-%        javaaddpath([libpath 'dcm4che-image-3.2.1.jar']);
-%        javaaddpath([libpath 'dcm4che-imageio-3.2.1.jar']);
-%        javaaddpath([libpath 'dcm4che-net-3.2.1.jar'])
-
-%        javaaddpath([libpath 'slf4j-api-1.6.1.jar']);
-%        javaaddpath([libpath 'slf4j-log4j12-1.6.1.jar']);
-%        javaaddpath([libpath 'log4j-1.2.16.jar']);
-
-
-       javaaddpath([libpath 'dcm4che-core-5.29.0.jar']);        
-       javaaddpath([libpath 'dcm4che-tool-common-5.29.0.jar']);        
-       javaaddpath([libpath 'slf4j-api-1.7.32.jar']);        
-       javaaddpath([libpath 'logback-core-1.2.9.jar']);        
-       javaaddpath([libpath 'commons-cli-1.4.jar']);        
-       
-        
+                    
+        javaaddpath([libpath 'dcm4che-core-5.33.1.jar']);        
+        javaaddpath([libpath 'dcm4che-tool-common-5.33.1.jar']);        
+        javaaddpath([libpath 'slf4j-api-2.0.16.jar']);        
+        javaaddpath([libpath 'logback-core-1.5.12.jar']);        
+        javaaddpath([libpath 'commons-cli-1.9.0.jar']);         
     end
 end

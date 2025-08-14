@@ -56,8 +56,21 @@ function tContours = readDicomContours(sFileName)
 
                         if ~isempty(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData)
                             % Read points
-                            dContourDataSize = numel(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData);
-                            aSegments{j} = reshape(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData, 3, dContourDataSize/3)';
+
+                            contourPath = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j});
+                            contourData = contourPath.ContourData;
+                            dContourDataSize = numel(contourData);
+                            
+                            % Pad if not divisible by 3
+                            remainder = mod(dContourDataSize, 3);
+                            if remainder ~= 0
+                                % Pad with last value repeated, or with zeros
+                                padding = repmat(contourData(end), 1, 3 - remainder)';  % or use zeros(1, 3 - remainder)
+                                contourData = [contourData; padding];  % Safe horizontal concatenation
+                                warning('ContourData at ROI %d, contour %d padded to be divisible by 3.', i, j);
+                            end
+                            
+                            aSegments{j} = reshape(contourData, 3, [])';
                                 
                             if isfield(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}), 'ContourImageSequence')
                                 tContours(i).Referenced.SOP(j).SOPClassUID    = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourImageSequence.Item_1.ReferencedSOPClassUID;

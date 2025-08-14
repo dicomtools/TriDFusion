@@ -1,5 +1,5 @@
-function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
-%function  brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
+function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSeriesOffset)
+%function  brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSeriesOffset)
 %Edit an ROI position from another ROI position.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -37,14 +37,30 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
     xSize = xSize+1;
     ySize = ySize+1;
-
-    hfMask = poly2mask(hf.Position(:,1), hf.Position(:,2), xSize, ySize);
+    % 
+    % hfMask = poly2mask(hf.Position(:,1), hf.Position(:,2), xSize, ySize);
+    % hfPos = round(hf.Position);
+    % hfMask(sub2ind([xSize, ySize], hfPos(:, 2), hfPos(:, 1))) = true;
+    % 
+    % heMask = poly2mask(he.Vertices(:, 1), he.Vertices(:, 2), xSize, ySize);
+    % hePos = round(he.Position);
+    % heMask(sub2ind([xSize, ySize], hePos(:, 2), hePos(:, 1))) = true;
+    
+    % Clamp hfPos
     hfPos = round(hf.Position);
-    hfMask(sub2ind([xSize, ySize], hfPos(:, 2), hfPos(:, 1))) = true;
-
-    heMask = poly2mask(he.Vertices(:, 1), he.Vertices(:, 2), xSize, ySize);
+    hfPos(:,1) = max(1, min(hfPos(:,1), ySize));  % x (columns)
+    hfPos(:,2) = max(1, min(hfPos(:,2), xSize));  % y (rows)
+    
+    hfMask = poly2mask(hf.Position(:,1), hf.Position(:,2), xSize, ySize);
+    hfMask(sub2ind([xSize, ySize], hfPos(:,2), hfPos(:,1))) = true;
+    
+    % Clamp hePos
     hePos = round(he.Position);
-    heMask(sub2ind([xSize, ySize], hePos(:, 2), hePos(:, 1))) = true;
+    hePos(:,1) = max(1, min(hePos(:,1), ySize));  % x
+    hePos(:,2) = max(1, min(hePos(:,2), xSize));  % y
+    
+    heMask = poly2mask(he.Vertices(:,1), he.Vertices(:,2), xSize, ySize);
+    heMask(sub2ind([xSize, ySize], hePos(:,2), hePos(:,1))) = true;
 
     center = he.Center;
 
@@ -60,7 +76,9 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
            if bMATLABReleaseOlderThan2023b == true 
 
-                newMask = imresize(newMask, 3, 'nearest');
+               % newMask = imresize(newMask, 3, 'nearest');
+
+                newMask   = repelem(newMask, 3, 3); % fastest way             
                 [B,~,n,~] = bwboundaries(newMask, 4, 'noholes');
            else
                 [B,~,n,~] = bwboundaries(newMask, 4, 'noholes','TraceStyle', 'pixeledge');
@@ -82,7 +100,18 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
         if isempty(B) || bDeleteRoi == true
 
+            % atRoiInputBak = roiTemplate('get', dSeriesOffset);
+            % atVoiInputBak = voiTemplate('get', dSeriesOffset);
+
             deleteRoiEvents(hf);
+
+            % atRoiInput = roiTemplate('get', dSeriesOffset);
+            % atVoiInput = voiTemplate('get', dSeriesOffset);
+            % 
+            % dUID = generateUniqueNumber(false);
+            % 
+            % roiTemplateEvent('add', dSeriesOffset, atRoiInputBak, atRoiInput, dUID, 2);
+            % voiTemplateEvent('add', dSeriesOffset, atRoiInputBak, atRoiInput, dUID, 2);
 
         else
             if ~isempty(dVoiOffset)
@@ -120,7 +149,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
                  if size(B2{dSecondBoundaryOffset}, 1) > 10
 
-                      addFreehandRoi(he.Parent, [B2{dSecondBoundaryOffset}(:, 2), B2{dSecondBoundaryOffset}(:, 1)], dVoiOffset, hf.Color, sLesionType, dSerieOffset);
+                      addFreehandRoi(he.Parent, [B2{dSecondBoundaryOffset}(:, 2), B2{dSecondBoundaryOffset}(:, 1)], dVoiOffset, hf.Color, sLesionType, dSeriesOffset);
                  end
             else
                 dBoundaryOffset = 1;
@@ -145,7 +174,9 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
         end
     end
-    catch
+
+    catch ME
+        logErrorToFile(ME);
     end
 
     function largestBoundary = getLargestboundary(cBoundaries)
@@ -178,7 +209,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
         % end
     end
 
-    function addFreehandRoi(pAxe, aPosition, dVoiOffset, aColor, sLesionType, dSerieOffset)
+    function addFreehandRoi(pAxe, aPosition, dVoiOffset, aColor, sLesionType, dSeriesOffset)
 
         % pAxe = gca(fiMainWindowPtr('get'));
 
@@ -187,8 +218,10 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
         % if isempty(pAxe)
         %     return;
         % end
+        atRoiInputBak = roiTemplate('get', dSeriesOffset);
+        atVoiInputBak = voiTemplate('get', dSeriesOffset);
 
-        sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+        sRoiTag = num2str(generateUniqueNumber(false));
 
         pRoi = images.roi.Freehand(pAxe, 'Color', aColor,'Position', aPosition, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', roiFaceAlphaValue('get'));
 
@@ -199,7 +232,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
         
         % Add ROI right click menu
 
-        addRoi(pRoi, dSerieOffset, sLesionType);
+        addRoi(pRoi, dSeriesOffset, sLesionType);
         
         addRoiMenu(pRoi);
 
@@ -222,13 +255,15 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
         % 
         % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
+        dUID = generateUniqueNumber(false);
+
+        atRoiInput = roiTemplate('get', dSeriesOffset);
+
         if ~isempty(dVoiOffset)
 
-            atVoiInput = voiTemplate('get', dSerieOffset);
+            atVoiInput = voiTemplate('get', dSeriesOffset);
 
             atVoiInput{dVoiOffset}.RoisTag{end+1} = sRoiTag;
-
-            atRoiInput = roiTemplate('get', dSerieOffset);
 
             % if ~isempty(atRoiInput)
             % 
@@ -252,9 +287,9 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                             sLabel = sprintf('%s (roi %d/%d)', atVoiInput{dVoiOffset}.Label, dRoiNb, dNbTags);
 
                             % Update fields in the structure
-                            atRoiInput{dTagOffset}.Label = sLabel;
-                            atRoiInput{dTagOffset}.Object.Label = sLabel;
-                            atRoiInput{dTagOffset}.ObjectType  = 'voi-roi';
+                            atRoiInput{dTagOffset}.Label           = sLabel;
+                            atRoiInput{dTagOffset}.Object.Label    = sLabel;
+                            atRoiInput{dTagOffset}.ObjectType      = 'voi-roi';
                             atRoiInput{dTagOffset}.Object.UserData = 'voi-roi';
                         end
                     end
@@ -263,8 +298,17 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
             % 
             % end
 
-            roiTemplate('set', dSerieOffset, atRoiInput);
-            voiTemplate('set', dSerieOffset, atVoiInput);
+            voiTemplate('set', dSeriesOffset, atVoiInput);
+
+            voiTemplateEvent('add', dSeriesOffset, atVoiInputBak, atVoiInput, dUID);
+
+            voiTemplateBackup('get', dSeriesOffset, atVoiInput);
         end
+
+        roiTemplate('set', dSeriesOffset, atRoiInput);      
+
+        roiTemplateEvent('add', dSeriesOffset, atRoiInputBak, atRoiInput, dUID, 2);
+        
+        roiTemplateBackup('set', dSeriesOffset, atRoiInput);
     end
 end

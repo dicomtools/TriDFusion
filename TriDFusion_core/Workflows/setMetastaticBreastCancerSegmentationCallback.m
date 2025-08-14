@@ -109,6 +109,8 @@ function setMetastaticBreastCancerSegmentationCallback(hObject, ~)
                        );       
         end
 
+        setObjectIcon(dlgBreastCancerSegmentation);
+
         % SUV threshold
     
             uicontrol(dlgBreastCancerSegmentation,...

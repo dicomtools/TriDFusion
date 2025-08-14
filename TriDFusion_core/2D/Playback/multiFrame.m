@@ -1,5 +1,5 @@
-function multiFrame(mPlay, pAxe)
-%function multiFrame(mPlay, pAxe)
+function multiFrame(mPlay)
+%function multiFrame(mPlay)
 %Play 2D Frames.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -26,117 +26,131 @@ function multiFrame(mPlay, pAxe)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+               
+    persistent t
 
+    % Get selected DICOM series offset
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
+    % Check if data is 3D (must have more than 1 slice)
     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+        progressBar(1, 'Error: Require a 3D Volume');
+        multiFramePlayback('set', false);
 
-        progressBar(1, 'Error: Require a 3D Volume');  
-        multiFramePlayback('set', false);                
-        mPlay.State = 'off';
-        set(uiSeriesPtr('get'), 'Enable', 'on');
-        return;
-    end   
-               
-    while multiFramePlayback('get')                       
+        icon = get(mPlay, 'UserData');
+        set(mPlay, 'CData', icon.default);
         
-        if (pAxe == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
-           (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))
-            
-            dLastSlice = size(dicomBuffer('get'), 1);  
+        set(uiSeriesPtr('get'), 'Enable', 'on');
 
-            dCurrentSlice = sliceNumber('get', 'coronal');
+        % Cleanup existing timer if it exists
+        if ~isempty(t) && isvalid(t)
+            stop(t); delete(t);
+            t = [];
+        end
+        return;
+    end
 
-            if dCurrentSlice < dLastSlice
+    % Toggle playback behavior
+    if multiFramePlayback('get')
 
-                dCurrentSlice = dCurrentSlice +1;
-            else
-                dCurrentSlice = 1;
-            end  
+        % Kill old timer if valid
+        if ~isempty(t) && isvalid(t)
+            stop(t); delete(t);
+        end
 
-            % sliceNumber('set', 'coronal', dCurrentSlice);
+        % Create a new timer
+        t = timer(...
+            'Name', 'multiFramePlayer', ...
+            'ExecutionMode', 'fixedSpacing', ...
+            'Period', multiFrameSpeed('get'), ...
+            'TimerFcn', @timerCallback);
 
-            set(uiSliderCorPtr('get'), 'Value', dCurrentSlice/dLastSlice);
+        start(t);
+    else
+        % If flag turned off, stop and delete existing timer
+        if ~isempty(t) && isvalid(t)
+            stop(t); delete(t);
+            t = [];
+        end
+    end
 
+    % Nested timer callback (has access to persistent `t`)
+    function timerCallback(~, ~)
+
+
+    % Check for playback off
+
+        if ~multiFramePlayback('get')
+            if ~isempty(t) && isvalid(t)
+                stop(t); delete(t); t = [];
+            end
+            return;
+        end
+    
+        % Dynamic speed check 
+        currentPeriod = t.Period;
+        newPeriod = multiFrameSpeed('get');
+    
+        if abs(currentPeriod - newPeriod) > eps
+            % Timer speed changed, so restart timer with new period
+            stop(t);
+            t.Period = newPeriod;
+            start(t);
+            return;  % Avoid double-frame advance in the same tick
+        end
+
+        % Check active view
+        chkCor = chkUiCorWindowSelectedPtr('get');
+        chkSag = chkUiSagWindowSelectedPtr('get');
+        chkTra = chkUiTraWindowSelectedPtr('get');
+
+        vsplashOn   = isVsplash('get');
+        vsplashView = vSplahView('get');
+
+        % Coronal
+        if (vsplashOn && strcmpi(vsplashView, 'coronal')) || ...
+           (~isempty(chkCor) && get(chkCor, 'Value'))
+
+            dLast = size(dicomBuffer('get'), 1);
+            dCur = sliceNumber('get', 'coronal');
+            dCur = mod(dCur, dLast) + 1;
+
+            set(uiSliderCorPtr('get'), 'Value', dCur);
             sliderCorCallback();
 
-        elseif (pAxe == axes2Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false) || ...
-               (isVsplash('get') == true &&  strcmpi(vSplahView('get'), 'sagittal'))
-           
-            dLastSlice = size(dicomBuffer('get'), 2);    
+        % Sagittal
+        elseif (vsplashOn && strcmpi(vsplashView, 'sagittal')) || ...
+               (~isempty(chkSag) && get(chkSag, 'Value'))
 
-            dCurrentSlice = sliceNumber('get', 'sagittal'); 
+            dLast = size(dicomBuffer('get'), 2);
+            dCur = sliceNumber('get', 'sagittal');
+            dCur = mod(dCur, dLast) + 1;
 
-            if dCurrentSlice < dLastSlice
-
-                dCurrentSlice = dCurrentSlice +1;
-            else
-                dCurrentSlice = 1;
-            end   
-            % sliceNumber('set', 'sagittal', dCurrentSlice);
-
-            set(uiSliderSagPtr('get'), 'Value', dCurrentSlice/dLastSlice);
-
+            set(uiSliderSagPtr('get'), 'Value', dCur);
             sliderSagCallback();
 
+        % Axial
+        elseif (vsplashOn && strcmpi(vsplashView, 'axial')) || ...
+               (~isempty(chkTra) && get(chkTra, 'Value'))
 
-        elseif (pAxe == axes3Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false) || ...
-               (isVsplash('get') == true && strcmpi(vSplahView('get'), 'axial'))
-            
-            dLastSlice = size(dicomBuffer('get'), 3);            
+            dLast = size(dicomBuffer('get'), 3);
+            dCur = sliceNumber('get', 'axial') - 1;
 
-            dCurrentSlice = sliceNumber('get', 'axial');
+            if dCur < 1
+                dCur = dLast;
+            end
 
-            if dCurrentSlice >= 1
-
-                dCurrentSlice = dCurrentSlice -1;
-            end        
-
-            if dCurrentSlice == 0
-
-                dCurrentSlice = dLastSlice;
-            end    
-
-            % sliceNumber('set', 'axial', dCurrentSlice);
-
-            dSlider = 1-(dCurrentSlice/dLastSlice);
-
-            set(uiSliderTraPtr('get'), 'Value', dSlider);
-
+            set(uiSliderTraPtr('get'), 'Value', dLast - dCur + 1);
             sliderTraCallback();
 
+        % MIP
         else
-            if isVsplash('get') == false
-                
-                iMipAngleValue = mipAngle('get');
-
-                iMipAngleValue = iMipAngleValue+1;
-
-                if iMipAngleValue > 32
-                    iMipAngleValue = 1;
-                end    
-
-                % mipAngle('set', iMipAngleValue);                    
-
-        %        if iMipAngleValue == 1
-        %            dMipSliderValue = 0;
-        %        else
-        %            dMipSliderValue = mipAngle('get')/32;
-        %        end
-
-        %        set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
-                % plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngleValue);       
-
-                set(uiSliderMipPtr('get'), 'Value', iMipAngleValue/32);
-
+            if ~vsplashOn
+                iVal = mipAngle('get') + 1;
+                if iVal > 32, iVal = 1; end
+                set(uiSliderMipPtr('get'), 'Value', iVal);
                 sliderMipCallback();
             end
         end
-
-        % refreshImages();                        
-
-        pause(multiFrameSpeed('get'));
-        
     end
-
 end

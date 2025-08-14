@@ -67,7 +67,8 @@ function writeDICOMCallback(~, ~)
         try
             exportDicomLastUsedDir = sOutDir;
             save(sMatFile, 'exportDicomLastUsedDir');
-        catch
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
     %        h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
     %        if integrateToBrowser('get') == true
@@ -136,7 +137,8 @@ function writeDICOMCallback(~, ~)
                 bInputIsDicom = true;
             end
         end
-    catch
+    catch ME   
+        logErrorToFile(ME);
     end
 
     if bInputIsDicom == true % Input series is dicom

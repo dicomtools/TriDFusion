@@ -74,7 +74,8 @@ function writeSeriestoNrrdCallback(~, ~)
         try
             exportNrrdLastUsedDir = sOutDir;
             save(sMatFile, 'exportNrrdLastUsedDir');
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
         end
 
@@ -104,7 +105,8 @@ function writeSeriestoNrrdCallback(~, ~)
 
     progressBar(1, sprintf('Export %s completed', sNrrdImagesName));
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         progressBar(1, 'Error:writeDICOMtoNrrdCallback()');
     end
 

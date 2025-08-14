@@ -33,7 +33,10 @@ function deleteRoiEvents(hObject, ~)
 
     atRoiInput = roiTemplate('get', dSeriesOffset);
     atVoiInput = voiTemplate('get', dSeriesOffset);  
-            
+
+    atRoiInputBack = roiTemplate('get', dSeriesOffset);
+    atVoiInputBack = voiTemplate('get', dSeriesOffset);
+
     % Clear it constraint
 
     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSeriesOffset);
@@ -85,74 +88,63 @@ function deleteRoiEvents(hObject, ~)
             end
 
             atRoiInput(dTagOffset) = [];
+            atRoiInput(cellfun(@isempty, atRoiInput)) = [];
            
             roiTemplate('set', dSeriesOffset, atRoiInput);  
+            
+            dUID = generateUniqueNumber(false);
+            roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+
+            % dUID = generateUniqueNumber(false);
+            % 
+            % roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
 
   %          atRoiInput(cellfun(@isempty, atRoiInput)) = [];
 
 
             % Clear roi from voi input template (if exist)
 
-            if ~isempty(atVoiInput)                        
+            if ~isempty(atVoiInput)
 
-                for vo=1:numel(atVoiInput)     
-
-                    dTagOffset = find(contains(atVoiInput{vo}.RoisTag, sRoiTag));
-
-                    if ~isempty(dTagOffset) % tag exist
-
-                        atVoiInput{vo}.RoisTag(dTagOffset) = [];
-                     %   atVoiInput{vo}.RoisTag(cellfun(@isempty, atVoiInput{vo}.RoisTag)) = [];     
-                        if isempty(atVoiInput{vo}.RoisTag)
-
-                            atVoiInput(vo) = [];
-                            break;
-                        else
-                            
-if 0 % Need to improve the operation speed  
-                           if ~isempty(atRoiInput)               
-                
-                                dNbTags = numel(atVoiInput{vo}.RoisTag);
-                
-                                for dRoiNb=1:dNbTags
-                
-                                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{vo}.RoisTag{dRoiNb} );
-                
-                                    if ~isempty(aTagOffset)
-                
-                                        dTagOffset = find(aTagOffset, 1);
-                
-                                        if~isempty(dTagOffset)
-                
-                                            sLabel = sprintf('%s (roi %d/%d)', atVoiInput{vo}.Label, dRoiNb, dNbTags);
-                
-                                            atRoiInput{dTagOffset}.Label = sLabel;
-                                            atRoiInput{dTagOffset}.Object.Label = sLabel;                           
-                                            atRoiInput{dTagOffset}.ObjectType  = 'voi-roi';
-                                       end
-                                    end                 
-                                end
-                            end
-end
+                removeVoiIdx = false(1, numel(atVoiInput)); % Preallocate logical index for removal
+            
+                for vo = 1:numel(atVoiInput)
+                    
+                    roiTags = atVoiInput{vo}.RoisTag;
+            
+                    dTagOffset = find(contains(roiTags, sRoiTag), 1); % Find first match only
+            
+                    if ~isempty(dTagOffset)
+                        
+                        roiTags(dTagOffset) = []; % Remove tag
+                        atVoiInput{vo}.RoisTag = roiTags;
+            
+                        if isempty(roiTags)
+                            removeVoiIdx(vo) = true; % Mark for removal
                         end
                     end
                 end
-
-  %             atVoiInput(cellfun(@isempty, atVoiInput)) = [];
-               roiTemplate('set', dSeriesOffset, atRoiInput);  
-               voiTemplate('set', dSeriesOffset, atVoiInput);                                        
+            
+                % Remove empty VOIs in one step
+                atVoiInput(removeVoiIdx) = [];
+            
+                voiTemplate('set', dSeriesOffset, atVoiInput);
+                voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
             end
 
             % Refresh contour popup
 
             setVoiRoiSegPopup();
 
+            enableUndoVoiRoiPanel();
+
         end
     end
-
-    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+    
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1 && is2DBrush('get') == false
 
         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
     end
 
+    drawnow; % Force refresh
 end

@@ -77,9 +77,9 @@ function importNrrdMaskCallback(~, ~)
         try
             importNrrdLastUsedDir = sPath;
             save(sMatFile, 'importNrrdLastUsedDir');
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-
         end        
         
 %        mainDir('set', sPathName);
@@ -89,16 +89,16 @@ function importNrrdMaskCallback(~, ~)
             setVsplashCallback();
         end
 
-        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
-            
-            link2DMip('set', true);
+        % if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+        % 
+        %     link2DMip('set', true);
+        % 
+        %     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        %     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
+        %     set(btnLinkMipPtr('get'), 'FontWeight', 'bold');            
+        % end
 
-            set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
-            set(btnLinkMipPtr('get'), 'FontWeight', 'bold');            
-        end
-
-        loadNrrdMaskFile(sPath, sFileName); 
+        loadNrrdMaskFile(sPath, sFileName, []); 
 
 %        triangulateImages();
         refreshImages();

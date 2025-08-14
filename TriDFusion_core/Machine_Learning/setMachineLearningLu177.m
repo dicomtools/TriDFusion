@@ -386,13 +386,16 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set fusion
 
     if isFusion('get') == false
 
         set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+        sliderAlphaValue('set', 0.65);
 
         setFusionCallback();
     end
@@ -429,7 +432,8 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dNMSerieOffset, true);
         progressBar( 1 , 'Error: setSegmentationLu177()' );
     end
@@ -471,6 +475,8 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
                        'Toolbar','none'...
                        );
         end
+
+        setObjectIcon(dlgLu177meanSD);
 
         % Normal Liver Mean
 

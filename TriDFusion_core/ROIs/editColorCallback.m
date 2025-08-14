@@ -30,16 +30,16 @@ function editColorCallback(hObject,~)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     aColor = uisetcolor([hObject.UserData.Color],'Select a color');
-    if aColor == 0
+    if isequal(aColor,0)
         return;
     end
-    
-    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
-    
-    if isempty(atRoiInput) 
-        return;        
+
+    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+    if isempty(atRoiInput)
+        return;
     else
-        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );       
+        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );
         dTagOffset = find(aTagOffset, 1);
     end
 
@@ -50,7 +50,7 @@ function editColorCallback(hObject,~)
         atRoiInput{dTagOffset}.Color = aColor;
 
         if isvalid(atRoiInput{dTagOffset}.Object)
-            
+
             atRoiInput{dTagOffset}.Object.Color = aColor;
         end
 
@@ -59,7 +59,7 @@ function editColorCallback(hObject,~)
 
     if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
-        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
     end
 
 end

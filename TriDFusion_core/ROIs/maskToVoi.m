@@ -79,6 +79,7 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                                
             if bPixelEdge == true
                 aSlice = imresize(aSlice,3, 'nearest'); % do not go directly through pixel centers
+                % aSlice = repelem(aSlice, 3, 3); % fastest way             
             end
             
             if exist('sOptions', 'var')
@@ -122,8 +123,11 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
             if ~isempty(maskSlice)
 
                 if strcmpi(sPlane, 'coronal')
+                    
                     sliceNumber('set', 'coronal', mm);
+
                 elseif strcmpi(sPlane, 'sagittal')
+
                     sliceNumber('set', 'sagittal', mm);
                 else
                     sliceNumber('set', 'axial', mm);
@@ -136,7 +140,7 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
 
                 for jj=1:numel(maskSlice)
                     
-                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                    sTag = num2str(generateUniqueNumber(false));
 
                     curentMask = maskSlice(jj);
 
@@ -225,7 +229,8 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
     
     progressBar(1, 'Ready' );      
    
-    catch
+    catch ME
+        logErrorToFile(ME);  
         progressBar(1, 'Error:maskToVoi()');          
     end  
 

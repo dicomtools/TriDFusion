@@ -27,13 +27,23 @@ function multiGate3D(mPlay)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    persistent t currentFrame
+
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
 
         progressBar(1, 'Error: Require a 3D Volume!');
         multiFrame3DPlayback('set', false);
-        mPlay.State = 'off';
+
+        icon = get(mPlay, 'UserData');
+        set(mPlay, 'CData', icon.default);
+
+        % Cleanup existing timer if it exists
+        if ~isempty(t) && isvalid(t)
+            stop(t); delete(t);
+            t = [];
+        end        
         return;
     end
      
@@ -50,7 +60,15 @@ function multiGate3D(mPlay)
 
         progressBar(1, 'Error: Require at least two 3D Volume!');
         multiFrame3DPlayback('set', false);
-        mPlay.State = 'off';
+
+        icon = get(mPlay, 'UserData');
+        set(mPlay, 'CData', icon.default);
+
+        % Cleanup existing timer if it exists
+        if ~isempty(t) && isvalid(t)
+            stop(t); delete(t);
+            t = [];
+        end        
         return;
     end
 
@@ -304,80 +322,21 @@ function multiGate3D(mPlay)
 
         set(uiOneWindowPtr('get'), 'Visible', 'on');
 
-        while multiFrame3DPlayback('get')
-    
-            for tt=1:dNbSeries                
-
-                if ~multiFrame3DPlayback('get')
-                    break;
+        if multiFrame3DPlayback('get')
+            
+            % If timer exists but speed changed, restart it
+            if ~isempty(t) && isvalid(t)
+                if t.Period ~= multiFrame3DSpeed('get')
+                    stop(t); delete(t);
+                    t = createViewerTimer();
+                    start(t);
                 end
-                            
-                if switchToMIPMode('get') == true
-
-                    aAlphamap = get(mipObjBak, 'Alphamap');
-                    aColormap = get(mipObjBak, 'Colormap');
-
-                    set(mipObj{tt}, 'Alphamap', aAlphamap);
-                    set(mipObj{tt}, 'Colormap', aColormap);
-
-                    set(mipObj{tt}, 'Visible', 'on');
-                end
-
-                if switchToIsoSurface('get') == true
-    
-                    dIsosurfaceValue = get(isoObjBak, 'IsosurfaceValue');
-                    aColormap = get(isoObjBak, 'Colormap');
-
-                    set(volObj{tt}, 'IsosurfaceValue', dIsosurfaceValue);
-                    set(volObj{tt}, 'Colormap', aColormap);
-
-                     set(isoObj{tt}, 'Visible', 'on');
-                end
-    
-                if switchTo3DMode('get') == true
-
-                    aAlphamap = get(volObjBak, 'Alphamap');
-                    aColormap = get(volObjBak, 'Colormap');
-
-                    set(volObj{tt}, 'Alphamap', aAlphamap);
-                    set(volObj{tt}, 'Colormap', aColormap);
-
-                    set(volObj{tt}, 'Visible', 'on'); 
-                end
-
-                pause(multiFrame3DSpeed('get'));
-
-                if switchToMIPMode('get') == true
-
-                    set(mipObj{tt}, 'Visible', 'off');
-                end
-
-                if switchToIsoSurface('get') == true
-    
-                     set(isoObj{tt}, 'Visible', 'off'); 
-                end
-    
-                if switchTo3DMode('get') == true
-    
-                     set(volObj{tt}, 'Visible', 'off'); 
-                end
-
+            else
+                t = createViewerTimer();
+                start(t);
             end
-        end
-
-        if switchToMIPMode('get') == true
-
-            set(mipObjBak, 'Visible', 'on'); 
-        end
-
-        if switchToIsoSurface('get') == true
-
-            set(isoObjBak, 'Visible', 'on');
-        end
-
-        if switchTo3DMode('get') == true
-
-            set(volObjBak, 'Visible', 'on');
+        else
+            cleanupTimer();
         end
     else
             
@@ -408,7 +367,7 @@ function multiGate3D(mPlay)
                                           'position', [0 ...
                                                        addOnWidth('get')+30 ...
                                                        getMainWindowSize('xsize')-280 ...
-                                                       getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30]);
+                                                       getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30]);
                 else
                     ui3DWindow{tt} = uipanel(fiMainWindowPtr('get'),...
                                           'Units'   , 'pixels',...
@@ -417,7 +376,7 @@ function multiGate3D(mPlay)
                                           'position', [680 ...
                                                        addOnWidth('get')+30 ...
                                                        getMainWindowSize('xsize')-680 ...
-                                                       getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30]);
+                                                       getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30]);
                 end
     
                 ui3DWindow{tt}.Visible = 'off';
@@ -1445,6 +1404,108 @@ function multiGate3D(mPlay)
         set(btnFusionPtr ('get')   , 'Enable', 'on');
         set(btnLinkMipPtr('get')   , 'Enable', 'on');
         set(uiFusedSeriesPtr('get'), 'Enable', 'on');
+    end
+
+    function t = createViewerTimer()
+        % Initialize index
+        currentFrame = dSeriesOffset;  % first frame            
+        t = timer( ...
+            'Name',          'multiFrame3DViewer', ...
+            'ExecutionMode', 'fixedRate', ...
+            'Period',        multiFrame3DSpeed('get'), ...
+            'TimerFcn',      @onViewerTick);
+    end
+
+
+    function onViewerTick(~, ~)
+        % Show one frame per tick, hide the last one, and stay responsive.
+
+        persistent frameIdx prevIdx
+
+        % Initialize on first tick
+        if isempty(frameIdx)
+            frameIdx = 1;
+            prevIdx  = [];
+        end
+
+        % If stopped, clean up and reset
+        if ~multiFrame3DPlayback('get')
+            cleanupTimer();
+            frameIdx = [];
+            prevIdx  = [];
+            return;
+        end
+
+        % Compute which series index we're at this tick
+        thisIdx = dSeriesOffset + frameIdx - 1;
+
+        % 1) Hide the previous frame immediately
+        if ~isempty(prevIdx)
+            if switchToMIPMode('get')
+                set(mipObj{prevIdx}, 'Visible', 'off');
+            end
+            if switchToIsoSurface('get')
+                set(isoObj{prevIdx}, 'Visible', 'off');
+            end
+            if switchTo3DMode('get')
+                set(volObj{prevIdx}, 'Visible', 'off');
+            end
+        end
+
+        % 2) Show the current frame
+        if switchToMIPMode('get')
+            set(mipObj{thisIdx}, ...
+                'Alphamap', get(mipObjBak, 'Alphamap'), ...
+                'Colormap', get(mipObjBak, 'Colormap'), ...
+                'Visible' , 'on');
+        end
+        if switchToIsoSurface('get')
+            set(isoObj{thisIdx}, ...
+                'IsosurfaceValue', get(isoObjBak, 'IsosurfaceValue'), ...
+                'Colormap'       , get(isoObjBak, 'Colormap'), ...
+                'Visible'        , 'on');
+        end
+        if switchTo3DMode('get')
+            set(volObj{thisIdx}, ...
+                'Alphamap', get(volObjBak, 'Alphamap'), ...
+                'Colormap', get(volObjBak, 'Colormap'), ...
+                'Visible' , 'on');
+        end
+
+        % Give MATLAB a chance to process any UI clicks
+        drawnow;
+
+        % 3) Advance the counters
+        prevIdx  = thisIdx;
+        frameIdx = frameIdx + 1;
+        if frameIdx > dNbSeries
+            frameIdx = 1;
+        end
+    end
+
+    function cleanupTimer()
+
+        if ~isempty(t) && isvalid(t)
+            stop(t); delete(t);
+            t = [];
+        end
+
+
+        if switchToMIPMode('get') == true
+
+            set(mipObjBak, 'Visible', 'on'); 
+        end
+
+        if switchToIsoSurface('get') == true
+
+            set(isoObjBak, 'Visible', 'on');
+        end
+
+        if switchTo3DMode('get') == true
+
+            set(volObjBak, 'Visible', 'on');
+        end
+
     end
 
 end

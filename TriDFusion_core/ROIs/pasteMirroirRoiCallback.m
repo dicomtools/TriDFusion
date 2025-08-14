@@ -40,7 +40,7 @@ function pasteMirroirRoiCallback(~, ~)
     if ~isvalid(ptrRoi)
         return;
     end
-    
+
     pAxe = getAxeFromMousePosition(dSeriesOffset);
 
     if isempty(pAxe)
@@ -53,29 +53,29 @@ function pasteMirroirRoiCallback(~, ~)
 
     [imgHeight, imgWidth, ~] =  size(dicomBuffer('get', [], dSeriesOffset));
 
-    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-    
-            
+    sTag = num2str(generateUniqueNumber(false));
+
+
     switch lower(ptrRoi.Type)
 
         case lower('images.roi.line')
 
             % Obtain the current positions of the line's start and end points
             aLinePosition = ptrRoi.Position; % This returns a 2x2 matrix: [x1, y1; x2, y2]
-            
+
             % Extract the individual coordinates
             x1 = aLinePosition(1,1);
             y1 = aLinePosition(1,2);
             x2 = aLinePosition(2,1);
             y2 = aLinePosition(2,2);
-            
+
             % Calculate the new x-coordinates by mirroring across the image's vertical axis
             newX1 = imgWidth - x1;
             newX2 = imgWidth - x2;
-            
+
             % Set the new positions for the line
             aLinePosition = [newX1, y1; newX2, y2];
-            
+
             pRoi = images.roi.Line(ptrRoi.Parent, ...
                                    'Position'           , aLinePosition, ...
                                    'Color'              , ptrRoi.Color, ...
@@ -83,8 +83,8 @@ function pasteMirroirRoiCallback(~, ~)
                                    'Label'              , ptrRoi.Label, ...
                                    'LabelVisible'       , 'on', ...
                                    'Tag'                , sTag, ...
-                                   'StripeColor'        , ptrRoi.StripeColor, ...                                                                             
-                                   'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...                                      
+                                   'StripeColor'        , ptrRoi.StripeColor, ...
+                                   'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...
                                    'UserData'           , ptrRoi.UserData, ...
                                    'Visible'            , 'on' ...
                                    );
@@ -109,16 +109,16 @@ function pasteMirroirRoiCallback(~, ~)
 
 
         case lower('images.roi.freehand')
-            
+
 %             xOffset = ptrRoi.Position(1,1)-clickedPtX;
 %             yOffset = ptrRoi.Position(1,2)-clickedPtY;
-%             
+%
 %             aFreehandPosition = zeros(numel(ptrRoi.Position(:,1)),2);
 %             aFreehandPosition(:,1) = ptrRoi.Position(:,1) - xOffset;
 %             aFreehandPosition(:,2) = ptrRoi.Position(:,2) - yOffset;
-            
+
             aFreehandPosition = ptrRoi.Position;
-                                                        
+
             % Perform flipping operations
             % Horizontal flip
             aFreehandPosition(:,1) = imgWidth - aFreehandPosition(:,1);
@@ -133,12 +133,12 @@ function pasteMirroirRoiCallback(~, ~)
                                        'FaceSelectable'     , ptrRoi.FaceSelectable, ...
                                        'FaceAlpha'          , ptrRoi.FaceAlpha, ...
                                        'Tag'                , sTag, ...
-                                       'StripeColor'        , ptrRoi.StripeColor, ...                                                                              
-                                       'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...                                          
+                                       'StripeColor'        , ptrRoi.StripeColor, ...
+                                       'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...
                                        'UserData'           , ptrRoi.UserData, ...
                                        'Visible'            , 'on' ...
                                        );
-                                   
+
             pRoi.Waypoints(:) = ptrRoi.Waypoints(:);
 
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
@@ -146,27 +146,27 @@ function pasteMirroirRoiCallback(~, ~)
             addRoiMenu(pRoi);
 
             % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
-            % addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
+            % addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
 
             % voiDefaultMenu(pRoi);
-            % 
+            %
             % roiDefaultMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu, 'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
             % uimenu(pRoi.UIContextMenu, 'Label', 'Clear Waypoints', 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-            % 
+            %
             % constraintMenu(pRoi);
-            % 
+            %
             % cropMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
-            % 
+            %
 
         case lower('images.roi.polygon')
-            
+
 %             xOffset = ptrRoi.Position(1,1)-clickedPtX;
 %             yOffset = ptrRoi.Position(1,2)-clickedPtY;
-%             
+%
 %             aPolygonPosition = zeros(numel(ptrRoi.Position(:,1)),2);
 %             aPolygonPosition(:,1) = ptrRoi.Position(:,1) - xOffset;
 %             aPolygonPosition(:,2) = ptrRoi.Position(:,2) - yOffset;
@@ -187,26 +187,26 @@ function pasteMirroirRoiCallback(~, ~)
                                       'FaceSelectable'     , ptrRoi.FaceSelectable, ...
                                       'FaceAlpha'          , ptrRoi.FaceAlpha, ...
                                       'Tag'                , sTag, ...
-                                      'StripeColor'        , ptrRoi.StripeColor, ...                                                                             
-                                      'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...                                         
+                                      'StripeColor'        , ptrRoi.StripeColor, ...
+                                      'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...
                                       'UserData'           , ptrRoi.UserData, ...
                                       'Visible'            , 'on' ...
                                       );
-                                  
+
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
             addRoiMenu(pRoi);
- 
+
             % voiDefaultMenu(pRoi);
-            % 
+            %
             % roiDefaultMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-            % 
+            %
             % constraintMenu(pRoi);
-            % 
+            %
             % cropMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
         case lower('images.roi.circle')
@@ -228,8 +228,8 @@ function pasteMirroirRoiCallback(~, ~)
                                      'FaceSelectable'     , ptrRoi.FaceSelectable, ...
                                      'FaceAlpha'          , ptrRoi.FaceAlpha, ...
                                      'Tag'                , sTag, ...
-                                     'StripeColor'        , ptrRoi.StripeColor, ...                                                                             
-                                     'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...                                           
+                                     'StripeColor'        , ptrRoi.StripeColor, ...
+                                     'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...
                                      'UserData'           , ptrRoi.UserData, ...
                                      'Visible'            , 'on' ...
                                      );
@@ -237,18 +237,18 @@ function pasteMirroirRoiCallback(~, ~)
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
             addRoiMenu(pRoi);
-            
+
             % voiDefaultMenu(pRoi);
-            % 
+            %
             % roiDefaultMenu(pRoi);
-            % 
+            %
             % constraintMenu(pRoi);
-            % 
+            %
             % cropMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
-            % 
-            
+            %
+
         case lower('images.roi.ellipse')
 
             aEclipsePosition = ptrRoi.Position;
@@ -271,7 +271,7 @@ function pasteMirroirRoiCallback(~, ~)
                                       'FaceAlpha'          , ptrRoi.FaceAlpha, ...
                                       'Tag'                , sTag, ...
                                       'StripeColor'        , ptrRoi.StripeColor, ...
-                                      'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...                                      
+                                      'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...
                                       'FixedAspectRatio'   , ptrRoi.FixedAspectRatio, ...
                                       'UserData'           , ptrRoi.UserData, ...
                                       'Visible'            , 'on' ...
@@ -280,30 +280,30 @@ function pasteMirroirRoiCallback(~, ~)
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
             addRoiMenu(pRoi);
-         
+
             % voiDefaultMenu(pRoi);
-            % 
+            %
             % roiDefaultMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-            % 
+            %
             % constraintMenu(pRoi);
-            % 
+            %
             % cropMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
-            % 
-            
+            %
+
             if strcmpi(pRoi.UserData, 'Sphere')
 
                 atRoi = roiTemplate('get', dSeriesOffset);
                 atVoi = voiTemplate('get', dSeriesOffset);
-                
+
                 aRoiTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {ptrRoi.Tag} );
-                dFirstRoiOffset = find(aRoiTagOffset, 1); 
-                
+                dFirstRoiOffset = find(aRoiTagOffset, 1);
+
                 if ~isempty(dFirstRoiOffset)
-                    
+
                     for vv=1:numel(atVoi)
 
                         pRoisTag   = atVoi{vv}.RoisTag;
@@ -312,7 +312,7 @@ function pasteMirroirRoiCallback(~, ~)
                         if find(aTagOffset, 1) % Found sphere
 
                             asTag{1} = sTag;
-                            
+
                             switch lower(atRoi{dFirstRoiOffset}.Axe)
 
                                 case 'axe'
@@ -331,9 +331,9 @@ function pasteMirroirRoiCallback(~, ~)
                                     sPlane = 'axial';
                                     dLastSlice = size(dicomBuffer('get'), 3);
                             end
-                            
+
                             dInitalRoiOffset = sliceNumber('get', sPlane);
-                            
+
                             for rr=1:numel(pRoisTag)
 
                                 if strcmp(pRoisTag{rr}, ptrRoi.Tag)
@@ -341,22 +341,22 @@ function pasteMirroirRoiCallback(~, ~)
                                 end
 
                                 aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), pRoisTag(rr) );
-                                dVoiRoiTagOffset = find(aTagOffset, 1);      
+                                dVoiRoiTagOffset = find(aTagOffset, 1);
 
                                 if ~isempty(dVoiRoiTagOffset)
 
                                     dSliceOffset =   atRoi{dFirstRoiOffset}.SliceNb - atRoi{dVoiRoiTagOffset}.SliceNb;
-                                    
+
                                     dSliceNumber = dInitalRoiOffset-dSliceOffset;
-                                    
+
                                     if dSliceNumber > dLastSlice || ...
-                                       dSliceNumber < 1 
+                                       dSliceNumber < 1
                                         continue;
                                     end
-                                    
-                                    sliceNumber('set', sPlane, dSliceNumber);                
 
-                                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                                    sliceNumber('set', sPlane, dSliceNumber);
+
+                                    sTag = num2str(generateUniqueNumber(false));
 
                                     a = images.roi.Ellipse(pAxe, ...
                                                            'Center'             , pRoi.Center, ...
@@ -379,37 +379,37 @@ function pasteMirroirRoiCallback(~, ~)
 
                                     addRoi(a, dSeriesOffset, 'Unspecified');
 
-                                    asTag{numel(asTag)+1} = sTag;    
+                                    asTag{numel(asTag)+1} = sTag;
 
-                                end   
+                                end
 
                             end
                         end
-                        
+
                         createVoiFromRois(dSeriesOffset, asTag, sprintf('Sphere %s mm', num2str(atRoi{dFirstRoiOffset}.MaxDistances.MaxXY.Length)), ptrRoi.Color, 'Unspecified');
 
                         setVoiRoiSegPopup();
 
                         sliceNumber('set', sPlane, dInitalRoiOffset);
-                        
+
                         break;
-                    end   
+                    end
                 end
             end
-                
+
 
         case lower('images.roi.rectangle')
-                        
+
             aRectanglePosition = ptrRoi.Position;
 
             x = aRectanglePosition(1);
             y = aRectanglePosition(2);
             w = aRectanglePosition(3);
             h = aRectanglePosition(4);
-            
+
             % Calculate the new X position for horizontal flip
             newX = imgWidth - x - w;
-            
+
             % Update the rectangle's position
             aRectanglePosition = [newX, y, w, h];
 
@@ -425,39 +425,39 @@ function pasteMirroirRoiCallback(~, ~)
                                         'FaceSelectable'     , ptrRoi.FaceSelectable, ...
                                         'FaceAlpha'          , ptrRoi.FaceAlpha, ...
                                         'Tag'                , sTag, ...
-                                        'StripeColor'        , ptrRoi.StripeColor, ...                                                                             
-                                        'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...                                           
+                                        'StripeColor'        , ptrRoi.StripeColor, ...
+                                        'InteractionsAllowed', ptrRoi.InteractionsAllowed, ...
                                         'FixedAspectRatio'   , ptrRoi.FixedAspectRatio, ...
                                         'UserData'           , ptrRoi.UserData, ...
                                         'Visible'            , 'on' ...
                                         );
 
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
-            
+
             addRoiMenu(pRoi);
 
             % voiDefaultMenu(pRoi);
-            % 
+            %
             % roiDefaultMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-            % 
+            %
             % constraintMenu(pRoi);
-            % 
+            %
             % cropMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
-            % 
+            %
 
         otherwise
             return;
     end
-    
+
     if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
-        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
     end
-            
+
 %    setVoiRoiSegPopup();
 
 

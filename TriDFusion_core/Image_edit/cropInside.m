@@ -69,4 +69,4 @@ function imBuffer = cropInside(aMask, imBuffer, dSliceNumber, sAxe)
             imBuffer(:,:,dSliceNumber) = b;                
         end
     end
-    
+end

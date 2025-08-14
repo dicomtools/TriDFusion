@@ -93,7 +93,8 @@ function tMaxDistances = computeVoiPlanesFarthestPoint(pVoi, atRoi, atMetaData, 
         for jj=1:numel(aIndicesCoronal)
 
             imCData = permute(a3DMmask(aIndicesCoronal(jj),:,:), [3 2 1]);
-            imCData = imresize(imCData , PIXEL_EDGE_RATIO, 'nearest');
+            %imCData = imresize(imCData , PIXEL_EDGE_RATIO, 'nearest');
+            imCData = repelem(imCData, PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way             
 
             boundaries = bwboundaries(imCData, 8, 'noholes');
 
@@ -159,7 +160,8 @@ function tMaxDistances = computeVoiPlanesFarthestPoint(pVoi, atRoi, atMetaData, 
         for jj=1:numel(aIndicesSagittal)
 
             imCData = permute(a3DMmask(:,aIndicesSagittal(jj),:), [3 1 2]);
-            imCData = imresize(imCData , PIXEL_EDGE_RATIO, 'nearest');
+            %imCData = imresize(imCData , PIXEL_EDGE_RATIO, 'nearest');
+            imCData = repelem(imCData, PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way             
 
             boundaries = bwboundaries(imCData, 8, 'noholes');
 
@@ -225,7 +227,8 @@ function tMaxDistances = computeVoiPlanesFarthestPoint(pVoi, atRoi, atMetaData, 
         for jj=1:numel(aIndicesAxial)
 
             imCData = a3DMmask(:,:,aIndicesAxial(jj));
-            imCData = imresize(imCData , PIXEL_EDGE_RATIO, 'nearest');
+            %imCData = imresize(imCData , PIXEL_EDGE_RATIO, 'nearest');
+            imCData = repelem(imCData, PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way             
 
             boundaries = bwboundaries(imCData, 8, 'noholes');
 

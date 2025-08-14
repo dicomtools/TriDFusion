@@ -117,7 +117,8 @@ function multiFrameScreenCapture(mPlay)
                     end
                 end
             end
-        catch
+        catch ME   
+            logErrorToFile(ME);
         end
     end
 

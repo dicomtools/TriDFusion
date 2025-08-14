@@ -27,127 +27,135 @@ function plotRotatedRoiOnMip(axesPtr, im, iMipAngle)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if size(im, 3) == 1
+ 
+    % Only for 3D volumes
+    if size(im,3) == 1
         return;
     end
 
+    % Fetch current ROIs *and* any stored patch‐handles
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    ptrPlot     = plotMipPtr('get');
 
-    ptrPlot = plotMipPtr('get');
-    if ~isempty(ptrPlot)
-        for pp=1:numel(ptrPlot)
-            delete(ptrPlot{pp});
+    % If there are no ROIs, delete *all* existing patches and clear the pointer
+    if isempty(atRoiInput)
+        if ~isempty(ptrPlot)
+            for k = 1:numel(ptrPlot)
+                if isgraphics(ptrPlot{k})
+                    delete(ptrPlot{k});
+                end
+            end
+            plotMipPtr('set', {});    % clear out the stored handles
+        end
+        return;
+    end
+
+    % Number of ROIs now
+    N = numel(atRoiInput);
+
+    % --- synchronize the patch‐handle list to exactly N entries ---
+    if isempty(ptrPlot)
+        ptrPlot = cell(N,1);
+    elseif numel(ptrPlot) < N
+        ptrPlot(end+1:N) = {[]};
+    elseif numel(ptrPlot) > N
+        % delete any extras
+        for k = N+1:numel(ptrPlot)
+            if isgraphics(ptrPlot{k})
+                delete(ptrPlot{k});
+            end
+        end
+        ptrPlot = ptrPlot(1:N);
+    end
+
+    % Make sure there’s a valid patch object for each ROI
+    for rr = 1:N
+        if isempty(ptrPlot{rr}) || ~isgraphics(ptrPlot{rr})
+            ptrPlot{rr} = patch(axesPtr, ...
+                                'XData',     NaN, ...
+                                'YData',     NaN, ...
+                                'EdgeColor', 'none', ...
+                                'FaceColor', 'none', ...
+                                'Visible',   'off');
         end
     end
 
-    if isempty(atRoiInput)
-        return;
+    % Show or hide based on UI setting
+    if contourVisibilityRoiPanelValue('get')
+        sVisible = 'on';
+    else
+        sVisible = 'off';
     end
 
-    ptrPlot = cell(numel(atRoiInput), 1);
+    % Prepare axes for batch update
+    wasHeld = ishold(axesPtr);
+    set(axesPtr, 'NextPlot', 'add');
 
-    for rr=1:numel(atRoiInput)
+    % Precompute rotation about image center
+    rotationAngle = 360 - ((iMipAngle - 1) * 11.25);
+    theta         = deg2rad(rotationAngle);
+    Rz            = [cos(theta), -sin(theta); sin(theta), cos(theta)];
+    centerXY      = [size(im,2), size(im,1)]/2;
+    alph          = mipFaceAlphaValue('get');
 
+    % Loop over each ROI and update its patch
+    for rr = 1:N
         currentRoi = atRoiInput{rr};
 
+        % --- get 2D boundary vertices in its native view ---
         switch lower(currentRoi.Type)
-                        
-            case {'images.roi.rectangle', ...
-                  'images.roi.circle'}
-    
-                switch lower(currentRoi.Axe)    
-                    
-                    case 'axe'
-                        aSlice = im(:,:); 
-                        
-                    case 'axes1'
-                        aSlice = permute(im(currentRoi.SliceNb,:,:), [3 2 1]);
-                        
-                    case 'axes2'
-                        aSlice = permute(im(:,currentRoi.SliceNb,:), [3 1 2]);
-                        
-                    case 'axes3'
-                        aSlice  = im(:,:,currentRoi.SliceNb);  
-                        
-                    otherwise   
-                        continue;
-                end
-    
-                 xy = currentRoi.Vertices;
-                 aLogicalMask = poly2mask(xy(:, 1), xy(:, 2), size(aSlice,1), size(aSlice,2));
-    
-                roiCoords = bwboundaries(aLogicalMask);                                    
-                roiCoords = roiCoords{1};
-    
-            case lower('images.roi.ellipse')
-                          
-                roiCoords = currentRoi.Vertices;
-                                                                      
+            case {'images.roi.rectangle','images.roi.circle','images.roi.ellipse'}
+                roiCoords2d = currentRoi.Vertices;
             otherwise
-    
-                roiCoords = currentRoi.Position;
-        end 
+                roiCoords2d = currentRoi.Position;
+        end
 
-        % Calculate the rotation angle for this MIP slice based on iMipAngle
-        rotationAngle = 360 - ((iMipAngle - 1) * 11.25);  % Angle in degrees, matching the MIP
-        
-        % Convert the rotation angle to radians
-        theta = deg2rad(rotationAngle);
-                
+        % Map those 2D coords into 3D (X,Y,Z) based on which plane
         switch lower(currentRoi.Axe)
-
             case 'axes1'
-                continue;
-
+                X = roiCoords2d(:,1);
+                Y = currentRoi.SliceNb * ones(size(X));
+                Z = roiCoords2d(:,2);
             case 'axes2'
-                continue;
-
+                X = currentRoi.SliceNb * ones(size(roiCoords2d,1),1);
+                Y = roiCoords2d(:,1);
+                Z = roiCoords2d(:,2);
             case 'axes3'
-
-                % Define the center of rotation (typically the center of the image, adjust if necessary)
-                center = [size(im, 2), size(im, 1)] / 2;  % [cols, rows] - adjust to the center of your image
-
-                % Create the 2D rotation matrix (assuming rotation around the Z-axis)
-                Rz = [cos(theta), -sin(theta);
-                      sin(theta),  cos(theta)];
-                
-                % Adjust the ROI coordinates by rotating them around the center
-                shiftedCoords = roiCoords - center;            % Shift ROI coordinates to the center
-                rotatedCoords = (Rz * shiftedCoords')';        % Apply the rotation matrix
-                finalCoords = rotatedCoords + center;          % Shift back to the original position
-                
-                % Extract the X and Y coordinates for plotting
-                rotatedX = finalCoords(:, 1);  % X coordinates after rotation
-                rotatedY = finalCoords(:, 2);  % Y coordinates after rotation
-    
-                rotatedY(:) = currentRoi.SliceNb;
-        end
-        
-        % Plot the rotated ROI on the MIP 
-        hold(axesPtr, 'on');  % Retain the current MIP image
-        
-        if contourVisibilityRoiPanelValue('get') == true
-            sVisible = 'on';
-        else
-            sVisible = 'off';
+                X = roiCoords2d(:,1);
+                Y = roiCoords2d(:,2);
+                Z = currentRoi.SliceNb * ones(size(X));
+            otherwise
+                continue;
         end
 
-        ptrPlot{rr} = patch(axesPtr, ...
-                            'XData', rotatedX, ...
-                            'YData', rotatedY, ...
-                            'EdgeColor', atRoiInput{rr}.Color, ...
-                            'FaceColor', atRoiInput{rr}.Color, ...
-                            'LineWidth', atRoiInput{rr}.LineWidth, ...
-                            'EdgeAlpha', roiFaceAlphaValue('get'), ...
-                            'FaceAlpha', roiFaceAlphaValue('get'), ...
-                            'Visible'  , sVisible ...
-                           );
+        % Rotate around the center
+        ptsXY     = [X - centerXY(1), Y - centerXY(2)];
+        fc        = (Rz * ptsXY')';
+        rotX      = fc(:,1) + centerXY(1);
+        rotY      = Z;
 
-        hold(axesPtr, 'off');  % Release the hold on the axes
+        % Apply to the patch‐object
+        h = ptrPlot{rr};
+        set(h, ...
+            'XData',     rotX, ...
+            'YData',     rotY, ...
+            'EdgeColor', currentRoi.Color, ...
+            'FaceColor', currentRoi.Color, ...
+            'LineWidth', currentRoi.LineWidth, ...
+            'EdgeAlpha', alph, ...
+            'FaceAlpha', alph, ...
+            'Visible',   sVisible);
     end
 
-    ptrPlot = ptrPlot(~cellfun(@isempty, ptrPlot));
+    % Restore axes state
+    set(axesPtr, 'NextPlot', 'replacechildren');
+    if ~wasHeld
+        hold(axesPtr, 'off');
+    end
 
+    % Force a single redraw
+    % drawnow limitrate;
+
+    % Save back the updated list of handles
     plotMipPtr('set', ptrPlot);
-
 end

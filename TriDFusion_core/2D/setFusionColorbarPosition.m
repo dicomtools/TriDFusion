@@ -31,12 +31,12 @@ function setFusionColorbarPosition(ptrFusionColorbar)
     uiKernelMainPanel = uiKernelMainPanelPtr('get');
     uiRoiMainPanel    = uiRoiMainPanelPtr('get');
 
-    aAxePosition = ptrFusionColorbar.Parent.Position;
+    aAxePosition = ptrFusionColorbar.Parent.Parent.Position;
     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
 
         dXoffset = aAxePosition(3)-48;
         dYoffset = 30;
-        dXsize   = 40;
+        dXsize   = 45;
         dYsize   = ((aAxePosition(4))/2)-53; 
 
     else
@@ -48,12 +48,12 @@ function setFusionColorbarPosition(ptrFusionColorbar)
                 if keyPressFusionStatus('get') == 1
                     dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
                     dYoffset = 7+24;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = aAxePosition(4)-11-24;                   
                 else
                     dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
                     dYoffset = 30;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = ((aAxePosition(4))/2)-44; 
                 end
             elseif viewKernelPanel('get') == true 
@@ -61,12 +61,12 @@ function setFusionColorbarPosition(ptrFusionColorbar)
                 if keyPressFusionStatus('get') == 1
                     dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
                     dYoffset = 7+24;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = aAxePosition(4)-11-24;                      
                 else
                     dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
                     dYoffset = 30;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = ((aAxePosition(4))/2)-44; 
                 end
             elseif viewRoiPanel('get') == true 
@@ -74,24 +74,24 @@ function setFusionColorbarPosition(ptrFusionColorbar)
                 if keyPressFusionStatus('get') == 1
                     dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
                     dYoffset = 7+24;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = aAxePosition(4)-11-24;                   
                 else
                     dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
                     dYoffset = 30;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = ((aAxePosition(4))/2)-44;
                 end 
             else
                 if keyPressFusionStatus('get') == 1
                     dXoffset = aAxePosition(3)-48;
                     dYoffset = 7+24;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = aAxePosition(4)-11-24;                    
                 else
                     dXoffset = aAxePosition(3)-48;
                     dYoffset = 30;
-                    dXsize   = 40;
+                    dXsize   = 45;
                     dYsize   = ((aAxePosition(4))/2)-44;
                 end
             end
@@ -100,18 +100,18 @@ function setFusionColorbarPosition(ptrFusionColorbar)
 
                 dXoffset = aAxePosition(3)-48;
                 dYoffset = 7+24;
-                dXsize   = 40;
+                dXsize   = 45;
                 dYsize   = aAxePosition(4)-11-24;            
             else
                 dXoffset = aAxePosition(3)-48;
                 dYoffset = 30;
-                dXsize   = 40;
+                dXsize   = 45;
                 dYsize   = ((aAxePosition(4))/2)-44;
             end
         end
     end
 
-    set(ptrFusionColorbar, ...
+    set(ptrFusionColorbar.Parent, ...
         'Position', [dXoffset, ...            
                      dYoffset, ...
                      dXsize, ...
@@ -121,6 +121,14 @@ function setFusionColorbarPosition(ptrFusionColorbar)
     axeFusionColorbar = axeFusionColorbarPtr('get');
     if ~isempty(axeFusionColorbar)
         
-        set(axeFusionColorbar, 'Position', get(ptrFusionColorbar, 'Position'));
-    end                   
+        set(axeFusionColorbar, ...
+            'Position', [dXoffset, ...            
+                         dYoffset, ...
+                         dXsize, ...
+                         dYsize] ...   
+           );
+
+    end    
+
+    % drawnow;
 end

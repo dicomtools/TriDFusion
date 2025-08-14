@@ -66,4 +66,5 @@ function imBuffer = cropOutside(aMask, imBuffer, dSliceNumber, sAxe)
             imBuffer(:,:,dSliceNumber) = b;                
         end
     end
+end
     

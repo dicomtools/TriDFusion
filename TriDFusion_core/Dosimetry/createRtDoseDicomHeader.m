@@ -106,6 +106,7 @@ function atRtDoseHeader = createRtDoseDicomHeader(aRtDoseImage, atSeriesHeader, 
     atRtDoseHeader{1}.ImagePositionPatient    = atSeriesHeader{end}.ImagePositionPatient;
     atRtDoseHeader{1}.ImageOrientationPatient = atSeriesHeader{1}.ImageOrientationPatient;
     atRtDoseHeader{1}.FrameOfReferenceUID     = atSeriesHeader{1}.FrameOfReferenceUID;
+    atRtDoseHeader{1}.SliceLocation           = atSeriesHeader{1}.SliceLocation;  
 
     atRtDoseHeader{1}.MediaStorageSOPClassUID    = '1.2.840.10008.5.1.4.1.1.481.2';
     atRtDoseHeader{1}.MediaStorageSOPInstanceUID = '1.2.752.37.54.2728.173529256568938809430198472177006276718';

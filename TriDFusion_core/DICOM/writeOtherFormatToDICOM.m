@@ -165,6 +165,8 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, bRescale)
                             atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.128'; % PT
                         case 'nm'
                             atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.20'; % NM
+                        case 'rtdose'    
+                            atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.481.2'; % RTDOSE
                         otherwise
                             atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.7'; % Secondary Capture
                           
@@ -185,6 +187,8 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, bRescale)
                         atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.128'; % PT
                     case 'nm'
                         atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.20'; % NM
+                    case 'rtdose'
+                        atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.481.2'; % RTDOSE
                     otherwise
                         atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.7'; % Secondary Capture
                       
@@ -286,15 +290,25 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, bRescale)
     f = java.io.File(char(sTmpDir)); % Copy from temp folder to output dir
     dinfo = f.listFiles();                   
     for K = 1 : 1 : numel(dinfo)
+        
         if ~(dinfo(K).isDirectory)
-            copyfile([char(sTmpDir) char(dinfo(K).getName())], char(sWriteDir) );
+            
+            sSrcFile  = fullfile(char(sTmpDir), char(dinfo(K).getName()));
+            sDstFile  = fullfile(char(sWriteDir), char(dinfo(K).getName()));
+            
+            if ~strcmpi(sSrcFile, sDstFile) % File doesn't exist
+
+                copyfile(sSrcFile, sWriteDir);
+            end
+
         end
     end 
     rmdir(char(sTmpDir), 's');    
     
     progressBar(1, sprintf('Export %d files completed %s', ww, char(sWriteDir)));
     
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, sprintf('Error:writeOtherFormatToDICOM(), %s', char(sWriteDir)) );                
     end
     

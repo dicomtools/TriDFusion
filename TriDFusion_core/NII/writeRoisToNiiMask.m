@@ -1,5 +1,5 @@
-function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex)
-%function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex)
+function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bIndex)
+%function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bIndex)
 %Export ROIs To .nii mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -28,7 +28,7 @@ function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomB
 % along with TriDFusion.cIf not, see <http://www.gnu.org/licenses/>.
 
     atInput = inputTemplate('get');
-    if dOffset > numel(atInput)
+    if dSeriesOffset > numel(atInput)
         return;
     end
 
@@ -50,13 +50,13 @@ function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomB
 %         atDicomMeta{sd}.SeriesDescription = sSeriesDescription;
 %     end
 
-    tRoiInput = roiTemplate('get', dOffset);
-    tVoiInput = voiTemplate('get', dOffset);
+    tRoiInput = roiTemplate('get', dSeriesOffset);
+    tVoiInput = voiTemplate('get', dSeriesOffset);
 
     bUseRoiTemplate = false;
     if numel(aInputBuffer) ~= numel(aDicomBuffer)
 
-        tRoiInput = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, tRoiInput, false);
+        [tRoiInput, tVoiInput] = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, tRoiInput, false, tVoiInput, dSeriesOffset);
 
         atDicomMeta  = atInputMeta;
         aDicomBuffer = aInputBuffer;
@@ -243,8 +243,8 @@ function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomB
 %     bInputIsDicom = false;
 %
 %     try
-%         if exist(char(atInput(dOffset).asFilesList{1}), 'file') % Input series is dicom
-%             if isdicom(char(atInput(dOffset).asFilesList{1}))
+%         if exist(char(atInput(dSeriesOffset).asFilesList{1}), 'file') % Input series is dicom
+%             if isdicom(char(atInput(dSeriesOffset).asFilesList{1}))
 %                 bInputIsDicom = true;
 %             end
 %         end
@@ -277,8 +277,14 @@ function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomB
 %         atNiiDicomMeta{1}.PatientAge              = atDicomMeta{1}.PatientAge;
 %         atNiiDicomMeta{1}.PatientBirthDate        = atDicomMeta{1}.PatientBirthDate;
         atNiiDicomMeta{1}.SeriesDescription       = sprintf('MASK-%s', atDicomMeta{1}.SeriesDescription);
-        atNiiDicomMeta{1}.PatientPosition         = atDicomMeta{1}.PatientPosition;
-        atNiiDicomMeta{1}.ImagePositionPatient    = atDicomMeta{end}.ImagePositionPatient;
+        if isfield(atNiiDicomMeta, 'PatientPosition')
+            atNiiDicomMeta{1}.PatientPosition         = atDicomMeta{1}.PatientPosition;
+        end
+        % if isDicomImageFlipped(atDicomMeta)
+        %     atNiiDicomMeta{1}.ImagePositionPatient = atDicomMeta{end}.ImagePositionPatient;
+        % else
+        %     atNiiDicomMeta{1}.ImagePositionPatient = atDicomMeta{1}.ImagePositionPatient;
+        % end
         atNiiDicomMeta{1}.ImageOrientationPatient = atDicomMeta{1}.ImageOrientationPatient;
 %         atNiiDicomMeta{1}.MediaStorageSOPClassUID     = atDicomMeta{1}.MediaStorageSOPClassUID;
 %         atNiiDicomMeta{1}.MediaStorageSOPInstanceUID  = atDicomMeta{1}.MediaStorageSOPInstanceUID;
@@ -300,7 +306,7 @@ function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomB
 %     end
 
 %    if bInputIsDicom == true % Input series is dicom
-%        writeDICOM(aMaskBuffer, atDicomMeta, sDICOMPath, dOffset, false);
+%        writeDICOM(aMaskBuffer, atDicomMeta, sDICOMPath, dSeriesOffset, false);
 %    else % Input series is another format
         writeOtherFormatToDICOM(aMaskBuffer, atNiiDicomMeta, sDICOMPath, false);
 %    end
@@ -315,7 +321,8 @@ function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomB
 
     progressBar(1, sprintf('Export NII mask to %s completed', char(sWriteDir)));
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         progressBar(1, 'Error:writeRoisToNiiMask()');
     end
 

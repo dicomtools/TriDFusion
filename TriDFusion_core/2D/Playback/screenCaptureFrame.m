@@ -125,7 +125,8 @@ function screenCaptureFrame(sDirection)
                 end
             end
         end
-    catch
+    catch ME   
+        logErrorToFile(ME);
     end
 
     cropValue('set', min(dicomBuffer('get', [], dOffset), [], 'all'));

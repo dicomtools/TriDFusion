@@ -69,6 +69,8 @@ function setMachineLearningFDGBrownFatPETFullAICallback(hObject, ~)
                            );    
             end
 
+            setObjectIcon(dlgFDGBrownFatPETFullAISegmentation);
+
             % Trainer with Dice and CE Loss
         
                 uicontrol(dlgFDGBrownFatPETFullAISegmentation,...

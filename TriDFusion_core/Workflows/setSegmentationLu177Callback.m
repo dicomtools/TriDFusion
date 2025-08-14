@@ -61,6 +61,9 @@ function setSegmentationLu177Callback(hObject, ~)
                        'Toolbar','none'...               
                        );
         end
+
+        setObjectIcon(dlgLu177Segmentation);
+
     %     % Boundary percent of max
     % 
     %         uicontrol(dlgLu177Segmentation,...

@@ -27,226 +27,190 @@ function sliderMipCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if size(dicomBuffer('get'), 3) == 1
+    if size(dicomBuffer('get'), 3) == 1 || isVsplash('get')
         return;
     end
 
-    if isVsplash('get') == true
+    hSlider = uiSliderMipPtr('get');
+    if isempty(hSlider)
         return;
     end
 
-    if ~isempty(uiSliderMipPtr('get'))
-
-        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-        dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
-    
-        if get(uiSliderMipPtr('get'), 'Value') >= 0 && ...
-           get(uiSliderMipPtr('get'), 'Value') <= 1     
-            
-        
-            if get(uiSliderMipPtr('get'), 'Value') == 1 
-                iMipAngle = 32;
-            elseif get(uiSliderMipPtr('get'), 'Value') == 0
-                iMipAngle = 1;
-            else
-                iMipAngle = round(get(uiSliderMipPtr('get'), 'Value') * 32);
-                if iMipAngle == 0
-                    iMipAngle = 1;
-                end
-            end        
-         
-            mipAngle('set', iMipAngle);
-            
-            imComputedMip = mipBuffer('get', [], dSeriesOffset);
-            imMip = imMipPtr ('get', [], dSeriesOffset);        
-            imMip.CData = permute(imComputedMip(iMipAngle,:,:), [3 2 1]);
-            
-            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
-    
-            imMipR      = [];
-            imMipG      = [];
-            imMipB      = [];
-    
-            for rr=1:dNbFusedSeries
-    
-               imMf = mipFusionBuffer('get', [], rr);
-    
-               if ~isempty(imMf)
-                    imMipF = imMipFPtr('get', [], rr);
-                    if ~isempty(imMipF)
-    
-                        imMipF.CData = permute(imMf(iMipAngle,:,:), [3 2 1]);
-    
-                        if isCombineMultipleFusion('get') == true
-    
-                            if invertColor('get')
-                                aRedColorMap   = flipud(getRedColorMap());
-                                aGreenColorMap = flipud(getGreenColorMap());
-                                aBlueColorMap  = flipud(getBlueColorMap());
-                            else
-                                aRedColorMap   = getRedColorMap();
-                                aGreenColorMap = getGreenColorMap();
-                                aBlueColorMap  = getBlueColorMap();
-                            end
-    
-                            if colormap(imMipF.Parent) == aRedColorMap
-                                imMipR  = imMipF.CData;
-                            end
-    
-                            if colormap(imMipF.Parent) == aGreenColorMap
-                                imMipG  = imMipF.CData;
-                            end
-    
-                            if colormap(imMipF.Parent) == aBlueColorMap
-                                imMipB  = imMipF.CData;
-                            end
-                        end
-                    end
-                end
-            end
-    
-            if isCombineMultipleFusion('get') == true
-    
-                cData = combineRGB(imMipR, imMipG, imMipB, 'Mip');
-                if ~isempty(cData)
-                    imMipF = imMipFPtr('get', [], dFusionSeriesOffset);
-                    if ~isempty(imMipF)
-                        imMipF.CData = cData;
-                    end
-                end
-            end
-    
-            if isPlotContours('get') == true
-    
-               imMf = squeeze(mipFusionBuffer('get', [], dFusionSeriesOffset));
-               if ~isempty(imMf)
-    
-                    sUnitDisplay = getSerieUnitValue(dFusionSeriesOffset);
-                    if strcmpi(sUnitDisplay, 'SUV')
-
-                        atInputTemplate = inputTemplate('get');
-
-                        tQuantification = quantificationTemplate('get', [], dFusionSeriesOffset);
-                        if atInputTemplate(dFusionSeriesOffset).bDoseKernel == false
-                            if ~isempty(tQuantification)
-                                imMf = imMf*tQuantification.tSUV.dScale;
-                            end
-                        end
-                    end
-    
-                    imMipFc = imMipFcPtr('get', [], dFusionSeriesOffset);
-     
-                    if ~isempty(imMipFc)
-                        imMipFc.ZData  = permute(imMf(iMipAngle,:,:), [3 2 1]);
-                    end
-                end
-            end
-    
-            if overlayActivate('get') == true 
-                
-                sAxeMipText = sprintf('\n%d/32', iMipAngle);                  
-     
-                tAxesMipText = axesText('get', 'axesMip');                                      
-                tAxesMipText.String = sAxeMipText;
-                tAxesMipText.Color  = overlayColor('get');             
-    
-                if      iMipAngle < 5
-                    sMipAngleView = 'Left';
-                elseif iMipAngle > 4 && iMipAngle < 13  
-                    sMipAngleView = 'Posterior';
-                elseif iMipAngle > 12 && iMipAngle < 21  
-                    sMipAngleView = 'Right';
-                elseif iMipAngle > 20 && iMipAngle < 29  
-                    sMipAngleView = 'Anterior';
-                else
-                    sMipAngleView = 'Left';
-                end 
-                
-                tAxesMipViewText = axesText('get', 'axesMipView');                                      
-                tAxesMipViewText.String = sMipAngleView;
-                tAxesMipViewText.Color  = overlayColor('get');              
-            end  
-    
-            if crossActivate('get') == true
-    
-                iCoronal  = sliceNumber('get', 'coronal');
-                iSagittal = sliceNumber('get', 'sagittal');
-                iAxial    = sliceNumber('get', 'axial'   );
-    
-                iCoronalSize  = size(dicomBuffer('get'),1);
-                iSagittalSize = size(dicomBuffer('get'),2);
-                iAxialSize    = size(dicomBuffer('get'),3);
-    
-                alAxesMipLine = axesLine('get', 'axesMip');
-                
-                angle = (iMipAngle - 1) * 11.25; % to rotate 90 counterclockwise
-    
-    % if 0
-    %             if angle >= 0 && angle < 180
-    %                 ratio = (iMipAngle-1) * 0.102;
+    iMipAngle = round(get(hSlider, 'Value'));
+    if iMipAngle < 0 || iMipAngle > 32
+        return;
+    end
     % 
-    %             else
-    %                 ratio = (17*0.102)-(iMipAngle-16)*0.102;
-    %             end
-    % 
-    %             xOffset = (iSagittal * (1 - ratio)) + (iCoronal * ratio)
+    % % Determine the MIP angle
+    % if sliderVal == 1
+    %     iMipAngle = 32;
+    % elseif sliderVal == 0
+    %     iMipAngle = 1;
     % else
-                if angle == 0
-                    xOffset = iSagittal;
-                elseif angle == 90
-                    xOffset = iCoronal;
-                elseif angle == 180
-                    xOffset = iSagittalSize - iSagittal;
-                elseif angle == 270
-                    xOffset = iCoronalSize - iCoronal;
-                else
-                    angleRad = deg2rad(angle);
-                    centerX = iSagittalSize / 2;
-                    centerY = iCoronalSize / 2;
-                    cosAngle = cos(angleRad);
-                    sinAngle = sin(angleRad);
-                    xOffset = (iSagittal - centerX) * cosAngle + (iCoronal - centerY) * sinAngle + centerX;
-                end    
-      
+    %     iMipAngle = max(1, round(sliderVal * 32));
     % end
-    
-                % Set MIP Line 1-5 with found xOffset
-                
-                alAxesMipLine{1}.XData = [xOffset(1), xOffset(1)];
-                alAxesMipLine{1}.YData = [iAxial - 0.5, iAxial + 0.5];
-                
-                alAxesMipLine{2}.XData = [xOffset(1) - 0.5, xOffset(1) + 0.5];
-                alAxesMipLine{2}.YData = [iAxial, iAxial];
-                
-                alAxesMipLine{3}.XData = [0, xOffset(1) - crossSize('get')];
-                alAxesMipLine{3}.YData = [iAxial, iAxial];
-                
-                alAxesMipLine{4}.XData = [xOffset(1) + crossSize('get'), iCoronalSize];
-                alAxesMipLine{4}.YData = [iAxial, iAxial];
-                
-                alAxesMipLine{5}.XData = [xOffset(1), xOffset(1)];
-                alAxesMipLine{5}.YData = [0, iAxial - crossSize('get')];
-                
-                alAxesMipLine{6}.XData = [xOffset(1), xOffset(1)];
-                alAxesMipLine{6}.YData = [iAxial + crossSize('get'), iAxialSize];
-        
-                % if multiFrameRecord('get') == false
-                % 
-                %     if multiFramePlayback('get') == false && ...
-                %        crossActivate('get') == true
-                % 
-                %         for ll=1:numel(alAxesMipLine)
-                %             set(alAxesMipLine{ll}, 'Visible', 'on');
-                %         end
-                %     else
-                %         for ll=1:numel(alAxesMipLine)
-                %             set(alAxesMipLine{ll}, 'Visible', 'off');
-                %         end
-                %     end
-                % end          
-            end 
-    
-            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngle);       
+
+    % Update angle
+    mipAngle('set', iMipAngle);
+
+    dSeriesOffset       = get(uiSeriesPtr('get'), 'Value');
+    dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+
+    % Update base MIP image
+    imComputedMip = mipBuffer('get', [], dSeriesOffset);
+    imMip         = imMipPtr('get', [], dSeriesOffset);
+    imMip.CData   = permute(imComputedMip(iMipAngle, :, :), [3 2 1]);
+
+    % Handle fusion images
+    if isCombineMultipleFusion('get')
+        imMipR = []; imMipG = []; imMipB = [];
+    end
+
+    dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+    for rr = 1:dNbFusedSeries
+        imMf = mipFusionBuffer('get', [], rr);
+        if isempty(imMf)
+            continue;
+        end
+
+        imMipF = imMipFPtr('get', [], rr);
+        if isempty(imMipF)
+            continue;
+        end
+
+        imMipF.CData = permute(imMf(iMipAngle, :, :), [3 2 1]);
+
+        if isCombineMultipleFusion('get')
+            if invertColor('get')
+                redMap   = flipud(getRedColorMap());
+                greenMap = flipud(getGreenColorMap());
+                blueMap  = flipud(getBlueColorMap());
+            else
+                redMap   = getRedColorMap();
+                greenMap = getGreenColorMap();
+                blueMap  = getBlueColorMap();
+            end
+
+            cmap = colormap(imMipF.Parent);
+            if isequal(cmap, redMap)
+                imMipR = imMipF.CData;
+            elseif isequal(cmap, greenMap)
+                imMipG = imMipF.CData;
+            elseif isequal(cmap, blueMap)
+                imMipB = imMipF.CData;
+            end
         end
     end
+
+    % Combine channels if needed
+    if isCombineMultipleFusion('get')
+        cData = combineRGB(imMipR, imMipG, imMipB, 'Mip');
+        if ~isempty(cData)
+            imMipF = imMipFPtr('get', [], dFusionSeriesOffset);
+            if ~isempty(imMipF)
+                imMipF.CData = cData;
+            end
+        end
+    end
+
+    % Overlay contours if active
+
+    if isPlotContours('get')
+        imMf = squeeze(mipFusionBuffer('get', [], dFusionSeriesOffset));
+        if ~isempty(imMf)
+            unit = getSerieUnitValue(dFusionSeriesOffset);
+            if strcmpi(unit, 'SUV')
+                inputTmpl = inputTemplate('get');
+                quantTmpl = quantificationTemplate('get', [], dFusionSeriesOffset);
+                if ~inputTmpl(dFusionSeriesOffset).bDoseKernel && ~isempty(quantTmpl)
+                    imMf = imMf * quantTmpl.tSUV.dScale;
+                end
+            end
+
+            imMipFc = imMipFcPtr('get', [], dFusionSeriesOffset);
+            if ~isempty(imMipFc)
+                imMipFc.ZData = permute(imMf(iMipAngle, :, :), [3 2 1]);
+            end
+        end
+    end
+
+    % Update crosshairs if active
+
+    if crossActivate('get')
+
+        iCoronal  = sliceNumber('get', 'coronal');
+        iSagittal = sliceNumber('get', 'sagittal');
+        iAxial    = sliceNumber('get', 'axial');
+
+        dims = size(dicomBuffer('get'));
+        alAxesMipLine = axesLine('get', 'axesMip');
+
+        angle = (iMipAngle - 1) * 11.25;
+        switch angle
+            case 0
+                xOffset = iSagittal;
+            case 90
+                xOffset = iCoronal;
+            case 180
+                xOffset = dims(2) - iSagittal;
+            case 270
+                xOffset = dims(1) - iCoronal;
+            otherwise
+                theta = deg2rad(angle);
+                xOffset = (iSagittal - dims(2)/2) * cos(theta) + ...
+                          (iCoronal - dims(1)/2) * sin(theta) + dims(2)/2;
+        end
+
+        cSize = crossSize('get');
+        iCorSize = dims(1);
+        iAxiSize = dims(3);
+
+        alAxesMipLine{1}.XData = [xOffset, xOffset];
+        alAxesMipLine{1}.YData = [iAxial - 0.5, iAxial + 0.5];
+
+        alAxesMipLine{2}.XData = [xOffset - 0.5, xOffset + 0.5];
+        alAxesMipLine{2}.YData = [iAxial, iAxial];
+
+        alAxesMipLine{3}.XData = [0, xOffset - cSize];
+        alAxesMipLine{3}.YData = [iAxial, iAxial];
+
+        alAxesMipLine{4}.XData = [xOffset + cSize, iCorSize];
+        alAxesMipLine{4}.YData = [iAxial, iAxial];
+
+        alAxesMipLine{5}.XData = [xOffset, xOffset];
+        alAxesMipLine{5}.YData = [0, iAxial - cSize];
+
+        alAxesMipLine{6}.XData = [xOffset, xOffset];
+        alAxesMipLine{6}.YData = [iAxial + cSize, iAxiSize];
+    end
+
+    % Overlay text
+    if overlayActivate('get')
+
+        sText = sprintf('\n%d/32', iMipAngle);
+        txt   = axesText('get', 'axesMip');
+        txt.String = sText;
+        txt.Color  = overlayColor('get');
+
+        if      iMipAngle < 5
+            sView = 'Left';
+        elseif iMipAngle < 13
+            sView = 'Posterior';
+        elseif iMipAngle < 21
+            sView = 'Right';
+        elseif iMipAngle < 29
+            sView = 'Anterior';
+        else
+            sView = 'Left';
+        end
+
+        viewTxt = axesText('get', 'axesMipView');
+        viewTxt.String = sView;
+        viewTxt.Color  = overlayColor('get');
+    end
+
+    % Plot rotated ROI
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), ...
+                        dicomBuffer('get', [], dSeriesOffset), iMipAngle);
+    refreshImages();
 end

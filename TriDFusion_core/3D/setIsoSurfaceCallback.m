@@ -27,10 +27,13 @@ function setIsoSurfaceCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if numel(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
-       size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+    dSeriesOffset      = get(uiSeriesPtr('get'), 'Value');
+    dFusedSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+
+    if ~isempty(dicomBuffer('get', [], dSeriesOffset)) && ...
+       size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
    
-%        try
+        try
             
         sFusionBtnEnable = get(btnFusionPtr('get'), 'Enable');
         
@@ -45,21 +48,24 @@ function setIsoSurfaceCallback(~, ~)
 
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+        % set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+        set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));
             
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnZoomPtr('get'), 'FontWeight', 'normal');
+        % set(btnZoomPtr('get'), 'FontWeight', 'normal');
+        set(btnZoomPtr('get'), 'CData', resizeTopBarIcon('zoom_grey.png'));
         zoomTool('set', false);
-        zoom(fiMainWindowPtr('get'), 'off');           
+        zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');           
 
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
-        set(btnPanPtr('get'), 'FontWeight', 'normal');
+        % set(btnPanPtr('get'), 'FontWeight', 'normal');
+        set(btnPanPtr('get'), 'CData', resizeTopBarIcon('pan_grey.png'));
         panTool('set', false);
-        pan(fiMainWindowPtr('get'), 'off');     
+        panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');     
 
         set(rotate3DMenu('get'), 'Checked', 'off');         
         rotate3DTool('set', false);
@@ -70,6 +76,7 @@ function setIsoSurfaceCallback(~, ~)
         datacursormode(fiMainWindowPtr('get'), 'off');  
 
         setRoiToolbar('off');
+        setPlotEditToolbar('off');
 
         if multiFramePlayback('get') == true
             multiFramePlayback('set', false);
@@ -137,7 +144,8 @@ function setIsoSurfaceCallback(~, ~)
             
             set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+            % set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+            set(btnIsoSurfacePtr('get'), 'CData', resizeTopBarIcon('3d_iso_grey.png'));
                 
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
@@ -317,43 +325,49 @@ function setIsoSurfaceCallback(~, ~)
                 voi3DEnableList('set', '');
                 voi3DTransparencyList('set', '');
 
-                clearDisplay();
-                initDisplay(3);
+                bFusion = isFusion('get');
+
+                isFusion('set', false);
 
                 link2DMip('set', true);
 
                 set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
                 set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
-                set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
+                % set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
+                set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_white.png'));
+
+                clearDisplay();
+                initDisplay(3);
 
                 dicomViewerCore();
                                 
-                atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+                atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
-                if isFusion('get')
-                    % tFuseInput    = inputTemplate('get');
-                    % iFuseOffset   = get(uiFusedSeriesPtr('get'), 'Value');
-                    % tFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+                if bFusion == true
 
-                    atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                    atFuseMetaData = fusionMetaData('get', [], dFusedSeriesOffset);
 
                     setViewerDefaultColor(true, atMetaData, atFuseMetaData);
+
+                    link2DMip('set', false);
+        
+                    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+                    % set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+                    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
+
+                    setFusionCallback();
                 else
+
                     setViewerDefaultColor(true, atMetaData);
                 end
                 
                 refreshImages();
                 
                 triangulateCallback();
-                
-%                if strcmpi(atMetaData{1}.Modality, 'ct')
-%                    link2DMip('set', false);
-
-%                    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-%                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));         
-%                end 
-                
+                                
                 setRoiToolbar('on');
+                setPlotEditToolbar('on');
                 
                 % Reactivate main tool bar 
                 set(uiSeriesPtr('get'), 'Enable', 'on');                        
@@ -422,16 +436,16 @@ function setIsoSurfaceCallback(~, ~)
                 
             switchToIsoSurface('set', true);            
                         
-            atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+            atMetaData = dicomMetaData('get', [], dSeriesOffset);
             
-            sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+            sSeriesUnit = getSerieUnitValue(dSeriesOffset);
 
             if strcmpi(sSeriesUnit, 'HU') % CT
 
                 % isoSurfaceFusionValue default value is preset
                 % for CT
                 if isoSurfaceValue('get') == defaultIsoSurfaceValue('get') 
-                    isoSurfaceValue('set', ctHUToScalarValue(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 150)/100);
+                    isoSurfaceValue('set', ctHUToScalarValue(dicomBuffer('get', [], dSeriesOffset), 150)/100);
                 end
 
                 % isoColorFusionOffset default color is preset
@@ -443,13 +457,13 @@ function setIsoSurfaceCallback(~, ~)
    
             if isFusion('get') == true % CT
                                 
-                sFusionUnit = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+                sFusionUnit = getSerieUnitValue(dFusedSeriesOffset);
        
                 if strcmpi(sFusionUnit, 'HU')
                     % isoSurfaceFusionValue default value is preset
                     % for CT, for other modality we use the defaultIsoSurfaceValue
                     if isoSurfaceFusionValue('get') == defaultIsoSurfaceFusionValue('get') 
-                        isoSurfaceFusionValue('set', ctHUToScalarValue(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 150)/100);
+                        isoSurfaceFusionValue('set', ctHUToScalarValue(fusionBuffer('get', [], dFusedSeriesOffset), 150)/100);
                     end
 
                     % isoColorFusionOffset default color is preset
@@ -476,7 +490,7 @@ function setIsoSurfaceCallback(~, ~)
 
                 setViewerDefaultColor(false, atMetaData);
 
-                isoObj = initVolShow(squeeze(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface', atMetaData);
+                isoObj = initVolShow(squeeze(dicomBuffer('get', [], dSeriesOffset)), uiOneWindowPtr('get'), 'Isosurface', atMetaData);
 
                 if isempty(viewer3dObject('get'))
                     set(isoObj, 'InteractionsEnabled', true);
@@ -494,7 +508,7 @@ function setIsoSurfaceCallback(~, ~)
                     set(chkPixelEdgeIsoMaskPtr('get'), 'Enable', 'on');
                     set(txtPixelEdgeIsoMaskPtr('get'), 'Enable', 'Inactive' );                     
                     
-                    sUnitDisplay = getSerieUnitValue( get(uiSeriesPtr('get'), 'Value'));                    
+                    sUnitDisplay = getSerieUnitValue( dSeriesOffset);                    
                     if ~strcmpi(sUnitDisplay, 'SUV')
                         percentOfPeakIsoMask('set', true);
                         set(chkPercentOfPeakIsoMaskPtr('get'), 'Enable', 'off');
@@ -542,7 +556,7 @@ function setIsoSurfaceCallback(~, ~)
                             
                             if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD)') % Need a quantified PT or NM
 
-                                sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+                                sSeriesUnit = getSerieUnitValue(dSeriesOffset);
 
                                 if ~strcmpi(sSeriesUnit, 'SUV') 
                                     set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
@@ -562,7 +576,7 @@ function setIsoSurfaceCallback(~, ~)
                                     dCTOffset = isoMaskCtSerieOffset('get');
                                     dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber; 
 
-                                    sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+                                    sSeriesUnit = getSerieUnitValue(dSeriesOffset);
                                     sCTUnit     = getSerieUnitValue(dCTSeriesNumber);
 
                                     if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sCTUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
@@ -580,7 +594,7 @@ function setIsoSurfaceCallback(~, ~)
                                     valueFormulaIsoMask('set', 1);                                    
                                 else    
                                     sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get')     , 'Value'));
-                                    sFusionUnit = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+                                    sFusionUnit = getSerieUnitValue(dFusedSeriesOffset);
 
                                     if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sFusionUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
                                         set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
@@ -631,12 +645,12 @@ function setIsoSurfaceCallback(~, ~)
                     set(btnFusionPtr('get'), 'Enable', 'on');            
                     
                     % tFuseInput     = inputTemplate('get');
-                    % iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
+                    % iFuseOffset    = dFusedSeriesOffset;
                     % atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
-                    atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                    atFuseMetaData = fusionMetaData('get', [], dFusedSeriesOffset);
 
-                    isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
+                    isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFusedSeriesOffset)), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
 
                     if isempty(viewer3dObject('get'))
 
@@ -755,7 +769,7 @@ function setIsoSurfaceCallback(~, ~)
                             set(chkPixelEdgeIsoMaskPtr('get'), 'Enable', 'on');
                             set(txtPixelEdgeIsoMaskPtr('get'), 'Enable', 'Inactive' );   
                     
-                            sUnitDisplay = getSerieUnitValue( get(uiSeriesPtr('get'), 'Value'));                    
+                            sUnitDisplay = getSerieUnitValue( dSeriesOffset);                    
                             if ~strcmpi(sUnitDisplay, 'SUV')
                                 percentOfPeakIsoMask('set', true);
                                 set(chkPercentOfPeakIsoMaskPtr('get'), 'Enable', 'off');
@@ -802,7 +816,7 @@ function setIsoSurfaceCallback(~, ~)
 
                                     if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD)') % Need a quantified PT or NM
 
-                                        sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+                                        sSeriesUnit = getSerieUnitValue(dSeriesOffset);
 
                                         if ~strcmpi(sSeriesUnit, 'SUV') 
                                             set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
@@ -822,7 +836,7 @@ function setIsoSurfaceCallback(~, ~)
                                             dCTOffset = isoMaskCtSerieOffset('get');
                                             dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber; 
 
-                                            sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+                                            sSeriesUnit = getSerieUnitValue(dSeriesOffset);
                                             sCTUnit     = getSerieUnitValue(dCTSeriesNumber);
 
                                             if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sCTUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
@@ -837,7 +851,7 @@ function setIsoSurfaceCallback(~, ~)
    
                                          
                                         sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get')     , 'Value'));
-                                        sFusionUnit = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+                                        sFusionUnit = getSerieUnitValue(dFusedSeriesOffset);
 
                                         if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sFusionUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
                                             set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
@@ -892,9 +906,9 @@ function setIsoSurfaceCallback(~, ~)
                         surface3DPriority('set', 'Isosurface', 2);
                     end
 
-                    atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
-                    isoObj = initVolShow(squeeze(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface', atMetaData);
+                    isoObj = initVolShow(squeeze(dicomBuffer('get', [], dSeriesOffset)), uiOneWindowPtr('get'), 'Isosurface', atMetaData);
 
                     if isempty(viewer3dObject('get'))
                         set(isoObj, 'InteractionsEnabled', false);
@@ -913,7 +927,7 @@ function setIsoSurfaceCallback(~, ~)
                         set(chkPixelEdgeIsoMaskPtr('get'), 'Enable', 'on');
                         set(txtPixelEdgeIsoMaskPtr('get'), 'Enable', 'Inactive' );   
                     
-                        sUnitDisplay = getSerieUnitValue( get(uiSeriesPtr('get'), 'Value'));                    
+                        sUnitDisplay = getSerieUnitValue( dSeriesOffset);                    
                         if ~strcmpi(sUnitDisplay, 'SUV')
                             percentOfPeakIsoMask('set', true);
                             set(chkPercentOfPeakIsoMaskPtr('get'), 'Enable', 'off');
@@ -961,7 +975,7 @@ function setIsoSurfaceCallback(~, ~)
 
                                 if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD)') % Need a quantified PT or NM
 
-                                    sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+                                    sSeriesUnit = getSerieUnitValue(dSeriesOffset);
 
                                     if ~strcmpi(sSeriesUnit, 'SUV') 
                                         set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
@@ -981,7 +995,7 @@ function setIsoSurfaceCallback(~, ~)
                                         dCTOffset = isoMaskCtSerieOffset('get');
                                         dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber; 
 
-                                        sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+                                        sSeriesUnit = getSerieUnitValue(dSeriesOffset);
                                         sCTUnit     = getSerieUnitValue(dCTSeriesNumber);
 
                                         if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sCTUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
@@ -995,7 +1009,7 @@ function setIsoSurfaceCallback(~, ~)
                                    strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
            
                                     sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get')     , 'Value'));
-                                    sFusionUnit = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+                                    sFusionUnit = getSerieUnitValue(dFusedSeriesOffset);
 
                                     if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sFusionUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
                                         set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
@@ -1042,9 +1056,9 @@ function setIsoSurfaceCallback(~, ~)
                 
                     if isFusion('get')
 
-                        atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                        atFuseMetaData = fusionMetaData('get', [], dFusedSeriesOffset);
 
-                        isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
+                        isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFusedSeriesOffset)), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
 
                         % isoFusionObj.IsosurfaceColor  = surfaceColor('one', isoColorFusionOffset('get') );
                         % isoFusionObj.Isovalue         = isoSurfaceFusionValue('get');
@@ -1086,8 +1100,9 @@ function setIsoSurfaceCallback(~, ~)
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');
             set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            set(btnIsoSurfacePtr('get'), 'FontWeight', 'bold');
-            
+            % set(btnIsoSurfacePtr('get'), 'FontWeight', 'bold');
+            set(btnIsoSurfacePtr('get'), 'CData', resizeTopBarIcon('3d_iso_white.png'));
+           
             set(btnMIPPtr('get'), 'Enable', 'on');            
             set(btn3DPtr('get') , 'Enable', 'on');
         end
@@ -1166,9 +1181,10 @@ function setIsoSurfaceCallback(~, ~)
             end
         end
         
- %       catch
-%            progressBar(1, 'Error:setIsoSurfaceCallback()');
- %       end
+        catch ME   
+           logErrorToFile(ME);
+           progressBar(1, 'Error:setIsoSurfaceCallback()');
+        end
         
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;

@@ -30,9 +30,13 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+
         progressBar(1, 'Error: Require a 3D Volume!');
         multiFrame3DRecord('set', false);
-        mRecord.State = 'off';
+
+        icon = get(mRecord, 'UserData');
+        set(mRecord, 'CData', icon.default);
+
         return;
     end
     
@@ -78,22 +82,30 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
 
         progressBar(1, 'Error: Require at least two 3D Volume!');
         multiFrame3DRecord('set', false);
-        mRecord.State = 'off';
+
+        icon = get(mRecord, 'UserData');
+        set(mRecord, 'CData', icon.default);
+
         return;
     end
 
-    % if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
-    %    gateUseSeriesUID('get') == true
-    % 
-    %     progressBar(1, 'Error: Require a dynamic 3D Volume!');
-    %     multiFrame3DRecord('set', false);
-    %     mRecord.State = 'off';
-    %     return;
-    % end
 
-    setFigureToobarsVisible('off');
+    try
 
-    setFigureTopMenuVisible('off');
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+
+    ptrViewer3d = viewer3dObject('get');
+
+    if ~isempty(ptrViewer3d) % New volshow
+
+        setFigureToobarsVisible('off');
+
+        setFigureTopMenuVisible('off');
+
+        drawnow;
+        drawnow;
+    end
 
     atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
@@ -109,6 +121,11 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('MFSC-%s', sSeriesDescription));
 
         if isempty(sSeriesDescription)
+            multiFrame3DRecord('set', false);
+            
+            icon = get(mRecord, 'UserData');
+            set(mRecord, 'CData', icon.default);
+
             return;
         end
     end
@@ -158,7 +175,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         set(uiFusedSeriesPtr('get'), 'Enable', 'off');
     end
 
-    set(uiOneWindowPtr('get'), 'Visible', 'off');
+    % set(uiOneWindowPtr('get'), 'Visible', 'off');
 
     if ~isempty(viewer3dObject('get'))
 
@@ -321,7 +338,11 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
             end 
         end
 
-        set(uiOneWindowPtr('get'), 'Visible', 'on');
+        volObj = volGateObject('get');
+        isoObj = isoGateObject('get');
+        mipObj = mipGateObject('get');
+
+        % set(uiOneWindowPtr('get'), 'Visible', 'on');
 
     else
     
@@ -348,7 +369,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                                           'position', [0 ...
                                                        addOnWidth('get')+30 ...
                                                        getMainWindowSize('xsize')-280 ...
-                                                       getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30]);
+                                                       getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30]);
                 else
                     ui3DWindow{tt} = uipanel(fiMainWindowPtr('get'),...
                                           'Units'   , 'pixels',...
@@ -357,7 +378,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                                           'position', [680 ...
                                                        addOnWidth('get')+30 ...
                                                        getMainWindowSize('xsize')-680 ...
-                                                       getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30]);
+                                                       getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30]);
                 end
     
                 ui3DWindow{tt}.Visible = 'off';
@@ -887,7 +908,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         end
     end
 
-    progressBar(1, 'Ready');
+    % progressBar(1, 'Ready');
     
     if strcmpi('*.avi', sExtention) || ...
        strcmpi('avi'  , sExtention) || ...     
@@ -908,10 +929,6 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         open(tClassVideoWriter);
     end
 
-    try
-
-    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;
 
     for tt=1:dNbSeries
         
@@ -956,9 +973,26 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
             set(ui3DWindow{tt}, 'Visible', 'on');
 
         end
-       
-        I = getframe(axePtr('get', [], tt ));
-        [indI,cm] = rgb2ind(I.cdata, 256);
+
+        if isempty(ptrViewer3d) % Old volshow
+
+            I = getframe(axePtr('get', [], tt ));
+            I = I.cdata;
+      else
+            I = getObjectFrame(axePtr('get', [], tt ));
+        end
+        
+        if tt == 1 % We can't write different image size.
+            
+            aFirstImageSize = size(I);
+        else
+            if ~isequal(size(I), aFirstImageSize)
+
+                I = imresize3(I, aFirstImageSize);
+            end
+        end
+        
+        [indI, cm] = rgb2ind(I, 256); % Convert to indexed image        
 
         if tt == 1
 
@@ -1303,7 +1337,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         end
     end
 
-    set(uiOneWindowPtr('get'), 'Visible', 'on');
+    % set(uiOneWindowPtr('get'), 'Visible', 'on');
 
 %        dicomBuffer('set', aBackup);
 
@@ -1347,13 +1381,20 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         
     end  
 
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, sprintf('Error: recordMultiGate3D()'));
     end
 
-    setFigureToobarsVisible('on');
+    if ~isempty(ptrViewer3d) % New volshow
 
-    setFigureTopMenuVisible('on');
+        setFigureToobarsVisible('on');
+
+        setFigureTopMenuVisible('on');
+
+        drawnow;
+        drawnow;        
+    end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;    

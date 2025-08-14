@@ -29,7 +29,8 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
 
     iNbFiles    = 0;
     iNbContours = 0;
-    
+    iNbAnnotations = 0;
+
     f = java.io.File(char(sDirName));
     asFileList = f.listFiles();
     
@@ -49,11 +50,38 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
             if ~isempty(tInfo)
                 
                 if strcmpi(tInfo.Modality, 'RTSTRUCT')
+
                     iNbContours = iNbContours+1;
 
                     tContours = readDicomContours(asFileList(iLoop)); 
                     
                     tFileList.Contours{iNbContours} = tContours;   
+
+                elseif isfield(tInfo,'Private_0029_0010') && ... % 3DF Annotations
+                       isfield(tInfo,'Private_0029_1010') && ...
+                       isfield(tInfo,'Private_0029_1011') && ...
+                       strcmpi(tInfo.Private_0029_1011, '3DF_Annotations')
+
+                    iNbAnnotations = iNbAnnotations+1;
+                    
+                    bError = false;
+                    raw = tInfo.Private_0029_1010;
+                    if isnumeric(raw)
+                        % uint8 vector → char row
+                        jsonText = char(raw(:)');  
+                    elseif isstring(raw) || ischar(raw)
+                        jsonText = char(raw);
+                    else
+                        bError = true;
+                    end
+
+                    if bError == false
+
+                        jsonText = regexprep(jsonText, '[\x00\s]+$', '');
+                    
+                        tFileList.Annotations{iNbAnnotations} = jsonText;   
+                    end
+
                else
                     dInstanceNumber = 0;
                     adImagePositionPatient = [0 0 0];

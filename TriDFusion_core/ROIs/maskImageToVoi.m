@@ -85,10 +85,12 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
         
         dTagOffset=1;
 
-        xmin=0.5;
-        xmax=1;
-        aColor=xmin+rand(1,3)*(xmax-xmin);
+        % xmin=0.5;
+        % xmax=1;
+        % aColor=xmin+rand(1,3)*(xmax-xmin);
     
+        aColor = generateUniqueColor(false);
+
         aPixelsList = gather(find(BW));
 
         [~,~,adSlices]=ind2sub(size(BW), aPixelsList);
@@ -128,7 +130,8 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
             aAxial = gather(BW(:,:,dCurrentSlice));
 
             if bPixelEdge == true
-                aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                %aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                aAxial = repelem(aAxial, PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way             
             end
             
             maskAxial = bwboundaries(aAxial, 8, 'noholes');                    
@@ -144,7 +147,7 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
 
                 curentMask = maskAxial(jj);
     
-                sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                sTag = num2str(generateUniqueNumber(false));
 
                 aPosition = flip(curentMask{1}, 2);
 

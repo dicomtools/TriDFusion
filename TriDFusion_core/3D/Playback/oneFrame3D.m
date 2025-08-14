@@ -27,15 +27,19 @@ function oneFrame3D()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    idxOffset = multiFrame3DIndex('get');
+
     if ~isempty(viewer3dObject('get'))
 
+        degreeAngle = ((idxOffset - 1) / (120 - 1)) * (360 - 1) + 1;
+
+        set3DView(viewer3dObject('get'), degreeAngle, 1);
     else
         volObj = volObject('get');
         isoObj = isoObject('get');                        
         mipObj = mipObject('get');  
         voiObj = voiObject('get');
     
-        idxOffset = multiFrame3DIndex('get');
     
         vec = linspace(0,2*pi(),120)';
     

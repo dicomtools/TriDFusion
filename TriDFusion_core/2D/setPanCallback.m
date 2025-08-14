@@ -28,6 +28,7 @@ function setPanCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
     if isempty(dicomBuffer('get'))
+        
         return;
     end
     
@@ -37,15 +38,18 @@ function setPanCallback(~, ~)
     releaseRoiWait();
 
     if panTool('get')
+        
+        panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');
 
         set(panMenu('get'), 'Checked', 'off');
 
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnPanPtr('get'), 'FontWeight', 'normal');
+
+        set(btnPanPtr('get'), 'CData', resizeTopBarIcon('pan_grey.png'));           
 
         panTool('set', false);
-        pan(fiMainWindowPtr('get'), 'off'); 
+        % panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off'); 
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
@@ -53,21 +57,24 @@ function setPanCallback(~, ~)
 
             rotate3d(fiMainWindowPtr('get'), 'on');
         else
-           % Restore the original colorbar limits after panning     
-
-            set(axeColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
-    
-            % Restore the original fusion colorbar limits after panning     
-    
-            if isFusion('get') == true
-                set(axeFusionColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
-            end
+           % % Restore the original colorbar limits after panning     
+           % 
+           %  set(axeColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
+           % 
+           %  % Restore the original fusion colorbar limits after panning     
+           % 
+           %  if isFusion('get') == true
+           % 
+           %      set(axeFusionColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
+           %  end
 
             set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
-            
+
+            set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));           
+              
             if isMoveImageActivated('get') == true
+
                 set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
             end            
         end
@@ -75,34 +82,48 @@ function setPanCallback(~, ~)
         set(panMenu('get'), 'Checked', 'on');
 
         if zoomTool('get')
+
             setZoomCallback();
         end
 
         if rotate3DTool('get')
+            
             setRotate3DCallback();
         end  
 
         if dataCursorTool('get')
+
             setDataCursorCallback();
         end  
         
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnTriangulatePtr('get'), 'FontWeight', 'normal');
-            
+        
+        set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_grey.png'));           
+         
         set(btnPanPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        set(btnPanPtr('get'), 'FontWeight', 'bold');
+
+        set(btnPanPtr('get'), 'CData', resizeTopBarIcon('pan_white.png'));           
         
         panTool('set', true);
 
-        hCMZ = uicontextmenu(fiMainWindowPtr('get'));
-        uimenu('Parent',hCMZ,'Label','Pan off', 'Callback',@setPanCallback);
-        
-        hPan = pan(fiMainWindowPtr('get'));
+        panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'on');
 
-        set(hPan, 'UIContextMenu', hCMZ);
+        % hCMZ = uicontextmenu(fiMainWindowPtr('get'));
+        % uimenu('Parent', hCMZ, 'Label', 'Exit Panning', 'Callback',@setPanCallback);
+        % 
+        % hPan = pan(fiMainWindowPtr('get'));
+        % 
+        % if isprop(hPan, 'ContextMenu')
+        % 
+        %     set(hPan, 'ContextMenu', hCMZ);
+        % 
+        % elseif isprop(hPan, 'UIContextMenu')
+        % 
+        %     set(hPan, 'UIContextMenu', hCMZ);
+        % end
 
-        pan(fiMainWindowPtr('get'), 'on');          
+        % pan(fiMainWindowPtr('get'), 'on');          
     end           
 end

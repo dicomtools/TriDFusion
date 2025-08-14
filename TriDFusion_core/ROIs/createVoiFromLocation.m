@@ -34,7 +34,12 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');            
     drawnow;
 
+    preSegFlag = clickVoiPreSegmentationValue('get');
+
     aImageSize = size(aBuffer);
+
+    dBufferMin = min(aBuffer, [], 'all');
+    dBufferMax = max(aBuffer, [], 'all');
 
     % Apply constraint
 
@@ -48,7 +53,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
     
         aLogicalMask = roiConstraintToMask(aBuffer, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
     
-        aBuffer(aLogicalMask==0) = min(aBuffer, [], 'all'); % Apply constraint
+        aBuffer(aLogicalMask==0) = dBufferMin; % Apply constraint
     end
 
     % Given:
@@ -99,7 +104,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
             
             % Calculate the threshold value based on the neighborhood of
             % image max
-            if clickVoiPreSegmentationValue('get') ~= 0
+            if preSegFlag ~= 0
                 
                 dValue = max(neighborhood(:)) * dPercentOfMax;
             else
@@ -139,7 +144,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
             
             % Calculate the threshold value based on the neighborhood of
             % image max
-            if clickVoiPreSegmentationValue('get') ~= 0
+            if preSegFlag ~= 0
                 
                 dValue = max(neighborhood(:)) * dPercentOfMax;
             else
@@ -175,7 +180,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
             
             % Calculate the threshold value based on the neighborhood of
             % image max
-            if clickVoiPreSegmentationValue('get') ~= 0
+            if preSegFlag ~= 0
                 
                 dValue = max(neighborhood(:)) * dPercentOfMax;
             else
@@ -212,7 +217,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
 
             % Calculate the threshold value based on the neighborhood of
             % image max
-            if clickVoiPreSegmentationValue('get') ~= 0
+            if preSegFlag ~= 0
                 
                 dValue = max(neighborhood(:)) * dPercentOfMax;
             else
@@ -240,9 +245,9 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
     % Step 1: Use Otsu's method for dynamic thresholding to set dPreSeg adaptively
     % [dOtsuThreshold, EF] = graythresh(aBuffer); % Otsu's global threshold
 
-    if clickVoiPreSegmentationValue('get') ~= 0
+    if preSegFlag ~= 0
 
-        dPreSeg = max(aBuffer, [], 'all') * clickVoiPreSegmentationValue('get') / 100;
+        dPreSeg = dBufferMax * preSegFlag / 100;
 
         dMin = min(aSlice, [], 'all');
 
@@ -255,13 +260,13 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
         dOtsuThreshold = multithresh(neighborhood(:));
 
         aSlice(aSlice<=dValue ) = min(aSlice, [], 'all');
-        % aSlice = imbinarize(aSlice, dOtsuThreshold);
         aSlice = imbinarize(aSlice);
     end
+  
 
     % dPreSeg = max(aBuffer, [], 'all') * dOtsuThreshold; % Use the Otsu threshold as dPreSeg
 
-       % dPreSeg = max(aBuffer, [], 'all') * clickVoiPreSegmentationValue('get') / 100;
+       % dPreSeg = max(aBuffer, [], 'all') * preSegFlag / 100;
 
 %     dPreSeg = max(aBuffer, [], 'all') * dValueRatio * dScalingFactor / 100;
 
@@ -281,17 +286,18 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
 
         bBreak = false;
 
-        aMask = zeros(size(aBuffer));
+        aMask = false(size(aBuffer));
 
 %         aBuffer(aBuffer<=dPreSeg)=0;
 % 
 %         aBuffer(aBuffer<=dValue)=0;
 %         aBuffer(aBuffer~=0) =1;  
 
-        xmin=0.5;
-        xmax=1;
-        aColor=xmin+rand(1,3)*(xmax-xmin);
-        
+        % xmin=0.5;
+        % xmax=1;
+        % aColor=xmin+rand(1,3)*(xmax-xmin);
+        aColor = generateUniqueColor(false);
+
         sLesionType = 'Unspecified';
       
         sLabel = sprintf('RMAX-%d-VOI%d', dPercentOfMax*100, numel(voiTemplate('get', dSeriesOffset))+1);
@@ -314,21 +320,40 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
 % 
                 aSegmentedBuffer = aBuffer;
 
-                if clickVoiPreSegmentationValue('get') ~= 0
-                    
-                    aSegmentedBuffer(aSegmentedBuffer<=dPreSeg) = min(aSegmentedBuffer, [], 'all');   
-                    aSegmentedBuffer(aSegmentedBuffer<=dValue ) = min(aSegmentedBuffer, [], 'all');
+                % if preSegFlag ~= 0
+                % 
+                %     aSegmentedBuffer(aSegmentedBuffer<=dPreSeg) = min(aSegmentedBuffer, [], 'all');   
+                %     aSegmentedBuffer(aSegmentedBuffer<=dValue ) = min(aSegmentedBuffer, [], 'all');
+                % 
+                %     aSegmentedBuffer = imbinarize(aSegmentedBuffer);
+                % else
+                %     aSegmentedBuffer(aSegmentedBuffer<=dValue ) = min(aSegmentedBuffer, [], 'all');
+                % 
+                %     if dValue/max(aBuffer, [], 'all') > 0.25
+                %         aSegmentedBuffer = imbinarize(aSegmentedBuffer);
+                %     else
+                %         aSegmentedBuffer = imbinarize(aSegmentedBuffer, dOtsuThreshold);
+                %     end
+                % end
 
-                    aSegmentedBuffer = imbinarize(aSegmentedBuffer);
-              % aSegmentedBuffer(aSegmentedBuffer~=0)=1;                    
+                
+                minVal = min(aSegmentedBuffer, [], 'all');
+                
+                if preSegFlag ~= 0
+                    maskThresh = max(dPreSeg, dValue);
                 else
-                    aSegmentedBuffer(aSegmentedBuffer<=dValue ) = min(aSegmentedBuffer, [], 'all');
+                    maskThresh = dValue;
+                end
+                
+                mask = (aSegmentedBuffer <= maskThresh);
 
-                    if dValue/max(aBuffer, [], 'all') > 0.25
-                        aSegmentedBuffer = imbinarize(aSegmentedBuffer);
-                    else
-                        aSegmentedBuffer = imbinarize(aSegmentedBuffer, dOtsuThreshold);
-                    end
+                % aSegmentedBuffer(mask) = minVal;
+                aSegmentedBuffer = aSegmentedBuffer .* ~mask + minVal .* mask; % Faster  
+
+                if preSegFlag ~= 0 || (dValue / dBufferMax > 0.25)
+                    aSegmentedBuffer = imbinarize(aSegmentedBuffer);
+                else
+                    aSegmentedBuffer = (aSegmentedBuffer > dOtsuThreshold);
                 end
 
                 % aSegmentedBuffer(aSegmentedBuffer<=dPreSeg)=0;   
@@ -368,16 +393,30 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
 
                     if isInsideComponent
 
-                        aSegmentedBuffer = aBuffer;
-    
-                        dVoiMax = max(aSegmentedBuffer(boundary3D.PixelIdxList{kk}), [], 'all');    
+%                         aSegmentedBuffer = aBuffer;
+% 
+%                         dVoiMax = max(aSegmentedBuffer(boundary3D.PixelIdxList{kk}), [], 'all');    
+% 
+% %                         aMask=zeros(size(aSegmentedBuffer));
+%                         aMask(:) = 0;
+%                         aMask(boundary3D.PixelIdxList{kk})=1; 
+% 
+%                         aMask(aSegmentedBuffer<=(dVoiMax*dPercentOfMax)) = 0;
 
-%                         aMask=zeros(size(aSegmentedBuffer));
-                        aMask(:) = 0;
-                        aMask(boundary3D.PixelIdxList{kk})=1; 
-                  
-                        aMask(aSegmentedBuffer<=(dVoiMax*dPercentOfMax)) = 0;
+                        aSegmentedBuffer = aBuffer;
                         
+                        idx = boundary3D.PixelIdxList{kk};  
+                        
+                        vals = aSegmentedBuffer(idx);
+                        dVoiMax = max(vals);  
+                        
+                        thresh = dVoiMax * dPercentOfMax;
+                        
+                        aMask(:) = false;
+                        
+                        keep = vals > thresh;
+                        aMask(idx(keep)) = true;
+
                         % Get the subscripts of the connected component voxels
 
                         switch (pAxe)
@@ -398,7 +437,9 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
                         uniqueZ = unique(subZ);
                         
                         % Create images.roi.Freehand objects for each unique subZ
-                        for i = 1:numel(uniqueZ)
+                        dNbElements = numel(uniqueZ);
+
+                        for i = 1:dNbElements
 
                             if cancelCreateVoiRoiPanel('get') == true
                                bBreak = true;
@@ -408,13 +449,16 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
                             % Get the subscripts corresponding to the current uniqueZ value
                             currZ = uniqueZ(i);
 
-                            if numel(uniqueZ) > 25
-                                progressBar(i/numel(uniqueZ), sprintf('Processing mask slice %d/%d', i, numel(uniqueZ) ) );      
+                            if dNbElements > 25
+                                if mod(i, 5)==1 || i == dNbElements
+                                    progressBar(i/dNbElements, sprintf('Processing mask slice %d/%d', i, dNbElements ) ); 
+                                end
                             end
 
                             switch (pAxe)
 
                                case axePtr('get', [], dSeriesOffset) % 2D
+                                   
                                     aSlice = aMask(:,:);
 
                                case axes1Ptr('get', [], dSeriesOffset) % Axial
@@ -434,7 +478,8 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
                             end
 
                             if bPixelEdge == true                    
-                               aSlice = imresize(aSlice,3, 'nearest'); % do not go directly through pixel centers
+                               %aSlice = imresize(aSlice,3, 'nearest'); % do not go directly through pixel centers
+                               aSlice = repelem(aSlice, 3, 3); % fastest way             
                             end
 
                             B = bwboundaries(aSlice, 8, 'noholes');
@@ -458,7 +503,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
                                     aPosition = smoothRoi(aPosition, aImageSize);
                                 end
 
-                                sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                                sTag = num2str(generateUniqueNumber(false));
 
                                 if size(aBuffer, 3) ~= 1 %3D
 
@@ -594,7 +639,8 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
 
     progressBar(1, 'Ready');      
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         progressBar(1, 'Error:createVoiFromLocation()');          
     end  
 

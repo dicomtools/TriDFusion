@@ -62,6 +62,8 @@ function setSegmentationFDGSUVCallback(hObject, ~)
                        );       
         end
 
+        setObjectIcon(dlgFDGSUVSegmentation);
+
         % SUV threshold
     
             uicontrol(dlgFDGSUVSegmentation,...

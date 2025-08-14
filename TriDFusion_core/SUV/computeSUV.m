@@ -60,24 +60,44 @@ function dSUVconv = computeSUV(atMetaData, suvType)
             % Acquisition Date Time
             
             if numel(atMetaData) > 1                
+
                 dayAcquisitionDate = inf;
+
                 for jj=1:numel(atMetaData)
+
+                    try
                     
                     acquisitionTime = atMetaData{jj}.AcquisitionTime;
                     acquisitionDate = atMetaData{jj}.AcquisitionDate;
+
+                    % Ensure acquisitionTime is valid
+                    if all(acquisitionTime == '0') || isempty(acquisitionTime)
+                        acquisitionTime = '000000'; % Default to midnight if invalid
+                    end
+                    
+                    % Ensure acquisitionDate is valid
+                    if all(acquisitionDate == '0') || isempty(acquisitionDate)
+                        acquisitionDate = '00010101'; % Default to a fallback date (e.g., Jan 1, 0001)
+                    end
 
                     if numel(acquisitionTime) == 6
                         acquisitionTime = sprintf('%s.00', acquisitionTime);
                     end            
 
-%                     datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
-%                     dayCurAcquisitionDate = datenum(datetimeAcquisitionDate);
-                    try
-                        fullAcquisitionDate = [acquisitionDate acquisitionTime(1:6)];  % Ignoring milliseconds for speed
-                        dayCurAcquisitionDate = datenum(fullAcquisitionDate, 'yyyymmddHHMMSS');
-                    catch
+                    fullAcquisitionDate = [acquisitionDate acquisitionTime(1:6)];  % Ignoring milliseconds for speed
+                    dayCurAcquisitionDate = datenum(fullAcquisitionDate, 'yyyymmddHHMMSS');
+
+                    catch ME
+                        % logErrorToFile(ME); 
+
+                        try
                         datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
-                        dayCurAcquisitionDate = datenum(datetimeAcquisitionDate);                        
+                        dayCurAcquisitionDate = datenum(datetimeAcquisitionDate);   
+
+                        catch ME2
+                            logErrorToFile(ME2); 
+                            dayCurAcquisitionDate = [];
+                        end
                     end
 
                     if dayCurAcquisitionDate < dayAcquisitionDate % Find min time
@@ -86,15 +106,33 @@ function dSUVconv = computeSUV(atMetaData, suvType)
                 end
             
             else
+                try
+
                 acquisitionTime = atMetaData{1}.AcquisitionTime;
                 acquisitionDate = atMetaData{1}.AcquisitionDate;
+
+                % Ensure acquisitionTime is valid
+                if all(acquisitionTime == '0') || isempty(acquisitionTime)
+                    acquisitionTime = '000000'; % Default to midnight if invalid
+                end
                 
+                % Ensure acquisitionDate is valid
+                if all(acquisitionDate == '0') || isempty(acquisitionDate)
+                    acquisitionDate = '00010101'; % Default to a fallback date (e.g., Jan 1, 0001)
+                end
+
                 if numel(acquisitionTime) == 6
                     acquisitionTime = sprintf('%s.00', acquisitionTime);
                 end            
 
                 datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
                 dayAcquisitionDate = datenum(datetimeAcquisitionDate);                
+
+                catch ME
+                    logErrorToFile(ME); 
+                    dayAcquisitionDate = [];
+                end
+
             end
             
             patWeight = atMetaData{1}.PatientWeight;
@@ -110,15 +148,18 @@ function dSUVconv = computeSUV(atMetaData, suvType)
             end
 
             % Radiopharmaceutical Date Time
-            
+
+            try          
+
             if numel(injDateTime) == 14
                 injDateTime = sprintf('%s.00', injDateTime);
             end
             
-            try
-                datetimeInjDate = datetime(injDateTime,'InputFormat','yyyyMMddHHmmss.SS');
-                dateInjDate = datenum(datetimeInjDate);
-            catch
+            datetimeInjDate = datetime(injDateTime,'InputFormat','yyyyMMddHHmmss.SS');
+            dateInjDate = datenum(datetimeInjDate);
+
+            catch ME
+                logErrorToFile(ME); 
                 dateInjDate = [];
             end
             
@@ -126,13 +167,30 @@ function dSUVconv = computeSUV(atMetaData, suvType)
             
             seriesTime = atMetaData{1}.SeriesTime;
             seriesDate = atMetaData{1}.SeriesDate;
+
+             % Ensure acquisitionTime is valid
+            if all(seriesTime == '0') || isempty(seriesTime)
+                seriesTime = '000000'; % Default to midnight if invalid
+            end
             
+            % Ensure acquisitionDate is valid
+            if all(seriesDate == '0') || isempty(seriesDate)
+                seriesDate = '00010101'; % Default to a fallback date (e.g., Jan 1, 0001)
+            end
+
             if numel(seriesTime) == 6
                 seriesTime = sprintf('%s.00', seriesTime);
             end
 
+            try 
+
             datetimeSeriesDate = datetime([seriesDate seriesTime],'InputFormat','yyyyMMddHHmmss.SS');
             daySeriesDate = datenum(datetimeSeriesDate);
+
+            catch ME
+                logErrorToFile(ME); 
+                daySeriesDate = [];
+            end
 
             % Acquisition Date Time
             
@@ -146,7 +204,6 @@ function dSUVconv = computeSUV(atMetaData, suvType)
             % Decay correction
             
             sDecayCorrection = atMetaData{1}.DecayCorrection;
-
 
             if strcmpi(sDecayCorrection, 'START')
 

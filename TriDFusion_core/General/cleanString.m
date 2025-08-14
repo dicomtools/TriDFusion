@@ -31,8 +31,11 @@ function sCleanString = cleanString(sInputString, sDelimiter)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if ~exist('sDelimiter', 'var')
+
         sDelimiter ='';
     end
-    
-    sCleanString = regexprep(sInputString, {' ','[',',','<','>','{','}','/','\',',^','%','!','$','*','(',')','@','#',']',':'}, sDelimiter);
+
+    sPatterns = '[ \[\,,<>{}/\\\^%!$*\(\)@#\]:]';
+
+    sCleanString = regexprep(sInputString, sPatterns, sDelimiter);
 end

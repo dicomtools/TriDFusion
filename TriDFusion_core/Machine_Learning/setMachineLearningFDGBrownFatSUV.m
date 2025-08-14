@@ -222,15 +222,15 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
                     end
                 end
 % if 0
-% 
+%
 %                 % Left right image constraint
-% 
+%
 %                  dLeftColumn  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_left' , 'left' )+25;
 %                  dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_right', 'right')-25;
 % %                 dLeftColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'spleen', 'right');
 % %                 dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'liver', 'left');
 %                 if ~isempty(dLeftColumn)
-% 
+%
 %                     if dLeftColumn > 1 && dLeftColumn < size(aExcludeMask, 2)
 %                         aExcludeMask(:,dLeftColumn:end,:) = 1;
 %                     end
@@ -244,9 +244,9 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
 % %                         end
 % %                     end
 %                 end
-% 
+%
 %                 if ~isempty(dRightColumn)
-% 
+%
 %                     if dRightColumn > 1 && dRightColumn < size(aExcludeMask, 2)
 %                         aExcludeMask(:,1:dRightColumn,:) = 1;
 %                     end
@@ -519,7 +519,8 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set intensity
 
@@ -545,6 +546,8 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
     if isFusion('get') == false
 
         set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+        sliderAlphaValue('set', 0.65);
 
         setFusionCallback();
     end
@@ -583,7 +586,8 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setSegmentationFDGBrownFatSUV()' );
     end

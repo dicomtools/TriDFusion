@@ -79,7 +79,8 @@ function selectVoiFromMouseOverForContourReview(dSeriesOffset)
         end
     end
 
-    catch
+    catch ME
+        logErrorToFile(ME);  
         progressBar(1, 'Error:selectMouseOverForContourReview()');
     end
 

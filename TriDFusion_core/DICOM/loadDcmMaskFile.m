@@ -65,10 +65,11 @@ function loadDcmMaskFile(sPath, sFileName)
     
             progressBar(jj/dVoiMax-0.009, sprintf('Importing mask %d/%d, please wait.',jj, dVoiMax));
     
-            xmin=0.5;
-            xmax=1;
-            aColor=xmin+rand(1,3)*(xmax-xmin);
-    
+            % xmin=0.5;
+            % xmax=1;
+            % aColor=xmin+rand(1,3)*(xmax-xmin);
+            aColor = generateUniqueColor(false);
+   
             aVoiMask = aMask;
             aVoiMask(aVoiMask~=jj) = 0;
     
@@ -78,7 +79,8 @@ function loadDcmMaskFile(sPath, sFileName)
         progressBar(1, sprintf('Import %s completed.', sFileName));
     end
 
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, 'Error:loadDcmMaskFile()');                        
     end
 

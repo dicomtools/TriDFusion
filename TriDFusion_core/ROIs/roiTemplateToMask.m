@@ -36,10 +36,17 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
         
         case 'images.roi.line'
                        
-            xValues = int32(aPosition(:,1));
+            % Create a mask with the same size as aSlice
+            rectMask = zeros(size(aSlice));  
+            
+            % Assuming aPosition(:,1) is x (columns) and aPosition(:,2) is y (rows)
+            xValues = int32(aPosition(:,1));  
             yValues = int32(aPosition(:,2));
             
-            rectMask(xValues, yValues)= 1;
+            % Use the correct indexing order: (row, column) = (y, x)
+            rectMask(yValues, xValues) = 1;  
+            
+            % Convert the mask to a logical array
             aLogicalMask = logical(rectMask);
             
         case 'images.roi.rectangle'

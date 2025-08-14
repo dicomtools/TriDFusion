@@ -27,6 +27,10 @@ function uiRoiPanelSliderCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    if isempty(uiRoiPanelSliderPtr('get'))
+        return;
+    end
+    
     val = get(uiRoiPanelSliderPtr('get'), 'Value');
 
     aPosition = get(uiRoiPanelPtr('get'), 'Position');

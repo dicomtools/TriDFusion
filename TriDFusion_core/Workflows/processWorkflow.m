@@ -95,6 +95,10 @@ function processWorkflow(sWorkflowName)
 
             setSegmentationMRTOrgansCallback();
 
+        case 'setsegmentationailivercallback' % setSegmentationAILiverCallback.m
+
+            setSegmentationAILiverCallback();
+
         % Modules
 
         case 'setmachinelearning3dlungshuntcallback' % setMachineLearning3DLungShuntCallback.m 
@@ -106,6 +110,23 @@ function processWorkflow(sWorkflowName)
 
             setMachineLearning3DLobeLungCallback(); 
 
+        % Brown Fat
+
+        case 'setfdgbrownfatctexporttoexcelcallback' % setFDGBrownFatCTExportToExcelCallback.m
+            
+            setFDGBrownFatCTExportToExcelCallback();
+              
+        case 'setfdgbrownfatptexporttoexcelcallback' % setFDGBrownFatPTExportToExcelCallback.m
+
+            setFDGBrownFatPTExportToExcelCallback();
+      
+        case 'setfdgbrownfatfullaiexporttoexcelcallback' % setFDGBrownFatFullAIExportToExcelCallback.m
+
+            setFDGBrownFatFullAIExportToExcelCallback();
+
+        case 'runmachinelearningfdgbrownfatfullaicallback' % runMachineLearningFDGBrownFatFullAICallback.m
+
+             runMachineLearningFDGBrownFatFullAICallback();
 
         case 'setmachinelearningfdgbrownfatsuvcallback' % setMachineLearningFDGBrownFatSUVCallback.m
 
@@ -148,7 +169,6 @@ function processWorkflow(sWorkflowName)
             setMachineLearningFDGBrownFatPETFullAICENormRTstructCallback();
 
         % PET/CT Full AI
-
 
         case 'setmachinelearningfdgbrownfatpetctfullaicallback' % setMachineLearningFDGBrownFatPETCTFullAICallback.m    
 
@@ -199,6 +219,15 @@ function processWorkflow(sWorkflowName)
         case 'setmachinelearningfdgbrownfatexporttonetworkcallback' % setMachineLearningFDGBrownFatExportToNetworkCallback.m
             
             setMachineLearningFDGBrownFatExportToNetworkCallback();     
+
+        % PET/CT BAT NEW NETWORK 
+        case 'setmachinelearningfdgbatexporttonetworkcallback' % setMachineLearningFDGBATExportToNetworkCallback.m
+
+            setMachineLearningFDGBATExportToNetworkCallback()
+
+        case 'setmachinelearningfdgbatdatapreprocessingcallback' % setMachineLearningFDGBATDataPreProcessingCallback.m
+
+            setMachineLearningFDGBATDataPreProcessingCallback();
 
         case 'setmachinelearningfdglymphnodesuvcallback' % setMachineLearningFDGLymphNodeSUVCallback.m
 
@@ -330,6 +359,14 @@ function processWorkflow(sWorkflowName)
             
             runFDGBrownFatPETCTFullAICallback();  
 
+        case 'setvoifatmetricsanalyzerforpetctcallback' % setVOIFatMetricsAnalyzerForPETCTCallback.m    
+            setVOIFatMetricsAnalyzerForPETCTCallback();
+        
+        case 'createtumorablationzonecallback' % createTumorAblationZoneCallback.m
+            createTumorAblationZoneCallback();
+
+        case 'createlivertumorzoningcallback' % createLiverTumorZoningCallback.m
+            createLiverTumorZoningCallback();
     end
 
 end

@@ -87,10 +87,16 @@ function triangulateImages()
                      
                             sliceNumber('set', 'sagittal', clickedPtX);
                             sliceNumber('set', 'axial'   , clickedPtY);
-    
-                            set(uiSliderSagPtr('get'), 'Value', clickedPtX / iSagittalSize);
-                            set(uiSliderTraPtr('get'), 'Value', 1 - (clickedPtY / iAxialSize));
-    
+
+                            uiSliderSag = uiSliderSagPtr('get');
+                            uiSliderTra = uiSliderTraPtr('get');
+
+                            uiSliderSag.Value = clickedPtX;
+                            uiSliderTra.Value = iAxialSize - clickedPtY + 1;   
+
+                            % set(uiSliderSagPtr('get'), 'Value', clickedPtX / iSagittalSize);
+                            % set(uiSliderTraPtr('get'), 'Value', 1 - (clickedPtY / iAxialSize));
+
                             refreshImages(clickedPtX, clickedPtY);
 
                             axeClicked('set', true);
@@ -106,10 +112,16 @@ function triangulateImages()
    
                             sliceNumber('set', 'coronal', clickedPtX);
                             sliceNumber('set', 'axial'  , clickedPtY);                
-    
-                            set(uiSliderCorPtr('get'), 'Value', clickedPtX / iCoronalSize);
-                            set(uiSliderTraPtr('get'), 'Value', 1 - (clickedPtY / iAxialSize));
-    
+
+                            uiSliderCor = uiSliderCorPtr('get');
+                            uiSliderTra = uiSliderTraPtr('get');
+
+                            uiSliderCor.Value = clickedPtX;
+                            uiSliderTra.Value = iAxialSize - clickedPtY + 1;   
+
+                            % set(uiSliderCorPtr('get'), 'Value', clickedPtX / iCoronalSize);
+                            % set(uiSliderTraPtr('get'), 'Value', 1 - (clickedPtY / iAxialSize));
+
                             refreshImages(clickedPtX, clickedPtY);
     
                             axeClicked('set', true);
@@ -125,10 +137,16 @@ function triangulateImages()
 
                             sliceNumber('set', 'sagittal', clickedPtX);
                             sliceNumber('set', 'coronal' , clickedPtY);
-    
-                            set(uiSliderSagPtr('get'), 'Value', clickedPtX / iSagittalSize);
-                            set(uiSliderCorPtr('get'), 'Value', clickedPtY / iCoronalSize);
-    
+
+                            uiSliderSag = uiSliderSagPtr('get');
+                            uiSliderCor = uiSliderCorPtr('get');
+
+                            uiSliderSag.Value = clickedPtX;
+                            uiSliderCor.Value = clickedPtY;
+
+                            % set(uiSliderSagPtr('get'), 'Value', clickedPtX / iSagittalSize);
+                            % set(uiSliderCorPtr('get'), 'Value', clickedPtY / iCoronalSize);
+
                             refreshImages(clickedPtX, clickedPtY);
     
                             axeClicked('set', true);
@@ -261,16 +279,26 @@ function triangulateImages()
                             if (iSagittal >= 1) && (iSagittal <= iSagittalSize) && ...
                                (iCoronal  >= 1) && (iCoronal  <= iCoronalSize) && ...
                                (iAxial    >= 1) && (iAxial    <= iAxialSize)
-        
+
+                                uiSliderSag = uiSliderSagPtr('get');
+                                uiSliderCor = uiSliderCorPtr('get');
+                                uiSliderTra = uiSliderTraPtr('get');
+
                                 sliceNumber('set', 'sagittal', iSagittal);
                                 sliceNumber('set', 'coronal', iCoronal);
-        
-                                set(uiSliderSagPtr('get'), 'Value', iSagittal / iSagittalSize);
-                                set(uiSliderCorPtr('get'), 'Value', iCoronal / iCoronalSize);
-        
-                                sliceNumber('set', 'axial', iAxial);
 
-                                set(uiSliderTraPtr('get'), 'Value', 1-( iAxial / iAxialSize));                       
+                                uiSliderSag.Value = iSagittal;
+                                uiSliderCor.Value = iCoronal;                               
+
+                                % set(uiSliderSagPtr('get'), 'Value', iSagittal / iSagittalSize);
+                                % set(uiSliderCorPtr('get'), 'Value', iCoronal / iCoronalSize);
+                                % 
+                                sliceNumber('set', 'axial', iAxial);
+                                
+                                uiSliderTra.Value = iAxialSize - iAxial + 1;   
+
+                                % set(uiSliderTraPtr('get'), 'Value', 1-( iAxial / iAxialSize));     
+ 
                             end
                         
                             refreshImages();
@@ -292,4 +320,6 @@ function triangulateImages()
             end
         end
     % end
+
+    % drawnow nocallbacks;
 end

@@ -27,6 +27,6 @@ function setPETCTLu177FusionCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    setModalitiesFusion('nm', 0, 7, 0, 7, 'ct', 50, 500, 50, 500, false, true);
+    setModalitiesFusion('nm', 0, 7, 0, 7, 'ct', 50, 500, 50, 500, 65, false, true);
 
 end

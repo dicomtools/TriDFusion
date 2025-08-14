@@ -69,7 +69,9 @@ function setMachineLearningLu177Callback(hObject, ~)
                            );    
             end 
 
-         % Exclude organs from AI analysis
+            setObjectIcon(dlgMachineLearningLu177);
+
+            % Exclude organs from AI analysis
     
             uicontrol(dlgMachineLearningLu177,...
                       'style'   , 'text',...

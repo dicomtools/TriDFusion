@@ -47,21 +47,24 @@ function loadDcmFile(asMainDirectory, sFileName, bInitDisplay)
     
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
-    
+        % set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+        set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));
+   
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnZoomPtr('get'), 'FontWeight', 'normal');
+        % set(btnZoomPtr('get'), 'FontWeight', 'normal');
+        set(btnZoomPtr('get'), 'CData', resizeTopBarIcon('zoom_grey.png'));
         zoomTool('set', false);
-        zoom(fiMainWindowPtr('get'), 'off');           
+        zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');           
     
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
-        set(btnPanPtr('get'), 'FontWeight', 'normal');
+        % set(btnPanPtr('get'), 'FontWeight', 'normal');
+        set(btnPanPtr('get'), 'CData', resizeTopBarIcon('pan_grey.png'));
         panTool('set', false);
-        pan(fiMainWindowPtr('get'), 'off');     
+        panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');     
     
         set(rotate3DMenu('get'), 'Checked', 'off');         
         rotate3DTool('set', false);
@@ -71,26 +74,26 @@ function loadDcmFile(asMainDirectory, sFileName, bInitDisplay)
         dataCursorTool('set', false);              
         datacursormode(fiMainWindowPtr('get'), 'off');  
         
-        switchTo3DMode    ('set', false);
-        switchToIsoSurface('set', false);
-        switchToMIPMode   ('set', false);
-    
         set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnFusionPtr('get'), 'FontWeight', 'normal');
+        % set(btnFusionPtr('get'), 'FontWeight', 'normal');
+        set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));
     
         set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btn3DPtr('get'), 'FontWeight', 'normal');
+        % set(btn3DPtr('get'), 'FontWeight', 'normal');
+        set(btn3DPtr('get'), 'CData', resizeTopBarIcon('3d_volume_grey.png'));
     
         set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+        % set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+        set(btnIsoSurfacePtr('get'), 'CData', resizeTopBarIcon('3d_iso_grey.png'));
     
         set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnMIPPtr('get'), 'FontWeight', 'normal');
-        
+        % set(btnMIPPtr('get'), 'FontWeight', 'normal');
+        set(btnMIPPtr('get'), 'CData', resizeTopBarIcon('3d_mip_grey.png'));
+            
         progressBar(0.5, 'Reading DICOM, please wait.');
     end
 
@@ -231,7 +234,8 @@ function loadDcmFile(asMainDirectory, sFileName, bInitDisplay)
         end
     end
 
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, 'Error:loadDcmFile()');                        
     end
 

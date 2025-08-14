@@ -86,18 +86,18 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
 %     if get(uiSeriesPtr('get'), 'Value') ~= dPTSerieOffset
 %         set(uiSeriesPtr('get'), 'Value', dPTSerieOffset);
-% 
+%
 %         setSeriesCallback();
 %     end
-% 
-% 
+%
+%
 %     % Apply ROI constraint
 %     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
-% 
+%
 %     bInvertMask = invertConstraint('get');
-% 
+%
 %     tRoiInput = roiTemplate('get', dPTSerieOffset);
-% 
+%
 %     aPTImageTemp = aPTImage;
 %     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
 %     aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
@@ -115,9 +115,9 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
     if ~isempty(aCTImage)
 
         if isInterpolated('get') == false
-        
+
             isInterpolated('set', true);
-        
+
             setImageInterpolation(true);
         end
 
@@ -158,7 +158,7 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;   
+    drawnow;
 
     % Create an empty directory
 
@@ -170,7 +170,7 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
     % Convert dicom to .nii
 
-    progressBar(3/10, 'DICOM to NRRD conversion, please wait.');
+    progressBar(3/10, 'DICOM to NRRD conversion, please wait...');
 
     sNrrdImagesName = sprintf('%sCase01_0000.nrrd', sNrrdTmpDir);
 
@@ -250,9 +250,9 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
                 if bCELossTrainer == false && bClassifySegmentation == true && ~isempty(aCTImage)
 
                     aBoneMask = aCTImage;
-                    aBoneMask(aBoneMask < 200) = 0;                                    
+                    aBoneMask(aBoneMask < 200) = 0;
                     aBoneMask(aBoneMask ~=0) = 1;
-                    aBoneMask = imfill(aBoneMask, 4, 'holes'); 
+                    aBoneMask = imfill(aBoneMask, 4, 'holes');
                     aBoneMask = imbinarize(aBoneMask);
 
                     aClassificationMask = ones(size(aPTImage)); % Soft Tissue
@@ -266,7 +266,7 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
                     maskAddVoiByTypeToSeries(aPTImage, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 3);
                 end
-                
+
 %                 clear aPTImageTemp;
 
                 if exist(char(sSegmentationFolderName), 'dir')
@@ -275,45 +275,45 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
                 end
 
 
-% 
+%
 %                 if ~isempty(aCTImage)
-% 
+%
 %                     progressBar(5/10, 'Resampling data series, please wait...');
-% 
+%
 %                     [aResampledNMImage, atResampledNMMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
-% 
+%
 %                     dicomMetaData('set', atResampledNMMetaData, dPTSerieOffset);
 %                     dicomBuffer  ('set', aResampledNMImage, dPTSerieOffset);
-% 
+%
 %                     progressBar(6/10, 'Resampling MIP, please wait...');
-% 
+%
 %                     refMip = mipBuffer('get', [], dCTSerieOffset);
 %                     aMip   = mipBuffer('get', [], dPTSerieOffset);
-% 
+%
 %                     aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-% 
+%
 %                     mipBuffer('set', aMip, dPTSerieOffset);
-% 
+%
 %                     setQuantification(dPTSerieOffset);
-% 
+%
 %                     progressBar(7/10, 'Resampling contours, please wait.');
-% 
-% 
+%
+%
 %                     atRoi = roiTemplate('get', dPTSerieOffset);
-% 
+%
 %                     if ~isempty(atRoi)
-% 
+%
 %                         atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledNMImage, atResampledNMMetaData, atRoi, true);
-% 
+%
 %                         roiTemplate('set', dPTSerieOffset, atResampledRoi);
 %                     end
-% 
+%
 %                     progressBar(8/10, 'Resampling axes, please wait...');
-% 
+%
 %                     resampleAxes(aResampledNMImage, atResampledNMMetaData);
-% 
+%
 %                     setImagesAspectRatio();
-% 
+%
 %                 end
 
 
@@ -343,7 +343,8 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set fusion
     if ~isempty(aCTImage)
@@ -353,6 +354,8 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
         if isFusion('get') == false
 
             set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+            sliderAlphaValue('set', 0.65);
 
             setFusionCallback();
         end
@@ -375,10 +378,10 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
         setViewRoiPanel();
     end
-% 
+%
 %     refreshImages();
-%     
-%     plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+%
+%     plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
@@ -392,7 +395,8 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setMachineLearningBreastCancerPETFullAI()' );
     end

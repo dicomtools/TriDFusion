@@ -51,7 +51,7 @@ function setContours(tContours, bInitDisplay)
         return;
     end
 
-%    try
+    try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow limitrate;
@@ -122,8 +122,8 @@ function setContours(tContours, bInitDisplay)
                                         sliceThikness =1;
                                     end
                                 end
-                                [xfm,~] = TransformMatrix(atInput(bb).atDicomInfo{1}, sliceThikness);
 
+                                [xfm,~] = TransformMatrix(atInput(bb).atDicomInfo{1}, sliceThikness, false);
 
                                 asTag = cell(numel(segments), 1);
 
@@ -153,7 +153,8 @@ function setContours(tContours, bInitDisplay)
 
                                         try
                                             dSliceNb =  aImageSize(3)-z(1);
-                                        catch
+                                        catch ME
+                                            logErrorToFile(ME);  
                                             dSliceNb =  z(1)+1;
                                         end
                         %                sliceNumber('set', 'axial', dSliceNb);
@@ -163,9 +164,19 @@ function setContours(tContours, bInitDisplay)
                         %                sliceNumber('set', 'axial', dSliceNb);
                                     end
 
-                                    sTag   = num2str(randi([-(2^52/2),(2^52/2)],1));
+                                    sTag   = num2str(generateUniqueNumber(false));
     %                                axRoi  = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                                    aColor = [atContours{cc}(dd).Color(1)/255 atContours{cc}(dd).Color(2)/255 atContours{cc}(dd).Color(3)/255];
+                                    
+                                    rawColor = atContours{cc}(dd).Color;
+
+                                    if isnumeric(rawColor) && numel(rawColor) == 3
+                                        aColor = rawColor(:)' / 255;
+                                    else
+                                        % Set default color to cyan [0 1 1]
+                                        aColor = [0 1 1];
+                                    end
+                                    % aColor = [atContours{cc}(dd).Color(1)/255 atContours{cc}(dd).Color(2)/255 atContours{cc}(dd).Color(3)/255];
+                                    
                                     sLabel = atContours{cc}(dd).ROIName;
 
     %                                pRoi = drawfreehand(axRoi, 'Smoothing', 1, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', sLabel, 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);
@@ -252,9 +263,10 @@ function setContours(tContours, bInitDisplay)
         end
     end
 
-%    catch
-%        progressBar(1, 'Error:setContours()');
-%    end
+    catch ME
+       logErrorToFile(ME);  
+       progressBar(1, 'Error:setContours()');
+   end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow limitrate;

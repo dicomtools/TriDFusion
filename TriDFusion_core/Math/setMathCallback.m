@@ -34,6 +34,8 @@ function setMathCallback(~, ~)
         return;
     end
 
+    set(btnMathPtr('get'), 'CData', resizeTopBarIcon('math_white.png'));           
+
     if viewerUIFigure('get') == true
 
         dlgMathematic = ...
@@ -45,6 +47,7 @@ function setMathCallback(~, ~)
                    'Resize', 'off', ...
                    'Color', viewerBackgroundColor('get'),...
                    'WindowStyle', 'modal', ...
+                   'CloseRequestFcn', @onCloseMath, ...
                    'Name' , 'Mathematic'...
                    );
     else
@@ -56,9 +59,12 @@ function setMathCallback(~, ~)
                                 FIG_MATH_Y ...
                                 ],...
                    'Color', viewerBackgroundColor('get'),...
+                   'CloseRequestFcn', @onCloseMath, ...
                    'Name' , 'Mathematic'...               
                    );
     end
+    
+    setObjectIcon(dlgMathematic);
 
     axeMathematic = ...           
         axes(dlgMathematic, ...
@@ -70,14 +76,14 @@ function setMathCallback(~, ~)
              'ZColor'  , viewerForegroundColor('get'),...             
              'Visible' , 'off'...             
              ); 
-     axeMathematic.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-     axeMathematic.Toolbar = []; 
+     axeMathematic.Interactions = [];
+     deleteAxesToolbar(axeMathematic); 
 
         uicontrol(dlgMathematic,...
                   'String','Reset',...
                   'Position',[15 525 100 25],...
                   'FontWeight', 'bold',...
-                  'BackgroundColor', [0.2 0.039 0.027], ...
+                  'BackgroundColor', [0.3255, 0.1137, 0.1137], ...
                   'ForegroundColor', [0.94 0.94 0.94], ...
                   'Callback', @resetMathematicCallback...
                   );
@@ -320,7 +326,8 @@ function setMathCallback(~, ~)
         
         progressBar(1,'Ready');
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:resetMathematicCallback()');
         end
         
@@ -528,7 +535,8 @@ function setMathCallback(~, ~)
 
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1,'Error:executeMathCallback()');
         end
         
@@ -582,4 +590,11 @@ function setMathCallback(~, ~)
                           );
     end
 
+    function onCloseMath(src, ~)
+        
+        delete(src); 
+  
+        set(btnMathPtr('get'), 'CData', resizeTopBarIcon('math_grey.png'));           
+
+    end
 end

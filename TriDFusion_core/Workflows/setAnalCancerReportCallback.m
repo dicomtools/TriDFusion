@@ -34,7 +34,8 @@ function setAnalCancerReportCallback(~, ~)
 
     exportSimplifiedContoursReport(true, false, false);
 
-    catch
+    catch ME
+       logErrorToFile(ME); 
        progressBar(1, 'Error: exportSimplifiedContoursReport()');
     end
 

@@ -87,18 +87,18 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
 %     if get(uiSeriesPtr('get'), 'Value') ~= dPTSerieOffset
 %         set(uiSeriesPtr('get'), 'Value', dPTSerieOffset);
-% 
+%
 %         setSeriesCallback();
 %     end
 
 
 %     % Apply ROI constraint
 %     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
-% 
+%
 %     bInvertMask = invertConstraint('get');
-% 
+%
 %     tRoiInput = roiTemplate('get', dPTSerieOffset);
-% 
+%
 %     aPTImageTemp = aPTImage;
 %     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
 %     aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
@@ -109,14 +109,14 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
     try
 
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
-    
+
     % PT
-    
+
     % Resample series
 
     progressBar(1/10, 'Resampling data series, please wait...');
@@ -157,7 +157,7 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
     % Convert dicom to .nii
 
-    progressBar(3/10, 'DICOM to NRRD conversion, please wait.');
+    progressBar(3/10, 'DICOM to NRRD conversion, please wait...');
 
     origin = atResampledPTMetaData{end}.ImagePositionPatient;
 
@@ -181,7 +181,7 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
         nrrdWriter(sNrrdPTImagesName, squeeze(aResampledPTImage(:,:,end:-1:1)*dSUVconv), pixelspacing, origin, 'raw'); % Write .nrrd images
 %     else
-% 
+%
 %         nrrdWriter(sNrrdPTImagesName, squeeze(aPTImage(:,:,end:-1:1)), pixelspacing, origin, 'raw'); % Write .nrrd images
 %     end
 
@@ -265,12 +265,12 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
                 progressBar(6/10, 'Segmenting prediction mask, please wait.');
 
-                if bCELossTrainer == false && bClassifySegmentation == true 
+                if bCELossTrainer == false && bClassifySegmentation == true
 
                     aBoneMask = aCTImage;
-                    aBoneMask(aBoneMask < 200) = 0;                                    
+                    aBoneMask(aBoneMask < 200) = 0;
                     aBoneMask(aBoneMask ~=0) = 1;
-                    aBoneMask = imfill(aBoneMask, 4, 'holes'); 
+                    aBoneMask = imfill(aBoneMask, 4, 'holes');
                     aBoneMask = imbinarize(aBoneMask);
 
                     aClassificationMask = ones(size(aResampledPTImage)); % Soft Tissue
@@ -283,7 +283,7 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
                 else
                     maskAddVoiByTypeToSeries(aResampledPTImage, aMask, atResampledPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 3);
                 end
-                
+
 
 %                 clear aPTImageTemp;
 
@@ -291,41 +291,41 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
                     rmdir(char(sSegmentationFolderName), 's');
                 end
-% 
+%
 %                 progressBar(5/10, 'Resampling data series, please wait...');
-% 
+%
 %                 [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
-% 
+%
 %                 dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
 %                 dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
-% 
+%
 %                 progressBar(6/10, 'Resampling MIP, please wait...');
-% 
+%
 %                 refMip = mipBuffer('get', [], dCTSerieOffset);
 %                 aMip   = mipBuffer('get', [], dPTSerieOffset);
-% 
+%
 %                 aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-% 
+%
 %                 mipBuffer('set', aMip, dPTSerieOffset);
-% 
+%
 %                 setQuantification(dPTSerieOffset);
-% 
+%
 %                 progressBar(7/10, 'Resampling contours, please wait.');
-% 
-% 
+%
+%
 %                 atRoi = roiTemplate('get', dPTSerieOffset);
-% 
+%
 %                 if ~isempty(atRoi)
-% 
+%
 %                     atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
-% 
+%
 %                     roiTemplate('set', dPTSerieOffset, atResampledRoi);
 %                 end
-% 
+%
 %                 progressBar(8/10, 'Resampling axes, please wait...');
-% 
+%
 %                 resampleAxes(aResampledPTImage, atResampledPTMetaData);
-% 
+%
 %                 setImagesAspectRatio();
 
             end
@@ -354,7 +354,8 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+  %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set fusion
 %     if ~isempty(aCTImage)
@@ -364,6 +365,8 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
         if isFusion('get') == false
 
             set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+            sliderAlphaValue('set', 0.65);
 
             setFusionCallback();
         end
@@ -383,13 +386,13 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
     % Activate ROI Panel
 
     if viewRoiPanel('get') == false
-        
+
         setViewRoiPanel();
     end
 
 %     refreshImages();
-%     
-%     plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+%
+%     plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
@@ -404,7 +407,8 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setMachineLearningBreastCancerPETCTFullAI()' );
     end

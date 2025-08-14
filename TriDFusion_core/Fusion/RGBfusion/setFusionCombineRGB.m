@@ -190,7 +190,8 @@ function setFusionCombineRGB(~, ~)
         end
     end
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         set(uiFusedSeriesPtr('get'), 'Enable', 'on');
 
 %        set(uiFusionSliderWindowPtr('get'), 'Enable', 'on');

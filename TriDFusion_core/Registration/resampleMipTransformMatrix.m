@@ -70,13 +70,51 @@ function [resampImage, atDcmMetaData, zMoveOffsetRemaining] = resampleMipTransfo
     
     TF = affine3d(f);
     
-    Rdcm  = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+    % DICOM volume spatial reference
+    dcmMeta = atDcmMetaData{1};
+    origin    = dcmMeta.ImagePositionPatient;     % [x0, y0, z0]
+    spacing   = dcmMeta.PixelSpacing;             % [rowSpacing; colSpacing]
+    % dimsDcm = [nRows, nCols, nSlices]
+    Rdcm = imref3d( dimsDcm, ...
+        ... % XWorldLimits along columns uses col‐spacing = spacing(2)
+        [ origin(1), origin(1) + (dimsDcm(2)-1) * spacing(2) ], ...
+        ... % YWorldLimits along rows uses row‐spacing = spacing(1)
+        [ origin(2), origin(2) + (dimsDcm(1)-1) * spacing(1) ], ...
+        ... % ZWorldLimits from first‐ to last‐slice center
+        [ origin(3), origin(3) + (dimsDcm(3)-1) * dcmSliceThickness ] );
     
+    % Reference volume spatial reference
+    refMeta    = atRefMetaData{1};
+    originRef  = refMeta.ImagePositionPatient;    % [x0, y0, z0]
+    spacingRef = refMeta.PixelSpacing;            % [rowSpacing; colSpacing]
+    % dimsRef = [nRows, nCols, nSlices]
+    Rref = imref3d( dimsRef, ...
+        ... % XWorldLimits along columns
+        [ originRef(1), originRef(1) + (dimsRef(2)-1) * spacingRef(2) ], ...
+        ... % YWorldLimits along rows
+        [ originRef(2), originRef(2) + (dimsRef(1)-1) * spacingRef(1) ], ...
+        ... % ZWorldLimits from first‐ to last‐slice center
+        [ originRef(3), originRef(3) + (dimsRef(3)-1) * refSliceThickness ] );
+
 %    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')) );  
     
 %    if numel(resampImage) ~=  numel(refImage) % SPECT and CT DX
     if bSameOutput == true
-        [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
+        % Rref = imref3d(dimsRef, atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+        % 
+        % Xlimits = [ atRefMetaData{1}.ImagePositionPatient(1), ...
+        %             atRefMetaData{1}.ImagePositionPatient(1) + Rref.ImageExtentInWorldX ];
+        % Ylimits = [ atRefMetaData{1}.ImagePositionPatient(2), ...
+        %             atRefMetaData{1}.ImagePositionPatient(2) + Rref.ImageExtentInWorldY ];
+        % Zlimits = [ atRefMetaData{1}.ImagePositionPatient(3), ...
+        %             atRefMetaData{1}.ImagePositionPatient(3) + Rref.ImageExtentInWorldZ ];
+        % 
+        % Rout = imref3d( dimsRef, ...
+        %                Xlimits, ...
+        %                Ylimits, ...
+        %                Zlimits );
+
+        [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', Rref);  
     else
         [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
     end
@@ -99,9 +137,7 @@ function [resampImage, atDcmMetaData, zMoveOffsetRemaining] = resampleMipTransfo
                 dImageOffset = round(dFirstOffset);
                 zMoveOffsetRemaining = dFirstOffset-dImageOffset;
     
-    
-    
-                 resampImage = resampImage(:,:,1:end);
+                resampImage = resampImage(:,:,1:end);
                 
     %                 dOffset = (dRefPosition - dDcmPosition)
     %%%%%%% TEMP PATH, NEED TO REVISIT
@@ -139,6 +175,28 @@ function [resampImage, atDcmMetaData, zMoveOffsetRemaining] = resampleMipTransfo
                 resampImage = aResample;
                 clear aResample;
             end
+        else
+            [dDcmFirstZ, ~] = getImageZPosition(atDcmMetaData, dcmImage);
+            [dRefFirstZ, ~] = getImageZPosition(atRefMetaData, refImage);
+        
+            dFirstOffset = (dRefFirstZ - dDcmFirstZ) / refSliceThickness;
+            dImageOffset = round(dFirstOffset);
+            zMoveOffsetRemaining = dFirstOffset - dImageOffset;
+        
+            if dImageOffset ~= 0
+                % Create a buffer and roll the data by dImageOffset slices
+                aShifted = single(zeros(aRspSize(1), aRspSize(2), dimsRef(3)));
+                if dImageOffset > 0
+                    % pad at front, drop at back
+                    aShifted(:,:,1 + dImageOffset : end) = resampImage(:,:,1 : end - dImageOffset);
+                else
+                    % pad at back, drop at front
+                    off = abs(dImageOffset);
+                    aShifted(:,:,1 : end - off) = resampImage(:,:,1 + off : end);
+                end
+                resampImage = aShifted;
+                clear aShifted;
+            end              
         end
     end
 %        if dimsRef(3)==dimsDcm(3)

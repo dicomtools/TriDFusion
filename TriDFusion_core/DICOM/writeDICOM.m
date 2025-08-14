@@ -48,9 +48,10 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
     aBufferSize = size(aBuffer);
 
     if numel(aBufferSize) > 2
+
         array4d = single(zeros(aBufferSize(1), aBufferSize(2),1, aBufferSize(3)));
 
-        for slice = 1:aBufferSize(3)
+        for slice = 1: aBufferSize(3)
 
             if bRescale == true
 
@@ -165,17 +166,18 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
     end    
 
     if numel(atWriteMetaData) ~= 1
-        if isfield(atWriteMetaData{1}, 'ImagePositionPatient') && ...
-           isfield(atWriteMetaData{2}, 'ImagePositionPatient')
 
-            if atWriteMetaData{2}.ImagePositionPatient(3) - ...
-               atWriteMetaData{1}.ImagePositionPatient(3) > 0                    
+        if isfield(atMetaData{1}, 'ImagePositionPatient') && ...
+           isfield(atMetaData{2}, 'ImagePositionPatient')
+
+            if isDicomImageFlipped(atMetaData)
+                                      
                  array4d = array4d(:,:,:,end:-1:1);   
                  atWriteMetaData = flip(atWriteMetaData);
             end
         end
     else
-        if strcmpi(atWriteMetaData{1}.Modality, 'RTDOSE')
+        if strcmpi(atMetaData{1}.Modality, 'RTDOSE')
 
 %             bFlip = getImagePosition(dSeriesOffset);
 %             if bFlip == true
@@ -183,15 +185,26 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
 %             end
         
         else
-            if isfield(atWriteMetaData{1}, 'PatientPosition')
-                if strcmpi(atWriteMetaData{1}.PatientPosition, 'FFS')
+            if isfield(atMetaData{1}, 'PatientPosition')
+
+                if strcmpi(atMetaData{1}.PatientPosition, 'FFS')
                      array4d = array4d(:,:,:,end:-1:1);    
-                     atWriteMetaData = flip(atWriteMetaData);
-                end         
+                     % atWriteMetaData = flip(atWriteMetaData);
                 
-                if strcmpi(atWriteMetaData{1}.PatientPosition, 'FFP')
+                
+                elseif strcmpi(atMetaData{1}.PatientPosition, 'FFP')
                      array4d = array4d(end:-1:1,:,:,:);    
-                end               
+                else
+                    if isDicomImageFlipped(atMetaData)
+
+                        array4d = array4d(:,:,:,end:-1:1);    
+                    end                  
+                end 
+            else
+                if isDicomImageFlipped(atMetaData)
+    
+                    array4d = array4d(:,:,:,end:-1:1);    
+                end                 
             end
         end
     end  
@@ -567,7 +580,8 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
                            'WritePrivate'     , true ...
                            );                            
             end
-        catch
+        catch ME   
+            logErrorToFile(ME);
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;             
             
@@ -583,20 +597,27 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
     f = java.io.File(char(sTmpDir)); % Copy from temp folder to output dir
     dinfo = f.listFiles();                   
     for K = 1 : 1 : numel(dinfo)
+
         if ~(dinfo(K).isDirectory)
-            copyfile([char(sTmpDir) char(dinfo(K).getName())], char(sWriteDir) );
+
+            sSrcFile  = fullfile(char(sTmpDir), char(dinfo(K).getName()));
+            sDstFile  = fullfile(char(sWriteDir), char(dinfo(K).getName()));
+            
+            if ~strcmpi(sSrcFile, sDstFile) % File doesn't exist
+
+                copyfile(sSrcFile, sWriteDir);
+            end
         end
     end 
     rmdir(char(sTmpDir), 's');    
     
     progressBar(1, sprintf('Export %d files completed %s', ww, char(sWriteDir)));
     
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, sprintf('Error:writeDICOM(), %s', char(sWriteDir)) );                
     end
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow; 
-    
-
 end        

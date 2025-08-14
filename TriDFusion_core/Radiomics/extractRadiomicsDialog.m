@@ -194,7 +194,9 @@ function extractRadiomicsDialog(sRadiomicsScript)
                    );
     end
 
-     axeRadiomics = ...
+    setObjectIcon(dlgRadiomics);
+
+    axeRadiomics = ...
         axes(dlgRadiomics, ...
              'Units'   , 'normalized', ...
              'Position', [0 0 1 1], ...
@@ -204,8 +206,9 @@ function extractRadiomicsDialog(sRadiomicsScript)
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'off'...
              );
-      axeRadiomics.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-      axeRadiomics.Toolbar.Visible = 'off';
+      axeRadiomics.Interactions = [];
+      % axeRadiomics.Toolbar.Visible = 'off';
+      deleteAxesToolbar(axeRadiomics);
       disableDefaultInteractivity(axeRadiomics);
 
       uiRadiomics = ...
@@ -2235,7 +2238,7 @@ function extractRadiomicsDialog(sRadiomicsScript)
                                0.06 ...
                                0.03], ...
                   'Enable'  , 'on', ...
-                  'BackgroundColor', [0.2 0.039 0.027], ...
+                  'BackgroundColor', [0.3255, 0.1137, 0.1137], ...
                   'ForegroundColor', [0.94 0.94 0.94], ...
                   'Callback', @deleteRadiomicsProtocolCallback...
                   );
@@ -3352,21 +3355,39 @@ function extractRadiomicsDialog(sRadiomicsScript)
         DLG_PROTOCOL_NAME_X = 380;
         DLG_PROTOCOL_NAME_Y = 100;
 
-        dlgProtocolName = ...
-            dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_PROTOCOL_NAME_X/2) ...
-                                (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_PROTOCOL_NAME_Y/2) ...
-                                DLG_PROTOCOL_NAME_X ...
-                                DLG_PROTOCOL_NAME_Y ...
-                                ],...
-                   'MenuBar', 'none',...
-                   'Resize', 'off', ...
-                   'NumberTitle','off',...
-                   'MenuBar', 'none',...
-                   'Color', viewerBackgroundColor('get'), ...
-                   'Name', 'Protocol Name',...
-                   'Toolbar','none'...
-                   );
+        if viewerUIFigure('get') == true
+    
+            dlgProtocolName = ...
+                uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_PROTOCOL_NAME_X/2) ...
+                                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_PROTOCOL_NAME_Y/2) ...
+                                    DLG_PROTOCOL_NAME_X ...
+                                    DLG_PROTOCOL_NAME_Y ...
+                                    ],...
+                         'Resize'     , 'off', ...
+                         'Color'      , viewerBackgroundColor('get'),...
+                         'WindowStyle', 'modal', ...
+                         'Name'       , 'Protocol Name'...
+                        );
+         else
+    
+            dlgProtocolName = ...
+                dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_PROTOCOL_NAME_X/2) ...
+                                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_PROTOCOL_NAME_Y/2) ...
+                                    DLG_PROTOCOL_NAME_X ...
+                                    DLG_PROTOCOL_NAME_Y ...
+                                    ],...
+                       'MenuBar', 'none',...
+                       'Resize', 'off', ...
+                       'NumberTitle','off',...
+                       'MenuBar', 'none',...
+                       'Color', viewerBackgroundColor('get'), ...
+                       'Name', 'Protocol Name',...
+                       'Toolbar','none'...
+                       );
+        end
 
+        setObjectIcon(dlgProtocolName);
+        
         axeProtocolName = ...
             axes(dlgProtocolName, ...
                  'Units'   , 'pixels', ...
@@ -3377,8 +3398,8 @@ function extractRadiomicsDialog(sRadiomicsScript)
                  'ZColor'  , viewerForegroundColor('get'),...
                  'Visible' , 'off'...
                  );
-        axeProtocolName.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axeProtocolName.Toolbar = [];
+        axeProtocolName.Interactions = [];
+        deleteAxesToolbar(axeProtocolName);
 
             uicontrol(dlgProtocolName,...
                       'style'   , 'text',...
@@ -4235,7 +4256,7 @@ function extractRadiomicsDialog(sRadiomicsScript)
 
         atMetaData = dicomMetaData('get', [],  get(uiSeriesPtr('get'), 'Value'));
 
-        tReadiomics = getReadiomicsFeaturestemplate();
+        tRadiomics = getRadiomicsFeaturestemplate();
 
         bContour       = get(chkRadiomicsContour     , 'Value');
         dContourOffset = get(popRadiomicsContours    , 'Value');
@@ -4263,19 +4284,19 @@ function extractRadiomicsDialog(sRadiomicsScript)
         end
 
         if bAllContours == true % All Contours
-            extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType);
+            extractRadiomicsFromContours(sRadiomicsScript, tRadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType);
         else % single contour
             if bContour == false && bEntireVolume == false %
                 progressBar('Error: At least one contour option must be selected!');
                 errordlg('At least one contour option must be selected!!', 'Contour validation');
             else
-                extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset);
+                extractRadiomicsFromContours(sRadiomicsScript, tRadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset);
             end
         end
 
     end
 
-    function tReadiomics = getReadiomicsFeaturestemplate()
+    function tRadiomics = getRadiomicsFeaturestemplate()
 
         % featureClass
 
@@ -4286,21 +4307,21 @@ function extractRadiomicsDialog(sRadiomicsScript)
         adOffset = find(cellfun( @(chkFirstOrderFeatures) chkFirstOrderFeatures.Value, chkFirstOrderFeatures, 'uni', true ), true);
 
         if isempty(adOffset)
-            tReadiomics.featureClass.firstOrder = [];
+            tRadiomics.featureClass.firstOrder = [];
         else
-            tReadiomics.featureClass.firstOrder.name = 'firstorder';
+            tRadiomics.featureClass.firstOrder.name = 'firstorder';
             bb=0;
             for aa=1:numel(asFirstOrderFeatures)
                 if get(chkFirstOrderFeatures{aa}, 'Value')
                     bb=bb+1;
-                    tReadiomics.featureClass.firstOrder.feature{bb} = asFirstOrderFeatures{aa};
+                    tRadiomics.featureClass.firstOrder.feature{bb} = asFirstOrderFeatures{aa};
                 end
             end
 
             if aa==bb % All features active
-                tReadiomics.featureClass.firstOrder.all = true;
+                tRadiomics.featureClass.firstOrder.all = true;
             else
-                tReadiomics.featureClass.firstOrder.all = false;
+                tRadiomics.featureClass.firstOrder.all = false;
             end
         end
 
@@ -4309,21 +4330,21 @@ function extractRadiomicsDialog(sRadiomicsScript)
         adOffset = find(cellfun( @(chkShapeFeatures) chkShapeFeatures.Value, chkShapeFeatures, 'uni', true ), true);
 
         if isempty(adOffset)
-            tReadiomics.featureClass.shape = [];
+            tRadiomics.featureClass.shape = [];
         else
-            tReadiomics.featureClass.shape.name = 'shape';
+            tRadiomics.featureClass.shape.name = 'shape';
             bb=0;
             for aa=1:numel(asShapeFeatures)
                 if get(chkShapeFeatures{aa}, 'Value')
                     bb=bb+1;
-                    tReadiomics.featureClass.shape.feature{bb} = asShapeFeatures{aa};
+                    tRadiomics.featureClass.shape.feature{bb} = asShapeFeatures{aa};
                 end
             end
 
             if aa==bb % All features active
-                tReadiomics.featureClass.shape.all = true;
+                tRadiomics.featureClass.shape.all = true;
             else
-                tReadiomics.featureClass.shape.all = false;
+                tRadiomics.featureClass.shape.all = false;
             end
         end
 
@@ -4332,21 +4353,21 @@ function extractRadiomicsDialog(sRadiomicsScript)
         adOffset = find(cellfun( @(chkGlcmFeatures) chkGlcmFeatures.Value, chkGlcmFeatures, 'uni', true ), true);
 
         if isempty(adOffset)
-            tReadiomics.featureClass.glcm = [];
+            tRadiomics.featureClass.glcm = [];
         else
-            tReadiomics.featureClass.glcm.name = 'glcm';
+            tRadiomics.featureClass.glcm.name = 'glcm';
             bb=0;
             for aa=1:numel(asGlcmFeatures)
                 if get(chkGlcmFeatures{aa}, 'Value')
                     bb=bb+1;
-                    tReadiomics.featureClass.glcm.feature{bb} = asGlcmFeatures{aa};
+                    tRadiomics.featureClass.glcm.feature{bb} = asGlcmFeatures{aa};
                 end
             end
 
             if aa==bb % All features active
-                tReadiomics.featureClass.glcm.all = true;
+                tRadiomics.featureClass.glcm.all = true;
             else
-                tReadiomics.featureClass.glcm.all = false;
+                tRadiomics.featureClass.glcm.all = false;
             end
         end
 
@@ -4355,21 +4376,21 @@ function extractRadiomicsDialog(sRadiomicsScript)
         adOffset = find(cellfun( @(chkGldmFeatures) chkGldmFeatures.Value, chkGldmFeatures, 'uni', true ), true);
 
         if isempty(adOffset)
-            tReadiomics.featureClass.gldm = [];
+            tRadiomics.featureClass.gldm = [];
         else
-            tReadiomics.featureClass.gldm.name = 'gldm';
+            tRadiomics.featureClass.gldm.name = 'gldm';
             bb=0;
             for aa=1:numel(asGldmFeatures)
                 if get(chkGldmFeatures{aa}, 'Value')
                     bb=bb+1;
-                    tReadiomics.featureClass.gldm.feature{bb} = asGldmFeatures{aa};
+                    tRadiomics.featureClass.gldm.feature{bb} = asGldmFeatures{aa};
                 end
             end
 
             if aa==bb % All features active
-                tReadiomics.featureClass.gldm.all = true;
+                tRadiomics.featureClass.gldm.all = true;
             else
-                tReadiomics.featureClass.gldm.all = false;
+                tRadiomics.featureClass.gldm.all = false;
             end
         end
 
@@ -4378,21 +4399,21 @@ function extractRadiomicsDialog(sRadiomicsScript)
         adOffset = find(cellfun( @(chkGlrlmFeatures) chkGlrlmFeatures.Value, chkGlrlmFeatures, 'uni', true ), true);
 
         if isempty(adOffset)
-            tReadiomics.featureClass.glrlm = [];
+            tRadiomics.featureClass.glrlm = [];
         else
-            tReadiomics.featureClass.glrlm.name = 'glrlm';
+            tRadiomics.featureClass.glrlm.name = 'glrlm';
             bb=0;
             for aa=1:numel(asGlrlmFeatures)
                 if get(chkGlrlmFeatures{aa}, 'Value')
                     bb=bb+1;
-                    tReadiomics.featureClass.glrlm.feature{bb} = asGlrlmFeatures{aa};
+                    tRadiomics.featureClass.glrlm.feature{bb} = asGlrlmFeatures{aa};
                 end
             end
 
             if aa==bb % All features active
-                tReadiomics.featureClass.glrlm.all = true;
+                tRadiomics.featureClass.glrlm.all = true;
             else
-                tReadiomics.featureClass.glrlm.all = false;
+                tRadiomics.featureClass.glrlm.all = false;
             end
         end
 
@@ -4401,21 +4422,21 @@ function extractRadiomicsDialog(sRadiomicsScript)
         adOffset = find(cellfun( @(chkGlszmFeatures) chkGlszmFeatures.Value, chkGlszmFeatures, 'uni', true ), true);
 
         if isempty(adOffset)
-            tReadiomics.featureClass.glszm = [];
+            tRadiomics.featureClass.glszm = [];
         else
-            tReadiomics.featureClass.glszm.name = 'glszm';
+            tRadiomics.featureClass.glszm.name = 'glszm';
             bb=0;
             for aa=1:numel(asGlszmFeatures)
                 if get(chkGlrlmFeatures{aa}, 'Value')
                     bb=bb+1;
-                    tReadiomics.featureClass.glszm.feature{bb} = asGlszmFeatures{aa};
+                    tRadiomics.featureClass.glszm.feature{bb} = asGlszmFeatures{aa};
                 end
             end
 
             if aa==bb % All features active
-                tReadiomics.featureClass.glszm.all = true;
+                tRadiomics.featureClass.glszm.all = true;
             else
-                tReadiomics.featureClass.glszm.all = false;
+                tRadiomics.featureClass.glszm.all = false;
             end
         end
 
@@ -4424,21 +4445,21 @@ function extractRadiomicsDialog(sRadiomicsScript)
         adOffset = find(cellfun( @(chkNgtdmFeatures) chkNgtdmFeatures.Value, chkNgtdmFeatures, 'uni', true ), true);
 
         if isempty(adOffset)
-            tReadiomics.featureClass.ngtdm = [];
+            tRadiomics.featureClass.ngtdm = [];
         else
-            tReadiomics.featureClass.ngtdm.name = 'ngtdm';
+            tRadiomics.featureClass.ngtdm.name = 'ngtdm';
             bb=0;
             for aa=1:numel(asNgtdmFeatures)
                 if get(chkNgtdmFeatures{aa}, 'Value')
                     bb=bb+1;
-                    tReadiomics.featureClass.ngtdm.feature{bb} = asNgtdmFeatures{aa};
+                    tRadiomics.featureClass.ngtdm.feature{bb} = asNgtdmFeatures{aa};
                 end
             end
 
             if aa==bb % All features active
-                tReadiomics.featureClass.ngtdm.all = true;
+                tRadiomics.featureClass.ngtdm.all = true;
             else
-                tReadiomics.featureClass.ngtdm.all = false;
+                tRadiomics.featureClass.ngtdm.all = false;
             end
         end
 
@@ -4446,62 +4467,62 @@ function extractRadiomicsDialog(sRadiomicsScript)
 
         % binWidth
 
-        tReadiomics.setting.binWidth.name   = get(chkSettingBinWidth, 'UserData');
-        tReadiomics.setting.binWidth.enable = get(chkSettingBinWidth, 'Value');
-        tReadiomics.setting.binWidth.value  = str2double(get(edtSettingBinWidth, 'String'));
+        tRadiomics.setting.binWidth.name   = get(chkSettingBinWidth, 'UserData');
+        tRadiomics.setting.binWidth.enable = get(chkSettingBinWidth, 'Value');
+        tRadiomics.setting.binWidth.value  = str2double(get(edtSettingBinWidth, 'String'));
 
         % resegmentRange
 
-        tReadiomics.setting.resegmentRange.name   = get(chkSettingResegmentation, 'UserData');
-        tReadiomics.setting.resegmentRange.enable = get(chkSettingResegmentation, 'Value');
-        tReadiomics.setting.resegmentRange.value.min  = str2double(get(edtSettingResegmentationMin, 'String'));
-        tReadiomics.setting.resegmentRange.value.max  = str2double(get(edtSettingResegmentationMax, 'String'));
+        tRadiomics.setting.resegmentRange.name   = get(chkSettingResegmentation, 'UserData');
+        tRadiomics.setting.resegmentRange.enable = get(chkSettingResegmentation, 'Value');
+        tRadiomics.setting.resegmentRange.value.min  = str2double(get(edtSettingResegmentationMin, 'String'));
+        tRadiomics.setting.resegmentRange.value.max  = str2double(get(edtSettingResegmentationMax, 'String'));
 
         % binCount
 
-        tReadiomics.setting.binCount.name   = get(chkSettingBinPerRoi, 'UserData');
-        tReadiomics.setting.binCount.enable = get(chkSettingBinPerRoi, 'Value');
-        tReadiomics.setting.binCount.value  = str2double(get(edtSettingBinPerRoi, 'String'));
+        tRadiomics.setting.binCount.name   = get(chkSettingBinPerRoi, 'UserData');
+        tRadiomics.setting.binCount.enable = get(chkSettingBinPerRoi, 'Value');
+        tRadiomics.setting.binCount.value  = str2double(get(edtSettingBinPerRoi, 'String'));
 
         % resampledPixelSpacing
 
-        tReadiomics.setting.resampledPixelSpacing.name   = get(chkSettingResampleImage, 'UserData');
-        tReadiomics.setting.resampledPixelSpacing.enable = get(chkSettingResampleImage, 'Value');
-        tReadiomics.setting.resampledPixelSpacing.value.x  = str2double(get(edtSettingResampleImageX, 'String'));
-        tReadiomics.setting.resampledPixelSpacing.value.y  = str2double(get(edtSettingResampleImageY, 'String'));
-        tReadiomics.setting.resampledPixelSpacing.value.z  = str2double(get(edtSettingResampleImageZ, 'String'));
+        tRadiomics.setting.resampledPixelSpacing.name   = get(chkSettingResampleImage, 'UserData');
+        tRadiomics.setting.resampledPixelSpacing.enable = get(chkSettingResampleImage, 'Value');
+        tRadiomics.setting.resampledPixelSpacing.value.x  = str2double(get(edtSettingResampleImageX, 'String'));
+        tRadiomics.setting.resampledPixelSpacing.value.y  = str2double(get(edtSettingResampleImageY, 'String'));
+        tRadiomics.setting.resampledPixelSpacing.value.z  = str2double(get(edtSettingResampleImageZ, 'String'));
 
         % interpolator (resampledPixelSpacing must be enable)
 
-        tReadiomics.setting.interpolator.name   = get(popSettingResampleImageInterpolation, 'UserData');
-        tReadiomics.setting.interpolator.enable = get(chkSettingResampleImage, 'Value');
+        tRadiomics.setting.interpolator.name   = get(popSettingResampleImageInterpolation, 'UserData');
+        tRadiomics.setting.interpolator.enable = get(chkSettingResampleImage, 'Value');
 
         asGetInterpolation = get(popSettingResampleImageInterpolation, 'String');
         dGetInterpolation  = get(popSettingResampleImageInterpolation, 'Value');
-        tReadiomics.setting.interpolator.value  = asGetInterpolation{dGetInterpolation};
+        tRadiomics.setting.interpolator.value  = asGetInterpolation{dGetInterpolation};
 
         % padDistance (resampledPixelSpacing must be enable)
 
-        tReadiomics.setting.padDistance.name   = get(edtSettingResampleImagePadDistance, 'UserData');
-        tReadiomics.setting.padDistance.enable = get(chkSettingResampleImage, 'Value');
-        tReadiomics.setting.padDistance.value  = str2double(get(edtSettingResampleImagePadDistance, 'String'));
+        tRadiomics.setting.padDistance.name   = get(edtSettingResampleImagePadDistance, 'UserData');
+        tRadiomics.setting.padDistance.enable = get(chkSettingResampleImage, 'Value');
+        tRadiomics.setting.padDistance.value  = str2double(get(edtSettingResampleImagePadDistance, 'String'));
 
         % normalize
 
-        tReadiomics.setting.normalize.name   = get(chkSettingNormalizeImage, 'UserData');
-        tReadiomics.setting.normalize.enable = get(chkSettingNormalizeImage, 'Value');
+        tRadiomics.setting.normalize.name   = get(chkSettingNormalizeImage, 'UserData');
+        tRadiomics.setting.normalize.enable = get(chkSettingNormalizeImage, 'Value');
         if get(chkSettingNormalizeImage, 'Value') == true
             sNormalize= 'true';
         else
             sNormalize= 'false';
         end
-        tReadiomics.setting.normalize.value  = sNormalize;
+        tRadiomics.setting.normalize.value  = sNormalize;
 
         % normalizeScale (normalize must be enable)
 
-        tReadiomics.setting.normalizeScale.name   = get(edtSettingNormalizeImageScale, 'UserData');
-        tReadiomics.setting.normalizeScale.enable = get(chkSettingNormalizeImage, 'Value');
-        tReadiomics.setting.normalizeScale.value  = str2double(get(edtSettingNormalizeImageScale, 'String'));
+        tRadiomics.setting.normalizeScale.name   = get(edtSettingNormalizeImageScale, 'UserData');
+        tRadiomics.setting.normalizeScale.enable = get(chkSettingNormalizeImage, 'Value');
+        tRadiomics.setting.normalizeScale.value  = str2double(get(edtSettingNormalizeImageScale, 'String'));
 
         % removeOutliers (normalize must be enable)
 
@@ -4516,15 +4537,15 @@ function extractRadiomicsDialog(sRadiomicsScript)
             bRemoveOutliersEnable = false;
         end
 
-        tReadiomics.setting.removeOutliers.name   = get(edtSettingNormalizeImageRemoveOutliers, 'UserData');
-        tReadiomics.setting.removeOutliers.enable = bRemoveOutliersEnable;
-        tReadiomics.setting.removeOutliers.value  = str2double(get(edtSettingNormalizeImageRemoveOutliers, 'String'));
+        tRadiomics.setting.removeOutliers.name   = get(edtSettingNormalizeImageRemoveOutliers, 'UserData');
+        tRadiomics.setting.removeOutliers.enable = bRemoveOutliersEnable;
+        tRadiomics.setting.removeOutliers.value  = str2double(get(edtSettingNormalizeImageRemoveOutliers, 'String'));
 
         % Mask validation
 
         % minimumROIDimensions (mask validation must be enable)
 
-        tReadiomics.setting.minimumROIDimensions.name = get(edtSettingMaskValidationMinRoiDim, 'UserData');
+        tRadiomics.setting.minimumROIDimensions.name = get(edtSettingMaskValidationMinRoiDim, 'UserData');
         if get(chkSettingMaskValidation, 'Value') == true
             dMinRoiDim = str2double(get(edtSettingMaskValidationMinRoiDim, 'String'));
             if dMinRoiDim > 0
@@ -4536,12 +4557,12 @@ function extractRadiomicsDialog(sRadiomicsScript)
             bROIDimensionsEnable = false;
         end
 
-        tReadiomics.setting.minimumROIDimensions.enable = bROIDimensionsEnable;
-        tReadiomics.setting.minimumROIDimensions.value  = str2double(get(edtSettingMaskValidationMinRoiDim, 'String'));
+        tRadiomics.setting.minimumROIDimensions.enable = bROIDimensionsEnable;
+        tRadiomics.setting.minimumROIDimensions.value  = str2double(get(edtSettingMaskValidationMinRoiDim, 'String'));
 
         % minimumROISize (mask validation must be enable)
 
-        tReadiomics.setting.minimumROISize.name = get(edtSettingMaskValidationMinRoiSize, 'UserData');
+        tRadiomics.setting.minimumROISize.name = get(edtSettingMaskValidationMinRoiSize, 'UserData');
         if get(chkSettingMaskValidation, 'Value') == true
             dMinRoiSize = str2double(get(edtSettingMaskValidationMinRoiSize, 'String'));
             if dMinRoiSize > 0
@@ -4553,12 +4574,12 @@ function extractRadiomicsDialog(sRadiomicsScript)
             bROISizeEnable = false;
         end
 
-        tReadiomics.setting.minimumROISize.enable = bROISizeEnable;
-        tReadiomics.setting.minimumROISize.value  = str2double(get(edtSettingMaskValidationMinRoiSize, 'String'));
+        tRadiomics.setting.minimumROISize.enable = bROISizeEnable;
+        tRadiomics.setting.minimumROISize.value  = str2double(get(edtSettingMaskValidationMinRoiSize, 'String'));
 
         % geometryTolerance (mask validation must be enable)
 
-        tReadiomics.setting.geometryTolerance.name = get(edtSettingMaskValidationGeometryTolerance, 'UserData');
+        tRadiomics.setting.geometryTolerance.name = get(edtSettingMaskValidationGeometryTolerance, 'UserData');
         if get(chkSettingMaskValidation, 'Value') == true
             dGeometryTolerance = str2double(get(edtSettingMaskValidationGeometryTolerance, 'String'));
             if dGeometryTolerance > 0
@@ -4570,12 +4591,12 @@ function extractRadiomicsDialog(sRadiomicsScript)
             bGeometryTolerancEnable = false;
         end
 
-        tReadiomics.setting.geometryTolerance.enable = bGeometryTolerancEnable;
-        tReadiomics.setting.geometryTolerance.value  = str2double(get(edtSettingMaskValidationGeometryTolerance, 'String'));
+        tRadiomics.setting.geometryTolerance.enable = bGeometryTolerancEnable;
+        tRadiomics.setting.geometryTolerance.value  = str2double(get(edtSettingMaskValidationGeometryTolerance, 'String'));
 
         % correctMask (mask validation must be enable)
 
-        tReadiomics.setting.correctMask.name = get(chkSettingMaskValidationCorrectMask, 'UserData');
+        tRadiomics.setting.correctMask.name = get(chkSettingMaskValidationCorrectMask, 'UserData');
         if get(chkSettingMaskValidation, 'Value') == true
             bCorrectMaskEnable = true;
         else
@@ -4589,12 +4610,12 @@ function extractRadiomicsDialog(sRadiomicsScript)
             sCorrectMask = 'false';
         end
 
-        tReadiomics.setting.correctMask.enable = bCorrectMaskEnable;
-        tReadiomics.setting.correctMask.value  = sCorrectMask;
+        tRadiomics.setting.correctMask.enable = bCorrectMaskEnable;
+        tRadiomics.setting.correctMask.value  = sCorrectMask;
 
         % force2D
 
-        tReadiomics.setting.force2D.name = get(chkSettingOtherForce2D, 'UserData');
+        tRadiomics.setting.force2D.name = get(chkSettingOtherForce2D, 'UserData');
         if get(chkSettingOtherForce2D, 'Value') == true
             bForce2DEnable = true;
         else
@@ -4607,12 +4628,12 @@ function extractRadiomicsDialog(sRadiomicsScript)
             sForce2D = 'false';
         end
 
-        tReadiomics.setting.force2D.enable = bForce2DEnable;
-        tReadiomics.setting.force2D.value  = sForce2D;
+        tRadiomics.setting.force2D.enable = bForce2DEnable;
+        tRadiomics.setting.force2D.value  = sForce2D;
 
         % force2Ddimension (force2D must be enablr)
 
-        tReadiomics.setting.force2Ddimension.name = get(edtSettingOtherForce2D, 'UserData');
+        tRadiomics.setting.force2Ddimension.name = get(edtSettingOtherForce2D, 'UserData');
         if get(chkSettingOtherForce2D, 'Value') == true
             dForce2Ddimension = str2double(get(edtSettingOtherForce2D, 'String'));
             if dForce2Ddimension > 0
@@ -4625,12 +4646,12 @@ function extractRadiomicsDialog(sRadiomicsScript)
             bForce2DdimensionEnable = false;
         end
 
-        tReadiomics.setting.force2Ddimension.enable = bForce2DdimensionEnable;
-        tReadiomics.setting.force2Ddimension.value  = str2double(get(edtSettingOtherForce2D, 'String'));
+        tRadiomics.setting.force2Ddimension.enable = bForce2DdimensionEnable;
+        tRadiomics.setting.force2Ddimension.value  = str2double(get(edtSettingOtherForce2D, 'String'));
 
         % weightingNorm
 
-        tReadiomics.setting.weightingNorm.name = get(popSettingOtherTextureMatrix, 'UserData');
+        tRadiomics.setting.weightingNorm.name = get(popSettingOtherTextureMatrix, 'UserData');
 
         asGetTextureMatrix =  get(popSettingOtherTextureMatrix, 'String');
         dGetTextureMatrix  =  get(popSettingOtherTextureMatrix, 'Value');
@@ -4641,18 +4662,18 @@ function extractRadiomicsDialog(sRadiomicsScript)
             bTextureMatrixEnable = true;
         end
 
-        tReadiomics.setting.weightingNorm.enable = bTextureMatrixEnable;
-        tReadiomics.setting.weightingNorm.value  = asGetTextureMatrix{dGetTextureMatrix};
+        tRadiomics.setting.weightingNorm.enable = bTextureMatrixEnable;
+        tRadiomics.setting.weightingNorm.value  = asGetTextureMatrix{dGetTextureMatrix};
 
         % distances
 
-        tReadiomics.setting.distances.name   = get(edtSettingOtherSetDistanceToNeighbour, 'UserData');
-        tReadiomics.setting.distances.enable = get(chkSettingOtherSetDistanceToNeighbour, 'Value');
-        tReadiomics.setting.distances.value  = str2double(get(edtSettingOtherSetDistanceToNeighbour, 'String'));
+        tRadiomics.setting.distances.name   = get(edtSettingOtherSetDistanceToNeighbour, 'UserData');
+        tRadiomics.setting.distances.enable = get(chkSettingOtherSetDistanceToNeighbour, 'Value');
+        tRadiomics.setting.distances.value  = str2double(get(edtSettingOtherSetDistanceToNeighbour, 'String'));
 
         % preCrop
 
-        tReadiomics.setting.preCrop.name   = get(chkSettingOtherPreCropping, 'UserData');
+        tRadiomics.setting.preCrop.name   = get(chkSettingOtherPreCropping, 'UserData');
 
         if get(chkSettingOtherPreCropping, 'Value') == true
             bPreCroppingEnable = true;
@@ -4666,12 +4687,12 @@ function extractRadiomicsDialog(sRadiomicsScript)
             sPreCropping = 'false';
         end
 
-        tReadiomics.setting.preCrop.enable = bPreCroppingEnable;
-        tReadiomics.setting.preCrop.value  = sPreCropping;
+        tRadiomics.setting.preCrop.enable = bPreCroppingEnable;
+        tRadiomics.setting.preCrop.value  = sPreCropping;
 
         % voxelArrayShift
 
-        tReadiomics.setting.voxelArrayShift.name = get(edtSettingOtherFirstOrderVoxelArrayShift, 'UserData');
+        tRadiomics.setting.voxelArrayShift.name = get(edtSettingOtherFirstOrderVoxelArrayShift, 'UserData');
 
         adOffset = find(cellfun( @(chkFirstOrderFeatures) chkFirstOrderFeatures.Value, chkFirstOrderFeatures, 'uni', true ), true);
 
@@ -4689,12 +4710,12 @@ function extractRadiomicsDialog(sRadiomicsScript)
             bVoxelArrayShiftEnable = false;
         end
 
-        tReadiomics.setting.voxelArrayShift.enable = bVoxelArrayShiftEnable;
-        tReadiomics.setting.voxelArrayShift.value  = str2double(get(edtSettingOtherFirstOrderVoxelArrayShift, 'String'));
+        tRadiomics.setting.voxelArrayShift.enable = bVoxelArrayShiftEnable;
+        tRadiomics.setting.voxelArrayShift.value  = str2double(get(edtSettingOtherFirstOrderVoxelArrayShift, 'String'));
 
         % symmetricalGLCM
 
-        tReadiomics.setting.symmetricalGLCM.name = get(chkSettingOtherSymmetricalGclm, 'UserData');
+        tRadiomics.setting.symmetricalGLCM.name = get(chkSettingOtherSymmetricalGclm, 'UserData');
 
         adOffset = find(cellfun( @(chkGlcmFeatures) chkGlcmFeatures.Value, chkGlcmFeatures, 'uni', true ), true);
 
@@ -4710,12 +4731,12 @@ function extractRadiomicsDialog(sRadiomicsScript)
             sSymmetricalGLCM = 'false';
         end
 
-        tReadiomics.setting.symmetricalGLCM.enable = bSymmetricalGLCMEnable;
-        tReadiomics.setting.symmetricalGLCM.value  = sSymmetricalGLCM;
+        tRadiomics.setting.symmetricalGLCM.enable = bSymmetricalGLCMEnable;
+        tRadiomics.setting.symmetricalGLCM.value  = sSymmetricalGLCM;
 
         % gldm_a
 
-        tReadiomics.setting.gldm_a.name = get(edtSettingOtherGldmAlpha, 'UserData');
+        tRadiomics.setting.gldm_a.name = get(edtSettingOtherGldmAlpha, 'UserData');
 
         if str2double(get(edtSettingOtherGldmAlpha, 'String')) > 0
             bGldmAlphaEnable = true;
@@ -4723,21 +4744,21 @@ function extractRadiomicsDialog(sRadiomicsScript)
             bGldmAlphaEnable = false;
         end
 
-        tReadiomics.setting.gldm_a.enable = bGldmAlphaEnable;
-        tReadiomics.setting.gldm_a.value  = str2double(get(edtSettingOtherGldmAlpha, 'String'));
+        tRadiomics.setting.gldm_a.enable = bGldmAlphaEnable;
+        tRadiomics.setting.gldm_a.value  = str2double(get(edtSettingOtherGldmAlpha, 'String'));
 
         % imageType
 
         % Original
 
-        tReadiomics.imageType.original.name   = get(chkImageTypeOriginal, 'UserData');
-        tReadiomics.imageType.original.enable = get(chkImageTypeOriginal, 'Value');
-        tReadiomics.imageType.original.value  = '';
+        tRadiomics.imageType.original.name   = get(chkImageTypeOriginal, 'UserData');
+        tRadiomics.imageType.original.enable = get(chkImageTypeOriginal, 'Value');
+        tRadiomics.imageType.original.value  = '';
 
         % Wavelet
 
-        tReadiomics.imageType.wavelet.name   = get(chkImageTypeWavelet, 'UserData');
-        tReadiomics.imageType.wavelet.enable = get(chkImageTypeWavelet, 'Value');
+        tRadiomics.imageType.wavelet.name   = get(chkImageTypeWavelet, 'UserData');
+        tRadiomics.imageType.wavelet.enable = get(chkImageTypeWavelet, 'Value');
 
         % start_level
         sWaveletStartLevelName  = get(edtImageTypeWaveletStartLevel, 'UserData');
@@ -4754,48 +4775,48 @@ function extractRadiomicsDialog(sRadiomicsScript)
         sWaveletValue = sprintf("'%s' : %s, '%s' : %s, '%s' : '%s'", ... % {'start_level' : 0, 'level' : 1, 'wavelet' : "coif1" }
             sWaveletStartLevelName, sWaveletStartLevelValue, sWaveletLevelName, sWaveletLevelValue, sWaveletWaveletName, sWaveletWaveletValue);
 
-        tReadiomics.imageType.wavelet.value = sWaveletValue;
+        tRadiomics.imageType.wavelet.value = sWaveletValue;
 
         % SquareRoot
 
-        tReadiomics.imageType.squareRoot.name   = get(chkImageTypeSquareRoot, 'UserData');
-        tReadiomics.imageType.squareRoot.enable = get(chkImageTypeSquareRoot, 'Value');
-        tReadiomics.imageType.squareRoot.value  = '';
+        tRadiomics.imageType.squareRoot.name   = get(chkImageTypeSquareRoot, 'UserData');
+        tRadiomics.imageType.squareRoot.enable = get(chkImageTypeSquareRoot, 'Value');
+        tRadiomics.imageType.squareRoot.value  = '';
 
         % Exponential
 
-        tReadiomics.imageType.exponential.name   = get(chkImageTypeExponential, 'UserData');
-        tReadiomics.imageType.exponential.enable = get(chkImageTypeExponential, 'Value');
-        tReadiomics.imageType.exponential.value  = '';
+        tRadiomics.imageType.exponential.name   = get(chkImageTypeExponential, 'UserData');
+        tRadiomics.imageType.exponential.enable = get(chkImageTypeExponential, 'Value');
+        tRadiomics.imageType.exponential.value  = '';
 
         % LoG
 
-        tReadiomics.imageType.loG.name   = get(chkImageTypeLoG, 'UserData');
-        tReadiomics.imageType.loG.enable = get(chkImageTypeLoG, 'Value');
+        tRadiomics.imageType.loG.name   = get(chkImageTypeLoG, 'UserData');
+        tRadiomics.imageType.loG.enable = get(chkImageTypeLoG, 'Value');
 
         sLoGSigmaName  = get(edtImageTypeLoGSigma, 'UserData');
         sLoGSigmaValue = get(edtImageTypeLoGSigma, 'String');
 
         sLoGValue = sprintf("'%s' : [%s]", sLoGSigmaName, sLoGSigmaValue);
 
-        tReadiomics.imageType.loG.value  = sLoGValue;
+        tRadiomics.imageType.loG.value  = sLoGValue;
 
         % Square
 
-        tReadiomics.imageType.square.name   = get(chkImageTypeSquare, 'UserData');
-        tReadiomics.imageType.square.enable = get(chkImageTypeSquare, 'Value');
-        tReadiomics.imageType.square.value  = '';
+        tRadiomics.imageType.square.name   = get(chkImageTypeSquare, 'UserData');
+        tRadiomics.imageType.square.enable = get(chkImageTypeSquare, 'Value');
+        tRadiomics.imageType.square.value  = '';
 
         % Logarithm
 
-        tReadiomics.imageType.logarithm.name   = get(chkImageTypeLogarithm, 'UserData');
-        tReadiomics.imageType.logarithm.enable = get(chkImageTypeLogarithm, 'Value');
-        tReadiomics.imageType.logarithm.value  = '';
+        tRadiomics.imageType.logarithm.name   = get(chkImageTypeLogarithm, 'UserData');
+        tRadiomics.imageType.logarithm.enable = get(chkImageTypeLogarithm, 'Value');
+        tRadiomics.imageType.logarithm.value  = '';
 
         % Gradient
 
-        tReadiomics.imageType.gradient.name   = get(chkImageTypeGradient, 'UserData');
-        tReadiomics.imageType.gradient.enable = get(chkImageTypeGradient, 'Value');
+        tRadiomics.imageType.gradient.name   = get(chkImageTypeGradient, 'UserData');
+        tRadiomics.imageType.gradient.enable = get(chkImageTypeGradient, 'Value');
 
         sGradientUseSpacingName  = get(chkImageTypeGradientUseSpacing, 'UserData');
         bGradientUseSpacingValue = get(chkImageTypeGradientUseSpacing, 'Value');
@@ -4808,7 +4829,7 @@ function extractRadiomicsDialog(sRadiomicsScript)
 
         sUseSpacingValue = sprintf("'%s' : %s", sGradientUseSpacingName, sGradientUseSpacingValue);
 
-        tReadiomics.imageType.gradient.value  = sUseSpacingValue;
+        tRadiomics.imageType.gradient.value  = sUseSpacingValue;
     end
 
     function uiRadiomicsSliderCallback(~, ~)

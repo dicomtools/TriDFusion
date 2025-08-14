@@ -28,7 +28,7 @@ function setOptionsCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     DLG_OPTIONS_X = 380;
-    DLG_OPTIONS_Y = 405;
+    DLG_OPTIONS_Y = 455;
 
     if viewerUIFigure('get') == true
 
@@ -41,7 +41,7 @@ function setOptionsCallback(~, ~)
                    'Resize', 'off', ...
                    'Color', viewerBackgroundColor('get'),...
                    'WindowStyle', 'modal', ...
-                   'Name' , 'Set Properties'...
+                   'Name' , 'Viewer Options'...
                    );
     else
         dlgOptions = ...
@@ -55,10 +55,12 @@ function setOptionsCallback(~, ~)
                    'NumberTitle','off',...
                    'MenuBar', 'none',...
                    'Color', viewerBackgroundColor('get'), ...
-                   'Name', 'Set Properties',...
+                   'Name', 'Viewer Options',...
                    'Toolbar','none'...
                    );
     end
+
+    setObjectIcon(dlgOptions);
 
     axeOptions = ...
         axes(dlgOptions, ...
@@ -70,9 +72,54 @@ function setOptionsCallback(~, ~)
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'off'...
              );
-    axeOptions.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeOptions.Toolbar.Visible = 'off';
+    axeOptions.Interactions = [];
+    % axeOptions.Toolbar.Visible = 'off';
+    deleteAxesToolbar(axeOptions);
     disableDefaultInteractivity(axeOptions);
+
+    chkenableErrorLogging = ...
+        uicontrol(dlgOptions,...
+                  'style'   , 'checkbox',...
+                  'enable'  , 'on',...
+                  'value'   , enableErrorLogging('get'),...
+                  'position', [20 410 20 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Callback', @enableErrorLoggingCallback...
+                  );
+
+         uicontrol(dlgOptions,...
+                  'style'   , 'text',...
+                  'string'  , 'Error Logging',...
+                  'horizontalalignment', 'left',...
+                  'position', [40 410 200 20],...
+                  'Enable', 'Inactive',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'ButtonDownFcn', @enableErrorLoggingCallback...
+                  );
+
+    chkLinkCoronalWithSagittal = ...
+        uicontrol(dlgOptions,...
+                  'style'   , 'checkbox',...
+                  'enable'  , 'on',...
+                  'value'   , linkCoronalWithSagittal('get'),...
+                  'position', [20 385 20 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Callback', @linkCoronalWithSagittalCallback...
+                  );
+
+         uicontrol(dlgOptions,...
+                  'style'   , 'text',...
+                  'string'  , 'Link Zoom\Pan between Coronal and Sagittal',...
+                  'horizontalalignment', 'left',...
+                  'position', [40 385 300 20],...
+                  'Enable', 'Inactive',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'ButtonDownFcn', @linkCoronalWithSagittalCallback...
+                  );
 
 %    if integrateToBrowser('get') == true
 %        sLogo = './TriDFusion/logo.png';
@@ -166,7 +213,7 @@ function setOptionsCallback(~, ~)
 
          uicontrol(dlgOptions,...
                   'style'   , 'text',...
-                  'string'  , 'Modified Images Contour Matrix',...
+                  'string'  , 'Contours from Modified Images Matrix',...
                   'horizontalalignment', 'left',...
                   'position', [60 280 200 20],...
                   'Enable', 'Inactive',...
@@ -176,35 +223,38 @@ function setOptionsCallback(~, ~)
                   );
 
 
-    chkMip2DOnly = ...
-        uicontrol(dlgOptions,...
-                  'style'   , 'checkbox',...
-                  'enable'  , 'on',...
-                  'value'   , playback2DMipOnly('get'),...
-                  'position', [20 255 20 20],...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @mip2DOnlyCallback...
-                  );
-
-         uicontrol(dlgOptions,...
-                  'style'   , 'text',...
-                  'string'  , '2D MIP Playback',...
-                  'horizontalalignment', 'left',...
-                  'position', [40 255 200 20],...
-                  'Enable', 'Inactive',...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...
-                  'ButtonDownFcn', @mip2DOnlyCallback...
-                  );
+    % chkMip2DOnly = ...
+    %     uicontrol(dlgOptions,...
+    %               'style'   , 'checkbox',...
+    %               'enable'  , 'on',...
+    %               'value'   , playback2DMipOnly('get'),...
+    %               'position', [20 255 20 20],...
+    %               'BackgroundColor', viewerBackgroundColor('get'), ...
+    %               'ForegroundColor', viewerForegroundColor('get'), ...
+    %               'Callback', @mip2DOnlyCallback...
+    %               );
+    % 
+    %      uicontrol(dlgOptions,...
+    %               'style'   , 'text',...
+    %               'string'  , '2D MIP Playback',...
+    %               'horizontalalignment', 'left',...
+    %               'position', [40 255 200 20],...
+    %               'Enable', 'Inactive',...
+    %               'BackgroundColor', viewerBackgroundColor('get'), ...
+    %               'ForegroundColor', viewerForegroundColor('get'), ...
+    %               'ButtonDownFcn', @mip2DOnlyCallback...
+    %               );
 
      bVoiViewer3d = false;
      if ~isMATLABReleaseOlderThan('R2022b')
 
-        if viewerUIFigure('get') == true
+        if viewerUIFigure('get') == true || ...
+           ~isMATLABReleaseOlderThan('R2025a')    
+            
             bVoiViewer3d = true;
         end
      end
+     
 
     if bVoiViewer3d == true
         sVoiRenderingEnable = 'off';
@@ -517,6 +567,24 @@ function setOptionsCallback(~, ~)
               'Callback', @okOptionsCallback...
               );
 
+    function enableErrorLoggingCallback(hObject, ~)
+
+        if get(chkenableErrorLogging, 'Value') == 1
+            if strcmpi(hObject.Style, 'checkbox')
+                set(chkenableErrorLogging, 'Value', 1);
+            else
+                set(chkenableErrorLogging, 'Value', 0);
+            end
+        else
+            if strcmpi(hObject.Style, 'checkbox')
+                set(chkenableErrorLogging, 'Value', 0);
+            else
+                set(chkenableErrorLogging, 'Value', 1);
+            end
+        end
+
+    end
+
     function updateSUVCallback(hObject, ~)
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
@@ -657,29 +725,29 @@ function setOptionsCallback(~, ~)
 
     end
 
-    function set3DEngineCallback(hObject, ~)
-
-        if get(chk3DEngine, 'Value') == 1
-            if strcmpi(hObject.Style, 'checkbox')
-                set(chk3DEngine, 'Value', 1);
-            else
-                set(chk3DEngine, 'Value', 0);
-            end
-        else
-            if strcmpi(hObject.Style, 'checkbox')
-                set(chk3DEngine, 'Value', 0);
-            else
-                set(chk3DEngine, 'Value', 1);
-            end
-        end
-
-        if get(chk3DEngine, 'Value') == 1
-            set(chkInterpolate, 'Enable', 'on');
-        else
-            set(chkInterpolate, 'Enable', 'off');
-        end
-
-     end
+    % function set3DEngineCallback(hObject, ~)
+    % 
+    %     if get(chk3DEngine, 'Value') == 1
+    %         if strcmpi(hObject.Style, 'checkbox')
+    %             set(chk3DEngine, 'Value', 1);
+    %         else
+    %             set(chk3DEngine, 'Value', 0);
+    %         end
+    %     else
+    %         if strcmpi(hObject.Style, 'checkbox')
+    %             set(chk3DEngine, 'Value', 0);
+    %         else
+    %             set(chk3DEngine, 'Value', 1);
+    %         end
+    %     end
+    % 
+    %     if get(chk3DEngine, 'Value') == 1
+    %         set(chkInterpolate, 'Enable', 'on');
+    %     else
+    %         set(chkInterpolate, 'Enable', 'off');
+    %     end
+    % 
+    %  end
 
     function shadingCallback(hObject, ~)
 
@@ -698,7 +766,7 @@ function setOptionsCallback(~, ~)
         end
 
         setImageInterpolation(get(chkInterpolate, 'Value'));
-
+        
     end
 
     function aspectRatioCallback(hObject, ~)
@@ -736,7 +804,7 @@ function setOptionsCallback(~, ~)
 
                     axis(axe, 'normal');
                    
-                    axe.Toolbar.Visible = 'off';                                      
+                    % axe.Toolbar.Visible = 'off';                                      
 
                     if isFusion('get') == true
 
@@ -750,7 +818,7 @@ function setOptionsCallback(~, ~)
 
                                 axis(axef, 'normal');
                                 
-                                axef.Toolbar.Visible = 'off';                                      
+                                % axef.Toolbar.Visible = 'off';                                      
                             end
 
                         end
@@ -761,7 +829,7 @@ function setOptionsCallback(~, ~)
 
                             daspect(axefc, [1 1 1]);
 
-                            axefc.Toolbar.Visible = 'off';  
+                            % axefc.Toolbar.Visible = 'off';  
                        end
                     end
                 else
@@ -784,15 +852,15 @@ function setOptionsCallback(~, ~)
                     axis(axes2, 'normal');
                     axis(axes3, 'normal');
 
-                    axes1.Toolbar.Visible = 'off';                                      
-                    axes2.Toolbar.Visible = 'off';                                      
-                    axes3.Toolbar.Visible = 'off';   
+                    % axes1.Toolbar.Visible = 'off';                                      
+                    % axes2.Toolbar.Visible = 'off';                                      
+                    % axes3.Toolbar.Visible = 'off';   
 
                     if isVsplash('get') == false
 
                         axis(axesMip, 'normal');
 
-                        axesMip.Toolbar.Visible = 'off';
+                        % axesMip.Toolbar.Visible = 'off';
                     end
 
                     if isFusion('get') == true
@@ -813,9 +881,9 @@ function setOptionsCallback(~, ~)
                                 axis(axes2f, 'normal');
                                 axis(axes3f, 'normal');
 
-                               axes1f.Toolbar.Visible = 'off';   
-                               axes2f.Toolbar.Visible = 'off';   
-                               axes3f.Toolbar.Visible = 'off';   
+                               % axes1f.Toolbar.Visible = 'off';   
+                               % axes2f.Toolbar.Visible = 'off';   
+                               % axes3f.Toolbar.Visible = 'off';   
 
                             end
 
@@ -829,7 +897,7 @@ function setOptionsCallback(~, ~)
 
                                     axis(axesMipf, 'normal');
 
-                                    axesMipf.Toolbar.Visible = 'off';                             
+                                    % axesMipf.Toolbar.Visible = 'off';                             
                                 end
                             end
                         end
@@ -849,9 +917,9 @@ function setOptionsCallback(~, ~)
                         axis(axes2fc, 'normal');
                         axis(axes3fc, 'normal');
 
-                        axes1fc.Toolbar.Visible = 'off';                             
-                        axes2fc.Toolbar.Visible = 'off';                             
-                        axes3fc.Toolbar.Visible = 'off';                             
+                        % axes1fc.Toolbar.Visible = 'off';                             
+                        % axes2fc.Toolbar.Visible = 'off';                             
+                        % axes3fc.Toolbar.Visible = 'off';                             
 
                         if isVsplash('get') == false
 
@@ -861,7 +929,7 @@ function setOptionsCallback(~, ~)
 
                             axis(axesMipfc, 'normal');
 
-                            axesMipfc.Toolbar.Visible = 'off';    
+                            % axesMipfc.Toolbar.Visible = 'off';    
                         end
                     end
 
@@ -912,7 +980,7 @@ function setOptionsCallback(~, ~)
 
                                     daspect(axef, [x y 1]);
 
-                                    axef.Toolbar.Visible = 'off';    
+                                    % axef.Toolbar.Visible = 'off';    
                                 end
                             end
 
@@ -922,7 +990,7 @@ function setOptionsCallback(~, ~)
 
                                 daspect(axefc, [x y 1]);
 
-                                axefc.Toolbar.Visible = 'off';
+                                % axefc.Toolbar.Visible = 'off';
                            end
                         end
 
@@ -960,9 +1028,9 @@ function setOptionsCallback(~, ~)
                             daspect(axes2, [z y x]);
                             daspect(axes3, [x y z]);
 
-                            axes1.Toolbar.Visible = 'off';
-                            axes2.Toolbar.Visible = 'off';
-                            axes3.Toolbar.Visible = 'off';
+                            % axes1.Toolbar.Visible = 'off';
+                            % axes2.Toolbar.Visible = 'off';
+                            % axes3.Toolbar.Visible = 'off';
 
                             if isVsplash('get') == false
 
@@ -970,7 +1038,7 @@ function setOptionsCallback(~, ~)
 
                                 daspect(axesMip, [z y x]);
 
-                                axesMip.Toolbar.Visible = 'off';
+                                % axesMip.Toolbar.Visible = 'off';
                             end
 
                             if isFusion('get') == true % TO DO, support fusion with is own aspect
@@ -988,9 +1056,9 @@ function setOptionsCallback(~, ~)
                                         daspect(axes2f, [z y x]);
                                         daspect(axes3f, [x y z]);
 
-                                        axes1f.Toolbar.Visible = 'off';
-                                        axes2f.Toolbar.Visible = 'off';
-                                        axes3f.Toolbar.Visible = 'off';
+                                        % axes1f.Toolbar.Visible = 'off';
+                                        % axes2f.Toolbar.Visible = 'off';
+                                        % axes3f.Toolbar.Visible = 'off';
 
                                     end
 
@@ -1002,7 +1070,7 @@ function setOptionsCallback(~, ~)
 
                                             daspect(axesMipf, [z y x]);
 
-                                            axesMipf.Toolbar.Visible = 'off';
+                                            % axesMipf.Toolbar.Visible = 'off';
                                         end
                                     end
 
@@ -1019,9 +1087,9 @@ function setOptionsCallback(~, ~)
                                 daspect(axes2fc, [z y x]);
                                 daspect(axes3fc, [x y z]);
 
-                                axes1fc.Toolbar.Visible = 'off';
-                                axes2fc.Toolbar.Visible = 'off';
-                                axes3fc.Toolbar.Visible = 'off';
+                                % axes1fc.Toolbar.Visible = 'off';
+                                % axes2fc.Toolbar.Visible = 'off';
+                                % axes3fc.Toolbar.Visible = 'off';
 
                                 if isVsplash('get') == false
 
@@ -1029,7 +1097,7 @@ function setOptionsCallback(~, ~)
 
                                     daspect(axesMipfc, [z y x]);
 
-                                    axesMipfc.Toolbar.Visible = 'off';
+                                    % axesMipfc.Toolbar.Visible = 'off';
                                 end
                             end
 
@@ -1219,23 +1287,39 @@ function setOptionsCallback(~, ~)
     end
 
 
-    function mip2DOnlyCallback(hObject, ~)
+    % function mip2DOnlyCallback(hObject, ~)
+    % 
+    %     if get(chkMip2DOnly, 'Value') == true
+    %         if strcmpi(hObject.Style, 'checkbox')
+    %             set(chkMip2DOnly, 'Value', true);
+    %         else
+    %             set(chkMip2DOnly, 'Value', false);
+    %         end
+    %     else
+    %         if strcmpi(hObject.Style, 'checkbox')
+    %             set(chkMip2DOnly, 'Value', false);
+    %         else
+    %             set(chkMip2DOnly, 'Value', true);
+    %         end
+    %     end
+    % end
 
-        if get(chkMip2DOnly, 'Value') == true
+    function linkCoronalWithSagittalCallback(hObject, ~)
+
+        if get(chkLinkCoronalWithSagittal, 'Value') == true
             if strcmpi(hObject.Style, 'checkbox')
-                set(chkMip2DOnly, 'Value', true);
+                set(chkLinkCoronalWithSagittal, 'Value', true);
             else
-                set(chkMip2DOnly, 'Value', false);
+                set(chkLinkCoronalWithSagittal, 'Value', false);
             end
         else
             if strcmpi(hObject.Style, 'checkbox')
-                set(chkMip2DOnly, 'Value', false);
+                set(chkLinkCoronalWithSagittal, 'Value', false);
             else
-                set(chkMip2DOnly, 'Value', true);
+                set(chkLinkCoronalWithSagittal, 'Value', true);
             end
         end
     end
-
 
     function chk3DVoiSmoothCallback(~, ~)
 
@@ -1345,7 +1429,7 @@ function setOptionsCallback(~, ~)
 
                     daspect(axe, [x y 1]);
 
-                    axe.Toolbar.Visible = 'off';
+                    % axe.Toolbar.Visible = 'off';
 
                     if isFusion('get') == true
 
@@ -1358,7 +1442,7 @@ function setOptionsCallback(~, ~)
 
                                 daspect(axef, [x y 1]);
 
-                                axef.Toolbar.Visible = 'off';
+                                % axef.Toolbar.Visible = 'off';
                             end
                         end
                     end
@@ -1369,7 +1453,7 @@ function setOptionsCallback(~, ~)
 
                     axis(axe, 'normal');
 
-                    axe.Toolbar.Visible = 'off';
+                    % axe.Toolbar.Visible = 'off';
 
                     if isFusion('get') == true
 
@@ -1384,7 +1468,7 @@ function setOptionsCallback(~, ~)
 
                                 axis(axef, 'normal');
 
-                                axef.Toolbar.Visible = 'off';
+                                % axef.Toolbar.Visible = 'off';
                             end
                         end
                     end
@@ -1396,12 +1480,12 @@ function setOptionsCallback(~, ~)
 
                     if isInterpolated('get')
 
-                        axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                        % axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
                        
 %                         shading(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
                         set(imAxePtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
                      
-                        axe.Toolbar.Visible = 'off';
+                        % axe.Toolbar.Visible = 'off';
 
                         if isFusion('get') == true
 
@@ -1419,19 +1503,19 @@ function setOptionsCallback(~, ~)
                                 axef = axefPtr('get', [], rr);
 
                                 if ~isempty(axef)
-                                    axef.Toolbar.Visible = 'off';
+                                    % axef.Toolbar.Visible = 'off';
                                 end
 
                             end
                         end
 
                     else
-                        axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                        % axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
 %                         shading(axe, 'flat');
 
                         set(imAxePtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
                        
-                        axe.Toolbar.Visible = 'off';
+                        % axe.Toolbar.Visible = 'off';
 
                         if isFusion('get') == true
 
@@ -1450,7 +1534,7 @@ function setOptionsCallback(~, ~)
 
                                 if ~isempty(axef)
 
-                                    axef.Toolbar.Visible = 'off';
+                                    % axef.Toolbar.Visible = 'off';
                                end
                             end
                         end
@@ -1496,9 +1580,9 @@ function setOptionsCallback(~, ~)
                         daspect(axes2, [z y x]);
                         daspect(axes3, [x y z]);
 
-                        axes1.Toolbar.Visible = 'off';
-                        axes2.Toolbar.Visible = 'off';
-                        axes3.Toolbar.Visible = 'off';
+                        % axes1.Toolbar.Visible = 'off';
+                        % axes2.Toolbar.Visible = 'off';
+                        % axes3.Toolbar.Visible = 'off';
 
                         if isVsplash('get') == false
 
@@ -1506,7 +1590,7 @@ function setOptionsCallback(~, ~)
 
                             daspect(axesMip, [z y x]);
 
-                            axesMip.Toolbar.Visible = 'off';
+                            % axesMip.Toolbar.Visible = 'off';
                         end
 
                         if isFusion('get') == true
@@ -1524,9 +1608,9 @@ function setOptionsCallback(~, ~)
                                     daspect(axes2f, [z y x]);
                                     daspect(axes3f, [x y z]);
 
-                                    axes1f.Toolbar.Visible = 'off';
-                                    axes2f.Toolbar.Visible = 'off';
-                                    axes3f.Toolbar.Visible = 'off';
+                                    % axes1f.Toolbar.Visible = 'off';
+                                    % axes2f.Toolbar.Visible = 'off';
+                                    % axes3f.Toolbar.Visible = 'off';
                                 end
 
                                 if isVsplash('get') == false
@@ -1536,7 +1620,7 @@ function setOptionsCallback(~, ~)
 
                                         daspect(axesMipf, [z y x]);
 
-                                        axesMipf.Toolbar.Visible = 'off';
+                                        % axesMipf.Toolbar.Visible = 'off';
                                     end
                                 end
 
@@ -1552,10 +1636,10 @@ function setOptionsCallback(~, ~)
                             daspect(axes1fc, [z x y]);
                             daspect(axes2fc, [z y x]);
                             daspect(axes3fc, [x y z]);
-
-                            axes1fc.Toolbar.Visible = 'off';
-                            axes2fc.Toolbar.Visible = 'off';
-                            axes3fc.Toolbar.Visible = 'off';
+                             
+                            % axes1fc.Toolbar.Visible = 'off';
+                            % axes2fc.Toolbar.Visible = 'off';
+                            % axes3fc.Toolbar.Visible = 'off';
 
                             if isVsplash('get') == false
 
@@ -1563,7 +1647,7 @@ function setOptionsCallback(~, ~)
 
                                 daspect(axesMipfc, [z y x]);
 
-                                axesMipfc.Toolbar.Visible = 'off';
+                                % axesMipfc.Toolbar.Visible = 'off';
                             end
                         end
 
@@ -1675,9 +1759,9 @@ function setOptionsCallback(~, ~)
                     axis(axes2, 'normal');
                     axis(axes3, 'normal');
             
-                    axes1.Toolbar.Visible = 'off';
-                    axes2.Toolbar.Visible = 'off';
-                    axes3.Toolbar.Visible = 'off';
+                    % axes1.Toolbar.Visible = 'off';
+                    % axes2.Toolbar.Visible = 'off';
+                    % axes3.Toolbar.Visible = 'off';
 
                     if isVsplash('get') == false
 
@@ -1687,7 +1771,7 @@ function setOptionsCallback(~, ~)
 
                         axis(axesMip, 'normal');
 
-                        axesMip.Toolbar.Visible = 'off';
+                        % axesMip.Toolbar.Visible = 'off';
                     end
 
                     if isFusion('get') == true
@@ -1709,9 +1793,9 @@ function setOptionsCallback(~, ~)
                                 axis(axes2f, 'normal');
                                 axis(axes3f, 'normal');
                                 
-                                axes1f.Toolbar.Visible = 'off';
-                                axes2f.Toolbar.Visible = 'off';
-                                axes3f.Toolbar.Visible = 'off';
+                                % axes1f.Toolbar.Visible = 'off';
+                                % axes2f.Toolbar.Visible = 'off';
+                                % axes3f.Toolbar.Visible = 'off';
                             end
 
                             if isVsplash('get') == false
@@ -1723,7 +1807,7 @@ function setOptionsCallback(~, ~)
 
                                     axis(axesMipf, 'normal');
 
-                                    axesMipf.Toolbar.Visible = 'off';
+                                    % axesMipf.Toolbar.Visible = 'off';
                                 end
                             end
 
@@ -1744,9 +1828,9 @@ function setOptionsCallback(~, ~)
                         axis(axes2fc, 'normal');
                         axis(axes3fc, 'normal');
 
-                        axes1fc.Toolbar.Visible = 'off';
-                        axes2fc.Toolbar.Visible = 'off';
-                        axes3fc.Toolbar.Visible = 'off';
+                        % axes1fc.Toolbar.Visible = 'off';
+                        % axes2fc.Toolbar.Visible = 'off';
+                        % axes3fc.Toolbar.Visible = 'off';
 
                         if isVsplash('get') == false
 
@@ -1756,7 +1840,7 @@ function setOptionsCallback(~, ~)
 
                             axis(axesMipfc, 'normal');
 
-                            axesMipfc.Toolbar.Visible = 'off';
+                            % axesMipfc.Toolbar.Visible = 'off';
                         end
                     end
 
@@ -1772,20 +1856,20 @@ function setOptionsCallback(~, ~)
 %                     shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
 %                     shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
 % 
-                    axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                    axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                    axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    % axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    % axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    % axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
 
-                    axes1.Toolbar.Visible = 'off';
-                    axes2.Toolbar.Visible = 'off';
-                    axes3.Toolbar.Visible = 'off';
+                    % axes1.Toolbar.Visible = 'off';
+                    % axes2.Toolbar.Visible = 'off';
+                    % axes3.Toolbar.Visible = 'off';
 
                     if link2DMip('get') == true && isVsplash('get') == false
 %                         shading(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
                         set(imMipPtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
 
-                        axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                        axesMip.Toolbar.Visible = 'off';
+                        % axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                        % axesMip.Toolbar.Visible = 'off';
                     end
 
                     if isFusion('get') == true
@@ -1804,20 +1888,20 @@ function setOptionsCallback(~, ~)
                                 set(imAxialF   ,  'Interpolation', 'bilinear');
                             end
 
-                            axes1f = axes1fPtr('get', [], rr);
-                            axes2f = axes2fPtr('get', [], rr);
-                            axes3f = axes3fPtr('get', [], rr);
-
-                            if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
-
-                                axes1f.Toolbar.Visible = 'off';
-                                axes2f.Toolbar.Visible = 'off';
-                                axes3f.Toolbar.Visible = 'off';
-                              
-%                                 shading(axes1f, 'interp');
-%                                 shading(axes2f, 'interp');
-%                                 shading(axes3f, 'interp');
-                            end
+%                             axes1f = axes1fPtr('get', [], rr);
+%                             axes2f = axes2fPtr('get', [], rr);
+%                             axes3f = axes3fPtr('get', [], rr);
+% 
+%                             if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
+% 
+%                                 axes1f.Toolbar.Visible = 'off';
+%                                 axes2f.Toolbar.Visible = 'off';
+%                                 axes3f.Toolbar.Visible = 'off';
+% 
+% %                                 shading(axes1f, 'interp');
+% %                                 shading(axes2f, 'interp');
+% %                                 shading(axes3f, 'interp');
+%                             end
 
                             if link2DMip('get') == true && isVsplash('get') == false
 
@@ -1827,13 +1911,13 @@ function setOptionsCallback(~, ~)
 
                                     set(imMipF ,  'Interpolation', 'bilinear');                                    
                                 end
-
-                                axesMipf = axesMipfPtr('get', [], rr);
-
-                                if ~isempty(axesMipf)
-                                    axesMipf.Toolbar.Visible = 'off';
-%                                     shading(axesMipf, 'interp');
-                                end
+% 
+%                                 axesMipf = axesMipfPtr('get', [], rr);
+% 
+%                                 if ~isempty(axesMipf)
+%                                     axesMipf.Toolbar.Visible = 'off';
+% %                                     shading(axesMipf, 'interp');
+%                                 end
                             end
 
                         end
@@ -1848,20 +1932,20 @@ function setOptionsCallback(~, ~)
 %                     shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
 %                     shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
 
-                    axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                    axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                    axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-
-                    axes1.Toolbar.Visible = 'off';
-                    axes2.Toolbar.Visible = 'off';
-                    axes3.Toolbar.Visible = 'off';
+                    % axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    % axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    % axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    % 
+                    % axes1.Toolbar.Visible = 'off';
+                    % axes2.Toolbar.Visible = 'off';
+                    % axes3.Toolbar.Visible = 'off';
 
                     if link2DMip('get') == true && isVsplash('get') == false
 %                         shading(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
                         set(imMipPtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
-
-                        axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                        axesMip.Toolbar.Visible = 'off';
+                        % 
+                        % axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                        % axesMip.Toolbar.Visible = 'off';
                     end
 
                     if isFusion('get') == true
@@ -1880,20 +1964,20 @@ function setOptionsCallback(~, ~)
                                 set(imAxialF   ,  'Interpolation', 'nearest');
                             end
 
-                            axes1f = axes1fPtr('get', [], rr);
-                            axes2f = axes2fPtr('get', [], rr);
-                            axes3f = axes3fPtr('get', [], rr);
-
-                            if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
-
-                                axes1f.Toolbar.Visible = 'off';
-                                axes2f.Toolbar.Visible = 'off';
-                                axes3f.Toolbar.Visible = 'off';
-                              
-%                                 shading(axes1f, 'flat');
-%                                 shading(axes2f, 'flat');
-%                                 shading(axes3f, 'flat');
-                            end
+%                             axes1f = axes1fPtr('get', [], rr);
+%                             axes2f = axes2fPtr('get', [], rr);
+%                             axes3f = axes3fPtr('get', [], rr);
+% 
+%                             if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
+% 
+%                                 axes1f.Toolbar.Visible = 'off';
+%                                 axes2f.Toolbar.Visible = 'off';
+%                                 axes3f.Toolbar.Visible = 'off';
+% 
+% %                                 shading(axes1f, 'flat');
+% %                                 shading(axes2f, 'flat');
+% %                                 shading(axes3f, 'flat');
+%                             end
 
                             if link2DMip('get') == true && isVsplash('get') == false
 
@@ -1904,12 +1988,12 @@ function setOptionsCallback(~, ~)
                                     set(imMipF ,  'Interpolation', 'nearest');                                    
                                 end
 
-                                axesMipf = axesMipfPtr('get', [], rr);
-
-                                if ~isempty(axesMipf)
-                                    axesMipf.Toolbar.Visible = 'off';
-%                                     shading(axesMipf, 'flat');
-                                end
+%                                 axesMipf = axesMipfPtr('get', [], rr);
+% 
+%                                 if ~isempty(axesMipf)
+%                                     axesMipf.Toolbar.Visible = 'off';
+% %                                     shading(axesMipf, 'flat');
+%                                 end
                             end
 
                         end
@@ -1927,23 +2011,17 @@ function setOptionsCallback(~, ~)
 
         bRefresh = false;
 
-        if get(chkUpdateWriteUID, 'Value') == true
-            updateDicomWriteSeriesInstanceUID('set', true);
-        else
-            updateDicomWriteSeriesInstanceUID('set', false);
-        end
+        enableErrorLogging('set', get(chkenableErrorLogging, 'Value'));        
 
-        if get(chkOriginalMatrix, 'Value') == true
-            modifiedImagesContourMatrix('set', true);
-        else
-            modifiedImagesContourMatrix('set', false);
-        end
+        setImageInterpolation(get(chkInterpolate, 'Value'));
 
-        if get(chkMip2DOnly, 'Value') == true
-            playback2DMipOnly('set', true);
-        else
-            playback2DMipOnly('set', false);
-        end
+        updateDicomWriteSeriesInstanceUID('set', get(chkUpdateWriteUID, 'Value'));
+
+        modifiedImagesContourMatrix('set', get(chkOriginalMatrix, 'Value'));
+
+        % playback2DMipOnly('set', get(chkMip2DOnly, 'Value'));
+
+        linkCoronalWithSagittal('set', get(chkLinkCoronalWithSagittal, 'Value'));
 
         if get(uiVoiRenderer, 'Value') == 1
             voi3DRenderer('set', 'VolumeRendering');
@@ -1953,67 +2031,28 @@ function setOptionsCallback(~, ~)
             voi3DRenderer('set', 'LabelRendering');
         end
 
-        if get(chk3DVoiSmooth, 'Value') == true
-            voi3DSmooth('set', true);
-        else
-            voi3DSmooth('set', false);
-        end
+        voi3DSmooth('set', get(chk3DVoiSmooth, 'Value'));
 
-        if get(chkBorder, 'Value') == true
-            showBorder('set', true);
-        else
-            showBorder('set', false);
-        end
+        showBorder('set', get(chkBorder, 'Value'));
 
-%         if get(chkInterpolate , 'Value') ~= isInterpolated('get' ) || ...
-%            get(chk3DEngine, 'Value') ~= is3DEngine('get')
-%             bRefresh = true;
-%         end
+        gateUseSeriesUID('set', ~get(chkUseUID, 'Value'));
 
-        if get(chkUseUID, 'Value') == false
-            gateUseSeriesUID('set', true);
-        else
-            gateUseSeriesUID('set', false);
-        end
-
-        if get(chkLookupTable, 'Value') == true
-            gateLookupTable('set', true);
-        else
-            gateLookupTable('set', false);
-        end
+        gateLookupTable('set', get(chkLookupTable, 'Value'));
 
         dLookUpValue  = get(uiLookupTable, 'Value' );
         asLookUpValue = get(uiLookupTable, 'String');
 
         gateLookupType('set', asLookUpValue{dLookUpValue});
 
-        if get(chkInterpolate, 'Value') == true
-            isInterpolated('set', true);
-        else
-            isInterpolated('set', false);
-        end
+        isInterpolated('set', get(chkInterpolate, 'Value'));
 
-        if get(chkAspect, 'Value') == true
-            aspectRatio('set', true);
-        else
-            aspectRatio('set', false);
-        end
-
-%         if get(chk3DEngine, 'Value') == true
-%             is3DEngine('set', true);
-%         else
-%             is3DEngine('set', false);
-%         end
+        aspectRatio('set', get(chkAspect, 'Value'));
 
         aspectRatioValue('set', 'x', str2double(get(edtRatioX, 'String')));
         aspectRatioValue('set', 'y', str2double(get(edtRatioY, 'String')));
         aspectRatioValue('set', 'z', str2double(get(edtRatioZ, 'String')));
 
         delete(dlgOptions);
-
-%                if gateUseSeriesUID('get') == false % resample buffer
-%                    resampleRegisterSeries(gateLookupTable('get') , gateRegister('get'));
-%                end
 
         if switchTo3DMode('get')     == false && ...
            switchToIsoSurface('get') == false && ...

@@ -30,7 +30,8 @@ function deleteObject(objToDelete)
     if ~isempty(objToDelete)
         try
             delete(objToDelete);
-        catch
+        catch ME   
+            logErrorToFile(ME);
         end
     end              
 end

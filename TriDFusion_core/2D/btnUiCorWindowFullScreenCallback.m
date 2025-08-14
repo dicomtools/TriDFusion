@@ -27,7 +27,9 @@ function btnUiCorWindowFullScreenCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent ptLimit;
+    persistent ptLimitCor;
+    persistent ptLimitSag;
+    persistent ptLogoPosition;
 
     uiCorWindow = uiCorWindowPtr('get');
     uiSagWindow = uiSagWindowPtr('get');
@@ -41,6 +43,8 @@ function btnUiCorWindowFullScreenCallback(~, ~)
 
     if ~isempty(uiCorWindow)
 
+        uiLogo = logoObject('get');
+
         btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
 
         if ~isempty(btnUiCorWindowFullScreen)
@@ -51,19 +55,27 @@ function btnUiCorWindowFullScreenCallback(~, ~)
 
             if bIsFullScreen == false
 
-                ptLimit = axesLimitsFromTemplate(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                ptLogoPosition = uiLogo.Position;
+
+                ptLimitCor = axesLimitsFromTemplate(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                ptLimitSag = axesLimitsFromTemplate(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
                 adjAxeCameraViewAngle(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-                
+                adjAxeCameraViewAngle(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+               
                 if isFusion('get') == true
 
                     setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                    setAxesLimitsFromSource(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                  
+                    uiLogo.Position(2) = uiLogo.Position(2)+15;
                 end
 
                 if isPlotContours('get') == true
 
                     setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
-                end
+                    setAxesLimitsFromSource(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
+               end
 
                 % 
                 % pdCameraViewAngle = get(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CameraViewAngle');
@@ -80,16 +92,21 @@ function btnUiCorWindowFullScreenCallback(~, ~)
                 set(uiSagSlider, 'Visible', 'Off');
                 set(uiMipSlider, 'Visible', 'Off');
             else
-                axesLimitsFromTemplate(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ptLimit);
+                uiLogo.Position = ptLogoPosition;
+
+                axesLimitsFromTemplate(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ptLimitCor);
+                axesLimitsFromTemplate(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ptLimitSag);
 
                 if isFusion('get') == true
 
                     setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
-                end
+                    setAxesLimitsFromSource(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+               end
 
                 if isPlotContours('get') == true
                     
                     setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
+                    setAxesLimitsFromSource(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
                 end
 
                 % set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CameraViewAngle', pdCameraViewAngle);

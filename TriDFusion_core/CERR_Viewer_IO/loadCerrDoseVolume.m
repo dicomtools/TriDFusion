@@ -30,43 +30,46 @@ function loadCerrDoseVolume(planC, structNamC)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    % Deactivate main tool bar 
-    set(uiSeriesPtr('get'), 'Enable', 'off');        
+    % Deactivate main tool bar
+    set(uiSeriesPtr('get'), 'Enable', 'off');
     mainToolBarEnable('off');
-    
+
     try
-        
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-    
+
     releaseRoiWait();
 
     set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
     set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-    set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+    % set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+    set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));
 
     set(zoomMenu('get'), 'Checked', 'off');
     set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnZoomPtr('get'), 'FontWeight', 'normal');
+    % set(btnZoomPtr('get'), 'FontWeight', 'normal');
+    set(btnZoomPtr('get'), 'CData', resizeTopBarIcon('zoom_grey.png'));
     zoomTool('set', false);
-    zoom(fiMainWindowPtr('get'), 'off');           
+    zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');
 
     set(panMenu('get'), 'Checked', 'off');
     set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
-    set(btnPanPtr('get'), 'FontWeight', 'normal');
+    set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    % set(btnPanPtr('get'), 'FontWeight', 'normal');
+    set(btnPanPtr('get'), 'CData', resizeTopBarIcon('pan_grey.png'));
     panTool('set', false);
-    pan(fiMainWindowPtr('get'), 'off');     
+    panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');
 
-    set(rotate3DMenu('get'), 'Checked', 'off');         
+    set(rotate3DMenu('get'), 'Checked', 'off');
     rotate3DTool('set', false);
     rotate3d(fiMainWindowPtr('get'), 'off');
 
     set(dataCursorMenu('get'), 'Checked', 'off');
-    dataCursorTool('set', false);              
-    datacursormode(fiMainWindowPtr('get'), 'off');  
-    
+    dataCursorTool('set', false);
+    datacursormode(fiMainWindowPtr('get'), 'off');
+
     if isFusion('get') == true % Deactivate fusion
          setFusionCallback();
     end
@@ -76,11 +79,11 @@ function loadCerrDoseVolume(planC, structNamC)
     copyRoiPtr('set', '');
 
     isMoveImageActivated('set', false);
-    
+
     outputDir('set', '');
 
     dicomMetaData('reset');
-    
+
     quantificationTemplate('reset');
 
     dicomBuffer  ('reset');
@@ -93,9 +96,11 @@ function loadCerrDoseVolume(planC, structNamC)
 
     inputTemplate('set', '');
     inputContours('set', '');
+    inputAnnotations('set', '');
 
     roiTemplate ('reset');
     voiTemplate ('reset');
+    plotEditTemplate('reset');
 
     scanNum = 1;
     doseNum = 1;
@@ -130,23 +135,23 @@ function loadCerrDoseVolume(planC, structNamC)
 
         atTemplate{ii}.PatientName      = sPatientName;
         atTemplate{ii}.NumberOfSlices = numel(planC{1,3}(1).scanInfo);
-        
-        if ~isfield(atTemplate{ii}, 'AcquisitionDate')                
+
+        if ~isfield(atTemplate{ii}, 'AcquisitionDate')
             atTemplate{ii}.AcquisitionDate = '';
         end
-        
-        if ~isfield(atTemplate{ii}, 'AcquisitionTime')                
+
+        if ~isfield(atTemplate{ii}, 'AcquisitionTime')
             atTemplate{ii}.AcquisitionTime = '';
         end
-        
-        if ~isfield(atTemplate{ii}, 'SeriesDate')    
+
+        if ~isfield(atTemplate{ii}, 'SeriesDate')
             atTemplate{ii}.SeriesDate = '';
         end
-        
-        if ~isfield(atTemplate{ii}, 'SeriesTime')    
+
+        if ~isfield(atTemplate{ii}, 'SeriesTime')
             atTemplate{ii}.SeriesTime = '';
         end
-        
+
         if isfield( planC{1,3}(1).scanInfo(ii), 'frameAcquisitionDuration')
             atTemplate{ii}.ActualFrameDuration = planC{1,3}(1).scanInfo(ii).frameAcquisitionDuration;
         else
@@ -177,10 +182,10 @@ function loadCerrDoseVolume(planC, structNamC)
             atTemplate{ii}.PatientAge          = '';
         end
 
-        if isfield( planC{1,3}(1).scanInfo(ii), 'patientBirthDate')                
-            atTemplate{ii}.PatientBirthDate    = planC{1,3}(1).scanInfo(ii).patientBirthDate;         
+        if isfield( planC{1,3}(1).scanInfo(ii), 'patientBirthDate')
+            atTemplate{ii}.PatientBirthDate    = planC{1,3}(1).scanInfo(ii).patientBirthDate;
         else
-            atTemplate{ii}.PatientBirthDate    = '';         
+            atTemplate{ii}.PatientBirthDate    = '';
         end
 
         if ~isfield(atTemplate{ii}, 'SeriesType')
@@ -202,7 +207,7 @@ function loadCerrDoseVolume(planC, structNamC)
         if ~isfield(atTemplate{ii}, 'Units')
             atTemplate{ii}.Units = '';
         end
-         
+
         if isfield(planC{1,3}(1).scanInfo(ii).DICOMHeaders, 'RadiopharmaceuticalInformationSequence')
 
             atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime  = planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime;
@@ -241,8 +246,8 @@ function loadCerrDoseVolume(planC, structNamC)
                 char(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodingSchemeDesignator);
 
             atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning = ...
-                char(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning);                 
-        end      
+                char(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning);
+        end
 
 
     end
@@ -250,7 +255,7 @@ function loadCerrDoseVolume(planC, structNamC)
     atNewInput(1).atDicomInfo = atTemplate;
     atNewInput(2).atDicomInfo = atTemplate;
 
-    atNewInput(1).atDicomInfo{1}.din = []; 
+    atNewInput(1).atDicomInfo{1}.din = [];
     atNewInput(2).atDicomInfo{1}.din = [];
 
     for ii=1:numel(atNewInput(2).atDicomInfo)
@@ -258,15 +263,15 @@ function loadCerrDoseVolume(planC, structNamC)
         atNewInput(2).atDicomInfo{ii}.SeriesDescription = sprintf('Dose: %s', atNewInput(1).atDicomInfo{ii}.SeriesDescription);
         atNewInput(2).atDicomInfo{ii}.Units = 'DOSE';
     end
-% To reduce memory usage                
+% To reduce memory usage
 %     atNewInput(1).aDicomBuffer = scan3M;
 %     atNewInput(2).aDicomBuffer = dose3M;
-% To reduce memory usage                
-    
+% To reduce memory usage
+
     for ii=1:numel(atNewInput)
         atNewInput(ii).asFilesList    = [];
         atNewInput(ii).asFilesList{1} = '';
-       
+
         atNewInput(ii).sOrientationView    = 'Axial';
 
         if strcmpi(atNewInput(ii).atDicomInfo{1}.Modality, 'RTDOSE')
@@ -283,17 +288,17 @@ function loadCerrDoseVolume(planC, structNamC)
         atNewInput(ii).bMathApplied        = false;
         atNewInput(ii).bFusedDoseKernel    = false;
         atNewInput(ii).bFusedEdgeDetection = false;
-        
+
         atNewInput(ii).tMovement = [];
-        
+
         atNewInput(ii).tMovement.bMovementApplied = false;
-        atNewInput(ii).tMovement.aGeomtform       = []; 
-        
+        atNewInput(ii).tMovement.aGeomtform       = [];
+
         atNewInput(ii).tMovement.atSeq{1}.sAxe         = [];
         atNewInput(ii).tMovement.atSeq{1}.aTranslation = [];
-        atNewInput(ii).tMovement.atSeq{1}.dRotation    = [];         
+        atNewInput(ii).tMovement.atSeq{1}.dRotation    = [];
     end
-    
+
     aBuffer{1}=scan3M;
     aBuffer{2}=dose3M;
 
@@ -499,7 +504,8 @@ function loadCerrDoseVolume(planC, structNamC)
     isVsplash('set', false);
     set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnVsplashPtr('get'), 'FontWeight', 'normal');
+    % set(btnVsplashPtr('get'), 'FontWeight', 'normal');
+    set(btnVsplashPtr('get'), 'CData', resizeTopBarIcon('splash_grey.png'));
 
     registrationReport('set', '');
 
@@ -509,23 +515,28 @@ function loadCerrDoseVolume(planC, structNamC)
 
     set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnFusionPtr('get'), 'FontWeight', 'normal');
+    % set(btnFusionPtr('get'), 'FontWeight', 'normal');
+    set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));
 
     set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btn3DPtr('get'), 'FontWeight', 'normal');
+    % set(btn3DPtr('get'), 'FontWeight', 'normal');
+    set(btn3DPtr('get'), 'CData', resizeTopBarIcon('3d_volume_grey.png'));
 
     set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+    % set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+    set(btnIsoSurfacePtr('get'), 'CData', resizeTopBarIcon('3d_iso_grey.png'));
 
     set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnMIPPtr('get'), 'FontWeight', 'normal');
+    % set(btnMIPPtr('get'), 'FontWeight', 'normal');
+    set(btnMIPPtr('get'), 'CData', resizeTopBarIcon('3d_mip_grey.png'));
 
     set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
     set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-    set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+    % set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+    set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));
 
     imageOrientation('set', 'axial');
 
@@ -637,14 +648,14 @@ function loadCerrDoseVolume(planC, structNamC)
         if get(uiSeriesPtr('get'), 'Value') ~= planC{4}(mm).associatedScan
             set(uiSeriesPtr('get'), 'Value', planC{4}(mm).associatedScan);
             setSeriesCallback();
-            mainToolBarEnable('off');            
+            mainToolBarEnable('off');
         end
 
         if contourVisibilityRoiPanelValue('get') == false
-    
+
             contourVisibilityRoiPanelValue('set', true);
             set(chkContourVisibilityPanelObject('get'), 'Value', true);
-        end 
+        end
 
         maskToVoi(strMaskC{mm}, structNamC{mm}, 'Unspecified' ,aVoiColor, 'axial',  planC{4}(mm).associatedScan, false);
     end
@@ -683,22 +694,23 @@ function loadCerrDoseVolume(planC, structNamC)
     % Activate playback
 
     if size(dicomBuffer('get'), 3) ~= 1
-        
+
         setPlaybackToolbar('on');
     end
-    
+
     setRoiToolbar('on');
-   
+
     progressBar(1, 'Import of dose volume completed.');
-    
-    catch
-        progressBar(1, 'Error:loadCerrDoseVolume()');                        
+
+    catch ME
+        logErrorToFile(ME);
+        progressBar(1, 'Error:loadCerrDoseVolume()');
     end
-    
-    % Reactivate main tool bar 
-    set(uiSeriesPtr('get'), 'Enable', 'on');        
+
+    % Reactivate main tool bar
+    set(uiSeriesPtr('get'), 'Enable', 'on');
     mainToolBarEnable('on');
-    
+
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
 end

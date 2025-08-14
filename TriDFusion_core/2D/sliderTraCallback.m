@@ -27,32 +27,33 @@ function sliderTraCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if ~isempty(uiSliderTraPtr('get'))
-
-
-        if get(uiSliderTraPtr('get'), 'Value') >= 0 && ...
-           get(uiSliderTraPtr('get'), 'Value') <= 1 
-           % strcmpi(windowButton('get'), 'up')  
-            
-%             windowButton('set', 'scrool');
-
-            if get(uiSliderTraPtr('get'), 'Value') == 1 
-                dSliceNumber = 1;
-            else
-                dSliceNumber = round((1-get(uiSliderTraPtr('get'), 'Value')) * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3));
-            end
+    hSlider = uiSliderTraPtr('get');
+    if isempty(hSlider)
+        return;
+    end
     
-            if dSliceNumber < 0
-                dSliceNumber = 1;
-            end
+    sliderVal = round(get(hSlider, 'Value'));
+    seriesIdx = get(uiSeriesPtr('get'), 'Value');
+    buffer    = dicomBuffer('get', [], seriesIdx);
+    numSlices = size(buffer, 3);
     
-            sliceNumber('set', 'axial', dSliceNumber);    
+    % Check slider value is in range
+    if sliderVal >= 0 && sliderVal <= numSlices
+
+        if sliderVal == numSlices
+            dSliceNumber = 1;
+        else
+            dSliceNumber = round(numSlices - sliderVal)+1;
+        end
     
+        % Clamp to valid slice range
+        dSliceNumber = max(1, min(dSliceNumber, numSlices));
+    
+        % Update only if changed
+        if dSliceNumber ~= sliceNumber('get', 'axial')
+
+            sliceNumber('set', 'axial', dSliceNumber);
             refreshImages();
-
-%             windowButton('set', 'up');
-   
-            % drawnow;
         end
     end
 end

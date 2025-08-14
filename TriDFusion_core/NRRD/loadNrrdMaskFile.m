@@ -1,6 +1,38 @@
-function loadNrrdMaskFile(sPath, sFileName)
-%function loadNrddMaskFile(sPath, sFileName)
-%Load .nrrd mask file to TriDFusion.
+function loadNrrdMaskFile(sPath, sFileName, acLesionMap)
+%function loadNrddMaskFile(sPath, sFileName, acLesionMap)
+% Reads the specified .nrrd
+% mask file located in the directory sPath and processes it for use within the
+% TriDFusion system. The function utilizes acLesionMap to translate lesion type
+% names (e.g., 'Cervical', 'Abdominal', etc.) into their corresponding numeric
+% codes as defined in the mask data.
+%
+% Input Arguments:
+%   sPath       - A string or character vector representing the directory path
+%                 to the .nrrd file.
+%   sFileName   - A string or character vector containing the name of the .nrrd
+%                 file to be loaded.
+%   acLesionMap - A containers.Map object (or cell array) that maps lesion type
+%                 names to their numeric codes. This mapping is used to correctly
+%                 interpret and process the mask data.
+%
+%   Example:
+%       % Define lesion mapping using a containers.Map:
+%       lesionMap = containers.Map(...
+%           {'background', 'Cervical', 'Supraclavicular', 'Mediastinal', ...
+%           'Paraspinal', 'Axillary', 'Abdominal'}, ...
+%           [0, 1, 2, 3, 4, 5, 6]);
+%
+%       % Specify the path and file name:
+%       filePath = 'C:\data\masks\';
+%       fileName = 'mask.nrrd';
+%
+%       % Load the mask file into TriDFusion:
+%       loadNrddMaskFile(filePath, fileName, lesionMap);
+%
+%   Note:
+%       This function requires the NRRD file format to be supported by the 
+%       underlying nrrd file reading utilities (e.g., nrrdread).
+%
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -67,24 +99,34 @@ function loadNrrdMaskFile(sPath, sFileName)
     end
    
     if bContinue == true
+
         for jj=1:dVoiMax
     
             progressBar(jj\dVoiMax-0.009, sprintf('Importing mask %d/%d, please wait.',jj, dVoiMax));
     
-            xmin=0.5;
-            xmax=1;
-            aColor=xmin+rand(1,3)*(xmax-xmin);
+            % xmin=0.5;
+            % xmax=1;
+            % aColor=xmin+rand(1,3)*(xmax-xmin);
+            aColor = generateUniqueColor(false);
     
             aVoiMask = aMask;
             aVoiMask(aVoiMask~=jj) = 0;
-    
-            maskToVoi(aVoiMask, sprintf('MASK %d', jj), 'Unspecified', aColor, 'axial',  get(uiSeriesPtr('get'), 'Value'), true);
+            
+            if ~isempty(acLesionMap)
+
+                sLesionType = acLesionMap(jj);
+            else
+                sLesionType = 'Unspecified';
+            end
+            
+            maskToVoi(aVoiMask, sprintf('MASK %d', jj), sLesionType, aColor, 'axial',  get(uiSeriesPtr('get'), 'Value'), true);
         end
     
         progressBar(1, sprintf('Import %s completed.', sFileName));
     end
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         progressBar(1, 'Error:loadNdrrMaskFile()');                        
     end
 

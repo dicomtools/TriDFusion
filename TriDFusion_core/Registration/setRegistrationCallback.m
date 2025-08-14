@@ -34,6 +34,8 @@ function setRegistrationCallback(~, ~)
         return;
     end
 
+    set(btnRegisterPtr('get'), 'CData', resizeTopBarIcon('register_white.png'));           
+
     tRegistration = registrationTemplate('get');
 
     if viewerUIFigure('get') == true
@@ -47,6 +49,7 @@ function setRegistrationCallback(~, ~)
                    'Resize', 'off', ...
                    'Color', viewerBackgroundColor('get'),...
                    'WindowStyle', 'modal', ...
+                   'CloseRequestFcn', @onCloseRegister, ...
                    'Name' , 'Image Registration'...
                    );
     else
@@ -58,10 +61,13 @@ function setRegistrationCallback(~, ~)
                                 FIG_REGISTRATION_Y ...
                                 ],...
                    'Color', viewerBackgroundColor('get'),...
+                   'CloseRequestFcn', @onCloseRegister, ...
                    'Name' , 'Image Registration'...
                    );
     end
 
+    setObjectIcon(dlgRegister);
+    
     axeRegister = ...
         axes(dlgRegister, ...
              'Units'   , 'pixels', ...
@@ -72,8 +78,10 @@ function setRegistrationCallback(~, ~)
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'off'...
              );
-    axeRegister.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeRegister.Toolbar = [];
+     axeRegister.Interactions = [];
+     deleteAxesToolbar(axeRegister); 
+     disableDefaultInteractivity(axeRegister);
+
 %    if integrateToBrowser('get') == true
 %        sLogo = './TriDFusion/logo.png';
 %    else
@@ -103,7 +111,7 @@ function setRegistrationCallback(~, ~)
          uicontrol(dlgRegister,...
                   'String','Reset',...
                   'Position',[15 700 100 25],...
-                  'BackgroundColor', [0.2 0.039 0.027], ...
+                  'BackgroundColor', [0.3255, 0.1137, 0.1137], ...
                   'ForegroundColor', [0.94 0.94 0.94], ...
                   'Callback', @resetRegistrationCallback...
                   );
@@ -874,7 +882,8 @@ function setRegistrationCallback(~, ~)
             for jj=1:numel(adLbSeries)
                 adLbSeries(jj) = 0;
             end
-        elseif numel(adLbOffset) == 1 % First Entry
+            
+        elseif isscalar(adLbOffset) % First Entry
             dLbOffset = adLbOffset(1);
 
             for jj=1:numel(adLbSeries)
@@ -983,7 +992,8 @@ function setRegistrationCallback(~, ~)
 
         progressBar(1,'Ready');
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:resetRegistrationCallback()');
         end
 
@@ -1012,6 +1022,14 @@ function setRegistrationCallback(~, ~)
     function resampleCallback(~, ~)
 
         try
+
+        dInitOffset = get(uiSeriesPtr('get'), 'Value');
+
+        if size(dicomBuffer('get', [], dInitOffset), 3) ~= 1
+            dCoronal  = sliceNumber('get', 'coronal');
+            dSagittal = sliceNumber('get', 'sagittal');
+            dAxial    = sliceNumber('get', 'axial');
+        end
 
         if isFusion('get') == true
             setFusionCallback(); % Deactivate fusion
@@ -1063,8 +1081,6 @@ function setRegistrationCallback(~, ~)
 
         tInput = inputTemplate('get');
         aInput = inputBuffer('get');
-
-        dInitOffset = get(uiSeriesPtr('get'), 'Value');
 
         set(uiSeriesPtr('get'), 'Enable', 'off');
 
@@ -1156,16 +1172,31 @@ function setRegistrationCallback(~, ~)
                                           kk);
 
                         atRoi = roiTemplate('get', kk);
+                        atVoi = voiTemplate('get', kk);
 
-                        atResampledRoi = ...
+                        [atRoi, atVoi] = ...
                             resampleROIs(aBuffer            , ...
                                          atMetaData         , ...
                                          aResampledBuffer   , ...
                                          atResampledMetaData, ...
                                          atRoi              , ...
-                                         true);
+                                         true               , ...
+                                         atVoi              ,...
+                                         kk);
 
-                        roiTemplate('set', kk, atResampledRoi);
+                        roiTemplate('set', kk, atRoi);
+                        voiTemplate('set', kk, atVoi);
+
+                        roiTemplateEvent ('reset', kk);
+                        voiTemplateEvent ('reset', kk);  
+                        roiTemplateBackup('reset', kk);
+                        voiTemplateBackup('reset', kk); 
+
+                        atPlotEdit = plotEditTemplate('get', kk);
+
+                        atPlotEdit = resamplePlotEdit(aBuffer, atMetaData, aResampledBuffer, atResampledMetaData, atPlotEdit, true);
+
+                        plotEditTemplate('set', kk, atPlotEdit);
 
                         if size(aInput{kk}, 3) ~= 1
 
@@ -1256,13 +1287,19 @@ function setRegistrationCallback(~, ~)
             %
             %     dicomViewerCore();
             % end
+            if size(dicomBuffer('get', [], dInitOffset), 3) ~= 1
+
+                resetTriangulation(aInput{dInitOffset}, dCoronal, dSagittal, dAxial);
+            end         
         end
 
-        sliderCorCallback();
-        sliderSagCallback();
-        sliderTraCallback();
-        sliderMipCallback();
+        clear aInput;
 
+        % sliderCorCallback();
+        % sliderSagCallback();
+        % sliderTraCallback();
+        % sliderMipCallback();
+        
 %        refreshImages();
 
 %            refreshImages();
@@ -1276,7 +1313,8 @@ function setRegistrationCallback(~, ~)
 %            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 %        end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:resampleCallback()');
         end
 
@@ -1507,6 +1545,15 @@ function setRegistrationCallback(~, ~)
 
         try
 
+        dInitOffset = get(uiSeriesPtr('get'), 'Value');
+
+        if size(dicomBuffer('get', [], dInitOffset), 3) ~= 1
+            
+            dCoronal  = sliceNumber('get', 'coronal');
+            dSagittal = sliceNumber('get', 'sagittal');
+            dAxial    = sliceNumber('get', 'axial');
+        end
+
         if isFusion('get') == true
             setFusionCallback(); % Deactivate fusion
         end
@@ -1644,8 +1691,6 @@ function setRegistrationCallback(~, ~)
 
         tInput = inputTemplate('get');
         aInput = inputBuffer('get');
-
-        dInitOffset = get(uiSeriesPtr('get'), 'Value');
 
         set(uiSeriesPtr('get'), 'Enable', 'off');
 
@@ -1830,6 +1875,7 @@ function setRegistrationCallback(~, ~)
                                 end
                             end
                         end
+                        
                         % End condition 3
 
                         if bProceedWithRegistration == true
@@ -1877,6 +1923,12 @@ function setRegistrationCallback(~, ~)
                                                   kk);
                             end
 
+                            roiTemplateEvent ('reset', kk);
+                            voiTemplateEvent ('reset', kk);  
+                            roiTemplateBackup('reset', kk);
+                            voiTemplateBackup('reset', kk);
+
+
                             tInput(adLbSeries(kk)).tMovement.bMovementApplied = true;
                             % if isfield(registratedGeomtform, 'T')
                             %     tInput(adLbSeries(kk)).tMovement.aGeomtform = registratedGeomtform;
@@ -1887,6 +1939,15 @@ function setRegistrationCallback(~, ~)
                             sReport = sprintf('Registration %d', dNextSeries-1);
                             sReport = sprintf('%s\nFixed Series : %s', sReport, atRefMetaData{1}.SeriesDescription);
                             sReport = sprintf('%s\nMoving Series: %s', sReport, atRegisteredMetaData{1}.SeriesDescription);
+                            sReport = sprintf('%s\nMoving Series: %s', sReport, atRegisteredMetaData{1}.SeriesDescription);
+
+
+                            % Format the output as text
+                            sOutputText = sprintf('rigidtform3d with properties:\n\n');
+                            sOutputText = sprintf('%s  Dimensionality: %d\n', sOutputText, registratedGeomtform.Dimensionality);
+                            sOutputText = sprintf('%s  Translation: [%s]\n' , sOutputText, num2str(registratedGeomtform.Translation));
+
+                            sReport = sprintf('%s\n%s', sReport, sOutputText);
 
                             if ~strcmpi(sMode, 'Deformable')
 
@@ -1987,6 +2048,11 @@ function setRegistrationCallback(~, ~)
                                         atMetaData = tInput(dAssociatedSeries).atDicomInfo;
                                     end
 
+                                    if dInitOffset == dAssociatedSeries
+        
+                                        bResampleAxe = true;
+                                    end
+
                                     if strcmpi(sMode, 'Deformable')
 
                                         [aAssociatedRegistratedBuffer, atAssociatedRegisteredMetaData, registratedGeomtform] = ...
@@ -2025,6 +2091,12 @@ function setRegistrationCallback(~, ~)
                                                           dAssociatedSeries, ...
                                                           registratedGeomtform);
                                     end
+
+                                    roiTemplateEvent ('reset', dAssociatedSeries);
+                                    voiTemplateEvent ('reset', dAssociatedSeries);  
+                                    roiTemplateBackup('reset', dAssociatedSeries);
+                                    voiTemplateBackup('reset', dAssociatedSeries); 
+
                                     % 
                                     % tInput(dAssociatedSeries).tMovement.bMovementApplied = true;
                                     % if isfield(registratedGeomtform, 'T')
@@ -2121,6 +2193,7 @@ function setRegistrationCallback(~, ~)
 %        set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
 %        set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
+    
         set(dlgRegister, 'Pointer', 'default');
 
         delete(dlgRegister);
@@ -2160,16 +2233,24 @@ function setRegistrationCallback(~, ~)
                 end
 
                 dicomViewerCore();
+
+                setViewerDefaultColor(true, dicomMetaData('get', [], dInitOffset));
+
+                if size(dicomBuffer('get', [], dInitOffset), 3) ~= 1
+    
+                    resetTriangulation(aInput{dInitOffset}, dCoronal, dSagittal, dAxial);
+                end                  
  %           end
         end
 
-        setViewerDefaultColor(true, dicomMetaData('get', [], dInitOffset));
+        clear aInput;
+        % setViewerDefaultColor(true, dicomMetaData('get', [], dInitOffset));
 
 %        sliderCorCallback();
 %        sliderSagCallback();
 %        sliderTraCallback();
 
-        refreshImages();
+        % refreshImages();
 
 
 %         triangulateCallback();
@@ -2186,7 +2267,8 @@ function setRegistrationCallback(~, ~)
 %        end
 %        refreshImages();
  %       aBuffer = registerImage(aBuffer, atMetaData, refImage, tInput(iRefOffset).atDicomInfo, sMode, optimizer, metric);
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:registerCallback()');
         end
 
@@ -2260,4 +2342,12 @@ function setRegistrationCallback(~, ~)
         referenceOutputView('set', get(chkRegResampleRegistration, 'Value'));
 
     end
+
+    function onCloseRegister(src, ~)
+
+        delete(src);  
+
+        set(btnRegisterPtr('get'), 'CData', resizeTopBarIcon('register_grey.png'));           
+    end
+
 end

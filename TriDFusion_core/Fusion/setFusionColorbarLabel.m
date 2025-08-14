@@ -47,7 +47,7 @@ function setFusionColorbarLabel()
     dAlphaValue = 1-sliderAlphaValue('get');
     sLabel = sprintf('Fusion Alpha %0.2f', dAlphaValue);
         
-    if numel(tInput) == 1
+    if isscalar(tInput)
         if tInput(dFuseOffset).bFusedEdgeDetection == true
             sLabel = sprintf('%s, Edge', sLabel);
         end    
@@ -66,7 +66,8 @@ function setFusionColorbarLabel()
     end
         
 
-    ptrFusionColorbar.Label.String = sLabel;         
+    ptrFusionColorbar.Parent.YLabel.String = sLabel;         
+
     uiFusionColorbarPtr('set', ptrFusionColorbar);
 
 end

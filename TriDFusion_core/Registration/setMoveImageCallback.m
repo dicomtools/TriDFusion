@@ -368,7 +368,8 @@ function setMoveImageCallback(~, ~)
             
         end
         
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:setMoveImageCallback()');           
         end
 

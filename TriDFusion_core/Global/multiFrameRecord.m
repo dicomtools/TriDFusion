@@ -32,5 +32,6 @@ function bPlayback = multiFrameRecord(sAction, bValue)
     if strcmpi('set', sAction)
         pbPlayback = bValue;            
     end
+    
     bPlayback = pbPlayback;             
 end

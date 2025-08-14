@@ -28,12 +28,14 @@ function setShowFaceAlphContoursCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
     
     if isShowFaceAlphaContours('get') == true
+
         isShowFaceAlphaContours('set', false);
     else
         isShowFaceAlphaContours('set', true);       
     end 
 
     if isPlotContours('get') == true % Deactivate contour
+        
         setPlotContoursCallback(); 
     end
 

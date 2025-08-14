@@ -1,5 +1,5 @@
-function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, bUseDefault)
-%function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, bUseDefault)
+function setSegmentationPSMA(sSegmentatorScript, tGa68, bUseDefault)
+%function setSegmentationPSMA(sSegmentatorScript, tGa68, bUseDefault)
 %Run PSMA Segmentation base on normal liver Threshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -7,7 +7,7 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
 %
 %Last specifications modified:
 %
-% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2025, Daniel Lafontaine, on behalf of the TriDFusion development team.
 %
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 %
@@ -28,10 +28,24 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     gbProceedWithSegmentation = false;
+    gbBypassOrgansSegmentation = false;
+
     gdNormalLiverMean = [];
     gdNormalLiverSTD = [];
 
+    gdLymphNodesSUVThresholdValue = [];
+    gdBoneSUVThresholdValue  = [];
+
+    gbLymphNodesSegmentation = [];
+    gbBoneSegmentation = [];
+
     atInput = inputTemplate('get');
+
+    bExcludeOrgansFromSegmentation = tGa68.options.excludeOrgansFromSegmentation;
+    bOrganMargins      = tGa68.options.excludeOrganMargins;
+    dBoneMaskThreshold = tGa68.options.boneMaskThresholdValue;
+    dSmalestVoiValue   = tGa68.options.smalestVoiValue;
+    dPixelEdge         = tGa68.options.pixelEdge;
 
     % Modality validation
 
@@ -53,11 +67,10 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
 
     if isempty(dCTSerieOffset) || ...
        isempty(dPTSerieOffset)
-        progressBar(1, 'Error: PSMA Ga68 tumor segmentation require a CT and PT image!');
-        errordlg('PSMA Ga68 tumor segmentation require a CT and PT image!', 'Modality Validation');
+        progressBar(1, 'Error: PSMA tumor segmentation require a CT and PT image!');
+        errordlg('PSMA tumor segmentation require a CT and PT image!', 'Modality Validation');
         return;
     end
-
 
     atPTMetaData = dicomMetaData('get', [], dPTSerieOffset);
     atCTMetaData = dicomMetaData('get', [], dCTSerieOffset);
@@ -98,6 +111,8 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
 
     atRoiInput = roiTemplate('get', dPTSerieOffset);
 
+    bResetSeries = true;
+
     if ~isempty(atRoiInput)
 
         aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );
@@ -135,29 +150,49 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
 
                 waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));
 
-                PSMANormalLiverMeanSDDialog();
+                PSMAThresholdValuesDialog();
 
                 if gbProceedWithSegmentation == false
                     return;
                 end
+
+                bResetSeries = false;
             else
-                gdNormalLiverMean = PSMANormalLiverMeanValue('get');
-                gdNormalLiverSTD  = PSMANormalLiverSDValue('get');
+                gbLymphNodesSegmentation = true;
+                gbBoneSegmentation = true;
+
+                gdLymphNodesSUVThresholdValue = PSMALymphNodesSUVThresholdValue('get');
+                gdBoneSUVThresholdValue       = PSMABoneSUVThresholdValue('get');
             end
         end
     else
+
         if bUseDefault == false
 
-            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));
+            waitfor(msgbox('Warning: Normal Liver ROI not found. Draw an ROI on the normal liver, right-click on the ROI, and select the predefined label ''Normal Liver,'' or manually input the Lymph Nodes and Bone SUV Threshold into the following dialog.', 'Warning'));
 
-            PSMANormalLiverMeanSDDialog();
+            PSMAThresholdValuesDialog();
 
             if gbProceedWithSegmentation == false
                 return;
             end
+
+            if gbLymphNodesSegmentation == false
+                gbBypassOrgansSegmentation = true;
+            end
+
+            if gbLymphNodesSegmentation == false && gbBoneSegmentation == false
+                gbBypassOrgansSegmentation = true;
+            end
+
+            bResetSeries = false;
+
         else
-            gdNormalLiverMean = PSMANormalLiverMeanValue('get');
-            gdNormalLiverSTD  = PSMANormalLiverSDValue('get');
+            gbLymphNodesSegmentation = true;
+            gbBoneSegmentation = true;
+
+            gdLymphNodesSUVThresholdValue = PSMALymphNodesSUVThresholdValue('get');
+            gdBoneSUVThresholdValue       = PSMABoneSUVThresholdValue('get');
         end
     end
 
@@ -177,7 +212,10 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
         aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
     end
 
-    resetSeries(dPTSerieOffset, true);
+    if bResetSeries == true
+
+        resetSeries(dPTSerieOffset, true);
+    end
 
     try
 
@@ -191,7 +229,7 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
         setImageInterpolation(true);
     end
 
-    progressBar(5/10, 'Resampling data series, please wait...');
+    progressBar(5/13, 'Resampling data series, please wait...');
 
     [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
     [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
@@ -204,8 +242,7 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
     clear aPTImageTemp;
     clear aResampledPTImageTemp;
 
-
-    progressBar(6/10, 'Resampling MIP, please wait...');
+    progressBar(6/13, 'Resampling MIP, please wait...');
 
     refMip = mipBuffer('get', [], dCTSerieOffset);
     aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -224,47 +261,32 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
         dSUVScale = 1;
     end
 
-    progressBar(7/10, 'Computing mask, please wait...');
+    progressBar(7/13, 'Computing mask, please wait...');
 
     aBWMask = aResampledPTImage;
 
     dMin = min(aBWMask, [], 'all');
 
-%     dThreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
-    dThreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
-    if dThreshold < 3
-        dThreshold = 3;
+    if isempty(gbLymphNodesSegmentation) && ...
+       isempty(gbBoneSegmentation)
+
+    %     dThreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
+        dThreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
+
+        if dThreshold < 3
+
+            dThreshold = 3;
+        end
+
+        aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
+
+        aBWMask = imbinarize(aBWMask);
     end
 
-    aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
-
-    aBWMask = imbinarize(aBWMask);
-
-    progressBar(8/10, 'Computing CT map, please wait...');
+    progressBar(8/13, 'Computing CT map, please wait...');
 
     BWCT = aCTImage >= dBoneMaskThreshold;   % Logical mask creation
     BWCT = imfill(single(BWCT), 4, 'holes'); % Fill holes in the binary mask
-
-%     BWCT = aCTImage;
-%
-%     % Thresholding to create a binary mask
-%     BWCT = BWCT >= dBoneMaskThreshold;
-%
-%     % Perform morphological closing to smooth contours and fill small gaps
-%     se = strel('disk', 3); % Adjust the size as needed
-%     BWCT = imclose(BWCT, se);
-%
-%     % Fill holes in the binary image
-%     BWCT = imfill(BWCT, 'holes');
-%
-%     % Optional: Remove small objects that are not part of the bone
-%     BWCT = bwareaopen(BWCT, 100); % Adjust the size threshold as needed
-%
-%     % Perform another round of morphological closing if necessary
-%     BWCT = imclose(BWCT, se);
-%
-%     % Optional: Perform morphological opening to remove small spurious regions
-%     BWCT = imopen(BWCT, se);
 
     if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
 
@@ -279,15 +301,151 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
         BWCT = imbinarize(BWCT);
     end
 
-    progressBar(9/10, 'Generating contours, please wait...');
+    if bExcludeOrgansFromSegmentation == true && ...
+       gbBypassOrgansSegmentation == false
+
+        % Get DICOM directory directory
+
+        [sFilePath, ~, ~] = fileparts(char(atInput(dCTSerieOffset).asFilesList{1}));
+
+        % Create an empty directory
+
+        sNiiTmpDir = sprintf('%stemp_nii_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+        if exist(char(sNiiTmpDir), 'dir')
+            rmdir(char(sNiiTmpDir), 's');
+        end
+        mkdir(char(sNiiTmpDir));
+
+        % Convert dicom to .nii
+
+        progressBar(9/13, 'Converting DICOM to NII, please wait...');
+
+        dicm2nii(sFilePath, sNiiTmpDir, 1);
+
+        sNiiFullFileName = '';
+
+        f = java.io.File(char(sNiiTmpDir)); % Get .nii file name
+        dinfo = f.listFiles();
+        for K = 1 : 1 : numel(dinfo)
+            if ~(dinfo(K).isDirectory)
+                if contains(sprintf('%s%s', sNiiTmpDir, dinfo(K).getName()), '.nii.gz')
+                    sNiiFullFileName = sprintf('%s%s', sNiiTmpDir, dinfo(K).getName());
+                    break;
+                end
+            end
+        end
+
+        if isempty(sNiiFullFileName)
+
+            progressBar(1, 'Error: nii file not found!');
+            errordlg('nii file not found!!', '.nii file Validation');
+        else
+
+            progressBar(10/13, 'Machine learning in progress, this might take several minutes, please be patient.');
+
+            sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+            if exist(char(sSegmentationFolderName), 'dir')
+                rmdir(char(sSegmentationFolderName), 's');
+            end
+            mkdir(char(sSegmentationFolderName));
+
+            if ispc % Windows
+
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast --force_split --body_seg', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);
+
+                [bStatus, sCmdout] = system(sCommandLine);
+
+                if bStatus
+                    progressBar( 1, 'Error: An error occur during machine learning segmentation!');
+                    errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');
+                else % Process succeed
+
+                    progressBar(10/13, 'Importing exclusion masks, please wait...');
+
+                    aExcludeMask = getPSMAExcludeMask(tGa68, sSegmentationFolderName, zeros(size(aCTImage)));
+                    aExcludeMask = imdilate(aExcludeMask, strel('sphere', bOrganMargins)); % Increse mask by 2 pixels
+
+                    if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+
+                         aExcludeMask = resample3DImage(aExcludeMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+                         aExcludeMask = imbinarize(aExcludeMask);
+
+                        if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+                            aExcludeMask = resizeMaskToImageSize(aExcludeMask, aResampledPTImage);
+                        end
+                    else
+                        aExcludeMask = imbinarize(aExcludeMask);
+                    end
+
+                    aBWMask(aExcludeMask) = dMin;
+
+                    clear aExcludeMask;
+
+                    if exist(char(sNiiTmpDir), 'dir')
+                        rmdir(char(sNiiTmpDir), 's');
+                    end
+
+                    if exist(char(sSegmentationFolderName), 'dir')
+                        rmdir(char(sSegmentationFolderName), 's');
+                    end
+                end
+            elseif isunix % Linux is not yet supported
+
+                progressBar( 1, 'Error: Machine Learning under Linux is not supported');
+                errordlg('Machine Learning under Linux is not supported', 'Machine Learning Validation');
+
+            else % Mac is not yet supported
+
+                progressBar( 1, 'Error: Machine Learning under Mac is not supported');
+                errordlg('Machine Learning under Mac is not supported', 'Machine Learning Validation');
+            end
+        end
+
+    end
+
+    progressBar(12/13, 'Generating contours, please wait...');
 
     imMask = aResampledPTImage;
 %     imMask(aBWMask == 0) = dMin;
 
     setSeriesCallback();
 
-    sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
-    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD);
+    if isempty(gbLymphNodesSegmentation) && ...
+       isempty(gbBoneSegmentation)
+
+        sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Lymph Nodes & Bone SUV 3, CT Bone Map';
+        maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD);
+    else
+
+        if gbLymphNodesSegmentation == true && ... % Lymph Nodes and Bone
+           gbBoneSegmentation == true
+
+            aBWMask(aBWMask*dSUVScale<gdLymphNodesSUVThresholdValue)=dMin;
+            aBWMask = imbinarize(aBWMask);
+
+            sFormula = 'Lymph Nodes & Bone SUV, CT Bone Map';
+            maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, gdLymphNodesSUVThresholdValue, false, 0, false, sFormula, BWCT, dSmalestVoiValue, [],[],[], gbBoneSegmentation);
+        else
+            if gbLymphNodesSegmentation== true % Lymph Nodes
+
+                aBWMask(aBWMask*dSUVScale<gdLymphNodesSUVThresholdValue)=dMin;
+
+                aBWMask(BWCT==1) = dMin;
+                aBWMask = imbinarize(aBWMask);
+
+                sFormula = 'Lymph Nodes';
+                maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, gdLymphNodesSUVThresholdValue, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
+            else % Bone
+                aBWMask(aBWMask*dSUVScale<gdBoneSUVThresholdValue)=dMin;
+
+                aBWMask(BWCT==0) = dMin;
+                aBWMask = imbinarize(aBWMask);
+
+                sFormula = 'Bone';
+                maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, gdBoneSUVThresholdValue, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
+            end
+        end
+    end
 
     clear aResampledPTImage;
     clear aBWMask;
@@ -321,13 +479,16 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set fusion
 
     if isFusion('get') == false
 
         set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+        sliderAlphaValue('set', 0.65);
 
         setFusionCallback();
     end
@@ -366,7 +527,8 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setSegmentationPSMA()' );
     end
@@ -374,14 +536,14 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
 
-    function PSMANormalLiverMeanSDDialog()
+    function PSMAThresholdValuesDialog()
 
         DLG_PSMA_MEAN_SD_X = 380;
-        DLG_PSMA_MEAN_SD_Y = 150;
+        DLG_PSMA_MEAN_SD_Y = 215;
 
         if viewerUIFigure('get') == true
 
-            dlgPSMAmeanSD = ...
+            dlgPSMASUVThreshold = ...
                 uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_PSMA_MEAN_SD_X/2) ...
                                 (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_PSMA_MEAN_SD_Y/2) ...
                                 DLG_PSMA_MEAN_SD_X ...
@@ -390,10 +552,10 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
                        'Resize', 'off', ...
                        'Color', viewerBackgroundColor('get'),...
                        'WindowStyle', 'modal', ...
-                       'Name' , 'PSMA Segmentation Mean and SD'...
+                       'Name' , 'PSMA Segmentation Threshold'...
                        );
         else
-            dlgPSMAmeanSD = ...
+            dlgPSMASUVThreshold = ...
                 dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_PSMA_MEAN_SD_X/2) ...
                                     (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_PSMA_MEAN_SD_Y/2) ...
                                     DLG_PSMA_MEAN_SD_X ...
@@ -404,113 +566,218 @@ function setSegmentationPSMA(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
                        'NumberTitle','off',...
                        'MenuBar', 'none',...
                        'Color', viewerBackgroundColor('get'), ...
-                       'Name', 'PSMA Segmentation Mean and SD',...
+                       'Name', 'PSMA Segmentation SUV Threshold',...
                        'Toolbar','none'...
                        );
         end
 
-        % Normal Liver Mean
+        setObjectIcon(dlgPSMASUVThreshold);
 
-            uicontrol(dlgPSMAmeanSD,...
+        % Lymph Nodes Segmentation
+
+        chkLymphNodesSegmentation = ...
+            uicontrol(dlgPSMASUVThreshold,...
+                      'style'   , 'checkbox',...
+                      'enable'  , 'on',...
+                      'value'   , PSMALymphNodesSegmentation('get'),...
+                      'position', [20 165 20 20],...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...
+                      'Callback', @chkLymphNodesSegmentationCallback...
+                      );
+
+            uicontrol(dlgPSMASUVThreshold,...
                       'style'   , 'text',...
-                      'Enable'  , 'On',...
-                      'string'  , 'Normal Liver Mean',...
+                      'Enable'  , 'Inactive',...
+                      'string'  , 'Lymph Nodes Segmentation',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
-                      'position', [20 90 250 20]...
+                      'ButtonDownFcn'  , @chkLymphNodesSegmentationCallback, ...
+                      'position', [40 165 250 20]...
                       );
 
-        edtPSMANormalLiverMeanValue = ...
-            uicontrol(dlgPSMAmeanSD, ...
+       if get(chkLymphNodesSegmentation, 'Value') == true
+           sLymphNodesEnable = 'on';
+       else
+           sLymphNodesEnable = 'off';
+       end
+
+            uicontrol(dlgPSMASUVThreshold,...
+                      'style'   , 'text',...
+                      'Enable'  , 'On',...
+                      'string'  , 'Lymph Nodes SUV Threshold Value',...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...
+                      'position', [40 140 245 20]...
+                      );
+
+        edtPSMALymphNodesSUVThresholdValue = ...
+            uicontrol(dlgPSMASUVThreshold, ...
                       'Style'   , 'Edit', ...
-                      'Position', [285 90 75 20], ...
-                      'String'  , num2str(PSMANormalLiverMeanValue('get')), ...
-                      'Enable'  , 'on', ...
+                      'Position', [285 140 75 20], ...
+                      'String'  , num2str(PSMALymphNodesSUVThresholdValue('get')), ...
+                      'Enable'  , sLymphNodesEnable, ...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
-                      'CallBack', @edtPSMANormalLiverMeanValueCallback ...
+                      'CallBack', @edtPSMALymphNodesSUVThresholdValueCallback ...
                       );
 
-        % Normal Liver Standard Deviation
+        % Bone Segmentation
 
-            uicontrol(dlgPSMAmeanSD,...
+        chkBoneSegmentation = ...
+            uicontrol(dlgPSMASUVThreshold,...
+                      'style'   , 'checkbox',...
+                      'enable'  , 'on',...
+                      'value'   , PSMABoneSegmentation('get'),...
+                      'position', [20 90 20 20],...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...
+                      'Callback', @chkBoneSegmentationCallback...
+                      );
+
+            uicontrol(dlgPSMASUVThreshold,...
                       'style'   , 'text',...
-                      'Enable'  , 'On',...
-                      'string'  , 'Normal Liver Standard Deviation',...
+                      'Enable'  , 'Inactive',...
+                      'string'  , 'Bone Segmentation',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
-                      'position', [20 65 250 20]...
+                      'ButtonDownFcn'  , @chkBoneSegmentationCallback, ...
+                      'position', [40 90 250 20]...
                       );
 
-        edtPSMANormalLiverSDValue = ...
-            uicontrol(dlgPSMAmeanSD, ...
+       if get(chkBoneSegmentation, 'Value') == true
+           sBoneEnable = 'on';
+       else
+           sBoneEnable = 'off';
+       end
+            uicontrol(dlgPSMASUVThreshold,...
+                      'style'   , 'text',...
+                      'Enable'  , 'On',...
+                      'string'  , 'Bone SUV Threshold Value',...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...
+                      'position', [40 65 245 20]...
+                      );
+
+        edtPSMABoneSUVThresholdValue = ...
+            uicontrol(dlgPSMASUVThreshold, ...
                       'Style'   , 'Edit', ...
                       'Position', [285 65 75 20], ...
-                      'String'  , num2str(PSMANormalLiverSDValue('get')), ...
-                      'Enable'  , 'on', ...
+                      'String'  , num2str(PSMABoneSUVThresholdValue('get')), ...
+                      'Enable'  , sBoneEnable, ...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
-                      'CallBack', @edtPSMANormalLiverSDValueCallback ...
+                      'CallBack', @edtPSMABoneSUVThresholdValueCallback ...
                       );
 
          % Cancel or Proceed
 
-         uicontrol(dlgPSMAmeanSD,...
+         uicontrol(dlgPSMASUVThreshold,...
                    'String','Cancel',...
                    'Position',[285 7 75 25],...
                    'BackgroundColor', viewerBackgroundColor('get'), ...
                    'ForegroundColor', viewerForegroundColor('get'), ...
-                   'Callback', @cancelPSMAmeanSDCallback...
+                   'Callback', @cancelPSMASUVThreshold...
                    );
 
-         uicontrol(dlgPSMAmeanSD,...
+         uicontrol(dlgPSMASUVThreshold,...
                   'String','Continue',...
                   'Position',[200 7 75 25],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @proceedPSMAmeanSDCallback...
+                  'Callback', @proceedPSMASUVThreshold...
                   );
 
-        waitfor(dlgPSMAmeanSD);
+        waitfor(dlgPSMASUVThreshold);
 
-        function edtPSMANormalLiverMeanValueCallback(~, ~)
+        function chkLymphNodesSegmentationCallback(hObject, ~)
 
-            dMeanValue = str2double(get(edtPSMANormalLiverMeanValue, 'Value'));
+            bObjectValue = get(chkLymphNodesSegmentation, 'Value');
 
-            if dMeanValue < 0
-                dMeanValue = 0.1;
-                set(edtPSMANormalLiverMeanValue, 'Value', num2str(dMeanValue));
+            if strcmpi(get(hObject, 'Style'), 'text')
+
+                set(chkLymphNodesSegmentation, 'Value', ~bObjectValue);
             end
 
-            PSMANormalLiverMeanValue('set', dMeanValue);
-        end
+            bObjectValue = get(chkLymphNodesSegmentation, 'Value');
 
-        function edtPSMANormalLiverSDValueCallback(~, ~)
+            if bObjectValue == true
 
-            dSDValue = str2double(get(edtPSMANormalLiverSDValue, 'Value'));
-
-            if dSDValue < 0
-                dSDValue = 0.1;
-                set(edtPSMANormalLiverSDValue, 'Value', num2str(dSDValue));
+                set(edtPSMALymphNodesSUVThresholdValue, 'Enable', 'On');
+            else
+                set(edtPSMALymphNodesSUVThresholdValue, 'Enable', 'Off');
             end
 
-            PSMANormalLiverSDValue('set', dSDValue);
+            PSMALymphNodesSegmentation('set', bObjectValue);
+
         end
 
-        function proceedPSMAmeanSDCallback(~, ~)
+        function edtPSMALymphNodesSUVThresholdValueCallback(~, ~)
 
-            gdNormalLiverMean = str2double(get(edtPSMANormalLiverMeanValue, 'String'));
-            gdNormalLiverSTD  = str2double(get(edtPSMANormalLiverSDValue, 'String'));
+            dSUVValue = str2double(get(edtPSMALymphNodesSUVThresholdValue, 'String'));
 
-            delete(dlgPSMAmeanSD);
+            if dSUVValue < 0
+
+                set(edtPSMALymphNodesSUVThresholdValue, 'String', num2str(1));
+            end
+
+            PSMALymphNodesSUVThresholdValue('set', dSUVValue);
+        end
+
+        function chkBoneSegmentationCallback(hObject, ~)
+
+            bObjectValue = get(chkBoneSegmentation, 'Value');
+
+            if strcmpi(get(hObject, 'Style'), 'text')
+
+                set(chkBoneSegmentation, 'Value', ~bObjectValue);
+            end
+
+            bObjectValue = get(chkBoneSegmentation, 'Value');
+
+            if bObjectValue == true
+
+                set(edtPSMABoneSUVThresholdValue, 'Enable', 'On');
+            else
+                set(edtPSMABoneSUVThresholdValue, 'Enable', 'Off');
+            end
+
+            PSMABoneSegmentation('set', bObjectValue);
+
+        end
+
+        function edtPSMABoneSUVThresholdValueCallback(~, ~)
+
+            dSUVValue = str2double(get(edtPSMABoneSUVThresholdValue, 'String'));
+
+            if dSUVValue < 0
+
+                set(edtPSMABoneSUVThresholdValue, 'String', num2str(1));
+            end
+
+            PSMABoneSUVThresholdValue('set', dSUVValue);
+        end
+
+        function proceedPSMASUVThreshold(~, ~)
+
+            gbLymphNodesSegmentation = get(chkLymphNodesSegmentation, 'Value');
+            gbBoneSegmentation       = get(chkBoneSegmentation, 'Value');
+
+            gdLymphNodesSUVThresholdValue = str2double(get(edtPSMALymphNodesSUVThresholdValue, 'String'));
+            gdBoneSUVThresholdValue       = str2double(get(edtPSMABoneSUVThresholdValue, 'String'));
+
+            delete(dlgPSMASUVThreshold);
+
             gbProceedWithSegmentation = true;
         end
 
-        function cancelPSMAmeanSDCallback(~, ~)
+        function cancelPSMASUVThreshold(~, ~)
 
-            delete(dlgPSMAmeanSD);
+            delete(dlgPSMASUVThreshold);
             gbProceedWithSegmentation = false;
         end
     end

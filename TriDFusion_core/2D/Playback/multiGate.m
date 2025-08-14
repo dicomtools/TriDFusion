@@ -1,5 +1,5 @@
-function multiGate(mPlay, pAxe)
-%function multiGate(mPlay, pAxe)
+function multiGate(mPlay)
+%function multiGate(mPlay)
 %Play 3D DICOM 4D Images.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -36,7 +36,6 @@ function multiGate(mPlay, pAxe)
 
         progressBar(1, 'Error: Require a 3D Volume!');
         multiFramePlayback('set', false);
-        mPlay.State = 'off';
         set(uiSeriesPtr('get'), 'Enable', 'on');
         return;
     end
@@ -46,30 +45,10 @@ function multiGate(mPlay, pAxe)
 
         progressBar(1, 'Error: Require at least two 3D Volume!');
         multiFramePlayback('set', false);
-        mPlay.State = 'off';
         set(uiSeriesPtr('get'), 'Enable', 'on');
         return;
     end
 
-%     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}, 'din') && ...
-%        gateUseSeriesUID('get') == true
-% 
-%         progressBar(1, 'Error: Require a 4D series!');
-%         multiFramePlayback('set', false);
-%         mPlay.State = 'off';
-%         set(uiSeriesPtr('get'), 'Enable', 'on');
-%         return;
-%     end
-% 
-%     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
-%        gateUseSeriesUID('get') == true
-% 
-%         progressBar(1, 'Error: Require a 4D series!');
-%         multiFramePlayback('set', false);
-%         mPlay.State = 'off';
-%         set(uiSeriesPtr('get'), 'Enable', 'on');
-%         return;
-%     end
 
     lMinBak = windowLevel('get', 'min');
     lMaxBak = windowLevel('get', 'max');
@@ -86,13 +65,6 @@ function multiGate(mPlay, pAxe)
         pAxes3fText.String = '';
     end
 
-%            tOverlay = text(axes3, 0.02, 0.97, '', 'Units','normalized');
-
-%            if strcmp(backgroundColor('get'), 'black')
-%                tOverlay.Color = [0.9500 0.9500 0.9500];
-%            else
-%                tOverlay.Color = [0.1500 0.1500 0.1500];
-%            end
     aInput  = inputBuffer('get');
     dOffset = dSeriesOffset;
 
@@ -152,7 +124,47 @@ function multiGate(mPlay, pAxe)
 %         aBackup = dicomBuffer('get');
 
 
-    while multiFramePlayback('get')
+    persistent t
+
+    % Cancel any running timer first
+    if ~isempty(t) && isvalid(t)
+        stop(t); delete(t);
+    end
+
+    % Initialize offset if not already
+    if isempty(dOffset)
+        dOffset = get(uiSeriesPtr('get'), 'Value');
+    end
+
+    % Create a new timer
+    t = timer(...
+        'ExecutionMode', 'fixedSpacing', ...
+        'Period', multiFrameSpeed('get'), ...
+        'TimerFcn', @frameAdvanceCallback, ...
+        'BusyMode', 'drop', ...
+        'Name', 'FramePlaybackTimer');
+
+    start(t);
+
+    function frameAdvanceCallback(~, ~)
+
+        % Stop if playback is disabled
+        if ~multiFramePlayback('get')
+            stop(t); delete(t); t = [];
+            return;
+        end
+
+        % Check if speed has changed
+        currentPeriod = t.Period;
+        newPeriod = multiFrameSpeed('get');
+        if abs(currentPeriod - newPeriod) > eps
+            stop(t);
+            t.Period = newPeriod;
+            start(t);
+            return;
+        end
+
+        try
 
         % Get current Axes
 
@@ -255,9 +267,8 @@ function multiGate(mPlay, pAxe)
         if size(aCurrentBuffer) ~= size(aBuffer)
 
             progressBar(1, 'Error: Resample or Register the series!');
-            mPlay.State = 'off';
             multiFramePlayback('set', false);
-            break;
+            return;
         end
 
         atCoreMetaData = dicomMetaData('get', [], dOffset);
@@ -308,8 +319,6 @@ function multiGate(mPlay, pAxe)
             setWindowMinMax(lMax, lMin);
         end
 
-
-if 1
         if gateUseSeriesUID('get') == false
 
             if aspectRatio('get') == true
@@ -344,35 +353,7 @@ if 1
                     
                     if isVsplash('get') == false                                    
                         daspect(axesMipPtr('get', [], dOffset), [z y x]);
-                    end
-                
-%               if strcmp(imageOrientation('get'), 'axial')
-%                    daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [z x y]);
-%                    daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [z y x]);
-%                    daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [x y z]);
-
-%                    if link2DMip('get') == true && isVsplash('get') == false
-%                        daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-%                    end
-
-%               elseif strcmp(imageOrientation('get'), 'coronal')
-%                    daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-%                    daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]);
-%                    daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-
-%                    if link2DMip('get') == true && isVsplash('get') == false
-%                        daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-%                    end
-
-%                elseif strcmp(imageOrientation('get'), 'sagittal')
-%                    daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [y x z]);
-%                    daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [x z y]);
-%                    daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [z x y]);
-
-%                    if link2DMip('get') == true && isVsplash('get') == false
-%                        daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
-%                    end
-%               end
+                    end               
 
             else
                 x =1;
@@ -401,7 +382,7 @@ if 1
             aspectRatioValue('set', 'y', y);
             aspectRatioValue('set', 'z', z);
         end
-end
+
         if isempty(aBuffer)
             
             aBuffer = aInput{dOffset};
@@ -462,7 +443,7 @@ end
                     num2str(size(aBuffer, 3)));
             end
 
-            if pAxe == axes3Ptr('get', [], dOffset) && ...
+            if gca(fiMainWindowPtr('get')) == axes3Ptr('get', [], dOffset) && ...
                strcmp(windowButton('get'), 'down') && ...
                isVsplash('get') == false
 
@@ -542,7 +523,17 @@ end
                     end
                 end
             end
-        catch
+
+        catch ME   
+            logErrorToFile(ME);
+        end
+
+        catch ME2
+            logErrorToFile(ME2);
+            % Fail-safe cleanup
+            if ~isempty(t) && isvalid(t)
+                stop(t); delete(t); t = [];
+            end
         end
     end
 

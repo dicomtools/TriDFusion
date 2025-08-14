@@ -36,14 +36,16 @@ if USE_DCM4CHEE == true
 
         dataset = din.readDataset(-1, -1);                  
         % info.din.pixelData = dataset.getInts(org.dcm4che3.data.Tag.PixelData);
-    catch 
+    catch ME   
+        logErrorToFile(ME);
         try 
             
         info = dicominfo(char(fileInput)); 
 %        info.din.rows       = info.Rows;
 %        info.din.cols       = info.Columns;   
-        catch
-            info = [];
+        catch ME   
+            % logErrorToFile(ME);
+            info = []; % The specified file is not in DICOM format.
         end
         
         return;
@@ -53,7 +55,8 @@ else
             
         info = dicominfo(char(fileInput)); 
  
-        catch
+        catch ME   
+            logErrorToFile(ME);
             info = [];
         end
   
@@ -247,6 +250,7 @@ end
             info.RotationInformationSequence.Item_1.NumberOfFramesInRotation = str2double(datasetRotationInformation.getString(org.dcm4che3.data.Tag.NumberOfFramesInRotation));
             info.RotationInformationSequence.Item_1.AngularStep              = double(datasetRotationInformation.getDoubles(org.dcm4che3.data.Tag.AngularStep));                                                                                                                                                                                
             info.RotationInformationSequence.Item_1.StartAngle               = double(datasetRotationInformation.getDoubles(org.dcm4che3.data.Tag.StartAngle));                                                                                                                                                                                
+            info.RotationInformationSequence.Item_1.ScanArc                  = double(datasetRotationInformation.getDoubles(org.dcm4che3.data.Tag.ScanArc));
         end
 
         % Dose information
@@ -317,6 +321,7 @@ end
         info.DetectorInformationSequence.(sInformationSequenceItem).StartAngle            = double(detectorInformationSequence.getDoubles(org.dcm4che3.data.Tag.StartAngle));                                                                                                                                                                                
         info.DetectorInformationSequence.(sInformationSequenceItem).FieldOfViewShape      = char(detectorInformationSequence.getString(org.dcm4che3.data.Tag.FieldOfViewShape, 0));                                                                                                                                                                                
         info.DetectorInformationSequence.(sInformationSequenceItem).FieldOfViewDimensions = double(detectorInformationSequence.getInts(org.dcm4che3.data.Tag.FieldOfViewDimensions));   
+        info.DetectorInformationSequence.(sInformationSequenceItem).RadialPosition        = double(detectorInformationSequence.getDoubles(org.dcm4che3.data.Tag.RadialPosition));
 
         detectorInformationSequence = dataset.getNestedDataset(org.dcm4che3.data.Tag.DetectorInformationSequence, dInformationSequenceItem); % Item_X
 
@@ -365,7 +370,38 @@ end
         end          
     end
 
+    % 3DF private tags 
+    grp      = hex2dec('0029');
+    tag0010  = bitor(bitshift(grp,16), hex2dec('0010'));   % Private Creator
+    tag1010  = bitor(bitshift(grp,16), hex2dec('1010'));   % JSON payload (VR=UN)
+    tag1011  = bitor(bitshift(grp,16), hex2dec('1011'));   % short text 
 
+    % Private Creator 
+    info.Private_0029_0010 = char( dataset.getString(tag0010, '') );
+
+    % JSON payload lives in a VR=UN tag 
+    rawBytes = dataset.getBytes(tag1010);
+    if isempty(rawBytes)
+        info.Private_0029_1010 = '';
+    else
+        % Java byte[] → MATLAB int8 array
+        mb = int8(rawBytes);
+        % reinterpret as uint8 0–255
+        ub = typecast(mb, 'uint8');
+        % turn into a row char vector
+        info.Private_0029_1010 = char(ub(:)') ;
+    end
+
+    % 3DF Annotation string is short (VR=LO)
+    rawBytes1011 = dataset.getBytes(tag1011);
+    if isempty(rawBytes1011)
+        info.Private_0029_1011 = '';
+    else
+        mb1 = int8(rawBytes1011);
+        ub1 = typecast(mb1,'uint8');
+        txt1011 = char(ub1(:)');
+        info.Private_0029_1011 = regexprep(txt1011,'[\x00]+$','');
+    end
      %    E3 = info.EnergyWindowInformationSequence.Item_3.EnergyWindowRangeSequence.Item_1;
 
 %    info.din.rows       = info.Rows;

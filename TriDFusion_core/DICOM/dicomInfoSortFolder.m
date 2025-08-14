@@ -48,6 +48,8 @@ function tDataSets = dicomInfoSortFolder(link)
     if(iNbFiles == 0) 
         if isfield(tFileList, 'Contours') 
             tDataSets.Contours = tFileList.Contours;
+        elseif isfield(tFileList, 'Annotations') 
+            tDataSets.Annotations = tFileList.Annotations;
         else
             tDataSets = [];
         end

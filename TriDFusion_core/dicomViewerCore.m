@@ -26,7 +26,9 @@ function dicomViewerCore()
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-    
+
+    try
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
 
     isCombineMultipleFusion('set', false);
@@ -79,23 +81,18 @@ function dicomViewerCore()
 
     atInput = inputTemplate('get');
 
-    dOffset = dSeriesOffset;
-    if dOffset > numel(atInput)
-        return;
-    end
-    
-    if     strcmpi(atInput(dOffset).sOrientationView, 'Axial')
+    if     strcmpi(atInput(dSeriesOffset).sOrientationView, 'Axial')
         imageOrientation('set', 'axial');
-    elseif strcmpi(atInput(dOffset).sOrientationView, 'Coronal')
+    elseif strcmpi(atInput(dSeriesOffset).sOrientationView, 'Coronal')
         imageOrientation('set', 'coronal');
-    elseif strcmpi(atInput(dOffset).sOrientationView, 'Sagittal')
+    elseif strcmpi(atInput(dSeriesOffset).sOrientationView, 'Sagittal')
         imageOrientation('set', 'sagittal');
     end
-   
+
     if isfield(atMetaData{1}, 'PatientName')
-        
+
         if  isstruct(atMetaData{1}.PatientName)
-            
+
             if isfield(atMetaData{1}.PatientName, 'GivenName')
 
                 sGivenName = atMetaData{1}.PatientName.GivenName;
@@ -114,7 +111,7 @@ function dicomViewerCore()
                 sFamilyName = atMetaData{1}.PatientName.FamilyName;
             else
                 sFamilyName = '';
-            end            
+            end
 
             sPatientName = sprintf('%s %s %s', sGivenName, sMiddleName, sFamilyName);
             sPatientName = strrep(sPatientName,'^',' ');
@@ -183,13 +180,13 @@ function dicomViewerCore()
 %                       'CallBack', @sliderWindowCallback ...
 %                       );
 %         uiSliderWindowPtr('set', uiSliderWindow);
-% 
+%
 %         addlistener(uiSliderWindow, 'Value', 'PreSet', @sliderWindowCallback);
-% 
+%
 %         set(uiSliderWindow, 'Visible', 'off');
-%         
+%
 %     end
-% 
+%
 %     uiSliderLevel = uiSliderLevelPtr('get');
 %     if isempty(uiSliderLevel)
 %         uiSliderLevel = ...
@@ -201,9 +198,9 @@ function dicomViewerCore()
 %                       'CallBack', @sliderLevelCallback ...
 %                       );
 %         uiSliderLevelPtr('set', uiSliderLevel);
-% 
+%
 %         addlistener(uiSliderLevel,'Value','PreSet',@sliderLevelCallback);
-% 
+%
 %         set(uiSliderLevel, 'Visible', 'off');
 %     end
 
@@ -230,7 +227,7 @@ function dicomViewerCore()
 %             else
 %                 uiTraWindow = uiTraWindowPtr('get');
 %                 aAxePosition = uiTraWindow.Position;
-% 
+%
 %                 set(uiSliderWindow, ...
 %                     'Position', [aAxePosition(1)+aAxePosition(3)-50 ...
 %                                  50 ...
@@ -241,7 +238,7 @@ function dicomViewerCore()
 %             end
 %         end
 %     end
-% 
+%
 %     uiSliderLevel = uiSliderLevelPtr('get');
 %     if ~isempty(uiSliderLevel)
 %         aFigurePosition = uiSliderLevel.Parent.Position;
@@ -265,7 +262,7 @@ function dicomViewerCore()
 %             else
 %                 uiTraWindow = uiTraWindowPtr('get');
 %                 aAxePosition = uiTraWindow.Position;
-% 
+%
 %                 set(uiSliderLevel, ...
 %                     'Position', [aAxePosition(1)+aAxePosition(3)-21 ...
 %                                  50 ...
@@ -278,14 +275,14 @@ function dicomViewerCore()
 %     end
 
     bInitSegPanel = false;
-    if viewSegPanel('get') 
+    if viewSegPanel('get')
 
         if isVsplash('get') == false
             bInitSegPanel = true;
         end
 
         viewSegPanel('set', false);
-        
+
         objSegPanel = viewSegPanelMenuObject('get');
         if ~isempty(objSegPanel)
             objSegPanel.Checked = 'off';
@@ -293,7 +290,7 @@ function dicomViewerCore()
     end
 
     bInitKernelPanel = false;
-    if  viewKernelPanel('get')  
+    if  viewKernelPanel('get')
 
         if isVsplash('get') == false
             bInitKernelPanel = true;
@@ -308,7 +305,7 @@ function dicomViewerCore()
     end
 
     bInitRoiPanel = false;
-    if  viewRoiPanel('get')  
+    if  viewRoiPanel('get')
 
         if isVsplash('get') == false
             bInitRoiPanel = true;
@@ -346,8 +343,8 @@ function dicomViewerCore()
         disableDefaultInteractivity(axePtr('get', [], dSeriesOffset));
 
         set(axePtr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
-        set(axePtr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-        set(axePtr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+        set(axePtr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');
+        set(axePtr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off');
 
         grid(axePtr('get', [], dSeriesOffset), 'off');
 
@@ -359,44 +356,37 @@ function dicomViewerCore()
             if x == 0
                 x=1;
             end
-            
-            if y == 0 
+
+            if y == 0
                 y=1;
             end
-            
+
             daspect(axePtr('get', [], dSeriesOffset) , [x y 1]);
         end
 
-        if gaussFilter('get') == true
-
-            if isInterpolated('get')
-
-                imAxe = imagesc(imgaussfilt(im)    , ...
-                               'Parent'   , axePtr('get', [], dSeriesOffset), ...
-                               'Interpolation', 'bilinear'...
-                               );               
-            else
-                imAxe = imagesc(imgaussfilt(im)    , ...
-                               'Parent'   , axePtr('get', [], dSeriesOffset), ...
-                               'Interpolation', 'nearest'...
-                               );
-            end
-        else
-            if isInterpolated('get')
-
-                imAxe  = imagesc(im , ...
-                                'Parent'   , axePtr('get', [], dSeriesOffset), ...
-                                'Interpolation', 'bilinear'...
-                                );
-            else
-                imAxe  = imagesc(im , ...
-                                'Parent'   , axePtr('get', [], dSeriesOffset), ...
-                                'Interpolation', 'nearest'...
-                                 );
-            end
+        % Retrieve the current settings
+        applyGaussFilter = gaussFilter('get');
+        useInterpolation = isInterpolated('get');
+        
+        % Select the appropriate interpolation method
+        interpMethod = 'nearest';
+        if useInterpolation
+            interpMethod = 'bilinear';
         end
+        
+        % Apply Gaussian filter if needed
+        imData = im;
+        if applyGaussFilter
+            imData = imgaussfilt(imData);
+        end
+        
+        % Display the image
+        imAxe = imshow(imData, ...
+                       'Parent', axePtr('get', [], dSeriesOffset), ...
+                       'Interpolation', interpMethod);
 
         % adjAxeCameraViewAngle(axePtr('get', [], dSeriesOffset));
+        disableAxesToolbar(axePtr('get', [], dSeriesOffset));
 
         rightClickMenu('add', imAxe);
 
@@ -412,43 +402,49 @@ function dicomViewerCore()
                  getColorMap('one', colorMapOffset('get')) ...
                 );
 
-        ptrColorbar = ...
-            colorbar(axesColorbarPtr('get', [], dSeriesOffset)  , ...
-                    'AxisLocation' , 'in', ...
-                    'Tag'          , 'Colorbar', ...
-                    'EdgeColor'    , overlayColor('get'), ...
-                    'Units'        , 'pixels', ...
-                    'Box'          , 'off', ...
-                    'Location'     , 'east', ...
-                    'ButtonDownFcn', @colorbarCallback ...
-                    );
+        % ptrColorbar = ...
+        %     colorbar(axesColorbarPtr('get', [], dSeriesOffset)  , ...
+        %             'AxisLocation' , 'in', ...
+        %             'Tag'          , 'Colorbar', ...
+        %             'EdgeColor'    , overlayColor('get'), ...
+        %             'Units'        , 'pixels', ...
+        %             'Box'          , 'off', ...
+        %             'Location'     , 'east', ...
+        %             'ButtonDownFcn', @colorbarCallback ...
+        %             );
+        % 
+        % ptrColorbar.TickLabels = [];
+        % ptrColorbar.Ticks = [];
+        % ptrColorbar.TickLength = 0;
+        % ptrColorbar.Interruptible = 'off'; % Prevent interruptions
 
-        ptrColorbar.TickLabels = [];
-        ptrColorbar.Ticks = [];
-        ptrColorbar.TickLength = 0;
-        ptrColorbar.Interruptible = 'off'; % Prevent interruptions
+        ptrColorbar = viewerColorbar(axesColorbarPtr('get', [], dSeriesOffset),  ...
+                                    'Colorbar', ...
+                                    getColorMap('one', colorMapOffset('get')));
 
         uiColorbarPtr('set', ptrColorbar);
         colorbarCallback(ptrColorbar); % Fix for Linux
-
-        aFigurePosition = ptrColorbar.Parent.Position;
+        
+        aFigurePosition = ptrColorbar.Parent.Parent.Position;
         if isFusion('get') == true
-            set(ptrColorbar, ...
+            set(axesColorbarPtr('get', [], dSeriesOffset), ...
                 'Position', [aFigurePosition(3)-48 ...
                              (aFigurePosition(4)/2)-9 ...
-                             40 ...
+                             45 ...
                              (aFigurePosition(4)/2)+5  ...
                              ] ...
                 );
         else
-            set(ptrColorbar, ...
+            set(axesColorbarPtr('get', [], dSeriesOffset), ...
                 'Position', [aFigurePosition(3)-48 ...
                              7 ...
-                             40 ...
+                             45 ...
                              aFigurePosition(4)-11  ...
                              ] ...
                 );
         end
+
+        ptrColorbar.Parent.YLabel.Position = [ptrColorbar.Parent.YLabel.Position(1) - 10, ptrColorbar.Parent.YLabel.Position(2), ptrColorbar.Parent.YLabel.Position(3)];       
 
         tQuant = quantificationTemplate('get');
 
@@ -464,19 +460,21 @@ function dicomViewerCore()
         uiOneWindow = uiOneWindowPtr('get');
 
         axAxeText = ...
-            axes(uiOneWindow, ...
+            uiaxes(uiOneWindow, ...
                  'Units'    , 'pixels', ...
-                 'position' , [5 ...
-                               (uiOneWindow.Position(4)-getTopWindowSize('ysize')) ...
+                 'Position' , [5 ...
+                               uiOneWindow.Position(4)-getTopWindowSize('ysize')-55-10 ...
                                100 ...
                                200 ...
                                ], ...
                  'Tag'      , 'axAxeText', ...
+                 'Box'      , 'off', ...
                  'visible'  , 'off' ...
                  );
-        axAxeText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axAxeText.Toolbar.Visible = 'off';
+        axAxeText.Interactions = [];
+        % axAxeText.Toolbar.Visible = 'off';
         disableDefaultInteractivity(axAxeText);
+        deleteAxesToolbar(axAxeText);
 
         tAxeText = ...
             text(axAxeText, ...
@@ -490,6 +488,8 @@ function dicomViewerCore()
             set(tAxeText, 'Visible', 'off');
         end
 
+        disableAxesToolbar(axAxeText);
+
         axesText('set', 'axe', tAxeText);
 
         if aspectRatio('get') == true
@@ -501,11 +501,11 @@ function dicomViewerCore()
             if x==0
                 x=1;
             end
-            
+
             if y == 0
                 y =1;
             end
-            
+
             daspect(axePtr('get', [], dSeriesOffset) , [x y z]);
         else
             x =1;
@@ -557,7 +557,7 @@ function dicomViewerCore()
             'Position', [0 0 1 1], ...
             'Visible' , 'off', ...
             'Ydir'    , 'reverse', ...
-            'Tag'     , 'axes1', ...   
+            'Tag'     , 'axes1', ...
             'XLim'    , [0 inf], ...
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
@@ -565,9 +565,9 @@ function dicomViewerCore()
         disableDefaultInteractivity(axes1Ptr('get', [], dSeriesOffset));
 
         set(axes1Ptr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
-        set(axes1Ptr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-        set(axes1Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
-        
+        set(axes1Ptr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');
+        set(axes1Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off');
+
         grid(axes1Ptr('get', [], dSeriesOffset), 'off');
 
         axis(axes1Ptr('get', [], dSeriesOffset) , 'tight');
@@ -581,12 +581,12 @@ function dicomViewerCore()
                     'Position', [0 ...
                                  addOnWidth('get')+30+15 ...
                                  getMainWindowSize('xsize') ...
-                                 getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
+                                 getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15 ...
                                  ] ...
                     );
 
                  set(uiSliderCorPtr('get'), ...
-                     'position', [0 ...
+                     'Position', [0 ...
                                   addOnWidth('get')+30 ...
                                   getMainWindowSize('xsize') ...
                                   20 ...
@@ -595,15 +595,15 @@ function dicomViewerCore()
 
             else
                 set(uiCorWindowPtr('get'),  ...
-                    'position', [0 ...
+                    'Position', [0 ...
                                  addOnWidth('get')+30+15 ...
                                  getMainWindowSize('xsize')/4 ...
-                                 getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
+                                 getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15 ...
                                  ]...
                    );
 
                  set(uiSliderCorPtr('get'),  ...
-                     'position', [0 ...
+                     'Position', [0 ...
                                   addOnWidth('get')+30 ...
                                   getMainWindowSize('xsize')/4 ...
                                   20 ...
@@ -618,34 +618,28 @@ function dicomViewerCore()
 
             imComputed = computeMontage(im, 'coronal', iCoronal);
 
-            if gaussFilter('get') == true
-
-                if isInterpolated('get')
-
-                    imCoronal = imagesc(imgaussfilt(permute(im (iCoronal,:,:), [3 2 1])), ...
-                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
-                                       'Interpolation', 'bilinear' ...
-                                       );                    
-                else
-                    imCoronal = imagesc(imgaussfilt(permute(im (iCoronal,:,:), [3 2 1])), ...
-                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
-                                       'Interpolation', 'nearest' ...
-                                       );
-                end
-            else
-                if isInterpolated('get')
-
-                    imCoronal = imagesc(permute(im (iCoronal,:,:), [3 2 1]), ...
-                                       'Parent'      , axes1Ptr('get', [], dSeriesOffset), ...
-                                       'Interpolation', 'bilinear' ...
-                                       );                    
-                else
-                    imCoronal = imagesc(permute(im (iCoronal,:,:), [3 2 1]), ...
-                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
-                                       'Interpolation', 'nearest' ...
-                                       );
-                end
+            applyGaussFilter = gaussFilter('get');
+            useInterpolation = isInterpolated('get');
+            
+            % Select the appropriate interpolation method
+            interpMethod = 'nearest';
+            if useInterpolation
+                interpMethod = 'bilinear';
             end
+            
+            % Extract the coronal image slice and permute dimensions
+            imData = permute(im(iCoronal, :, :), [3, 2, 1]);
+            
+            % Apply Gaussian filter if needed
+            if applyGaussFilter
+                imData = imgaussfilt(imData);
+            end
+            
+            % Display the image
+            imCoronal = imshow(imData, ...
+                               'Parent', axes1Ptr('get', [], dSeriesOffset), ...
+                               'Interpolation', interpMethod);
+
 
             imCoronalPtr ('set', imCoronal , dSeriesOffset);
 
@@ -665,7 +659,7 @@ function dicomViewerCore()
                 imCoronal.Parent.YLim = [1 size(imCoronal.CData,1)];
             else
                 xOffset = imCoronal.XData(2)/dVsplashLayoutX;
-                yOffset = imCoronal.YData(2)/dVsplashLayoutY;                
+                yOffset = imCoronal.YData(2)/dVsplashLayoutY;
             end
 
             iPointerOffset=1;
@@ -691,48 +685,41 @@ function dicomViewerCore()
 
         else
             set(uiCorWindowPtr('get'), ...
-                'position', [0 ...
+                'Position', [0 ...
                              addOnWidth('get')+30+15 ...
                              getMainWindowSize('xsize')/5 ...
-                             getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
+                             getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15 ...
                              ] ...
                 );
 
-            set(uiSliderCorPtr('get'), 'position', ...
+            set(uiSliderCorPtr('get'), 'Position', ...
                 [0 ...
                  addOnWidth('get')+30 ...
                  getMainWindowSize('xsize')/5 ...
                  20] ...
                 );
 
-            if gaussFilter('get') == true
-
-                if isInterpolated('get')
-
-                    imCoronal = imagesc(imgaussfilt(permute(im (iCoronal,:,:), [3 2 1])), ...
-                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
-                                       'Interpolation', 'bilinear'...
-                                      );                    
-                else
-                    imCoronal = imagesc(imgaussfilt(permute(im (iCoronal,:,:), [3 2 1])), ...
-                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
-                                       'Interpolation', 'nearest'...
-                                      );
-                end
-            else
-                if isInterpolated('get')
-
-                    imCoronal = imagesc(permute(im (iCoronal,:,:), [3 2 1]), ...
-                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
-                                       'Interpolation', 'bilinear'...
-                                       );                    
-                else
-                    imCoronal = imagesc(permute(im (iCoronal,:,:), [3 2 1]), ...
-                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
-                                       'Interpolation', 'nearest'...
-                                       );
-                end
+            applyGaussFilter = gaussFilter('get');
+            useInterpolation = isInterpolated('get');
+            
+            % Select the appropriate interpolation method
+            interpMethod = 'nearest';
+            if useInterpolation
+                interpMethod = 'bilinear';
             end
+            
+            % Extract the coronal image slice and permute dimensions
+            imData = permute(im(iCoronal, :, :), [3, 2, 1]);
+            
+            % Apply Gaussian filter if needed
+            if applyGaussFilter
+                imData = imgaussfilt(imData);
+            end
+            
+            % Display the image
+            imCoronal = imshow(imData, ...
+                               'Parent', axes1Ptr('get', [], dSeriesOffset), ...
+                               'Interpolation', interpMethod);
 
 %            imCoronal.EraseMode = 'none';
 %            imCoronalF.EraseMode = 'none';
@@ -742,6 +729,8 @@ function dicomViewerCore()
         end
 
         % adjAxeCameraViewAngle(axes1Ptr('get', [], dSeriesOffset));
+
+        disableAxesToolbar(axes1Ptr('get', [], dSeriesOffset));
 
         rightClickMenu('add', imCoronal);
 
@@ -811,19 +800,33 @@ function dicomViewerCore()
 
         uiCorWindow = uiCorWindowPtr('get');
 
+        if isVsplash('get') == true
+
+            if strcmpi(vSplahView('get'), 'all')
+                
+                dExtraYOffset = 0;   
+            else                
+                dExtraYOffset = -20; 
+            end
+        else
+            dExtraYOffset = 0;                                
+        end
+
         axAxes1Text = ...
-            axes(uiCorWindow, ...
+            uiaxes(uiCorWindow, ...
                  'Units'    , 'pixels', ...
-                 'position' , [5 ...
-                             (uiCorWindow.Position(4)-15) ...
+                 'Position' , [5 ...
+                             uiCorWindow.Position(4)-15-20+dExtraYOffset ...
                              70 ...
                              30 ...
                              ], ...
                  'Tag'      , 'axAxes1Text', ...
+                 'Box'      , 'off', ...
                  'visible'  , 'off' ...
                  );
-        axAxes1Text.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axAxes1Text.Toolbar.Visible = 'off';
+        axAxes1Text.Interactions = [];
+        delete(axAxes1Text.Toolbar);    
+        axAxes1Text.Toolbar = [];
         disableDefaultInteractivity(axAxes1Text);
 
         if isVsplash('get') == true && ...
@@ -872,22 +875,29 @@ function dicomViewerCore()
                        'Position', [0 0 1 1], ...
                        'Visible' , 'off',...
                        'Tag'     , 'axAxes1View', ...
+                       'Box'     , 'off', ...
                        'HandleVisibility', 'off' ...
                        );
-            axAxes1View.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            axAxes1View.Toolbar.Visible = 'off';
+            axAxes1View.Interactions = [];
+            % axAxes1View.Toolbar.Visible = 'off';
+            deleteAxesToolbar(axAxes1View);
             disableDefaultInteractivity(axAxes1View);
 
             tAxes1View = text(axAxes1View, 0.03, 0.46, 'Right', 'Color', overlayColor('get'), 'Rotation', 270);
             if overlayActivate('get') == false
                 set(tAxes1View, 'Visible', 'off');
             end
+
+            disableAxesToolbar(axAxes1View); % Protection in case th toobar is automatically recreated. 
+
             axesText('set', 'axes1View', tAxes1View);
         end
 
         if overlayActivate('get') == false
             set(tAxes1Text, 'Visible', 'off');
         end
+
+        disableAxesToolbar(axAxes1Text); % Protection in case th toobar is automatically recreated.
 
         axesText('set', 'axes1', tAxes1Text);
 
@@ -901,7 +911,7 @@ function dicomViewerCore()
             'Position', [0 0 1 1], ...
             'Visible' , 'off', ...
             'Ydir'    , 'reverse', ...
-            'Tag'     , 'axes2', ...   
+            'Tag'     , 'axes2', ...
             'XLim'    , [0 inf], ...
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
@@ -909,8 +919,8 @@ function dicomViewerCore()
         disableDefaultInteractivity(axes2Ptr('get', [], dSeriesOffset));
 
         set(axes2Ptr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
-        set(axes2Ptr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-        set(axes2Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+        set(axes2Ptr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');
+        set(axes2Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off');
 
         grid(axes2Ptr('get', [], dSeriesOffset), 'off');
 
@@ -925,12 +935,12 @@ function dicomViewerCore()
                     'Position',[0 ...
                                 addOnWidth('get')+30+15 ...
                                 getMainWindowSize('xsize') ...
-                                getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
+                                getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15 ...
                                 ] ...
                     );
 
                  set(uiSliderSagPtr('get'), ...
-                     'position', [0 ...
+                     'Position', [0 ...
                                   addOnWidth('get')+30 ...
                                   getMainWindowSize('xsize') ...
                                   20 ...
@@ -939,14 +949,14 @@ function dicomViewerCore()
 
             else
                 set(uiSagWindowPtr('get'), ...
-                    'position', [getMainWindowSize('xsize')/4 ...
+                    'Position', [getMainWindowSize('xsize')/4 ...
                                  addOnWidth('get')+30+15 ...
                                  getMainWindowSize('xsize')/4 ...
-                                 getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
+                                 getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15 ...
                                  ]...
                    );
 
-                 set(uiSliderSagPtr('get'), 'position', ...
+                 set(uiSliderSagPtr('get'), 'Position', ...
                      [getMainWindowSize('xsize')/4 ...
                       addOnWidth('get')+30 ...
                       getMainWindowSize('xsize')/4 ...
@@ -961,37 +971,29 @@ function dicomViewerCore()
 
             imComputed = computeMontage(im, 'sagittal', iSagittal);
 
-
-            if gaussFilter('get') == true
-
-                if isInterpolated('get')
-
-                    imSagittal = imagesc(imgaussfilt(permute(im (:,iSagittal,:), [3 1 2])), ...
-                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
-                                        'Interpolation', 'bilinear'... 
-                                       );                    
-                else
-                    imSagittal = imagesc(imgaussfilt(permute(im (:,iSagittal,:), [3 1 2])), ...
-                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
-                                        'Interpolation', 'nearest'... 
-                                        );
-                end
-            else
-                if isInterpolated('get')
-
-                    imSagittal = imagesc(permute(im (:,iSagittal,:), [3 1 2]), ...
-                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
-                                        'Interpolation', 'bilinear'... 
-                                       );
-                else
-                    imSagittal = imagesc(permute(im (:,iSagittal,:), [3 1 2]), ...
-                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
-                                        'Interpolation', 'nearest'... 
-                                        );
-                end
+            applyGaussFilter = gaussFilter('get');
+            useInterpolation = isInterpolated('get');
+            
+            % Select the appropriate interpolation method
+            interpMethod = 'nearest';
+            if useInterpolation
+                interpMethod = 'bilinear';
             end
+            
+            % Extract the sagittal image slice and permute dimensions
+            imData = permute(im(:, iSagittal, :), [3, 1, 2]);
+            
+            % Apply Gaussian filter if needed
+            if applyGaussFilter
+                imData = imgaussfilt(imData);
+            end
+            
+            % Display the image
+            imSagittal = imshow(imData, ...
+                                'Parent', axes2Ptr('get', [], dSeriesOffset), ...
+                                'Interpolation', interpMethod);
 
-
+            
             imSagittalPtr ('set', imSagittal , dSeriesOffset);
 
 %             imComputed = computeMontage(im, 'sagittal', iSagittal);
@@ -1008,7 +1010,7 @@ function dicomViewerCore()
 
                 imSagittal.Parent.XLim = [1 size(imSagittal.CData,2)];
                 imSagittal.Parent.YLim = [1 size(imSagittal.CData,1)];
-            else            
+            else
                 xOffset = imSagittal.XData(2)/dVsplashLayoutX;
                 yOffset = imSagittal.YData(2)/dVsplashLayoutY;
             end
@@ -1038,15 +1040,15 @@ function dicomViewerCore()
 
         else
             set(uiSagWindowPtr('get'),  ...
-                'position', [getMainWindowSize('xsize')/5 ...
+                'Position', [getMainWindowSize('xsize')/5 ...
                              addOnWidth('get')+30+15 ...
                              getMainWindowSize('xsize')/5 ...
-                             getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
+                             getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15 ...
                              ]...
                 );
 
              set(uiSliderSagPtr('get'), ...
-                 'position', [getMainWindowSize('xsize')/5 ...
+                 'Position', [getMainWindowSize('xsize')/5 ...
                               addOnWidth('get')+30 ...
                               getMainWindowSize('xsize')/5 ...
                               20 ...
@@ -1054,39 +1056,34 @@ function dicomViewerCore()
                  );
 
 
-            if gaussFilter('get') == true
-
-                if isInterpolated('get')
-
-                    imSagittal = imagesc(imgaussfilt(permute(im (:,iSagittal,:), [3 1 2]),1), ...
-                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
-                                        'Interpolation', 'bilinear'... 
-                                        );                    
-                else
-                    imSagittal = imagesc(imgaussfilt(permute(im (:,iSagittal,:), [3 1 2]),1), ...
-                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
-                                        'Interpolation', 'nearest'... 
-                                        );
-                end
-            else
-                if isInterpolated('get')
-
-                    imSagittal = imagesc(permute(im (:,iSagittal,:), [3 1 2]), ...
-                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
-                                        'Interpolation', 'bilinear'... 
-                                        );                    
-                else
-                    imSagittal = imagesc(permute(im (:,iSagittal,:), [3 1 2]), ...
-                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
-                                        'Interpolation', 'nearest'... 
-                                        );
-                end
+            applyGaussFilter = gaussFilter('get');
+            useInterpolation = isInterpolated('get');
+            
+            % Select the appropriate interpolation method
+            interpMethod = 'nearest';
+            if useInterpolation
+                interpMethod = 'bilinear';
             end
+            
+            % Extract the sagittal image slice and permute dimensions
+            imData = permute(im(:, iSagittal, :), [3, 1, 2]);
+            
+            % Apply Gaussian filter if needed
+            if applyGaussFilter
+                imData = imgaussfilt(imData, 1);
+            end
+            
+            % Display the image
+            imSagittal = imshow(imData, ...
+                                'Parent', axes2Ptr('get', [], dSeriesOffset), ...
+                                'Interpolation', interpMethod);
 
             imSagittalPtr ('set', imSagittal , dSeriesOffset);
         end
 
         % adjAxeCameraViewAngle(axes2Ptr('get', [], dSeriesOffset));
+       
+        disableAxesToolbar(axes2Ptr('get', [], dSeriesOffset));
 
         rightClickMenu('add', imSagittal);
 
@@ -1151,16 +1148,34 @@ function dicomViewerCore()
 
         uiSagWindow = uiSagWindowPtr('get');
 
+        if isVsplash('get') == true
+
+            if strcmpi(vSplahView('get'), 'all')
+                
+                dExtraYOffset = 0;   
+            else                
+                dExtraYOffset = -20; 
+            end
+        else
+            dExtraYOffset = 0;                                
+        end
+
         axAxes2Text = ...
-            axes(uiSagWindow, ...
+            uiaxes(uiSagWindow, ...
                  'Units'   , 'pixels', ...
-                 'position', [5 (uiSagWindow.Position(4)-15) 70 30], ...
+                 'Position', [5 ...
+                             uiSagWindow.Position(4)-15-20+dExtraYOffset ... 
+                             70 ...
+                             30], ...
                  'Tag'     , 'axAxes2Text', ...
+                 'Box'     , 'off', ...
                  'visible' , 'off' ...
                  );
-        axAxes2Text.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axAxes2Text.Toolbar.Visible = 'off';
+        axAxes2Text.Interactions = [];
+        % axAxes2Text.Toolbar.Visible = 'off';
         disableDefaultInteractivity(axAxes2Text);
+        delete(axAxes2Text.Toolbar);
+        axAxes2Text.Toolbar = [];
 
         if isVsplash('get') == true && ...
            strcmpi(vSplahView('get'), 'sagittal')
@@ -1200,44 +1215,54 @@ function dicomViewerCore()
                      'Position', [0 0 1 1], ...
                      'Visible' , 'off',...
                      'Tag'     , 'axAxes2View', ...
+                     'Box'     , 'off', ...
                      'HandleVisibility', 'off' ...
                      );
-            axAxes2View.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            axAxes2View.Toolbar.Visible = 'off';
+            axAxes2View.Interactions = [];
+            % axAxes2View.Toolbar.Visible = 'off';
             disableDefaultInteractivity(axAxes2View);
+            deleteAxesToolbar(axAxes2View);                            
 
             tAxes2View = text(axAxes2View, 0.03, 0.46, 'Anterior', 'Color', overlayColor('get'), 'Rotation', 270);
             if overlayActivate('get') == false
                 set(tAxes2View, 'Visible', 'off');
             end
+
+            disableAxesToolbar(axAxes2View); % Protection in case th toobar is automatically recreated. 
+
             axesText('set', 'axes2View', tAxes2View);
         end
 
         if overlayActivate('get') == false
             set(ptAxes2Text, 'Visible', 'off');
         end
+               
+        disableAxesToolbar(axAxes2Text); % Protection in case th toobar is automatically recreated.
+
         axesText('set', 'axes2', ptAxes2Text);
 
-        % Axe 3 
+        % Axe 3
 
         axesText('set', 'axes3', '');
         axesText('set', 'axes3View', '');
 
         cla(axes3Ptr('get', [], dSeriesOffset) ,'reset');
+        
+        % Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);            
 
         set(axes3Ptr('get', [], dSeriesOffset) , ...
             'Units'   , 'normalized', ...
             'Position', [0 0 1 1], ...
             'Visible' , 'off', ...
             'Ydir'    , 'reverse', ...
-            'Tag'     , 'axes3', ...   
+            'Tag'     , 'axes3', ...
             'XLim'    , [0 inf], ...
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
             );
         set(axes3Ptr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
-        set(axes3Ptr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-        set(axes3Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+        set(axes3Ptr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');
+        set(axes3Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off');
 
         grid(axes3Ptr('get', [], dSeriesOffset), 'off');
 
@@ -1249,15 +1274,15 @@ function dicomViewerCore()
 
             if strcmpi(vSplahView('get'), 'axial')
                 set(uiTraWindowPtr('get'), ...
-                    'position', [0 ...
+                    'Position', [0 ...
                                  addOnWidth('get')+30+15 ...
                                  getMainWindowSize('xsize') ...
-                                 getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
+                                 getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15 ...
                                  ]...
                     );
 
                  set(uiSliderTraPtr('get'), ...
-                     'position', [0 ...
+                     'Position', [0 ...
                                   addOnWidth('get')+30 ...
                                   getMainWindowSize('xsize') ...
                                   20 ...
@@ -1266,15 +1291,15 @@ function dicomViewerCore()
 
             else
                 set(uiTraWindowPtr('get'), ...
-                    'position', [(getMainWindowSize('xsize')/2) ...
+                    'Position', [(getMainWindowSize('xsize')/2) ...
                                  addOnWidth('get')+30+15 ...
                                  getMainWindowSize('xsize')/2 ...
-                                 getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
+                                 getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15 ...
                                  ]...
                     );
 
                  set(uiSliderTraPtr('get'), ...
-                     'position', [(getMainWindowSize('xsize')/2) ...
+                     'Position', [(getMainWindowSize('xsize')/2) ...
                                   addOnWidth('get')+30 ...
                                   getMainWindowSize('xsize')/2 ...
                                   20 ...
@@ -1290,35 +1315,29 @@ function dicomViewerCore()
                                         size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1 ...
                                         );
 
-            if gaussFilter('get') == true
-
-                if isInterpolated('get')
-
-                    imAxial = imagesc(imgaussfilt(im (:,:,iAxial), 1),  ...
-                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
-                                     'Interpolation', 'bilinear'... 
-                                     );
-                else
-                    imAxial = imagesc(imgaussfilt(im (:,:,iAxial), 1),  ...
-                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
-                                     'Interpolation', 'nearest'... 
-                                     );                  
-                end
-
-            else
-                if isInterpolated('get')
-                    imAxial = imagesc(im (:,:,iAxial),  ...
-                                     'Parent'      , axes3Ptr('get', [], dSeriesOffset), ...
-                                     'Interpolation', 'bilinear'... 
-                                     );                    
-                else
-                    imAxial = imagesc(im (:,:,iAxial),  ...
-                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
-                                     'Interpolation', 'nearest'... 
-                                     );
-                end
-            end           
+            applyGaussFilter = gaussFilter('get');
+            useInterpolation = isInterpolated('get');
             
+            % Select the appropriate interpolation method
+            interpMethod = 'nearest';
+            if useInterpolation
+                interpMethod = 'bilinear';
+            end
+            
+            % Extract the image slice
+            imData = im(:, :, iAxial);
+            
+            % Apply Gaussian filter if needed
+            if applyGaussFilter
+                imData = imgaussfilt(imData, 1);
+            end
+            
+            % Display the image
+            imAxial = imshow(imData, ...
+                             'Parent', axes3Ptr('get', [], dSeriesOffset), ...
+                             'Interpolation', interpMethod);
+
+
             imAxialPtr ('set', imAxial , dSeriesOffset);
 
 %             imComputed = computeMontage(im(:,:,end:-1:1), ...
@@ -1342,7 +1361,7 @@ function dicomViewerCore()
 
                 imAxial.Parent.XLim = [1 size(imAxial.CData,2)];
                 imAxial.Parent.YLim = [1 size(imAxial.CData,1)];
-            else 
+            else
                 xOffset = imAxial.XData(2)/dVsplashLayoutX;
                 yOffset = imAxial.YData(2)/dVsplashLayoutY;
             end
@@ -1369,40 +1388,36 @@ function dicomViewerCore()
 
         else
 
-            if gaussFilter('get') == true
-
-                if isInterpolated('get')
-
-                    imAxial = imagesc(imgaussfilt(im(:,:,iAxial)), ...
-                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
-                                     'Interpolation', 'bilinear'... 
-                                    );
-                else
-                    imAxial = imagesc(imgaussfilt(im(:,:,iAxial)), ...
-                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
-                                     'Interpolation', 'nearest'... 
-                                    );                
-                end
-            else
-                if isInterpolated('get')
-
-                    imAxial = imagesc(im (:,:,iAxial), ...
-                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
-                                     'Interpolation', 'bilinear'... 
-                                     );
-                else
-                    imAxial = imagesc(im (:,:,iAxial), ...
-                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
-                                     'Interpolation', 'nearest'... 
-                                     );                    
-                end
+            applyGaussFilter = gaussFilter('get');
+            useInterpolation = isInterpolated('get');
+            
+            % Select the appropriate interpolation method
+            interpMethod = 'nearest';
+            if useInterpolation
+                interpMethod = 'bilinear';
             end
+            
+            % Extract the image slice
+            imData = im(:, :, iAxial);
+            
+            % Apply Gaussian filter if needed
+            if applyGaussFilter
+                imData = imgaussfilt(imData);
+            end
+            
+            % Display the image
+            imAxial = imshow(imData, ...
+                             'Parent', axes3Ptr('get', [], dSeriesOffset), ...
+                             'Interpolation', interpMethod);
+
 
             imAxialPtr ('set', imAxial , dSeriesOffset);
 
         end
 
         % adjAxeCameraViewAngle(axes3Ptr('get', [], dSeriesOffset));
+        
+        disableAxesToolbar(axes3Ptr('get', [], dSeriesOffset));
 
         rightClickMenu('add', imAxial );
 
@@ -1466,22 +1481,76 @@ function dicomViewerCore()
              end
         end
 
+        atInputTemplate = inputTemplate('get');
+
+        if atInputTemplate(dSeriesOffset).bDoseKernel == true
+
+            dExtraYOffset = 10;                                  
+        else
+            
+            switch lower(atMetaData{1}.Modality)
+
+                case {'pt', 'nm'}
+
+                    sUnit = getSerieUnitValue(dSeriesOffset);
+
+                    if strcmpi(sUnit, 'SUV')
+                        
+                        dExtraYOffset = 20;
+
+
+                    else
+                        dExtraYOffset = 15;
+
+                    end
+
+                case 'ct'
+
+                    dExtraYOffset = 0;
+
+                case 'mr'
+                     dExtraYOffset = 5;
+
+                otherwise
+
+                    dExtraYOffset = 0;                    
+            end
+
+            if viewerUIFigure('get') == false && ... 
+               isMATLABReleaseOlderThan('R2025a')
+
+                dExtraYOffset = dExtraYOffset + 5;
+            end            
+        end
+        
+        if isVsplash('get') == true
+
+            if strcmpi(vSplahView('get'), 'all')
+
+                 dExtraYOffset = -40; 
+            else
+                dExtraYOffset = -20; 
+           end
+        end
+
         uiTraWindow = uiTraWindowPtr('get');
 
         axAxes3Text = ...
-            axes(uiTraWindow, ...
+            uiaxes(uiTraWindow, ...
                  'Units'   , 'pixels', ...
-                 'position', [25 ...
-                              (uiTraWindow.Position(4)-getTopWindowSize('ysize')) ...
+                 'Position', [25 ...
+                              uiTraWindow.Position(4)-getTopWindowSize('ysize')-55-dExtraYOffset ...
                               100 ...
                               200 ...
                               ], ...
                  'Tag'     , 'axAxes3Text', ...
+                 'Box'     , 'off', ...
                  'visible' , 'off' ...
                  );
-        axAxes3Text.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axAxes3Text.Toolbar.Visible = 'off';
+        axAxes3Text.Interactions = [];
+        % axAxes3Text.Toolbar.Visible = 'off';
         disableDefaultInteractivity(axAxes3Text);
+        deleteAxesToolbar(axAxes3Text);                
 
         if isVsplash('get') == true && ...
            (strcmpi(vSplahView('get'), 'axial') || ...
@@ -1521,11 +1590,13 @@ function dicomViewerCore()
                      'Position', [0 0 0.90 1], ...
                      'Visible' , 'off',...
                      'Tag'     , 'axAxes3View', ...
+                     'Box'     , 'off', ...
                      'HandleVisibility', 'off' ...
                      );
-            axAxes3View.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            axAxes3View.Toolbar.Visible = 'off';
+            axAxes3View.Interactions = [];
+            % axAxes3View.Toolbar.Visible = 'off';
             disableDefaultInteractivity(axAxes3View);
+            deleteAxesToolbar(axAxes3View);                
 
             tAxes3View{1} = text(axAxes3View, 0.46, 0.08, 'Posterior', 'Color', overlayColor('get'));
             tAxes3View{2} = text(axAxes3View, 0.03, 0.46, 'Right', 'Color', overlayColor('get'),'Rotation', 270);
@@ -1540,12 +1611,16 @@ function dicomViewerCore()
 
             axesText('set', 'axes3View', tAxes3View);
 
+            disableAxesToolbar(axAxes3View); % Protection in case th toobar is automatically recreated. 
+
         end
 
         tAxes3Text  = text(axAxes3Text, 0, 0, sAxe3Text, 'Color', overlayColor('get'));
         if overlayActivate('get') == false
             set(tAxes3Text, 'Visible', 'off');
         end
+
+        disableAxesToolbar(axAxes3Text); % Protection in case th toobar is automatically recreated.
 
         axesText('set', 'axes3', tAxes3Text);
 
@@ -1558,7 +1633,7 @@ function dicomViewerCore()
             'Position', [0 0 1 1], ...
             'Visible' , 'off', ...
             'Ydir'    , 'reverse', ...
-            'Tag'     , 'axesMip', ...   
+            'Tag'     , 'axesMip', ...
             'XLim'    , [0 inf], ...
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
@@ -1566,7 +1641,7 @@ function dicomViewerCore()
         disableDefaultInteractivity(axesMipPtr ('get', [], dSeriesOffset));
 
         set(axesMipPtr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
-        set(axesMipPtr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axesMipPtr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');
         set(axesMipPtr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off');
 
         grid(axesMipPtr('get', [], dSeriesOffset), 'off');
@@ -1579,37 +1654,32 @@ function dicomViewerCore()
 
             imComputedMip  = mipBuffer('get', [], dSeriesOffset);
 
-            if gaussFilter('get') == true
+            applyGaussFilter = gaussFilter('get');
+            useInterpolation = isInterpolated('get');
+            
+            % Select the appropriate interpolation method
+            interpMethod = 'nearest';
+            if useInterpolation
 
-                if isInterpolated('get')
-
-                    imMip = imagesc(imgaussfilt(permute(imComputedMip (iMipAngle,:,:), [3 2 1])), ...
-                                   'Parent'       , axesMipPtr('get', [], dSeriesOffset), ...
-                                   'Interpolation', 'bilinear'... 
-                                   );
-                else
-                    imMip = imagesc(imgaussfilt(permute(imComputedMip (iMipAngle,:,:), [3 2 1])), ...
-                                   'Parent'       , axesMipPtr('get', [], dSeriesOffset), ...
-                                   'Interpolation', 'nearest'... 
-                                   );                
-                end
-            else
-                if isInterpolated('get')
-                
-                    imMip = imagesc(permute(imComputedMip (iMipAngle,:,:), [3 2 1]), ...
-                                   'Parent'       , axesMipPtr('get', [], dSeriesOffset), ...
-                                   'Interpolation', 'bilinear'... 
-                                   );
-                else
-                    imMip = imagesc(permute(imComputedMip (iMipAngle,:,:), [3 2 1]), ...
-                                   'Parent'       , axesMipPtr('get', [], dSeriesOffset), ...
-                                   'Interpolation', 'nearest'... 
-                                   );                
-                end
+                interpMethod = 'bilinear';
             end
-           
+            
+            % Extract and optionally filter the image
+            imData = permute(imComputedMip(iMipAngle, :, :), [3, 2, 1]);
+            if applyGaussFilter
+
+                imData = imgaussfilt(imData);
+            end
+            
+            % Display the image
+            imMip = imshow(imData, ...
+                           'Parent', axesMipPtr('get', [], dSeriesOffset), ...
+                           'Interpolation', interpMethod);
+
+
             % adjAxeCameraViewAngle(axesMipPtr('get', [], dSeriesOffset));
- 
+            disableAxesToolbar(axesMipPtr('get', [], dSeriesOffset));
+        
             imMipPtr ('set', imMip , dSeriesOffset);
 
             % linkaxes([axesMipPtr('get', [], dSeriesOffset) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
@@ -1669,19 +1739,21 @@ function dicomViewerCore()
             uiMipWindow = uiMipWindowPtr('get');
 
             axAxesMipText = ...
-                axes(uiMipWindow, ...
+                uiaxes(uiMipWindow, ...
                      'Units'   , 'pixels', ...
-                     'position', [5 ...
-                                  (uiMipWindow.Position(4)-5) ...
+                     'Position', [5 ...
+                                  uiMipWindow.Position(4)-5-30 ...
                                   70 ...
                                   30 ...
                                   ], ...
                      'Tag'     , 'axAxesMipText', ...
+                     'Box'     , 'off', ...
                      'visible' , 'off' ...
                      );
-            axAxesMipText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            axAxesMipText.Toolbar.Visible = 'off';
+            axAxesMipText.Interactions = [];
+            % axAxesMipText.Toolbar.Visible = 'off';
             disableDefaultInteractivity(axAxesMipText);
+            deleteAxesToolbar(axAxesMipText);
 
             sAxeMipText = sprintf('\n%d/32', iMipAngle);
 
@@ -1689,6 +1761,7 @@ function dicomViewerCore()
             if overlayActivate('get') == false
                 set(tAxesMipText, 'Visible', 'off');
             end
+
             axesText('set', 'axesMip', tAxesMipText);
 
             axAxesMipView = ...
@@ -1702,11 +1775,13 @@ function dicomViewerCore()
                      'Position', [0 0 1 1], ...
                      'Visible' , 'off',...
                      'Tag'     , 'axAxesMipView', ...
+                     'Box'     , 'off', ...
                      'HandleVisibility', 'off' ...
                      );
-            axAxesMipView.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            axAxesMipView.Toolbar.Visible = 'off';
+            axAxesMipView.Interactions = [];
+            %axAxesMipView.Toolbar.Visible = 'off';
             disableDefaultInteractivity(axAxesMipView);
+            deleteAxesToolbar(axAxesMipView);
 
             if      iMipAngle < 5
                 sMipAngleView = 'Left';
@@ -1724,8 +1799,11 @@ function dicomViewerCore()
             if overlayActivate('get') == false
                 set(tAxesMipView, 'Visible', 'off');
             end
+            
             axesText('set', 'axesMipView', tAxesMipView);
 
+            disableAxesToolbar(axAxesMipText);
+            disableAxesToolbar(axAxesMipView);
         end
 
         if isVsplash('get') == true
@@ -1741,7 +1819,7 @@ function dicomViewerCore()
                 aAxeYLim = get(axes2Ptr('get', [], dSeriesOffset), 'YLim');
                 set(axes2Ptr('get', [], dSeriesOffset), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
                 set(axes2Ptr('get', [], dSeriesOffset), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
-    
+
                 aAxeXLim = get(axes3Ptr('get', [], dSeriesOffset), 'XLim');
                 aAxeYLim = get(axes3Ptr('get', [], dSeriesOffset), 'YLim');
                 set(axes3Ptr('get', [], dSeriesOffset), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
@@ -1782,7 +1860,7 @@ function dicomViewerCore()
             daspect(axes1Ptr('get', [], dSeriesOffset), [z y x]);
             daspect(axes2Ptr('get', [], dSeriesOffset), [z x y]);
             daspect(axes3Ptr('get', [], dSeriesOffset), [x y z]);
-            
+
             if isVsplash('get') == false
                 daspect(axesMipPtr('get', [], dSeriesOffset), [z y x]);
             end
@@ -1816,7 +1894,9 @@ function dicomViewerCore()
             axis(axes1Ptr('get', [], dSeriesOffset), 'normal');
             axis(axes2Ptr('get', [], dSeriesOffset), 'normal');
             axis(axes3Ptr('get', [], dSeriesOffset), 'normal');
+
             if isVsplash('get') == false
+
                 axis(axesMipPtr('get', [], dSeriesOffset), 'normal');
             end
         end
@@ -1850,102 +1930,110 @@ function dicomViewerCore()
         colormap(axes3Ptr('get', [], dSeriesOffset)  , getColorMap('one', colorMapOffset('get')));
 
         if isVsplash('get') == false
+
             colormap(axesMipPtr('get', [], dSeriesOffset), getColorMap('one', colorMapOffset('get')));
         end
 
-         if isVsplash('get') == true && ...
-            ~strcmpi(vSplahView('get'), 'all')
-            if strcmpi(vSplahView('get'), 'coronal')
-                ptrColorbar = ...
-                    colorbar(axesColorbarPtr('get', [], dSeriesOffset), ...
-                             'AxisLocation' , 'in', ...
-                             'Tag'          , 'Colorbar', ...
-                             'EdgeColor'    , overlayColor('get'), ...
-                             'Units'        , 'pixels', ...
-                             'Box'          , 'off', ...
-                             'Location'     , 'east', ...
-                             'ButtonDownFcn', @colorbarCallback ...
-                             );
-            elseif strcmpi(vSplahView('get'), 'sagittal')
-                ptrColorbar = ...
-                    colorbar(axesColorbarPtr('get', [], dSeriesOffset), ...
-                             'AxisLocation' , 'in', ...
-                             'Tag'          , 'Colorbar', ...
-                             'EdgeColor'    , overlayColor('get'), ...
-                             'Units'        , 'pixels', ...
-                             'Box'          , 'off', ...
-                             'Location'     , 'east', ...
-                             'ButtonDownFcn', @colorbarCallback ...
-                             );
-            else
-                ptrColorbar = ...
-                    colorbar(axesColorbarPtr('get', [], dSeriesOffset), ...
-                             'AxisLocation' , 'in', ...
-                             'Tag'          , 'Colorbar', ...
-                             'EdgeColor'    , overlayColor('get'), ...
-                             'Units'        , 'pixels', ...
-                             'Box'          , 'off', ...
-                             'Location'     , 'east', ...
-                             'ButtonDownFcn', @colorbarCallback ...
-                             );
-            end
-         else
-            % axesColorbar = ...
-            %     axes(uiTraWindowPtr('get'), ...
-            %            'Units'   , 'normalized', ...
-            %            'Position', [0 0 1 1], ...
-            %            'Visible' , 'off', ...
-            %            'Ydir'    , 'reverse', ...
-            %            'Tag'     , 'axesColorbar', ...   
-            %            'XLim'    , [0 inf], ...
-            %            'YLim'    , [0 inf], ...
-            %            'CLim'    , [0 inf] ...
-            %          );
-            % axesColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            % axesColorbar.Toolbar.Visible = 'off';           
-            % % axes3Ptr('set', axes3, get(uiSeriesPtr('get'), 'Value'));                               
-            % disableDefaultInteractivity(axesColorbar);
+         % if isVsplash('get') == true && ...
+         %    ~strcmpi(vSplahView('get'), 'all')
+         %    if strcmpi(vSplahView('get'), 'coronal')
+         %        ptrColorbar = ...
+         %            colorbar(axesColorbarPtr('get', [], dSeriesOffset), ...
+         %                     'AxisLocation' , 'in', ...
+         %                     'Tag'          , 'Colorbar', ...
+         %                     'EdgeColor'    , overlayColor('get'), ...
+         %                     'Units'        , 'pixels', ...
+         %                     'Box'          , 'off', ...
+         %                     'Location'     , 'east', ...
+         %                     'ButtonDownFcn', @colorbarCallback ...
+         %                     );
+         %    elseif strcmpi(vSplahView('get'), 'sagittal')
+         %        ptrColorbar = ...
+         %            colorbar(axesColorbarPtr('get', [], dSeriesOffset), ...
+         %                     'AxisLocation' , 'in', ...
+         %                     'Tag'          , 'Colorbar', ...
+         %                     'EdgeColor'    , overlayColor('get'), ...
+         %                     'Units'        , 'pixels', ...
+         %                     'Box'          , 'off', ...
+         %                     'Location'     , 'east', ...
+         %                     'ButtonDownFcn', @colorbarCallback ...
+         %                     );
+         %    else
+         %        ptrColorbar = ...
+         %            colorbar(axesColorbarPtr('get', [], dSeriesOffset), ...
+         %                     'AxisLocation' , 'in', ...
+         %                     'Tag'          , 'Colorbar', ...
+         %                     'EdgeColor'    , overlayColor('get'), ...
+         %                     'Units'        , 'pixels', ...
+         %                     'Box'          , 'off', ...
+         %                     'Location'     , 'east', ...
+         %                     'ButtonDownFcn', @colorbarCallback ...
+         %                     );
+         %    end
+         % else
+         %    % axesColorbar = ...
+         %    %     axes(uiTraWindowPtr('get'), ...
+         %    %            'Units'   , 'normalized', ...
+         %    %            'Position', [0 0 1 1], ...
+         %    %            'Visible' , 'off', ...
+         %    %            'Ydir'    , 'reverse', ...
+         %    %            'Tag'     , 'axesColorbar', ...
+         %    %            'XLim'    , [0 inf], ...
+         %    %            'YLim'    , [0 inf], ...
+         %    %            'CLim'    , [0 inf] ...
+         %    %          );
+         %    % axesColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+         %    % axesColorbar.Toolbar.Visible = 'off';
+         %    % % axes3Ptr('set', axes3, get(uiSeriesPtr('get'), 'Value'));
+         %    % disableDefaultInteractivity(axesColorbar);
+         % 
+         %    ptrColorbar = ...
+         %        colorbar(axesColorbarPtr('get', [], dSeriesOffset), ...
+         %                 'AxisLocation' , 'in', ...
+         %                 'Tag'          , 'Colorbar', ...
+         %                 'EdgeColor'    , overlayColor('get'), ...
+         %                 'Units'        , 'pixels', ...
+         %                 'Box'          , 'off', ...
+         %                 'Location'     , 'east', ...
+         %                 'ButtonDownFcn', @colorbarCallback ...
+         %                 );
+         % end
 
-            ptrColorbar = ...
-                colorbar(axesColorbarPtr('get', [], dSeriesOffset), ...
-                         'AxisLocation' , 'in', ...
-                         'Tag'          , 'Colorbar', ...
-                         'EdgeColor'    , overlayColor('get'), ...
-                         'Units'        , 'pixels', ...
-                         'Box'          , 'off', ...
-                         'Location'     , 'east', ...
-                         'ButtonDownFcn', @colorbarCallback ...
-                         );
-         end
 
-         ptrColorbar.TickLabels = [];
-         ptrColorbar.Ticks = [];
-         ptrColorbar.TickLength = 0;
-         ptrColorbar.Interruptible = 'off';
+         % ptrColorbar.TickLabels = [];
+         % ptrColorbar.Ticks = [];
+         % ptrColorbar.TickLength = 0;
+         % ptrColorbar.Interruptible = 'off';
+         
+        ptrColorbar = viewerColorbar(axesColorbarPtr('get', [], dSeriesOffset),  ...
+                                     'Colorbar', ...
+                                     getColorMap('one', colorMapOffset('get')));
 
          uiColorbarPtr('set', ptrColorbar);
          colorbarCallback(ptrColorbar); % Fix for Linux
 
-         aAxePosition = ptrColorbar.Parent.Position;
+         aAxePosition = ptrColorbar.Parent.Parent.Position;
          if isFusion('get') == true
-            set(ptrColorbar, ...
+            set(axesColorbarPtr('get', [], dSeriesOffset), ...
                 'Position', [aAxePosition(3)-48 ...
                              (aAxePosition(4)/2) ...
-                             40 ...
+                             45 ...
                              (aAxePosition(4)/2)-4 ...
                              ] ...
                 );
          else
-            set(ptrColorbar, ...
+            set(axesColorbarPtr('get', [], dSeriesOffset), ...
                 'Position', [aAxePosition(3)-48 ...
                              7 ...
-                             40 ...
+                             45 ...
                              aAxePosition(4)-11 ...
                              ] ...
                );
          end
-
-% 
+       
+         ptrColorbar.Parent.YLabel.Position = [ptrColorbar.Parent.YLabel.Position(1) - 10, ptrColorbar.Parent.YLabel.Position(2), ptrColorbar.Parent.YLabel.Position(3)];       
+      
+%
 %          set(axes1Ptr('get', [], dSeriesOffset), 'CLim', [lMin lMax]);
 %          set(axes2Ptr('get', [], dSeriesOffset), 'CLim', [lMin lMax]);
 %          set(axes3Ptr('get', [], dSeriesOffset), 'CLim', [lMin lMax]);
@@ -1972,7 +2060,8 @@ function dicomViewerCore()
 
 %            setWindowMinMax(lMax, lMin);
 %           overlayText();
-    if size(dicomBuffer('get'), 3) == 1
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+
         uiLogo = displayLogo(uiOneWindowPtr('get'));
     else
         if isVsplash('get') == true && ...
@@ -2003,29 +2092,7 @@ function dicomViewerCore()
     if isVsplash('get') == false
 
         initRoi();
-
-        tRefreshRoi = roiTemplate('get', dSeriesOffset);
-        if ~isempty(tRefreshRoi)
-            for bb=1:numel(tRefreshRoi)
-               if isvalid(tRefreshRoi{bb}.Object)
-                   if (strcmpi(tRefreshRoi{bb}.Axe, 'Axes1') && ...
-                        iCoronal == tRefreshRoi{bb}.SliceNb) || ...
-                       (strcmpi(tRefreshRoi{bb}.Axe, 'Axes2')&& ...
-                        iSagittal == tRefreshRoi{bb}.SliceNb)|| ...
-                       (strcmpi(tRefreshRoi{bb}.Axe, 'Axes3') && ...
-                        iAxial == tRefreshRoi{bb}.SliceNb)
-
-                        if isVsplash('get') == true
-                            tRefreshRoi{bb}.Object.Visible = 'off';
-                        else
-                            tRefreshRoi{bb}.Object.Visible = 'on';
-                        end
-                    else
-                        tRefreshRoi{bb}.Object.Visible = 'off';
-                    end
-               end
-            end
-        end
+        initPlotEdit();
     end
 
     setColorbarLabel();
@@ -2036,7 +2103,7 @@ function dicomViewerCore()
         if ~isempty(axe)
             alpha( axe, 1);
         end
-       
+
         initAxePlotView(axe);
     else
 
@@ -2054,7 +2121,7 @@ function dicomViewerCore()
 
             initAxePlotView(axes1);
             initAxePlotView(axes2);
-            initAxePlotView(axes3); 
+            initAxePlotView(axes3);
         end
 
         if link2DMip('get') == true && isVsplash('get') == false
@@ -2068,18 +2135,19 @@ function dicomViewerCore()
                 initAxePlotView(axesMip);
             end
         end
-        
-      
+
+
     end
 
     % Deactivate slider
-% 
-%     set(uiSliderWindowPtr('get'), 'Visible', 'off');  
+%
+%     set(uiSliderWindowPtr('get'), 'Visible', 'off');
 %     set(uiSliderLevelPtr('get') , 'Visible', 'off');
 
     % Use line on colorbar instead of slider in the side
 
-    if size(dicomBuffer('get'), 3) == 1
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+
         axeColorbar = axes(uiOneWindowPtr('get'), ...
                           'Units'   , 'pixel', ...
                           'Ydir'    , 'reverse', ...
@@ -2088,11 +2156,10 @@ function dicomViewerCore()
                           'zlimmode', 'manual',...
                           'climmode', 'manual',...
                           'alimmode', 'manual',...
-                          'Position', [get(ptrColorbar, 'Position')], ...
+                          'Position', [get(axesColorbarPtr('get', [], dSeriesOffset), 'Position')], ...
+                          'Box'     , 'off', ...
                           'Visible' , 'off'...
-                          );  
-        axeColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axeColorbar.Toolbar.Visible = 'off';       
+                          );
     else
 
         axeColorbar = axes(uiTraWindowPtr('get'), ...
@@ -2103,24 +2170,28 @@ function dicomViewerCore()
                           'zlimmode', 'manual',...
                           'climmode', 'manual',...
                           'alimmode', 'manual',...
-                          'Position', [get(ptrColorbar, 'Position')], ...
+                          'Position', [get(axesColorbarPtr('get', [], dSeriesOffset), 'Position')], ...
+                          'Box'     , 'off', ...
                           'Visible' , 'off'...
                           );
-        axeColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axeColorbar.Toolbar.Visible = 'off';          
     end
-    
+
+    axeColorbar.Interactions = [];
+    % axeColorbar.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axeColorbar);
+    deleteAxesToolbar(axeColorbar);
+
     axeColorbarPtr('set', axeColorbar);
-    
+
     % Compute colorbar line y offset
 
-    dYOffsetMax = computeLineColorbarIntensityMaxYOffset(dOffset);
-    dYOffsetMin = computeLineColorbarIntensityMinYOffset(dOffset);
-    
+    dYOffsetMax = computeLineColorbarIntensityMaxYOffset(dSeriesOffset);
+    dYOffsetMin = computeLineColorbarIntensityMinYOffset(dSeriesOffset);
+
     % Line on colorbar
 
-    lineColorbarIntensityMax = line(axeColorbar, [0, 1], [dYOffsetMax, dYOffsetMax], 'Color', viewerColorbarIntensityMaxLineColor('get'), 'LineWidth', 10);
-    lineColorbarIntensityMin = line(axeColorbar, [0, 1], [dYOffsetMin, dYOffsetMin], 'Color', viewerColorbarIntensityMinLineColor('get'), 'LineWidth', 10); 
+    lineColorbarIntensityMax = line(axeColorbar, [0.1, 0.9], [dYOffsetMax, dYOffsetMax], 'Color', viewerColorbarIntensityMaxLineColor('get'), 'LineWidth', 15);
+    lineColorbarIntensityMin = line(axeColorbar, [0.1, 0.9], [dYOffsetMin, dYOffsetMin], 'Color', viewerColorbarIntensityMinLineColor('get'), 'LineWidth', 15);
 
     lineColorbarIntensityMaxPtr('set', lineColorbarIntensityMax);
     lineColorbarIntensityMinPtr('set', lineColorbarIntensityMin);
@@ -2135,8 +2206,8 @@ function dicomViewerCore()
 
     % Text on colorbar line
 
-    textColorbarIntensityMax = text(axeColorbar, 0.0,lineColorbarIntensityMax.YData(1), ' ','Color', viewerColorbarIntensityMaxTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
-    textColorbarIntensityMin = text(axeColorbar, 0.0,lineColorbarIntensityMin.YData(1), ' ','Color', viewerColorbarIntensityMinTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
+    textColorbarIntensityMax = text(axeColorbar, 0.1,lineColorbarIntensityMax.YData(1), ' ','Color', viewerColorbarIntensityMaxTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
+    textColorbarIntensityMin = text(axeColorbar, 0.1,lineColorbarIntensityMin.YData(1), ' ','Color', viewerColorbarIntensityMinTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
 
     textColorbarIntensityMaxPtr('set', textColorbarIntensityMax);
     textColorbarIntensityMinPtr('set', textColorbarIntensityMin);
@@ -2148,53 +2219,59 @@ function dicomViewerCore()
     set(textColorbarIntensityMin,'ButtonDownFcn',@lineColorbarIntensityMinClick);
 
     if isempty(isColorbarDefaultUnit('get'))
+
         isColorbarDefaultUnit('set', true);
     end
 
-    % Ajust the intensity 
+    % Ajust the intensity
 
-    setColorbarIntensityMaxScaleValue(lineColorbarIntensityMax.YData(1), colorbarScale('get'), isColorbarDefaultUnit('get'), dOffset);
-    setColorbarIntensityMinScaleValue(lineColorbarIntensityMin.YData(1), colorbarScale('get'), isColorbarDefaultUnit('get'), dOffset);
+    setColorbarIntensityMaxScaleValue(lineColorbarIntensityMax.YData(1), colorbarScale('get'), isColorbarDefaultUnit('get'), dSeriesOffset);
+    setColorbarIntensityMinScaleValue(lineColorbarIntensityMin.YData(1), colorbarScale('get'), isColorbarDefaultUnit('get'), dSeriesOffset);
 
-    setAxesIntensity(dOffset);
+    setAxesIntensity(dSeriesOffset);
+
+    disableAxesToolbar(axeColorbar);
 
     if strcmpi(atMetaData{1}.Modality, 'ct')
 
         if link2DMip('get') == true && isVsplash('get') == false
 
             [dLevelMax, dLevelMin] = computeWindowLevel(2500, 415);
-            set(axesMipPtr('get', [], dOffset), 'CLim', [dLevelMin dLevelMax]);
-        end        
+            set(axesMipPtr('get', [], dSeriesOffset), 'CLim', [dLevelMin dLevelMax]);
+        end
     end
 
     if isVsplash('get') == true
-        
+
         if strcmpi(vSplahView('get'), 'Coronal') || ...
-           strcmpi(vSplahView('get'), 'Sagittal')     
+           strcmpi(vSplahView('get'), 'Sagittal')
 
             setColorbarVisible('off');
         end
     end
 
     setColorbarLabel();
- 
-%                     setFusionColorbarVisible('off');  
-%    sUnitDisplay = getSerieUnitValue(dOffset);
+
+%                     setFusionColorbarVisible('off');
+%    sUnitDisplay = getSerieUnitValue(dSeriesOffset);
 
 %     if strcmpi(sUnitDisplay, 'SUV')
 %         tQuant = quantificationTemplate('get');
 %         for tt=1:numel(ptrColorbar.TickLabels)
-% 
+%
 %             ptrColorbar.TickLabels{tt} = num2str(str2double(ptrColorbar.TickLabels{tt})*tQuant.tSUV.dScale);
 %         end
 %     end
 
-    if size(dicomBuffer('get'), 3) == 1
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
 
         set(uiOneWindowPtr('get'), 'Visible', 'on');
 
-        axe = axePtr('get', [], dSeriesOffset);
-        axe.Toolbar.Visible = 'off';        
+        % axe = axePtr('get', [], dSeriesOffset);
+        % axe.Toolbar.Visible = 'off';
+       
+        % disableAxesToolbar(axe);
+        % delete(axe.Toolbar);
     else
 
         if isVsplash('get') == true && ...
@@ -2235,13 +2312,21 @@ function dicomViewerCore()
                 set(uiSliderMipPtr('get'), 'Visible', 'off');
             end
 
-            axe1 = axes1Ptr('get', [], dSeriesOffset);
-            axe2 = axes2Ptr('get', [], dSeriesOffset);
-            axe3 = axes3Ptr('get', [], dSeriesOffset);
+            % axe1 = axes1Ptr('get', [], dSeriesOffset);
+            % axe2 = axes2Ptr('get', [], dSeriesOffset);
+            % axe3 = axes3Ptr('get', [], dSeriesOffset);
+            % 
+            % disableAxesToolbar(axe1);
+            % disableAxesToolbar(axe2);
+            % disableAxesToolbar(axe3);
 
-            axe1.Toolbar.Visible = 'off';
-            axe2.Toolbar.Visible = 'off';
-            axe3.Toolbar.Visible = 'off';
+            % delete(axe1.Toolbar);
+            % delete(axe2.Toolbar);
+            % delete(axe3.Toolbar);
+
+            % axe1.Toolbar.Visible = 'off';
+            % axe2.Toolbar.Visible = 'off';
+            % axe3.Toolbar.Visible = 'off';
 
         else
 
@@ -2251,55 +2336,75 @@ function dicomViewerCore()
                 set(uiSliderMipPtr('get'), 'Visible', 'on');
 
                 axeMip = axesMipPtr('get', [], dSeriesOffset);
-                axeMip.Toolbar.Visible = 'off';                
+                % axeMip.Toolbar.Visible = 'off';
+                disableAxesToolbar(axeMip);
+                % delete(axeMip.Toolbar);
             end
 
             set(uiCorWindowPtr('get'), 'Visible', 'on');
             set(uiSagWindowPtr('get'), 'Visible', 'on');
             set(uiTraWindowPtr('get'), 'Visible', 'on');
+            % 
+            % axe1 = axes1Ptr('get', [], dSeriesOffset);
+            % axe2 = axes2Ptr('get', [], dSeriesOffset);
+            % axe3 = axes3Ptr('get', [], dSeriesOffset);
 
-            axe1 = axes1Ptr('get', [], dSeriesOffset);
-            axe2 = axes2Ptr('get', [], dSeriesOffset);
-            axe3 = axes3Ptr('get', [], dSeriesOffset);
+            % axe1.Toolbar.Visible = 'off';
+            % axe2.Toolbar.Visible = 'off';
+            % axe3.Toolbar.Visible = 'off';
 
-            axe1.Toolbar.Visible = 'off';
-            axe2.Toolbar.Visible = 'off';
-            axe3.Toolbar.Visible = 'off';
+            % disableAxesToolbar(axe1);
+            % disableAxesToolbar(axe2);
+            % disableAxesToolbar(axe3);
+
+            % delete(axe1.Toolbar);
+            % delete(axe2.Toolbar);
+            % delete(axe3.Toolbar);
 
             set(uiSliderCorPtr('get'), 'Visible', 'on');
             set(uiSliderSagPtr('get'), 'Visible', 'on');
-            set(uiSliderTraPtr('get'), 'Visible', 'on');        
+            set(uiSliderTraPtr('get'), 'Visible', 'on');
 
             % adjAxeCameraViewAngle(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
             % adjAxeCameraViewAngle(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-            % adjAxeCameraViewAngle(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))); 
-            % adjAxeCameraViewAngle(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))); 
+            % adjAxeCameraViewAngle(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+            % adjAxeCameraViewAngle(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
+
 
         end
     end
 
     if isFusion('get') == true
-        
+
         isFusion('set', false);
         setFusionCallback();
     end
 
-    if bInitSegPanel == true 
+    if bInitSegPanel == true
+
        setViewSegPanel();
     end
 
     if bInitKernelPanel == true
+
        setViewKernelPanel();
     end
 
     if bInitRoiPanel == true
+
        setViewRoiPanel();
     end
 
-    setOverlayPatientInformation(dSeriesOffset);  
-    
+    setOverlayPatientInformation(dSeriesOffset);
+
     clear im;
+
+    catch ME
+        logErrorToFile(ME)
+        progressBar(1, 'Error: dicomViewerCore()');
+    end
     
+    refreshImages();
+
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-   
 end

@@ -27,7 +27,8 @@ function btnUiSagWindowFullScreenCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent ptLimit;
+    persistent ptLimitSag;
+    persistent ptLimitCor;
 
     uiCorWindow = uiCorWindowPtr('get');
     uiSagWindow = uiSagWindowPtr('get');
@@ -51,18 +52,22 @@ function btnUiSagWindowFullScreenCallback(~, ~)
 
             if bIsFullScreen == false
 
-                ptLimit = axesLimitsFromTemplate(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                ptLimitSag = axesLimitsFromTemplate(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                ptLimitCor = axesLimitsFromTemplate(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
                 adjAxeCameraViewAngle(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-                
+                adjAxeCameraViewAngle(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+              
                 if isFusion('get') == true
 
                     setAxesLimitsFromSource(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                    setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
                 end
 
                 if isPlotContours('get') == true
 
                     setAxesLimitsFromSource(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
+                    setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
                 end
 
                 set(btnUiSagWindowFullScreen, 'TooltipString'  , 'Exit Full Screen (Ctrl + F)');
@@ -75,16 +80,19 @@ function btnUiSagWindowFullScreenCallback(~, ~)
                 set(uiCorSlider, 'Visible', 'Off');
                 set(uiMipSlider, 'Visible', 'Off');
             else
-                axesLimitsFromTemplate(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ptLimit);
+                axesLimitsFromTemplate(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ptLimitSag);
+                axesLimitsFromTemplate(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ptLimitCor);
 
                 if isFusion('get') == true
 
                     setAxesLimitsFromSource(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
-                end
+                    setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+               end
 
                 if isPlotContours('get') == true
                     
                     setAxesLimitsFromSource(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
+                    setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
                 end
 
                 set(btnUiSagWindowFullScreen, 'TooltipString'  , 'Full Screen (Ctrl + F)');

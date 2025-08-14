@@ -32,7 +32,7 @@ function refreshColorMap()
        switchToMIPMode('get')    == false
 
         ptrColorbar = uiColorbarPtr('get');
-        colormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
+        setColorbarColormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
 
         if size(dicomBuffer('get'), 3) == 1
             colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
@@ -51,7 +51,7 @@ function refreshColorMap()
             if isFusion('get')  == true
                 
                 ptrFusionColorbar = uiFusionColorbarPtr('get');
-                colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
+                setColorbarColormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
 
                 colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                 colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));

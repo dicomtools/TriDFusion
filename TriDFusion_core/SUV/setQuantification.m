@@ -68,76 +68,78 @@ function setQuantification(dSeriesOffset)
             atQuantDicomInfo = atInput(cc).atDicomInfo;
         end
 
-        sModality = lower(atInput(cc).atDicomInfo{1}.Modality);
-        if strcmpi(sModality, 'ct') || strcmpi(sModality, 'mr')
-
-            xPixel = 0;
-            yPixel = 0;
-%            zPixel = 0;
-            for jj=1: numel(atQuantDicomInfo)-1
-
-                xPixel = xPixel + (atQuantDicomInfo{jj}.PixelSpacing(1)/10);
-                yPixel = yPixel + (atQuantDicomInfo{jj}.PixelSpacing(2)/10);
-
-%                if atQuantDicomInfo{jj  }.SliceLocation - ...
-%                   atQuantDicomInfo{jj+1}.SliceLocation > 0
-%                    zPixel = atQuantDicomInfo{jj  }.SliceLocation - ...
-%                             atQuantDicomInfo{jj+1}.SliceLocation + ...
-%                             zPixel;
-
-%                elseif atQuantDicomInfo{jj+1}.SliceLocation - ...
-%                       atQuantDicomInfo{jj  }.SliceLocation > 0
-%                    zPixel = atQuantDicomInfo{jj+1}.SliceLocation - ...
-%                             atQuantDicomInfo{jj  }.SliceLocation + ...
-%                             zPixel;
-%                end
-
-            %    zPixel = zPixel + (atInput(cc).atDicomInfo{jj}.SliceThickness /10);
-            end
-            
-            xPixel = xPixel / numel(atQuantDicomInfo);
-            yPixel = yPixel / numel(atQuantDicomInfo);
-            zPixel = computeSliceSpacing(atQuantDicomInfo);
-%            zPixel = zPixel / (numel(atQuantDicomInfo)-1);
-
-            voxVolume = xPixel * yPixel * zPixel;
-            nbVoxels = numel(aInput);
-            volMean =  mean(aInput,'all');
-
-            atInput(cc).tQuant.tHU.dMin = atInput(cc).tQuant.tCount.dMin;
-            atInput(cc).tQuant.tHU.dMax = atInput(cc).tQuant.tCount.dMax;
-            atInput(cc).tQuant.tHU.dTot = voxVolume * nbVoxels * volMean;
-
-        elseif strcmpi(sModality, 'pt') || strcmpi(sModality, 'nm')
-
-            dScale = computeSUV(atQuantDicomInfo, viewerSUVtype('get'));
-
-            if dScale ~= 0
-                
+        if ~isempty(atInput(cc).atDicomInfo)
+            sModality = lower(atInput(cc).atDicomInfo{1}.Modality);
+            if strcmpi(sModality, 'ct') || strcmpi(sModality, 'mr')
+    
                 xPixel = 0;
                 yPixel = 0;
-%                zPixel = 0;
-
-                for jj=1: numel(atQuantDicomInfo)
+    %            zPixel = 0;
+                for jj=1: numel(atQuantDicomInfo)-1
+    
                     xPixel = xPixel + (atQuantDicomInfo{jj}.PixelSpacing(1)/10);
                     yPixel = yPixel + (atQuantDicomInfo{jj}.PixelSpacing(2)/10);
+    
+    %                if atQuantDicomInfo{jj  }.SliceLocation - ...
+    %                   atQuantDicomInfo{jj+1}.SliceLocation > 0
+    %                    zPixel = atQuantDicomInfo{jj  }.SliceLocation - ...
+    %                             atQuantDicomInfo{jj+1}.SliceLocation + ...
+    %                             zPixel;
+    
+    %                elseif atQuantDicomInfo{jj+1}.SliceLocation - ...
+    %                       atQuantDicomInfo{jj  }.SliceLocation > 0
+    %                    zPixel = atQuantDicomInfo{jj+1}.SliceLocation - ...
+    %                             atQuantDicomInfo{jj  }.SliceLocation + ...
+    %                             zPixel;
+    %                end
+    
+                %    zPixel = zPixel + (atInput(cc).atDicomInfo{jj}.SliceThickness /10);
                 end
-
+                
                 xPixel = xPixel / numel(atQuantDicomInfo);
                 yPixel = yPixel / numel(atQuantDicomInfo);
                 zPixel = computeSliceSpacing(atQuantDicomInfo);
-
+    %            zPixel = zPixel / (numel(atQuantDicomInfo)-1);
+    
                 voxVolume = xPixel * yPixel * zPixel;
                 nbVoxels = numel(aInput);
                 volMean =  mean(aInput,'all');
-
-                atInput(cc).tQuant.tSUV.dScale = dScale;
-                atInput(cc).tQuant.tSUV.dMin =  atInput(cc).tQuant.tCount.dMin * dScale;
-                atInput(cc).tQuant.tSUV.dMax =  atInput(cc).tQuant.tCount.dMax * dScale;
-                atInput(cc).tQuant.tSUV.dTot =  voxVolume * nbVoxels * volMean;
-                atInput(cc).tQuant.tSUV.dmCi =  (voxVolume * nbVoxels * volMean) / 3.7E7 / 10;
+    
+                atInput(cc).tQuant.tHU.dMin = atInput(cc).tQuant.tCount.dMin;
+                atInput(cc).tQuant.tHU.dMax = atInput(cc).tQuant.tCount.dMax;
+                atInput(cc).tQuant.tHU.dTot = voxVolume * nbVoxels * volMean;
+    
+            elseif strcmpi(sModality, 'pt') || strcmpi(sModality, 'nm')
+    
+                dScale = computeSUV(atQuantDicomInfo, viewerSUVtype('get'));
+    
+                if dScale ~= 0
+                    
+                    xPixel = 0;
+                    yPixel = 0;
+    %                zPixel = 0;
+    
+                    for jj=1: numel(atQuantDicomInfo)
+                        xPixel = xPixel + (atQuantDicomInfo{jj}.PixelSpacing(1)/10);
+                        yPixel = yPixel + (atQuantDicomInfo{jj}.PixelSpacing(2)/10);
+                    end
+    
+                    xPixel = xPixel / numel(atQuantDicomInfo);
+                    yPixel = yPixel / numel(atQuantDicomInfo);
+                    zPixel = computeSliceSpacing(atQuantDicomInfo);
+    
+                    voxVolume = xPixel * yPixel * zPixel;
+                    nbVoxels = numel(aInput);
+                    volMean =  mean(aInput,'all');
+    
+                    atInput(cc).tQuant.tSUV.dScale = dScale;
+                    atInput(cc).tQuant.tSUV.dMin =  atInput(cc).tQuant.tCount.dMin * dScale;
+                    atInput(cc).tQuant.tSUV.dMax =  atInput(cc).tQuant.tCount.dMax * dScale;
+                    atInput(cc).tQuant.tSUV.dTot =  voxVolume * nbVoxels * volMean;
+                    atInput(cc).tQuant.tSUV.dmCi =  (voxVolume * nbVoxels * volMean) / 3.7E7 / 10;
+                end
+            else
             end
-        else
         end
     end
 

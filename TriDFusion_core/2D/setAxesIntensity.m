@@ -45,11 +45,13 @@ function setAxesIntensity(dSeriesOffset)
     % Set axes intensity
 
     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1            
+        
         set(axePtr('get', [], dSeriesOffset), 'CLim', [dLevelMin dLevelMax]);
     else
         set(axes1Ptr('get', [], dSeriesOffset), 'CLim', [dLevelMin dLevelMax]);
         set(axes2Ptr('get', [], dSeriesOffset), 'CLim', [dLevelMin dLevelMax]);
         set(axes3Ptr('get', [], dSeriesOffset), 'CLim', [dLevelMin dLevelMax]);
+
         if link2DMip('get') == true && isVsplash('get') == false
             set(axesMipPtr('get', [], dSeriesOffset), 'CLim', [dLevelMin dLevelMax]);
         end

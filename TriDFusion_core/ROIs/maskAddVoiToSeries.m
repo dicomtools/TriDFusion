@@ -26,676 +26,427 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
-
     try
-
-    if viewRoiPanel('get') == true
-
-        set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'off'); 
-        set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'off');   
-        set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'off'); 
-        set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'off'); 
-        set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'off'); 
-        set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'off'); 
-    
-        uiCreateVoiRoiPanel = uiCreateVoiRoiPanelObject('get');
-    
-        set(uiCreateVoiRoiPanel, 'String', 'Cancel');            
-        set(uiCreateVoiRoiPanel, 'Background', [0.2 0.039 0.027]);
-        set(uiCreateVoiRoiPanel, 'Foreground', [0.94 0.94 0.94]);
-    
-        cancelCreateVoiRoiPanel('set', false);
-    end
-    
-    bMATLABReleaseOlderThan2023b = true;
-    if isMATLABReleaseOlderThan('R2023b')
-
-        bMATLABReleaseOlderThan2023b = true;
-    end
-
-    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow limitrate;
-
-    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    
-    atMetaData = dicomMetaData('get', [], dSeriesOffset);
-          
-    dPixelSizeX = atMetaData{1}.PixelSpacing(1);
-    if dPixelSizeX == 0 
-        dPixelSizeX = 1;
-    end
-    
-    dPixelSizeY = atMetaData{1}.PixelSpacing(2);
-    if dPixelSizeY == 0 
-        dPixelSizeY = 1;
-    end                    
-    
-    dPixelSizeZ = computeSliceSpacing(atMetaData);
-    if dPixelSizeZ == 0  
-        dPixelSizeZ = 1;
-    end            
-
-    dVoxelSize = dPixelSizeX * dPixelSizeY * dPixelSizeZ;
-    
-    dSmalestValueNbVoxels = round(dSmalestValue/(dVoxelSize/1000)); % In ml
-    
-%            SMALEST_ROI_SIZE = 0;
-    PIXEL_EDGE_RATIO = 3;
-
-    dMinValue = single(min(imMask, [], 'all'));
-%            dMaxValue = max(imMask, [], 'all');
-
-%    CC = bwconncomp(gather(BW), 18);
-
-
-    CC = bwconncomp(gather(BW), 26);
-    dNbElements = numel(CC.PixelIdxList);
-
-
-%            asAllTag = [];
-     
-    if canUseGPU()
-        BW2    = gpuArray(single(zeros(size(imMask)))); % Init BW2 buffer                                       
-        BWCT2  = gpuArray(BWCT);
-        % BWANDBWCT = gpuArray(zeros(size(BWCT)));
-    else
-        BW2   = single(zeros(size(imMask))); % Init BW2 buffer                                       
-        BWCT2 = BWCT;
-        % BWANDBWCT = zeros(size(BWCT));                
-    end
-
-    for bb=1:dNbElements  % Nb VOI
-
-        if mod(bb,10)==1 || bb == 1 || bb == dNbElements
-
-            progressBar( bb/dNbElements-0.0001, sprintf('Processing contour %d/%d, please wait.', bb, dNbElements) );
-        end
-%                if numel(CC.PixelIdxList{bb}) 
-
-        if cancelCreateVoiRoiPanel('get') == true
-            break;
+        
+        % Disable ROI UI controls during processing
+        if viewRoiPanel('get')
+            set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable','off');
+            set(uiDeleteVoiRoiPanelObject   ('get'), 'Enable','off');
+            set(uiAddVoiRoiPanelObject      ('get'), 'Enable','off');
+            set(uiPrevVoiRoiPanelObject     ('get'), 'Enable','off');
+            set(uiDelVoiRoiPanelObject      ('get'), 'Enable','off');
+            set(uiNextVoiRoiPanelObject     ('get'), 'Enable','off');
+            set(uiUndoVoiRoiPanelObject     ('get'), 'Enable','off');
+            uiCreateVoiRoiPanel = uiCreateVoiRoiPanelObject('get');
+            set(uiCreateVoiRoiPanel, 'String','Cancel', ...
+                'Background',[0.3255, 0.1137, 0.1137], ...
+                'Foreground',[0.94 0.94 0.94]);
+            cancelCreateVoiRoiPanel('set', false);
         end
 
-        BW2(BW2~=0) = 0; % Reset BW2 buffer
+        % MATLAB release check
+        bMATLABReleaseOlderThan2023b = isMATLABReleaseOlderThan('R2023b');
 
-        BW2(CC.PixelIdxList{bb}) = imMask(CC.PixelIdxList{bb});
+        % Busy pointer
+        set(fiMainWindowPtr('get'), 'Pointer','watch');
+        drawnow limitrate;
 
-        if bPercentOfPeak == true % Percent of peak or SUV Value
-            
-            if isempty(sMinSUVformula)
-                sLesionType = 'Unspecified';
-            else
-                if  contains(sMinSUVformula, 'CT Bone Map') || ...
-                    contains(sMinSUVformula, 'CT ISO Map')  || ...
-                    contains(sMinSUVformula, 'Lymph Nodes')
+        % Load DICOM metadata & compute voxel volume
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        atMetaData    = dicomMetaData('get', [], dSeriesOffset);
+        dPixelSizeX   = atMetaData{1}.PixelSpacing(1);
+        dPixelSizeY   = atMetaData{1}.PixelSpacing(2);
+        if dPixelSizeX==0, dPixelSizeX=1; end
+        if dPixelSizeY==0, dPixelSizeY=1; end
+        dPixelSizeZ   = computeSliceSpacing(atMetaData);
+        if dPixelSizeZ==0, dPixelSizeZ=1; end
+        dVoxelSize    = dPixelSizeX * dPixelSizeY * dPixelSizeZ;         % mm^3
+        dSmalestValueNbVoxels = round(dSmalestValue/(dVoxelSize/1000));  % convert mL to voxels
 
-                    BWANDBWCT = BW2&BWCT2;
-    
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-    
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-                    else
-                        if contains(sMinSUVformula, 'Lymph Nodes')
-                            sLesionType = 'Lymph Nodes';
-                        else
-                            sLesionType = 'Soft Tissue';
-                        end
-                    end
-    
-                elseif  strcmpi(sMinSUVformula, 'Liver') 
-                    sLesionType = 'Liver';
-              
-                else
-                    sLesionType = 'Unspecified';
-                end
-            end
+        % Prepare mask components
+        PIXEL_EDGE_RATIO = 3;
+        dMinValue        = single(min(imMask, [], 'all'));
 
-            if bMultiplePeaks == true % Multiple peaks
+        CC = bwconncomp(gather(BW), 26);
+        dNbElements = numel(CC.PixelIdxList);
 
-                dMaxMaskValue = max(imMask(CC.PixelIdxList{bb}), [], 'all') * (dPercentMaxOrMaxSUVValue) /100;
-                dMaxMaskValue = dMaxMaskValue * (dMultiplePeaksPercentValue) /100;
-
-                BW2(BW2 <= dMaxMaskValue) = dMinValue;
-
-                BW2(BW2 ~= dMinValue) = 1;
-                BW2(BW2 == dMinValue) = 0;
-
-            else % Single peak
-
-                dMaxMaskValue = max(imMask(CC.PixelIdxList{bb}), [], 'all') * dPercentMaxOrMaxSUVValue /100;
-
-                BW2(BW2 <= dMaxMaskValue) = dMinValue;
-
-                BW2(BW2 ~= dMinValue) = 1;
-                BW2(BW2 == dMinValue) = 0;
-            end
+        if canUseGPU()
+            BW2   = gpuArray(single(zeros(size(imMask))));
+            BWCT2 = gpuArray(BWCT);
         else
-            tQuant = quantificationTemplate('get');
-            
-            if isfield(tQuant, 'tSUV')
-                dSUVScale = tQuant.tSUV.dScale;
-            else
-                dSUVScale = 1;
+            BW2   = single(zeros(size(imMask)));
+            BWCT2 = BWCT;
+        end
+
+        % Process each connected component (VOI candidate)
+        for bb = 1:dNbElements
+            if mod(bb,10)==1 || bb==1 || bb==dNbElements
+                progressBar(bb/dNbElements-0.0001, ...
+                    sprintf('Processing contour %d/%d, please wait.', bb, dNbElements));
             end
+            if cancelCreateVoiRoiPanel('get'), break; end
 
-            if bUseFormula == false
+            % Reset and fill BW2 for this VOI
+            BW2(:) = 0;
+            BW2(CC.PixelIdxList{bb}) = imMask(CC.PixelIdxList{bb});
 
+            % Thresholding / formula logic to binarize BW2
+            if bPercentOfPeak
+                %--- Percent-of-peak thresholding ---
                 if isempty(sMinSUVformula)
                     sLesionType = 'Unspecified';
                 else
-                    if  contains(sMinSUVformula, 'CT Bone Map') || ...
-                        contains(sMinSUVformula, 'CT ISO Map')  || ... 
-                        contains(sMinSUVformula, 'Lymph Nodes')
-
-                        BWANDBWCT = BW2&BWCT2;
-    
-                        dBWnbPixel        = numel(BW2(BW2~=0));
-                        dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-    
-                        if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
+                    % Determine lesion type from formula name or CT overlap
+                    switch lower(sMinSUVformula)
+                        case 'liver'
+                            sLesionType = 'Liver';
+                        case 'soft tissue'
+                            sLesionType = 'Soft Tissue';
+                        case 'lymph nodes'
+                            sLesionType = 'Lymph Nodes';
+                        case 'bone'
                             sLesionType = 'Bone';
-                        else
-                            if contains(sMinSUVformula, 'Lymph Nodes')
+                        otherwise
+                            if contains(sMinSUVformula,'ct bone map','IgnoreCase',true) || ...
+                               contains(sMinSUVformula,'ct iso map','IgnoreCase',true)
+                                BWANDBWCT = BW2 & BWCT2;
+                                dBWand = nnz(BWANDBWCT);
+                                dBW     = nnz(BW2);
+                                if (dBWand/dBW)*100 > 10
+                                    sLesionType = 'Bone';
+                                else
+                                    if contains(sMinSUVformula,'lymph','IgnoreCase',true)
+                                        sLesionType = 'Lymph Nodes';
+                                    else
+                                        sLesionType = 'Soft Tissue';
+                                    end
+                                end
+                            else
+                                sLesionType = 'Unspecified';
+                            end
+                    end
+                end
+
+                % Compute threshold value
+                if bMultiplePeaks
+                    dMaxMaskValue = max(imMask(CC.PixelIdxList{bb}), [], 'all') ...
+                                    * dPercentMaxOrMaxSUVValue/100 ...
+                                    * dMultiplePeaksPercentValue/100;
+                else
+                    dMaxMaskValue = max(imMask(CC.PixelIdxList{bb}), [], 'all') ...
+                                    * dPercentMaxOrMaxSUVValue/100;
+                end
+                BW2(BW2 <= dMaxMaskValue) = dMinValue;
+                BW2(BW2 ~= dMinValue)    = 1;
+                BW2(BW2 == dMinValue)    = 0;
+            else
+                %--- Absolute/formula-based SUV thresholding ---
+                tQuant = quantificationTemplate('get');
+                if isfield(tQuant,'tSUV')
+                    dSUVScale = tQuant.tSUV.dScale;
+                else
+                    dSUVScale = 1;
+                end
+
+                if ~bUseFormula
+                    % Simple absolute threshold
+                    if isempty(sMinSUVformula)
+                        sLesionType = 'Unspecified';
+                    else
+                        % Determine lesion type as above
+                        switch lower(sMinSUVformula)
+                            case 'liver'
+                                sLesionType = 'Liver';
+                            case 'soft tissue'
+                                sLesionType = 'Soft Tissue';
+                            case 'lymph nodes'
                                 sLesionType = 'Lymph Nodes';
+                            case 'bone'
+                                sLesionType = 'Bone';
+                            otherwise
+                                if contains(sMinSUVformula,'ct bone map','IgnoreCase',true) || ...
+                                   contains(sMinSUVformula,'ct iso map','IgnoreCase',true)
+                                    BWANDBWCT = BW2 & BWCT2;
+                                    if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                        sLesionType = 'Bone';
+                                    else
+                                        if contains(sMinSUVformula,'lymph','IgnoreCase',true)
+                                            sLesionType = 'Lymph Nodes';
+                                        else
+                                            sLesionType = 'Soft Tissue';
+                                        end
+                                    end
+                                else
+                                    sLesionType = 'Unspecified';
+                                end
+                        end
+                    end
+                    BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                    BW2(BW2 ~= dMinValue)    = 1;
+                    BW2(BW2 == dMinValue)    = 0;
+                else
+                    %--- Formula-based thresholds ---
+                    formula = lower(strtrim(sMinSUVformula));
+                    switch formula
+                        case '(4.30/suvmean)x(suvmean + sd)'
+                            sLesionType = 'Unspecified';
+                            vals        = gather(BW2(BW2~=dMinValue))*dSUVScale;
+                            dMean       = mean(vals,'all');
+                            dSTD        = std(vals,[], 'all');
+                            thr         = (4.30/dMean)*(dMean + dSTD);
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case '(4.30/suvmean)x(suvmean + sd), soft tissue & bone suv 3, ct bone map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 3;
                             else
                                 sLesionType = 'Soft Tissue';
+                                vals = gather(BW2(BW2~=dMinValue))*dSUVScale;
+                                thr  = (4.30/mean(vals,'all'))*(mean(vals,'all') + std(vals,[], 'all'));
                             end
-                        end
-                        
-                    elseif  strcmpi(sMinSUVformula, 'Liver') 
-                        sLesionType = 'Liver';
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case '(4.30/normal liver suvmean)x(normal liver suvmean + normal liver sd), soft tissue & bone suv 3, ct bone map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 3;
+                            else
+                                sLesionType = 'Soft Tissue';
+                                thr = (4.30/dLiverMean)*(dLiverMean + dLiverSTD);
+                            end
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case '(4.44/normal liver suvmean)x(normal liver suvmean + normal liver sd), soft tissue & bone suv 3, ct bone map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 3;
+                            else
+                                sLesionType = 'Soft Tissue';
+                                thr = (4.44/dLiverMean)*(dLiverMean + dLiverSTD);
+                            end
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case '(4.44/normal liver suvmean)x(normal liver suvmean + normal liver sd), lymph nodes & bone suv 3, ct bone map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 3;
+                            else
+                                sLesionType = 'Lymph Nodes';
+                                thr = (4.44/dLiverMean)*(dLiverMean + dLiverSTD);
+                            end
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case '(4.30/suvmean)x(suvmean + sd), soft tissue & bone suv 3, ct iso map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 3;
+                            else
+                                sLesionType = 'Soft Tissue';
+                                vals = gather(BW2(BW2~=dMinValue))*dSUVScale;
+                                thr  = (4.30/mean(vals,'all'))*(mean(vals,'all') + std(vals,[], 'all'));
+                            end
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case 'liver suv 10, soft tissue suv 4, bone suv 3, ct bone map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 3;
+                            else
+                                sLesionType = 'Soft Tissue';
+                                thr = 4;
+                            end
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case 'liver suv 10, soft tissue suv 4, bone suv 3, ct iso map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 3;
+                            else
+                                sLesionType = 'Soft Tissue';
+                                thr = 4;
+                            end
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case '(1.5 x normal liver suvmean)+(2 x normal liver sd), soft tissue & bone suv 3, ct bone map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 3;
+                            else
+                                sLesionType = 'Soft Tissue';
+                                thr = (1.5*dLiverMean)+(2*dLiverSTD);
+                            end
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case '(1.5 x normal liver suvmean)+(2 x normal liver sd), lymph nodes & bone suv 2.5, ct bone map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 2.5;
+                            else
+                                sLesionType = 'Lymph Nodes';
+                                thr = (1.5*dLiverMean)+(2*dLiverSTD);
+                            end
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case '(1.2 x normal liver suvmean)+(2 x normal liver sd), soft tissue & bone suv 2, ct bone map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 2;
+                            else
+                                sLesionType = 'Soft Tissue';
+                                thr = (1.2*dLiverMean)+(2*dLiverSTD);
+                            end
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case '(1.5 x normal liver suvmean)+(2 x normal liver sd), soft tissue & bone suv 2.5, ct bone map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                thr = 2.5;
+                            else
+                                sLesionType = 'Soft Tissue';
+                                thr = (1.5*dLiverMean)+(2*dLiverSTD);
+                            end
+                            BW2(BW2*dSUVScale < thr) = dMinValue;
+                        case 'lymph nodes & bone suv, ct bone map'
+                            BWANDBWCT = BW2 & BWCT2;
+                            if (nnz(BWANDBWCT)/nnz(BW2))*100 > 10
+                                sLesionType = 'Bone';
+                                BW2(BW2*dSUVScale < dBoneThreshold) = dMinValue;
+                            else
+                                sLesionType = 'Lymph Nodes';
+                                BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
+                            end
+                        otherwise
+                            return;
                     end
+                    BW2(BW2 ~= dMinValue) = 1;
+                    BW2(BW2 == dMinValue) = 0;
                 end
+            end
 
-                BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
-                BW2(BW2 ~= dMinValue) = 1;
-                BW2(BW2 == dMinValue) = 0;
-            else
-                if strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD)')      
+            % Collect slice-by-slice contours
+            asTag      = cell(5000,1);
+            dTagOffset = 1;
+            aColor     = generateUniqueColor(false);
 
-                    sLesionType = 'Unspecified';
+            aPixelsList = gather(find(BW2));
+            if numel(aPixelsList) < dSmalestValueNbVoxels
+                continue;
+            end
+            [~,~,adSlices]    = ind2sub(size(BW2), aPixelsList);
+            adSlices          = unique(adSlices);
+            dNbComputedSlices = numel(adSlices);
 
-                    dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
-                    dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
+            for aa = 1:dNbComputedSlices
+                if cancelCreateVoiRoiPanel('get'), break; end
+                dCurrentSlice = adSlices(aa);
+                aAxial        = gather(BW2(:,:,dCurrentSlice));
 
-                    dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
-                    BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0;                                
-
-                elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') 
-
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-                        dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
+                % optimized pixel‐edge block 
+                if bPixelEdge
+                    if bMATLABReleaseOlderThan2023b
+                        %aProcAxial = imresize(aSlice,PIXEL_EDGE_RATIO, 'nearest');
+                        aProcAxial = repelem(aAxial, PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO);
+                        extraArgs  = {};
                     else
-                        sLesionType = 'Soft Tissue';
-
-                        dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
-                        dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
-
-                        dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
+                        aProcAxial = aAxial;
+                        extraArgs  = {'TraceStyle','pixeledge'};
                     end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0;    
-
-%                                clear(BWANDBWCT);
-                elseif strcmpi(sMinSUVformula, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map')
-                    
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-                        dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    else
-                        sLesionType = 'Soft Tissue';
-
-%                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
-%                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
-
-                        dPercentMaxOrMaxSUVValue = (4.30/dLiverMean)*(dLiverMean + dLiverSTD);                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0;  
-
-                elseif strcmpi(sMinSUVformula, '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map')
-                    
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-                        dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    else
-                        sLesionType = 'Soft Tissue';
-
-%                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
-%                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
-
-                        dPercentMaxOrMaxSUVValue = (4.44/dLiverMean)*(dLiverMean + dLiverSTD);                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0;   
-                    
-                elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map') 
-
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-                        dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    else
-                        sLesionType = 'Soft Tissue';
-
-                        dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
-                        dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
-                        
-                        dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0;     
-                    
-                elseif strcmpi(sMinSUVformula, 'Liver SUV 10, Soft Tissue SUV 4, Bone SUV 3, CT Bone Map')
-                    
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-                        dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    else
-                        sLesionType = 'Soft Tissue';
-
-                        dPercentMaxOrMaxSUVValue = 4;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0; 
-                    
-                elseif strcmpi(sMinSUVformula, 'Liver SUV 10, Soft Tissue SUV 4, Bone SUV 3, CT ISO Map')
-                    
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-                        dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    else
-                        sLesionType = 'Soft Tissue';
-
-                        dPercentMaxOrMaxSUVValue = 4;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0; 
-%                                clear(BWANDBWCT);
-                elseif strcmpi(sMinSUVformula, '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map')
-
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-                        dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    else
-                        sLesionType = 'Soft Tissue';
-
-%                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
-%                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
-
-                        dPercentMaxOrMaxSUVValue = (1.5*dLiverMean)+(2 * dLiverSTD);                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0; 
-
-                elseif strcmpi(sMinSUVformula, '(1.2 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 2, CT Bone Map')
-                    
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-                        dPercentMaxOrMaxSUVValue = 2;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    else
-                        sLesionType = 'Soft Tissue';
-
-%                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
-%                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
-
-                        dPercentMaxOrMaxSUVValue = (1.2*dLiverMean)+(2 * dLiverSTD);                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0; 
-                elseif strcmpi(sMinSUVformula, '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 2.5, CT Bone Map')
-                    
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-                        dPercentMaxOrMaxSUVValue = 2.5;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    else
-                        sLesionType = 'Soft Tissue';
-
-%                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
-%                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
-
-                        dPercentMaxOrMaxSUVValue = (1.5*dLiverMean)+(2 * dLiverSTD);                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0; 
-                elseif strcmpi(sMinSUVformula, '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Lymph Nodes & Bone SUV 2.5, CT Bone Map')
-                    
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-                        dPercentMaxOrMaxSUVValue = 2.5;                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    else
-                        sLesionType = 'Lymph Nodes';
-
-%                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
-%                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
-
-                        dPercentMaxOrMaxSUVValue = (1.5*dLiverMean)+(2 * dLiverSTD);                                
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-                    end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0; 
-                elseif strcmpi(sMinSUVformula, 'Lymph Nodes & Bone SUV, CT Bone Map')
-                    
-                    BWANDBWCT = BW2&BWCT2;
-
-                    dBWnbPixel        = numel(BW2(BW2~=0));
-                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-
-                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                        sLesionType = 'Bone';
-
-%                         dPercentMaxOrMaxSUVValue = dBoneThreshold;                                
-                        BW2(BW2*dSUVScale < dBoneThreshold) = dMinValue;
-                    else
-                        sLesionType = 'Lymph Nodes';
-
-%                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
-%                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
-
-                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
-%                        mask = (BW2 .* dSUVScale < dPercentMaxOrMaxSUVValue);
-%                        BW2(mask) = dMinValue;  
-
-                    end
-
-                    BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0;                     
                 else
-                    return;
+                    aProcAxial = aAxial;
+                    extraArgs  = {};
+                end
+
+                [maskAxial, ~, dNbSlicesElements] = bwboundaries( ...
+                    aProcAxial, 8, 'noholes', extraArgs{:} );
+
+                if bPixelEdge && bMATLABReleaseOlderThan2023b
+                    for k = 1:numel(maskAxial)
+                        maskAxial{k} = (maskAxial{k} + 1) / PIXEL_EDGE_RATIO;
+                        maskAxial{k} = reducepoly(maskAxial{k});
+                    end
+                end
+                % end optimized block 
+
+                for jj = 1:dNbSlicesElements
+                    if cancelCreateVoiRoiPanel('get'), break; end
+                    curMask   = maskAxial(jj);
+                    sTag      = num2str(generateUniqueNumber(false));
+                    aPosition = flip(curMask{1}, 2);
+                    if ~bPixelEdge
+                        aPosition = smoothRoi(aPosition, size(imMask));
+                    end
+
+                    sliceNumber('set','axial',dCurrentSlice);
+                    roiPtr = images.roi.Freehand(axes3Ptr('get',[],dSeriesOffset), ...
+                        'Smoothing',1, 'Position',aPosition, 'Color',aColor, ...
+                        'LineWidth',1, 'Label','', 'LabelVisible','off', ...
+                        'Tag',sTag, 'Visible','on', 'FaceSelectable',0, ...
+                        'FaceAlpha',roiFaceAlphaValue('get'),'Visible','off');
+                    if ~isempty(roiPtr.Waypoints(:))
+                        roiPtr.Waypoints(:) = false;
+                    end
+                    addRoi(roiPtr, dSeriesOffset, sLesionType);
+                    addRoiMenu(roiPtr);
+
+                    asTag{dTagOffset} = sTag;
+                    dTagOffset = dTagOffset + 1;
                 end
             end
-        end
-        
-         % asTag = [];
-         asTag = cell(5000, 1);
-        
-         dTagOffset=1;
 
-%         dTagOffset = 1;
-%         asTag = cell(1000, 1); % Reset ROIs tag
+            % Remove empty tags
+            asTag = asTag(~cellfun(@isempty, asTag));
 
-        xmin=0.5;
-        xmax=1;
-        aColor=xmin+rand(1,3)*(xmax-xmin);
-
-%                    dNbSlices = size(BW2, 3);
-
-        aPixelsList = gather(find(BW2));
-        if numel(aPixelsList) < dSmalestValueNbVoxels
-            continue;
-        end
-
-        [~,~,adSlices] = ind2sub(size(BW2), aPixelsList);
-        adSlices = unique(adSlices);                
-        
-        dNbComputedSlices = numel(adSlices);
-
-        for aa=1:dNbComputedSlices % Find ROI
-
-            if cancelCreateVoiRoiPanel('get') == true
-                break;
-            end
-
-            dCurrentSlice = adSlices(aa);
-
-            aAxial = gather(BW2(:,:,dCurrentSlice));
-
-            if bPixelEdge == true 
-
-                if bMATLABReleaseOlderThan2023b == true
-
-                    aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); 
-                    [maskAxial, ~, dNbSlicesElements]  = bwboundaries(aAxial, 8, 'noholes');                    
-                else
-                    [maskAxial, ~, dNbSlicesElements]  = bwboundaries(aAxial, 8, 'noholes', 'TraceStyle', 'pixeledge');                    
-                end
-            else
-                [maskAxial, ~, dNbSlicesElements]  = bwboundaries(aAxial, 8, 'noholes');                    
-            end
-            
-             
-%             dSlicesNbElements = numel(maskAxial);
-            
-            for jj=1:dNbSlicesElements
-
-                if cancelCreateVoiRoiPanel('get') == true
-
-                    break;
-                end
-
-                if bPixelEdge == true && bMATLABReleaseOlderThan2023b == true
-
-                    maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;    
-                    maskAxial{jj} = reducepoly(maskAxial{jj});
-                end   
-
-                curentMask = maskAxial(jj);
-
-
-%                                    sliceNumber('set', 'axial', aa);
-
-                sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-
-                aPosition = flip(curentMask{1}, 2);
-%                                    aPosition(:,1) = aPosition(:,1) - 0.5;
-%                                    aPosition(:,2) = aPosition(:,2) + 0.5;
-
-%                                    bAddRoi = true;
-
-                if bPixelEdge == false
-            
-                    aPosition = smoothRoi(aPosition, size(imMask));
-                end
-
-                sliceNumber('set', 'axial', dCurrentSlice);
-                
-                roiPtr = images.roi.Freehand(axes3Ptr('get', [], dSeriesOffset), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'), 'Visible', 'off');
-
-                if ~isempty(roiPtr.Waypoints(:))
-                    
-                    roiPtr.Waypoints(:) = false;    
-                end
-
-                addRoi(roiPtr, dSeriesOffset, sLesionType);
-
-                addRoiMenu(roiPtr);
-
-                % addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
-                % addlistener(roiPtr, 'WaypointRemoved', @waypointEvents);  
-
-                % voiDefaultMenu(roiPtr);
-                % 
-                % roiDefaultMenu(roiPtr);
-                % 
-                % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-                % uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
-                % 
-                % constraintMenu(roiPtr);
-                % 
-                % cropMenu(roiPtr);
-                % 
-                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
-                % 
-%                        addContourToTemplate(dSeriesOffset, 'Axes3', dCurrentSlice, 'images.roi.freehand', aPosition, '', 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, sLesionType);
-
-                % asTag{numel(asTag)+1} = sTag;
-
-                asTag{dTagOffset} = sTag;
-                dTagOffset = dTagOffset+1;
-
-%                 asTag{dTagOffset} = sTag;
-%                 dTagOffset=dTagOffset+1;
-                % if viewRoiPanel('get') == true
-                % 
-                %     drawnow limitrate;
-                % end
-
-            end              
-        end
-        
-%         asTag(cellfun(@isempty, asTag)) = [];
-        
-        asTag = asTag(~cellfun(@isempty, asTag));
-
-        if ~isempty(asTag)
-
-            if exist('sVOIName', 'var') 
-
-                if ~isempty(sVOIName)
+            % Create VOI grouping all ROIs
+            if ~isempty(asTag)
+                if exist('sVOIName','var') && ~isempty(sVOIName)
                     sLabel = sprintf('%s %d', sVOIName, bb);
                 else
-                    bUseBoneThreshold = false;
-                    if strcmpi(sLesionType, 'Bone') 
-                        if exist('dBoneThreshold', 'var')
-                            if ~isempty(dBoneThreshold)
-                                bUseBoneThreshold = true;
-                            end
-                        end
-                    end
-
-                    if bUseBoneThreshold == true
+                    bUseBoneThreshold = strcmpi(sLesionType,'Bone') && ...
+                                       exist('dBoneThreshold','var') && ~isempty(dBoneThreshold);
+                    if bUseBoneThreshold
                         sLabel = sprintf('RMAX-%.2f-VOI%d', dBoneThreshold, bb);
                     else
                         sLabel = sprintf('RMAX-%.2f-VOI%d', dPercentMaxOrMaxSUVValue, bb);
                     end
                 end
-            else
-                sLabel = sprintf('RMAX-%.2f-VOI%d', dPercentMaxOrMaxSUVValue, bb);
+                createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
             end
 
-            createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
-        end           
-    end
+        end  % end for bb
 
-    setVoiRoiSegPopup();
-    
-    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+        % Finalize display & cleanup
+        setVoiRoiSegPopup();
+        if size(dicomBuffer('get',[],dSeriesOffset),3) ~= 1
+            plotRotatedRoiOnMip(axesMipPtr('get',[],dSeriesOffset), ...
+                dicomBuffer('get',[],dSeriesOffset), mipAngle('get'));
+        end
+        progressBar(1, 'Ready');
 
-        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
-    end
-
-    progressBar(1, 'Ready');
-
-    catch
+    catch ME
+        logErrorToFile(ME);
         progressBar(1, 'Error:maskAddVoiToSeries()');
     end
-    
-    if viewRoiPanel('get') == true
 
+    % Re-enable ROI UI controls
+    if viewRoiPanel('get')
         if ~isempty(voiTemplate('get', dSeriesOffset))
-            
-            set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on'); 
-            set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');   
-            set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
-            set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
-            set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
-            set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
+            set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable','on');
+            set(uiDeleteVoiRoiPanelObject   ('get'), 'Enable','on');
+            set(uiAddVoiRoiPanelObject      ('get'), 'Enable','on');
+            set(uiPrevVoiRoiPanelObject     ('get'), 'Enable','on');
+            set(uiDelVoiRoiPanelObject      ('get'), 'Enable','on');
+            set(uiNextVoiRoiPanelObject     ('get'), 'Enable','on');
+            set(uiUndoVoiRoiPanelObject     ('get'), 'Enable','on');
         end
-    
         cancelCreateVoiRoiPanel('set', false);
-    
-        set(uiCreateVoiRoiPanel, 'String', 'Segment');        
-        set(uiCreateVoiRoiPanel, 'Background', [0.6300 0.6300 0.4000]);
-        set(uiCreateVoiRoiPanel, 'Foreground', [0.1 0.1 0.1]); 
+        set(uiCreateVoiRoiPanel, 'String','Segment', ...
+            'Background',[0.6300 0.6300 0.4000], ...
+            'Foreground',[0.1 0.1 0.1]);
     end
 
-    clear BW2;
-    clear BWCT2; 
-    clear BWANDBWCT; 
-    
-    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    clear BW2 BWCT2 BWANDBWCT;
+    set(fiMainWindowPtr('get'), 'Pointer','default');
     drawnow limitrate;
+    
 end

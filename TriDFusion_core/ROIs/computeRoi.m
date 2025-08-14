@@ -1,5 +1,6 @@
-function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, ~, bMovementApplied)  
-%function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, ~, bMovementApplied
+function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bMovementApplied, transM)  
+%function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bMovementApplied, transM)
+%
 %Compute ROI values from ROI object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -35,27 +36,30 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
      xScale = 1;
      yScale = 1;  
      zScale = 1;
-            
+     
     if bModifiedMatrix  == false && ... 
-       bMovementApplied == false        % Can't use input buffer if movement have been applied
-               
-        if numel(imInput) ~= numel(imRoi)
-            pTemp{1} = ptrRoi;
-            [ptrRoiTemp, transM] = resampleROIs(imRoi, atRoiMetaData, imInput, atInputMetaData, pTemp, false);
-            ptrRoi = ptrRoiTemp{1};
-            
+       bMovementApplied == false && ...     
+       bSegmented       == false 
+
+        if ~isequal(size(imInput), size(imRoi))            
+            % pTemp{1} = ptrRoi;
+            % [ptrRoiTemp, atVoi, transM] = resampleROIs(imRoi, atRoiMetaData, imInput, atInputMetaData, pTemp, false, atVoi, dSeriesOffset);
+            % ptrRoi = ptrRoiTemp{1};
+            % 
+
             if ~strcmpi(ptrRoi.Axe, 'axe')
+
                 xScale = transM(2,2);
                 yScale = transM(1,1);  
                 zScale = transM(3,3);             
             end
         end
-        
+
         imRoi  = imInput;
 
         atRoiMetaData = atInputMetaData;    
     end
-    
+
     if isfield(ptrRoi, 'MaxDistances')
         
         tRoiComputed.MaxDistances = ptrRoi.MaxDistances;
@@ -87,18 +91,25 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
             return;
      end
     
-     if strcmpi(ptrRoi.Type, 'images.roi.line')
-        mask = createMask(ptrRoi.Object, imCData);         
-     else
+     % if strcmpi(ptrRoi.Type, 'images.roi.line')
+     %    mask = createMask(ptrRoi.Object, imCData);         
+     % else
         mask = roiTemplateToMask(ptrRoi, imCData);      
-     end
+     % end
 
     imCData = double(imCData(mask));
     
     if bSegmented  == true && ...      
        bModifiedMatrix == true % Can't use original buffer   
    
-        imCData = imCData(imCData>cropValue('get'));                            
+        imCDataOriginal = imCData;                            
+        imCData = imCData(imCData>cropValue('get'));     
+
+        tRoiComputed.removedCells = numel(imCDataOriginal) - numel(imCData);
+
+        clear imCDataOriginal;
+
+        nbRemovedVoxels = tRoiComputed.removedCells;                     
     end
     
 %    if numel(imCData) == 0
@@ -204,14 +215,40 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
             case 'axe'
                 tRoiComputed.area = nbVoxels * xPixel * yPixel;
 
+                if bSegmented      == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    tRoiComputed.removedArea = nbRemovedVoxels * xPixel * yPixel;
+                end
+
             case 'axes1'
                 tRoiComputed.area = nbVoxels * xPixel * zPixel;
 
+                if bSegmented      == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    tRoiComputed.removedArea = nbRemovedVoxels * xPixel * zPixel;
+                end
+
             case 'axes2'
+
                 tRoiComputed.area = nbVoxels * yPixel * zPixel;
 
+                if bSegmented      == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    tRoiComputed.removedArea = nbRemovedVoxels * yPixel * zPixel;
+                end
+
             case 'axes3'
+
                 tRoiComputed.area = nbVoxels * xPixel * yPixel;
+
+                if bSegmented      == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    tRoiComputed.removedArea = nbRemovedVoxels * xPixel * yPixel;
+                end
 
             otherwise   
                 tRoiComputed.area = []; 
@@ -250,6 +287,7 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
             tRoiComputed.peak = [];   
         end
 
+
         nbVoxels  = tRoiComputed.cells;
         volMean   = tRoiComputed.mean;                    
         tRoiComputed.total = voxVolume * nbVoxels * volMean;
@@ -259,16 +297,44 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
         switch lower(ptrRoi.Axe)    
 
             case 'axe'
+
                 tRoiComputed.area = nbVoxels * xPixel * yPixel;
+
+                if bSegmented      == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    tRoiComputed.removedArea = nbRemovedVoxels * xPixel * yPixel;
+                end
 
             case 'axes1'
+
                 tRoiComputed.area = nbVoxels * xPixel * zPixel;
 
+                if bSegmented      == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    tRoiComputed.removedArea = nbRemovedVoxels * xPixel * zPixel;
+                end
+
             case 'axes2'
+
                 tRoiComputed.area = nbVoxels * yPixel * zPixel;
 
+                if bSegmented      == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    tRoiComputed.removedArea = nbRemovedVoxels * yPixel * zPixel;
+                end
+
             case 'axes3'
+
                 tRoiComputed.area = nbVoxels * xPixel * yPixel;
+
+                if bSegmented      == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    tRoiComputed.removedArea = nbRemovedVoxels * xPixel * yPixel;
+                end
 
             otherwise   
                 tRoiComputed.area = []; 

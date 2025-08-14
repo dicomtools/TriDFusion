@@ -73,7 +73,8 @@ function writeSeriestoNIICallback(~, ~)
         try
             exportNIILastUsedDir = sOutDir;
             save(sMatFile, 'exportNIILastUsedDir');
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
         end
 
@@ -168,7 +169,8 @@ function writeSeriestoNIICallback(~, ~)
 
     progressBar(1, sprintf('Export to %s completed', char(sOutDir)));
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         progressBar(1, 'Error:writeDICOMtoNIICallback()');
     end
 

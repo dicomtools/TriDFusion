@@ -47,7 +47,7 @@ function initKernelPanel()
                   'String'  ,'Reset',...
                   'Position',[15 625 100 25],...
                   'FontWeight', 'bold',...
-                  'BackgroundColor', [0.2 0.039 0.027], ...
+                  'BackgroundColor', [0.3255, 0.1137, 0.1137], ...
                   'ForegroundColor', [0.94 0.94 0.94], ...
                   'Callback', @resetKernelCallback...
                   );
@@ -757,7 +757,8 @@ function initKernelPanel()
         imSagittal.CData = aSagittal;
         imAxial.CData    = aAxial;
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:previewCTdoseMapKernel()');
         end
 
@@ -1028,7 +1029,7 @@ function initKernelPanel()
                    'Name', sPlotKernelFigureName,...
                    'NumberTitle','off',...
                    'MenuBar', 'none',...
-                   'Resize', 'on', ...
+                   'Resize', 'off', ...
                    'Color', viewerBackgroundColor('get'), ...
                    'Toolbar','none'...
                    );
@@ -1045,11 +1046,12 @@ function initKernelPanel()
                  'ZColor'  , viewerForegroundColor('get'),...
                  'Visible' , 'on'...
                  );
-        axePlotKernelDistance.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axePlotKernelDistance.Toolbar = [];
+        axePlotKernelDistance.Interactions = [];
+        disableDefaultInteractivity(axePlotKernelDistance);
+        delete(axePlotKernelDistance.Toolbar);
 
         pDistancePlot = plot(axePlotKernelDistance, aDistance, log10(aDoseR2./aDistance.^2));
-        set(pDistancePlot, 'Color', 'cyan');
+        set(pDistancePlot, 'Color', [0.0000, 0.9608, 0.8275]);
 %        set(axePlotKernelDistance,'XDir','Reverse');
 %        set(axePlotKernelDistance,'YDir','Reverse');
 
@@ -1196,9 +1198,13 @@ function initKernelPanel()
 
             setColorbarLabel();
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error: An error occur during kernel processing!');
-            msgbox('Error: doseKernelCallback(): An error occur during kernel processing!', 'Error');
+
+            f = msgbox('Error: doseKernelCallback(): An error occur during kernel processing!', 'Error');
+            setObjectIcon(f);
+
 %            if integrateToBrowser('get') == true
 %                sLogo = './TriDFusion/logo.png';
 %            else
@@ -1354,7 +1360,8 @@ function initKernelPanel()
         clear aActivity;
         clear aBuffer;
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:setDoseKernel()');
         end
 
@@ -1378,7 +1385,8 @@ function initKernelPanel()
 
         progressBar(1, 'Ready');
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:resetKernelCallback()');
         end
 

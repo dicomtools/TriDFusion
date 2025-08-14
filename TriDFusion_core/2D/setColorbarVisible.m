@@ -27,7 +27,10 @@ function setColorbarVisible(sVisible)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    set(uiColorbarPtr('get'), 'visible', sVisible);
+    ptrColorbar = uiColorbarPtr('get');
+
+    set(ptrColorbar, 'visible', sVisible);
+    set(ptrColorbar.Parent, 'visible', sVisible);
 
     set(lineColorbarIntensityMaxPtr('get'), 'visible', sVisible);
     set(lineColorbarIntensityMinPtr('get'), 'visible', sVisible);

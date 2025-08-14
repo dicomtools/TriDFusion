@@ -97,7 +97,8 @@ else
     aPosition(:,1) = aSmoothedX(:);
     aPosition(:,2) = aSmoothedY(:);    
 end
-catch
+catch ME
+    logErrorToFile(ME);  
 end
 
 end

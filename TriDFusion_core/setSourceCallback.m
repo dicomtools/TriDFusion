@@ -51,36 +51,38 @@ function setSourceCallback(~, ~)
 
         % sTmpDir = sprintf('%stemp_nii_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         % mkdir(sTmpDir);
-        % 
+        %
         % for i = 1:length(sMainDir)
-        % 
+        %
         %     [~, folderName, ~] = fileparts(sMainDir{i});  % Extract folder name
         %     zipFileName = fullfile(sTmpDir, [folderName '.zip']);  % Target zip file path
         %     zip(zipFileName, sMainDir{i});
         %     unzip(zipFileName, sTmpDir);
-        %     delete(zipFileName);    
-        % 
+        %     delete(zipFileName);
+        %
         %     % Split the path by backslashes
         %     folderParts = strsplit(sMainDir{i}, filesep);
-        % 
+        %
         %     % Extract the last part, which is the full folder name
         %     lastFolderName = folderParts{end};
-        % 
+        %
         %     sMainDir{i} = fullfile(sTmpDir, lastFolderName);
         % end
-        % 
+        %
         roiConstraintList('reset'); % Delete all masks
-       
-         % Deactivate main tool bar 
-        set(uiSeriesPtr('get'), 'Enable', 'off');                        
-        mainToolBarEnable('off');       
-        
+
+         % Deactivate main tool bar
+        set(uiSeriesPtr('get'), 'Enable', 'off');
+        mainToolBarEnable('off');
+
         sMainDir{1} = [sMainDir{1} '/'];
 
         try
             openLastUsedDir = sMainDir{1};
             save(sMatFile, 'openLastUsedDir');
-        catch
+
+        catch ME
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
 %            h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %            if integrateToBrowser('get') == true
@@ -100,25 +102,25 @@ function setSourceCallback(~, ~)
             if isPathNetwork(sMainDir{1})
 
                 progressBar((1/1)-0.00001, 'Parsing folder, please wait');
-                
+
                 sTmpDir = sprintf('%stemp_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
-                mkdir(sTmpDir);         
+                mkdir(sTmpDir);
 
                 if ispc
 
                     cmd = sprintf('robocopy "%s" "%s" /MIR /R:0 /W:0 /MT:32 /Z /NFL /NDL /NC /NS /NP > nul 2>&1',sMainDir{1}, sTmpDir);
                     system(cmd);
-                                        
+
                 elseif isunix
 
                     rsyncCmd = sprintf('rsync -a "%s/" "%s/"', sMainDir{1}, sTmpDir);
-                    system(rsyncCmd); % Execute the rsync command                  
+                    system(rsyncCmd); % Execute the rsync command
                 else
-                    copyfile(sMainDir{1}, sTmpDir, 'f'); % Fallback for non-Unix systems                   
+                    copyfile(sMainDir{1}, sTmpDir, 'f'); % Fallback for non-Unix systems
                 end
 
                 sMainDir{1} = sTmpDir;
-                
+
             end
         end
 
@@ -149,19 +151,19 @@ function setSourceCallback(~, ~)
         end
 
         if(numel(mainDir('get')))
-            
-            % Restore ISOsurface default value. Those value will be use in
-            % setIsoSurfaceCallback(~, ~). 
 
-            isoColorOffset        ('set', defaultIsoColorOffset('get') ); 
-            isoSurfaceValue       ('set', defaultIsoSurfaceValue('get')); 
-            isoColorFusionOffset  ('set', defaultIsoColorFusionOffset('get')); 
+            % Restore ISOsurface default value. Those value will be use in
+            % setIsoSurfaceCallback(~, ~).
+
+            isoColorOffset        ('set', defaultIsoColorOffset('get') );
+            isoSurfaceValue       ('set', defaultIsoSurfaceValue('get'));
+            isoColorFusionOffset  ('set', defaultIsoColorFusionOffset('get'));
             isoSurfaceFusionValue ('set', defaultIsoSurfaceFusionValue('get'));
-        
+
             if isFusion('get') == true % Deactivate fusion
                  setFusionCallback();
             end
-            
+
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
 
@@ -172,12 +174,13 @@ function setSourceCallback(~, ~)
             releaseRoiWait();
 
             isFusion('set', false);
-            
+
             outputDir('set', '');
 
             inputTemplate('set', '');
             inputBuffer('set', '');
             inputContours('set', '');
+            inputAnnotations('set', '');
 
             quantificationTemplate('reset');
 
@@ -192,6 +195,7 @@ function setSourceCallback(~, ~)
             initFusionWindowLevel ('set', true);
             roiTemplate('reset');
             voiTemplate('reset');
+            plotEditTemplate('reset');
 
             getMipAlphaMap('set', '', 'auto');
             getVolAlphaMap('set', '', 'auto');
@@ -355,11 +359,11 @@ function setSourceCallback(~, ~)
                 mRecord.State = 'off';
           %      recordIconMenuObject('set', '');
             end
-            
-            isoMaskCtSerieOffset ('set', 1);    
+
+            isoMaskCtSerieOffset ('set', 1);
             kernelCtSerieOffset  ('set', 1);
             mipFusionBufferOffset('set', 1);
-    
+
             multiFrame3DPlayback('set', false);
             multiFrame3DRecord  ('set', false);
             multiFrame3DIndex   ('set', 1);
@@ -371,7 +375,7 @@ function setSourceCallback(~, ~)
             multiFrameZoom    ('set', 'in' , 1);
             multiFrameZoom    ('set', 'out', 1);
             multiFrameZoom    ('set', 'axe', []);
-            
+
             isPlotContours('set', false);
 
             clearDisplay();
@@ -386,8 +390,9 @@ function setSourceCallback(~, ~)
             isVsplash('set', false);
             set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnVsplashPtr('get'), 'FontWeight', 'normal');
-   
+            % set(btnVsplashPtr('get'), 'FontWeight', 'normal');
+            set(btnVsplashPtr('get'), 'CData', resizeTopBarIcon('splash_grey.png'));
+
             asMainDirectory = mainDir('get');
 
             registrationReport('set', '');
@@ -404,32 +409,41 @@ function setSourceCallback(~, ~)
 
                 rotate3d(fiMainWindowPtr('get'), 'off');
 
+                isFusion('set', false);
                 set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
                 set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-                set(btnFusionPtr('get'), 'FontWeight', 'normal');
+                % set(btnFusionPtr('get'), 'FontWeight', 'normal');
+                set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));
 
+                switchTo3DMode('set', false);
                 set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
                 set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-                set(btn3DPtr('get'), 'FontWeight', 'normal');
-
+                % set(btn3DPtr('get'), 'FontWeight', 'normal');
+                set(btn3DPtr('get'), 'CData', resizeTopBarIcon('3d_volume_grey.png'));
+              
+                switchToIsoSurface('set', false);
                 set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
                 set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-                set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
-
+                % set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+                set(btnIsoSurfacePtr('get'), 'CData', resizeTopBarIcon('3d_iso_grey.png'));
+        
+                switchToMIPMode('set', false);
                 set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
                 set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-                set(btnMIPPtr('get'), 'FontWeight', 'normal');
+                % set(btnMIPPtr('get'), 'FontWeight', 'normal');
+                set(btnMIPPtr('get'), 'CData', resizeTopBarIcon('3d_mip_grey.png'));
 
                 set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
                 set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-                set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+                % set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+                set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));
 
                 imageOrientation('set', 'axial');
 
                 [atInput, asSeriesDescription] = initInputTemplate(asFilesList, atDicomInfo, aDicomBuffer);
 
                 inputTemplate('set', atInput);
-           
+
                 if numel(inputTemplate('get')) ~= 0
 
                     seriesDescription('set', asSeriesDescription);
@@ -449,20 +463,20 @@ function setSourceCallback(~, ~)
                 setInputOrientation([]);
 
                 setDisplayBuffer([]);
-    
+
                 if numel(inputTemplate('get')) ~= 0
-                    for dTemplateLoop = 1 : numel(inputTemplate('get'))       
+                    for dTemplateLoop = 1 : numel(inputTemplate('get'))
                         setQuantification(dTemplateLoop);
                     end
                 end
 
                 atInput = inputTemplate('get');
-     
+
                 dicomMetaData('set', atInput(1).atDicomInfo);
 
                 aInputBuffer = inputBuffer('get');
 
-                dicomBuffer('set', aInputBuffer{1});    
+                dicomBuffer('set', aInputBuffer{1});
 
                 for mm=1:numel(aInputBuffer)
 
@@ -482,37 +496,45 @@ function setSourceCallback(~, ~)
                 link2DMip('set', true);
 
                 set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-                set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
-                set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
-                    
+                set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+                % set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
+                set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_white.png'));
+
                 dicomViewerCore();
 
                 setContours();
+                setAnnotations();
 
                 setViewerDefaultColor(true, dicomMetaData('get'));
-                
+
                 refreshImages();
-               
+
+                % drawnow;
+                % drawnow;
+                %
+                % hideAllAxesToolbars(fiMainWindowPtr('get'));
+
 %                atMetaData = dicomMetaData('get');
 
 %                if strcmpi(atMetaData{1}.Modality, 'ct')
 %                    link2DMip('set', false);
 
 %                    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-%                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));       
-%                end    
+%                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+%                end
 
-        
+
                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 || ... % 3D image
-                   size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1        % Multi-frame screen capture 
+                   size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1        % Multi-frame screen capture
                     setPlaybackToolbar('on');
                 end
 
-                setRoiToolbar('on'); 
-                
-                % Reactivate main tool bar 
-                set(uiSeriesPtr('get'), 'Enable', 'on');                        
-                mainToolBarEnable('on');    
+                setRoiToolbar('on');
+                setPlotEditToolbar('on');
+
+                % Reactivate main tool bar
+                set(uiSeriesPtr('get'), 'Enable', 'on');
+                mainToolBarEnable('on');
             else
                 progressBar(1 , 'Error: TriDFusion: no volumes detected!');
                 h = msgbox('Error: TriDFusion: no volumes detected!', 'Error');

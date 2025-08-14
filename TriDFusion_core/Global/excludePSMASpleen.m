@@ -1,6 +1,6 @@
 function bRemove = excludePSMASpleen(sAction, bValue)
 %function bRemove = excludePSMASpleen(sAction, bValue)
-%Get/Set PSMA segmentation remove small bowel.
+%Get/Set PSMA segmentation remove spleen.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

@@ -27,8 +27,27 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-    atRoiVoiMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+    atInput = inputTemplate('get');
+
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    atRoiInput       = roiTemplate('get', dSeriesOffset);
+    atVoiInput       = voiTemplate('get', dSeriesOffset);
+    atRoiVoiMetaData = dicomMetaData('get', [], dSeriesOffset);
+    aDisplayBuffer   = dicomBuffer('get', [], dSeriesOffset);
+    
+    bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
+
+    if bModifiedMatrix  == false && ... 
+       bSegmented       == false && ...
+       bMovementApplied == false % Can't use input buffer if movement have been applied
+
+        if numel(aInputBuffer) ~= ...
+           numel(aDisplayBuffer)
+
+            [atRoiInput, atVoiInput] = resampleROIs(aDisplayBuffer, atRoiVoiMetaData, aInputBuffer, atInputMetaData, atRoiInput, false, atVoiInput, dSeriesOffset);
+        end
+    end
 
     tQuant = quantificationTemplate('get');
     if isfield(tQuant, 'tSUV')
@@ -53,8 +72,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
     FIG_HIST_Y = ySize*0.75;
     FIG_HIST_X = FIG_HIST_Y*0.85;
 
-    % if viewerUIFigure('get') == true
-    if 0
+    if viewerUIFigure('get') == true
 
         figRoiHistogramWindow = ...
             uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_HIST_X/2) ...
@@ -79,6 +97,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                    'Toolbar','none'...
                    );
     end
+
+    setObjectIcon(figRoiHistogramWindow);
 
     setHistFigureName();
 
@@ -144,8 +164,9 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'on'...
              );
-    axeHistogram.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeHistogram.Toolbar.Visible = 'off';
+    axeHistogram.Interactions = [];
+    % axeHistogram.Toolbar.Visible = 'off';
+    deleteAxesToolbar(axeHistogram);
     disableDefaultInteractivity(axeHistogram);
 
     sliBins = ...
@@ -193,8 +214,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
     if histogramMenuOption('get') == true
 
         imCData = computeHistogram(aInputBuffer, ...
-                                   atInputMetaData, ...
-                                   dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                   aDisplayBuffer, ...
                                    atRoiVoiMetaData, ...
                                    ptrObject, ...
                                    atRoiInput, ...
@@ -202,7 +222,6 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                    bSUVUnit, ...
                                    bModifiedMatrix, ...
                                    bSegmented, ...
-                                   bDoseKernel, ...
                                    bMovementApplied);
 
         ptrHist = histogram(axeHistogram, ...
@@ -214,7 +233,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
         axeHistogram.XColor = viewerForegroundColor('get');
         axeHistogram.YColor = viewerForegroundColor('get');
         axeHistogram.ZColor = viewerForegroundColor('get');
-        axeHistogram.Toolbar.Visible = 'off';
+        % axeHistogram.Toolbar.VisibaxeHistogramle = 'off';
+        disableAxesToolbar(axeHistogram);
         disableDefaultInteractivity(axeHistogram);
 
         if bDoseKernel == true
@@ -259,8 +279,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
     elseif cummulativeMenuOption('get') == true
 
         imCData = computeHistogram(aInputBuffer, ...
-                                   atInputMetaData, ...
-                                   dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                   aDisplayBuffer, ...
                                    atRoiVoiMetaData, ...
                                    ptrObject, ...
                                    atRoiInput, ...
@@ -268,7 +287,6 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                    bSUVUnit, ...
                                    bModifiedMatrix, ...
                                    bSegmented, ...
-                                   bDoseKernel, ...
                                    bMovementApplied);
 
         set(edtBinsValue, 'String', num2str(dInitialBarWidth));
@@ -288,7 +306,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
   %          set(axeHistogram, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
   %          set(axeHistogram, 'YLim', [0 1]);
-        catch
+        catch ME 
+            logErrorToFile(ME); 
             ptrPlotCummulative = '';
         end
 
@@ -302,7 +321,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
         axeHistogram.XColor = viewerForegroundColor('get');
         axeHistogram.YColor = viewerForegroundColor('get');
         axeHistogram.ZColor = viewerForegroundColor('get');
-        axeHistogram.Toolbar.Visible = 'off';
+        % axeHistogram.Toolbar.Visible = 'off';
+        disableAxesToolbar(axeHistogram);
         disableDefaultInteractivity(axeHistogram);
 
         if bDoseKernel == true
@@ -350,13 +370,19 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
         set(sliBins, 'Value', 0);
 
         imCData = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
-        if bModifiedMatrix  == false && ...
+        if bModifiedMatrix  == false && ... 
+           bSegmented       == false && ...
            bMovementApplied == false        % Can't use input buffer if movement have been applied
 
-            if numel(aInputBuffer) ~= numel(imCData)
-                pTemp{1} = ptrObject;
-                ptrRoiTemp = resampleROIs(imCData, atRoiVoiMetaData, aInputBuffer, atInputMetaData, pTemp, false);
-                ptrObject = ptrRoiTemp{1};
+            % if numel(aInputBuffer) ~= numel(imCData)
+            %     pTemp{1} = ptrObject;
+            %     ptrRoiTemp = resampleROIs(imCData, atRoiVoiMetaData, aInputBuffer, atInputMetaData, pTemp, false);
+            %     ptrObject = ptrRoiTemp{1};
+            % end
+
+            idx = find(cellfun(@(s) strcmp(s.Tag, ptrObject.Tag), atRoiInput), 1);
+            if ~isempty(idx)
+                ptrObject = atRoiInput{idx}; 
             end
 
             imCData = aInputBuffer;
@@ -412,7 +438,9 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
         axeHistogram.XColor = viewerForegroundColor('get');
         axeHistogram.YColor = viewerForegroundColor('get');
         axeHistogram.ZColor = viewerForegroundColor('get');
-        axeHistogram.Toolbar.Visible = 'off';
+        % axeHistogram.Toolbar.Visible = 'off';
+        % delete(axeHistogram.Toolbar);
+        disableAxesToolbar(axeHistogram);
         disableDefaultInteractivity(axeHistogram);
 
         axeHistogram.XLabel.String = 'Cells';
@@ -454,7 +482,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
     dcmObject = datacursormode(figRoiHistogramWindow);
     set(dcmObject, 'Enable', 'on');
 
-    catch
+    catch ME 
+        logErrorToFile(ME); 
         progressBar(1, 'Error:figRoiHistogram()');
     end
 
@@ -552,25 +581,19 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
     function copyHistogramDisplayCallback(~, ~)
 
-        try
-
+        try        
             set(figRoiHistogramWindow, 'Pointer', 'watch');
-
-%            rdr = get(hFig,'Renderer');
-            inv = get(figRoiHistogramWindow,'InvertHardCopy');
-
-%            set(hFig,'Renderer','Painters');
-            set(figRoiHistogramWindow,'InvertHardCopy','Off');
-
             drawnow;
-            hgexport(figRoiHistogramWindow,'-clipboard');
 
-%            set(hFig,'Renderer',rdr);
-            set(figRoiHistogramWindow,'InvertHardCopy',inv);
-        catch
+            copyFigureToClipboard(figRoiHistogramWindow);
+
+        catch ME 
+            logErrorToFile(ME); 
+            progressBar(1, 'Error:copyHistogramDisplayCallback()');
         end
 
         set(figRoiHistogramWindow, 'Pointer', 'default');
+        drawnow;
     end
 
     function histogramTypeCallback(hObject, ~)
@@ -616,7 +639,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
       %          set(axeHistogram, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
       %          set(axeHistogram, 'YLim', [0 1]);
-            catch
+            catch ME 
+                logErrorToFile(ME); 
                 ptrPlotCummulative = '';
             end
 
@@ -631,7 +655,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             axeHistogram.XColor = viewerForegroundColor('get');
             axeHistogram.YColor = viewerForegroundColor('get');
             axeHistogram.ZColor = viewerForegroundColor('get');
-            axeHistogram.Toolbar.Visible = 'off';
+            % axeHistogram.Toolbar.Visible = 'off';
+            disableAxesToolbar(axeHistogram);
             disableDefaultInteractivity(axeHistogram);
 
             if bDoseKernel == true
@@ -793,13 +818,20 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             set(txtBins, 'String', 'Bar Width');
 
             imCData = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
-            if bModifiedMatrix  == false && ...
-               bMovementApplied == false        % Can't use input buffer if movement have been applied
 
-                if numel(aInputBuffer) ~= numel(imCData)
-                    pTemp{1} = ptrObject;
-                    ptrRoiTemp = resampleROIs(imCData, atRoiVoiMetaData, aInputBuffer, atInputMetaData, pTemp, false);
-                    ptrObject = ptrRoiTemp{1};
+            if bModifiedMatrix  == false && ... 
+               bSegmented       == false && ...
+               bMovementApplied == false       % Can't use input buffer if movement have been applied
+
+                % if numel(aInputBuffer) ~= numel(imCData)
+                %     pTemp{1} = ptrObject;
+                %     ptrRoiTemp = resampleROIs(imCData, atRoiVoiMetaData, aInputBuffer, atInputMetaData, pTemp, false);
+                %     ptrObject = ptrRoiTemp{1};
+                % end
+
+                idx = find(cellfun(@(s) strcmp(s.Tag, ptrObject.Tag), atRoiInput), 1);
+                if ~isempty(idx)
+                    ptrObject = atRoiInput{idx}; 
                 end
 
                 imCData = aInputBuffer;
@@ -855,7 +887,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             axeHistogram.XColor = viewerForegroundColor('get');
             axeHistogram.YColor = viewerForegroundColor('get');
             axeHistogram.ZColor = viewerForegroundColor('get');
-            axeHistogram.Toolbar.Visible = 'off';
+            % axeHistogram.Toolbar.Visible = 'off';
+            disableAxesToolbar(axeHistogram);
             disableDefaultInteractivity(axeHistogram);
 
             axeHistogram.XLabel.String = 'Cells';
@@ -896,7 +929,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
         setHistFigureName();
 
-        catch
+        catch ME 
+            logErrorToFile(ME); 
             progressBar(1, 'Error:histogramTypeCallback()');
         end
 
@@ -960,7 +994,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
            cummulativeMenuOption('get') == true || ...
            profileMenuOption('get')     == true
 
-            tInput = inputTemplate('get');
+            atInput = inputTemplate('get');
 
             dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
@@ -988,42 +1022,58 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
             aInput = inputBuffer('get');
             if     strcmpi(imageOrientation('get'), 'axial')
-                aInputBuffer = aInput{iOffset};
+                aInputBuffer = aInput{dSeriesOffset};
             elseif strcmpi(imageOrientation('get'), 'coronal')
-                aInputBuffer = reorientBuffer(aInput{iOffset}, 'coronal');
+                aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'coronal');
             elseif strcmpi(imageOrientation('get'), 'sagittal')
-                aInputBuffer = reorientBuffer(aInput{iOffset}, 'sagittal');
+                aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'sagittal');
             end
 
             if size(aInputBuffer, 3) ==1
 
-                if tInput(iOffset).bFlipLeftRight == true
-                    aInputBuffer=aInputBuffer(:,end:-1:1);
+                if atInput(dSeriesOffset).bFlipLeftRight == true
+                    aInputBuffer = aInputBuffer(:,end:-1:1);
                 end
 
-                if tInput(iOffset).bFlipAntPost == true
-                    aInputBuffer=aInputBuffer(end:-1:1,:);
+                if atInput(dSeriesOffset).bFlipAntPost == true
+                    aInputBuffer = aInputBuffer(end:-1:1,:);
                 end
             else
-                if tInput(iOffset).bFlipLeftRight == true
-                    aInputBuffer=aInputBuffer(:,end:-1:1,:);
+                if atInput(dSeriesOffset).bFlipLeftRight == true
+                    aInputBuffer = aInputBuffer(:,end:-1:1,:);
                 end
 
-                if tInput(iOffset).bFlipAntPost == true
-                    aInputBuffer=aInputBuffer(end:-1:1,:,:);
+                if atInput(dSeriesOffset).bFlipAntPost == true
+                    aInputBuffer = aInputBuffer(end:-1:1,:,:);
                 end
 
-                if tInput(iOffset).bFlipHeadFeet == true
-                    aInputBuffer=aInputBuffer(:,:,end:-1:1);
+                if atInput(dSeriesOffset).bFlipHeadFeet == true
+                    aInputBuffer = aInputBuffer(:,:,end:-1:1);
                 end
             end
 
-            atInputMetaData = tInput(iOffset).atDicomInfo;
+            atInputMetaData = atInput(dSeriesOffset).atDicomInfo;
+
+            bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
+    
+            transM = eye(3);
+    
+            if bModifiedMatrix  == false && ... 
+               bMovementApplied == false && ...     
+               bSegmented       == false        % Can't use input buffer if movement have been applied
+       
+                if numel(aInputBuffer) ~= ...
+                   numel(aDisplayBuffer)
+    
+                    [atRoiInput, atVoiInput, transM] = resampleROIs(aDisplayBuffer, atMetaData, aInputBuffer, atInputMetaData, atRoiInput, false, atVoiInput, dSeriesOffset);
+                end
+            end
 
             try
                 matlab.io.internal.getExcelInstance;
                 bExcelInstance = true;
             catch exception
+                logErrorToFile(exception);                 
     %            warning(message('MATLAB:xlswrite:NoCOMServer'));
                 bExcelInstance = false;
             end
@@ -1078,7 +1128,9 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                 try
                     saveHistLastUsedDir = [path '/'];
                     save(sMatFile, 'saveHistLastUsedDir');
-                catch
+
+                catch ME 
+                    logErrorToFile(ME); 
                     progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
 %                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                    if integrateToBrowser('get') == true
@@ -1232,7 +1284,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                     dLineOffset = dLineOffset+1;
 
-                    bMovementApplied = tInput(iOffset).tMovement.bMovementApplied;
+                    bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
 
                     dNbVois = numel(atVoiInput);
 
@@ -1261,8 +1313,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                bSUVUnit, ...
                                                bModifiedMatrix, ...
                                                bSegmented, ...
-                                               bDoseKernel, ...
-                                               bMovementApplied);
+                                               bMovementApplied, ...
+                                               transM);
 
                                 if ~isempty(tVoiComputed)
 
@@ -1367,7 +1419,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                     dLineOffset = dLineOffset+1;
 
-                    bMovementApplied = tInput(iOffset).tMovement.bMovementApplied;
+                    bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
 
                     dNbVois = numel(atVoiInput);
 
@@ -1387,7 +1439,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                                         atRoiInput{ro}.MaxDistances = tMaxDistances;
 
-                                        roiTemplate('set', dSeriesOffset, atRoiInput);
+                                        % roiTemplate('set', dSeriesOffset, atRoiInput);
                                    end
                                 end
                             end
@@ -1416,8 +1468,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                    bSUVUnit, ...
                                                    bModifiedMatrix, ...
                                                    bSegmented, ...
-                                                   bDoseKernel, ...
-                                                   bMovementApplied);
+                                                   bMovementApplied, ...
+                                                   transM);
 
                                     if ~isempty(tVoiComputed)
 
@@ -1559,7 +1611,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                                                 atRoiInput{bb}.MaxDistances = tMaxDistances;
 
-                                                roiTemplate('set', dSeriesOffset, atRoiInput);
+                                                % roiTemplate('set', dSeriesOffset, atRoiInput);
                                            end
                                         end
 
@@ -1573,8 +1625,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                        bSUVUnit, ...
                                                        bModifiedMatrix, ...
                                                        bSegmented, ...
-                                                       bDoseKernel, ...
-                                                       bMovementApplied);
+                                                       bMovementApplied, ...
+                                                       transM);
 
                                         sRoiName = atRoiInput{bb}.Label;
 
@@ -1825,7 +1877,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                 progressBar(1, sprintf('Write %s%s completed', path, file));
 
-                catch
+                catch ME 
+                    logErrorToFile(ME); 
                     progressBar(1, 'Error: exportCurrentHistogramCallback()');
                 end
 

@@ -33,7 +33,7 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, atRoiInput, asConstraintT
     %     aLogicalMask = zeros(size(aImage));
     % end
     
-    aLogicalMask = false(size(aImage));
+    aLogicalMask = zeros(size(aImage));
 
     if size(aImage, 3) == 1 % 2D image
         
@@ -98,7 +98,7 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, atRoiInput, asConstraintT
 
                                 aSlice = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]); 
 
-                                aLogicalMask(dd,:,:) = aLogicalMask(dd,:,:)+aSlice; % Add to final mask                                        
+                                aLogicalMask(dd,:,:) = aLogicalMask(dd,:,:) + aSlice; % Add to final mask                                        
                             end
 
                          else

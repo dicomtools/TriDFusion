@@ -26,6 +26,7 @@ function multiFrame3D(mPlay)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+    persistent t
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
@@ -33,51 +34,37 @@ function multiFrame3D(mPlay)
         
         progressBar(1, 'Error: Require a 3D Volume!');  
         multiFrame3DPlayback('set', false);
-        mPlay.State = 'off';
+
+        icon = get(mPlay, 'UserData');
+        set(mPlay, 'CData', icon.default);
+
+        % Cleanup existing timer if it exists
+        if ~isempty(t) && isvalid(t)
+            stop(t); delete(t);
+            t = [];
+        end
         return;
     end 
 
-    ptrViewer3d = viewer3dObject('get');
+    % ptrViewer3d = viewer3dObject('get');
 
     if ~isempty(viewer3dObject('get'))
 
-        idxOffset = multiFrame3DIndex('get');
-         
-        sz = size(dicomBuffer('get', [], dSeriesOffset));
-        center = sz/2 + 0.5;
-
-        % set(ptrViewer3d, 'CameraTarget', center);
-
-        numberOfFrames = 120;
-        vec = linspace(0,2*pi,numberOfFrames)';
-        dist = sqrt(sz(1)^2 + sz(2)^2 + sz(3)^2);
-        myPosition = center + ([cos(vec) sin(vec) ones(size(vec))]*dist);
-
-        while multiFrame3DPlayback('get')           
-           
-            for idx = 1:120
-    
-                if ~multiFrame3DPlayback('get')
-                    multiFrame3DIndex('set', idxOffset);
-    
-                    break;
+        if multiFrame3DPlayback('get')
+            
+            % If timer exists but speed changed, restart it
+            if ~isempty(t) && isvalid(t)
+                if t.Period ~= multiFrame3DSpeed('get')
+                    stop(t); delete(t);
+                    t = createViewerTimer();
+                    start(t);
                 end
-
-                aPosition = myPosition(idxOffset,:);
-
-                set(ptrViewer3d, 'CameraPosition', aPosition);
-
-                % drawnow;
-                
-                idxOffset = idxOffset+1;
-    
-                if idxOffset >= 120
-                    idxOffset =1;
-                end
-    
-                pause(multiFrame3DSpeed('get'));  
-
+            else
+                t = createViewerTimer();
+                start(t);
             end
+        else
+            cleanupTimer();
         end
         
     else
@@ -208,4 +195,44 @@ function multiFrame3D(mPlay)
     
         end
     end
+
+    function cleanupTimer()
+        if ~isempty(t) && isvalid(t)
+            stop(t); delete(t);
+            t = [];
+        end
+    end
+
+    function t = createViewerTimer()
+        % Initialize index
+        idxOffset = multiFrame3DIndex('get');
+        t = timer( ...
+            'Name',          'multiFrame3DViewer', ...
+            'ExecutionMode', 'fixedRate', ...
+            'Period',        multiFrame3DSpeed('get'), ...
+            'TimerFcn',      @onViewerTick);
+    end
+
+    function onViewerTick(~, ~)
+        % Stop if turned off
+        if ~multiFrame3DPlayback('get')
+            multiFrame3DIndex('set', idxOffset);
+            cleanupTimer();
+            return;
+        end
+
+        % Advance index (wrap at 120)
+        idxOffset = idxOffset + 1;
+        if idxOffset > 120
+            idxOffset = 1;
+        end
+        multiFrame3DIndex('set', idxOffset);
+
+        % Compute the view angle
+        degreeAngle = ((idxOffset - 1) / (119)) * 359 + 1;
+
+        % Update the 3D viewer
+        set3DView(viewer3dObject('get'), degreeAngle, 1);
+    end
+
 end

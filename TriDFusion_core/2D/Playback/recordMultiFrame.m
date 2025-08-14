@@ -1,5 +1,5 @@
-function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
-%function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
+function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
+%function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
 %Record 2D Frames.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -36,7 +36,10 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
         progressBar(1, 'Error: Require a 3D Volume!');
 
         multiFrameRecord('set', false);
-        mRecord.State = 'off';
+
+        icon = get(mRecord, 'UserData');
+        set(mRecord, 'CData', icon.default);
+
         set(uiSeriesPtr('get'), 'Enable', 'on');
 
         return;
@@ -60,27 +63,32 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
         end
     end
 
-    if viewerUIFigure('get') == true
-        setFigureToobarsVisible('off');
+    % if viewerUIFigure('get') == true
+    %     setFigureToobarsVisible('off');
+    % 
+    %     setFigureTopMenuVisible('off');
+    % end
 
-        setFigureTopMenuVisible('off');
-    end
+    chkUiCorWindowSelected = chkUiCorWindowSelectedPtr('get');
+    chkUiSagWindowSelected = chkUiSagWindowSelectedPtr('get');
+    chkUiTraWindowSelected = chkUiTraWindowSelectedPtr('get');
+    chkUiMipWindowSelected = chkUiMipWindowSelectedPtr('get');
 
-    if (pAxe == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
+    if get(chkUiCorWindowSelected, 'Value') == true || ...
        (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))
         
         dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 1);
         dCurrentSlice = sliceNumber('get', 'coronal');
         aAxe = axes1Ptr('get', [], dSeriesOffset);
 
-    elseif (pAxe == axes2Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
+    elseif get(chkUiSagWindowSelected, 'Value') == true || ...
            (isVsplash('get') == true && strcmpi(vSplahView('get'), 'sagittal'))
             
         dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 2);
         dCurrentSlice = sliceNumber('get', 'sagittal');
         aAxe = axes2Ptr('get', [], dSeriesOffset);
 
-    elseif (pAxe == axes3Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
+    elseif get(chkUiTraWindowSelected, 'Value') == true || ...
            (isVsplash('get') == true && strcmpi(vSplahView('get'), 'axial'))
         
         dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);
@@ -93,32 +101,29 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
         aAxe = axesMipPtr('get', [], dSeriesOffset);       
     end
 
+    set(chkUiCorWindowSelected, 'Visible', 'off');
+    set(chkUiSagWindowSelected, 'Visible', 'off');
+    set(chkUiTraWindowSelected, 'Visible', 'off');
+    set(chkUiMipWindowSelected, 'Visible', 'off');
+
     set(uiSliderSagPtr('get'), 'Visible', 'off');
     set(uiSliderCorPtr('get'), 'Visible', 'off');
     set(uiSliderTraPtr('get'), 'Visible', 'off');
     set(uiSliderMipPtr('get'), 'Visible', 'off');
     
-    if isVsplash('get') == false                       
-                
-        if aAxe == axes1Ptr('get', [], dSeriesOffset)
+    % Check if Vsplash is inactive
 
-            logoObj = logoObject('get');
-
-            if ~isempty(logoObj)
-
-                delete(logoObj);
-                logoObject('set', '');
-            end
-        end
-    else
+    if ~isVsplash('get')
 
         logoObj = logoObject('get');
+
+        % If the logo object exists, delete it and reset the reference
 
         if ~isempty(logoObj)
 
             delete(logoObj);
             logoObject('set', '');
-        end        
+        end
     end
 
     % Colorbar 
@@ -138,6 +143,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
     set(textColorbarIntensityMinPtr('get'), 'Visible', 'off');
 
     set(uiColorbarPtr('get'), 'Visible', 'off');
+    set(uiColorbarPtr('get').Parent, 'Visible', 'off');
 
     if isFusion('get')
 
@@ -158,9 +164,10 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
 
         set(uiAlphaSliderPtr('get')   , 'Visible', 'off');
         set(uiFusionColorbarPtr('get'), 'Visible', 'off');
+        set(uiFusionColorbarPtr('get').Parent, 'Visible', 'off');
     end
 
-    % Overlay text
+   % Overlay text
 
     if overlayActivate('get') == true
 
@@ -275,25 +282,58 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
 
     end
 
-    sLogo = sprintf('%s\n', 'TriDFusion (3DF)');  
+    if isVsplash('get') == false
 
-    tLogo    = text(aAxe, 0.02, 0.03, sLogo, 'Units','normalized');
-    tOverlay = text(aAxe, 0.02, 0.97, ''   , 'Units','normalized');
+        btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+        if ~isempty(btnUiCorWindowFullScreen)
+
+            btnUiCorWindowFullScreen.Visible = 'off';
+        end
+
+        btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+        if ~isempty(btnUiSagWindowFullScreen)
+        
+            btnUiSagWindowFullScreen.Visible = 'off';
+        end
+
+        btnUiTraWindowFullScreen = btnUiTraWindowFullScreenPtr('get');
+        if ~isempty(btnUiTraWindowFullScreen)
+     
+            btnUiTraWindowFullScreen.Visible = 'off';
+        end
+
+        btnUiMipWindowFullScreen = btnUiMipWindowFullScreenPtr('get');
+        if ~isempty(btnUiMipWindowFullScreen)
+    
+            btnUiMipWindowFullScreen.Visible = 'off';
+        end
+
+    end
+
+    % sLogo = sprintf('%s\n', 'TriDFusion (3DF)');  
+    % 
+    % pLogo    = text(aAxe, 0.02, 0.03, sLogo, 'Units','normalized');
+
+    pLogo = displayLogo(aAxe);
+
+    txtOverlay = text(aAxe, 0.02, 0.97, ''   , 'Units','normalized');
 
     if any(aAxe.Parent.BackgroundColor) % Not black
-        set(tLogo   , 'Color', [0.1500 0.1500 0.1500]);
-        set(tOverlay, 'Color', [0.1500 0.1500 0.1500]);
+        % set(pLogo   , 'Color', [0.1500 0.1500 0.1500]);
+        setLogoColor(pLogo, [0.1500 0.1500 0.1500]);
+        set(txtOverlay, 'Color', [0.1500 0.1500 0.1500]);
     else
-        set(tLogo   , 'Color', [0.8500 0.8500 0.8500]);
-        set(tOverlay, 'Color', [0.8500 0.8500 0.8500]);        
+        % set(pLogo   , 'Color', [0.8500 0.8500 0.8500]);
+        setLogoColor(pLogo, [0.8500 0.8500 0.8500]);
+        set(txtOverlay, 'Color', [0.8500 0.8500 0.8500]);        
     end
 
     if overlayActivate('get') == false
 
-        set(tOverlay, 'Visible', 'off');
+        set(txtOverlay, 'Visible', 'off');
     end
 
-    iSavedCurrentSlice = dCurrentSlice;
+    % iSavedCurrentSlice = dCurrentSlice;
 
     if strcmpi('*.avi', sExtention) || ...
        strcmpi('avi'  , sExtention) || ...
@@ -322,6 +362,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
     for idx = 1:dLastSlice
 
         if ~multiFrameRecord('get')
+
             break;
         end
 
@@ -337,7 +378,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
                 sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
             end
 
-            set(uiSliderCorPtr('get'), 'Value', dCurrentSlice/dLastSlice);
+            set(uiSliderCorPtr('get'), 'Value', dCurrentSlice);
 
             sliderCorCallback();
 
@@ -353,7 +394,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
                 sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
             end
 
-            set(uiSliderSagPtr('get'), 'Value', dCurrentSlice/dLastSlice);
+            set(uiSliderSagPtr('get'), 'Value', dCurrentSlice);
 
             sliderSagCallback();
 
@@ -369,7 +410,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
                 sSliceNb = sprintf('\n%s/%s', num2str(1+dLastSlice-dCurrentSlice), num2str(dLastSlice));
             end
 
-            set(uiSliderTraPtr('get'), 'Value', 1-(dCurrentSlice/dLastSlice));
+            set(uiSliderTraPtr('get'), 'Value', dLastSlice-dCurrentSlice+1);
 
             sliderTraCallback();
 
@@ -377,14 +418,14 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
             % mipAngle('set', dCurrentSlice);           
             sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
 
-            set(uiSliderMipPtr('get'), 'Value', dCurrentSlice/32);
+            set(uiSliderMipPtr('get'), 'Value', dCurrentSlice);
 
             sliderMipCallback();
 
             % plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), dCurrentSlice);       
         end
 
-        set(tOverlay, 'String', sSliceNb);
+        set(txtOverlay, 'String', sSliceNb);
 
         % windowButton('set', 'scrool');
         % 
@@ -403,8 +444,35 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
             end
         end
 
-        I = getframe(aAxe);
-        [indI,cm] = rgb2ind(I.cdata, 256);
+        if viewerUIFigure('get') == true || ...
+           ~isMATLABReleaseOlderThan('R2025a')
+
+            I = getObjectFrame(aAxe);
+        else
+
+            I = getframe(aAxe);
+            I = I.cdata;
+        end
+
+        if strcmpi('*.avi', sExtention) || ...
+           strcmpi('avi'  , sExtention) || ...
+           strcmpi('*.mp4', sExtention) || ...
+           strcmpi('mp4'  , sExtention) || ...   
+           strcmpi('*.gif', sExtention) || ...
+           strcmpi('gif'  , sExtention) 
+
+            if idx == 1 % We can't write different image size.
+                
+                aFirstImageSize = size(I);
+            else
+                if ~isequal(size(I), aFirstImageSize)
+    
+                    I = imresize3(I, aFirstImageSize);
+                end
+            end
+        end
+
+        [indI, cm] = rgb2ind(I, 256); % Convert to indexed image   
 
         if idx == 1
 
@@ -551,37 +619,21 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
         close(tClassVideoWriter);
     end
 
-    catch
+    catch ME   
+        logErrorToFile(ME);
         bWriteSucceed = false;
         progressBar(1, sprintf('Error: recordMultiFrame()'));
     end
-
-    if viewerUIFigure('get') == true
-
-        setFigureToobarsVisible('on');
-    
-        setFigureTopMenuVisible('on');
-    end
-
-    % if     aAxe == axes1Ptr('get', [], dSeriesOffset)
-    % 
-    %     sliceNumber('set', 'coronal', iSavedCurrentSlice);
-    % 
-    % elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
-    % 
-    %     sliceNumber('set', 'sagittal', iSavedCurrentSlice);
-    % 
-    % elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
-    % 
-    %     sliceNumber('set', 'axial', iSavedCurrentSlice);
-    % else
-    %     mipAngle('set', iSavedCurrentSlice);           
-    % end
 
     set(uiSliderSagPtr('get'), 'Visible', 'on');
     set(uiSliderCorPtr('get'), 'Visible', 'on');
     set(uiSliderTraPtr('get'), 'Visible', 'on');
     set(uiSliderMipPtr('get'), 'Visible', 'on');
+
+    set(chkUiCorWindowSelected, 'Visible', 'on');
+    set(chkUiSagWindowSelected, 'Visible', 'on');
+    set(chkUiTraWindowSelected, 'Visible', 'on');
+    set(chkUiMipWindowSelected, 'Visible', 'on');
 
     % Colorbar
     
@@ -592,6 +644,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
     set(textColorbarIntensityMinPtr('get'), 'Visible', sTextColorbarIntensityMinPtrVisible);
 
     set(uiColorbarPtr('get'), 'Visible', sUiColorbarPtrVisible);
+    set(uiColorbarPtr('get').Parent, 'Visible', sUiColorbarPtrVisible);
 
     if isFusion('get')
 
@@ -606,7 +659,8 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
 
         set(uiAlphaSliderPtr('get')   , 'Visible', sAlphaSliderPtrVisible);
         set(uiFusionColorbarPtr('get'), 'Visible', sFusionColorbarPtrVisible);
-    end
+        set(uiFusionColorbarPtr('get').Parent, 'Visible', sFusionColorbarPtrVisible);
+   end
 
     if overlayActivate('get')
         
@@ -710,37 +764,13 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
         end
     end
 
-    delete(tLogo);
+    delete(pLogo);
     
-    delete(tOverlay);
+    delete(txtOverlay);
     
-    if isVsplash('get') == false                       
-
-        if aAxe == axes1Ptr('get', [], dSeriesOffset)
-            uiLogo = displayLogo(uiCorWindowPtr('get'));
-            logoObject('set', uiLogo);
-        end
-    else
+    if isVsplash('get') == false         
         
-        if strcmpi(vSplahView('get'), 'coronal')  
-
-            uiLogo = displayLogo(uiCorWindowPtr('get'));
-            
-        elseif strcmpi(vSplahView('get'), 'sagittal')                                                
-
-            uiLogo = displayLogo(uiSagWindowPtr('get'));
-            
-        elseif  strcmpi(vSplahView('get'), 'axial')                             
-
-            uiLogo = displayLogo(uiTraWindowPtr('get'));
-            
-        elseif strcmpi(vSplahView('get'), 'all')                                 
-
-            uiLogo = displayLogo(uiCorWindowPtr('get'));
-            
-        else            
-            uiLogo = displayLogo(uiCorWindowPtr('get'));
-        end
+        uiLogo = displayLogo(uiCorWindowPtr('get'));        
         
         logoObject('set', uiLogo);
     end

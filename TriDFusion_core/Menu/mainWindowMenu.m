@@ -31,21 +31,23 @@ function mainWindowMenu()
     SPECT_RECON = true;
 
     mFile = uimenu(fiMainWindowPtr('get'),'Label','File');
-    uimenu(mFile,'Label', 'Open...'                         ,'Callback', @setSourceCallback);
-    uimenu(mFile,'Label', 'Import .raw file...'             ,'Callback', @importRawCallback);
-    uimenu(mFile,'Label', 'Import .stl file...'             ,'Callback', @importSTLCallback);
-    uimenu(mFile,'Label', 'Import .nii file...'             ,'Callback', @importNIICallback);
-    uimenu(mFile,'Label', 'Import .nrrd file...'            ,'Callback', @importNrrdCallback);
-    uimenu(mFile,'Label', 'Import .nii contours mask...'    ,'Callback', @importNIIMaskCallback, 'Separator','on');
-    uimenu(mFile,'Label', 'Import .nrrd contours mask...'   ,'Callback', @importNrrdMaskCallback);
-    uimenu(mFile,'Label', 'Import DICOM contours mask...'   ,'Callback', @importDicomdMaskCallback);
-    uimenu(mFile,'Label', 'Import DICOM RT-structure...'    ,'Callback', @importContoursCallback);
-    uimenu(mFile,'Label', 'Import CERR planC...'            ,'Callback', @importCerrPlanCCallback, 'Separator','on');
-    uimenu(mFile,'Label', 'Import CERR Dose Volume...'      ,'Callback', @importCerrDoseVolumeCallback);
-    uimenu(mFile,'Label', 'Import CERR Dose Constraint...'  ,'Callback', @importCerrDoseConstraintCallback);
-    uimenu(mFile,'Label', 'Import Dose Kernel...'           ,'Callback', @importDoseKernelCallback, 'Separator','on');
-    uimenu(mFile,'Label', 'Import Dose Radionuclide...'     ,'Callback', @importDoseRadionuclideCallback);
-    uimenu(mFile,'Label', 'Import Dose Material...'         ,'Callback', @importDoseMaterialCallback);
+    uimenu(mFile,'Label', 'Open...'                          ,'Callback', @setSourceCallback);
+    uimenu(mFile,'Label', 'Import .raw file...'              ,'Callback', @importRawCallback);
+    uimenu(mFile,'Label', 'Import .stl file...'              ,'Callback', @importSTLCallback);
+    uimenu(mFile,'Label', 'Import .nii file...'              ,'Callback', @importNIICallback);
+    uimenu(mFile,'Label', 'Import .nrrd file...'             ,'Callback', @importNrrdCallback);
+    uimenu(mFile,'Label', 'Import .np file...'               ,'Callback', @importNpCallback);
+    uimenu(mFile,'Label', 'Import .nii contours mask...'     ,'Callback', @importNIIMaskCallback, 'Separator','on');
+    uimenu(mFile,'Label', 'Import .nrrd contours mask...'    ,'Callback', @importNrrdMaskCallback);
+    uimenu(mFile,'Label', 'Import DICOM contours mask...'    ,'Callback', @importDicomdMaskCallback);
+    uimenu(mFile,'Label', 'Import DICOM RT-structure...'     ,'Callback', @importContoursCallback);
+    uimenu(mFile,'Label', 'Import DICOM Annotations...'      ,'Callback', @importPlotEditCallback);
+    uimenu(mFile,'Label', 'Import CERR planC...'             ,'Callback', @importCerrPlanCCallback, 'Separator','on');
+    uimenu(mFile,'Label', 'Import CERR Dose Volume...'       ,'Callback', @importCerrDoseVolumeCallback);
+    uimenu(mFile,'Label', 'Import CERR Dose Constraint...'   ,'Callback', @importCerrDoseConstraintCallback);
+    uimenu(mFile,'Label', 'Import Dose Kernel...'            ,'Callback', @importDoseKernelCallback, 'Separator','on');
+    uimenu(mFile,'Label', 'Import Dose Radionuclide...'      ,'Callback', @importDoseRadionuclideCallback);
+    uimenu(mFile,'Label', 'Import Dose Material...'          ,'Callback', @importDoseMaterialCallback);
 
     uimenu(mFile,'Label', 'Export to DICOM...'              ,'Callback', @writeDICOMCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export to DICOM all series...'   ,'Callback', @writeDICOMAllSeriesCallback);
@@ -55,10 +57,11 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Export Contours to .nii mask...'   ,'Callback', @writeRoisToNiiMaskCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export Contours to .nrrd mask...'  ,'Callback', @writeRoisToNrrdMaskCallback);
     uimenu(mFile,'Label', 'Export Contours to DICOM mask...'  ,'Callback', @writeRoisToDicomMaskCallback);
-    uimenu(mFile,'Label', 'Export Contours to RT-structure...','Callback', @writeRTStructCallback);
+    uimenu(mFile,'Label', 'Export Contours to DICOM RT-structure...','Callback', @writeRTStructCallback);
+    uimenu(mFile,'Label', 'Export Annotations to DICOM...'    ,'Callback', @writePlotEditCallback);
     uimenu(mFile,'Label', 'Export 3D ISO model to .stl...'    ,'Callback', @exportISOtoSTLCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export 3D rendering to slices...'  ,'Callback', @export3DToSlicesCallback);
-
+    
     uimenu(mFile,'Label', 'Print Preview...','Callback', 'filemenufcn(gcbf,''FilePrintPreview'')', 'Separator','on');
     uimenu(mFile,'Label', 'Print...','Callback', 'printdlg(gcbf)');
     uimenu(mFile,'Label', 'Exit' ,'Callback', @closeFigureCallback, 'Separator','on');
@@ -67,7 +70,7 @@ function mainWindowMenu()
     uimenu(mEdit,'Label', 'Copy Display'   , 'Callback', @copyDisplayCallback);
     uimenu(mEdit,'Label', 'Patient Dose...', 'Callback', @setPatientDoseCallback, 'Separator','on');
 
-    mOptions = uimenu(mEdit,'Label', 'Viewer Properties...', 'Callback', @setOptionsCallback);
+    mOptions = uimenu(mEdit,'Label', 'Viewer Options...', 'Callback', @setOptionsCallback);
     optionsPanelMenuObject('set', mOptions);
 
     mView = uimenu(fiMainWindowPtr('get'),'Label','View');
@@ -99,8 +102,9 @@ function mainWindowMenu()
         set(mVslashAll      , 'Checked', 'on');
     end
 
-    mViewCam  = uimenu(mView, 'Label','Camera Toolbar'   , 'Callback', @setViewToolbar, 'Separator','on');
-    mViewEdit = uimenu(mView, 'Label','Plot Edit Toolbar', 'Callback', @setViewToolbar);
+%    mViewCam  = uimenu(mView, 'Label','Camera Toolbar'   , 'Callback', @setViewToolbar, 'Separator','on');
+    mViewEdit = uimenu(mView, 'Label','Annotation Toolbar', 'Callback', @setViewToolbar, 'Separator','on');
+    viewPlotEditObject('set', mViewEdit);
 
     mViewRoi = uimenu(mView, 'Label','Contour Toolbar' , 'Callback', @setViewToolbar);
     viewRoiObject('set', mViewRoi);
@@ -108,29 +112,29 @@ function mainWindowMenu()
     mViewPlayback = uimenu(mView, 'Label','Playback Toolbar' , 'Callback', @setViewToolbar);
     viewPlaybackObject('set', mViewPlayback);
 
-    mViewSegPanel = uimenu(mView, 'Label','Image Panel' , 'Callback', @setViewSegPanel, 'Separator', 'on');
+    mViewSegPanel = uimenu(mView, 'Label','Image Panel (Alt + I)' , 'Callback', @setViewSegPanel, 'Separator', 'on');
     viewSegPanelMenuObject('set', mViewSegPanel);
 
-    mViewKernelPanel = uimenu(mView, 'Label','Kernel Panel', 'Callback', @setViewKernelPanel);
+    mViewKernelPanel = uimenu(mView, 'Label','Kernel Panel (Alt + K)', 'Callback', @setViewKernelPanel);
     viewKernelPanelMenuObject('set', mViewKernelPanel);
 
-    mViewRoiPanel = uimenu(mView, 'Label','Contour Panel', 'Callback', @setViewRoiPanel);
+    mViewRoiPanel = uimenu(mView, 'Label','Contour Panel (Alt + C)', 'Callback', @setViewRoiPanel);
     viewRoiPanelMenuObject('set', mViewRoiPanel);
 
     m3DPanel = uimenu(mView, 'Label','3D Panel', 'Callback', @setView3DPanel);
     view3DPanelMenuObject('set', m3DPanel);
 
     uimenu(mView, 'Label','Registration Report', 'Callback', @viewRegistrationReport, 'Separator','on');
-
-    mInsert = uimenu(fiMainWindowPtr('get'),'Label','Insert');
-    mEditPlot = uimenu(mInsert, 'Label','Plot Editor', 'Callback', @setInsertMenuCallback);
-    uimenu(mInsert, 'Label','Line'        , 'Callback', @setInsertMenuCallback, 'Separator','on');
-    uimenu(mInsert, 'Label','Arrow'       , 'Callback', @setInsertMenuCallback);
-    uimenu(mInsert, 'Label','Text Arrow'  , 'Callback', @setInsertMenuCallback);
-    uimenu(mInsert, 'Label','Double Arrow', 'Callback', @setInsertMenuCallback);
-    uimenu(mInsert, 'Label','Text Box'    , 'Callback', @setInsertMenuCallback);
-    uimenu(mInsert, 'Label','Rectangle'   , 'Callback', @setInsertMenuCallback);
-    uimenu(mInsert, 'Label','Ellipse'     , 'Callback', @setInsertMenuCallback);
+    % 
+    % mInsert = uimenu(fiMainWindowPtr('get'),'Label','Insert');
+    % mEditPlot = uimenu(mInsert, 'Label','Plot Editor', 'Callback', @setInsertMenuCallback);
+    % uimenu(mInsert, 'Label','Line'        , 'Callback', @setInsertMenuCallback, 'Separator','on');
+    % uimenu(mInsert, 'Label','Arrow'       , 'Callback', @setInsertMenuCallback);
+    % uimenu(mInsert, 'Label','Text Arrow'  , 'Callback', @setInsertMenuCallback);
+    % uimenu(mInsert, 'Label','Double Arrow', 'Callback', @setInsertMenuCallback);
+    % uimenu(mInsert, 'Label','Text Box'    , 'Callback', @setInsertMenuCallback);
+    % uimenu(mInsert, 'Label','Rectangle'   , 'Callback', @setInsertMenuCallback);
+    % uimenu(mInsert, 'Label','Ellipse'     , 'Callback', @setInsertMenuCallback);
 
     mTools = uimenu(fiMainWindowPtr('get'),'Label','Tools');
 %    mTotalSegmentation = uimenu(mTools, 'Label','Total Segmentation', 'Callback', @totalSegmentationCallback);
@@ -173,8 +177,9 @@ function mainWindowMenu()
     uimenu(mTools, 'Label','Registration'                  , 'Callback', @setRegistrationCallback, 'Separator','on');
     uimenu(mTools, 'Label','Mathematic'                    , 'Callback', @setMathCallback);
     uimenu(mTools, 'Label','Compute 2D MIP'                , 'Callback', @computeMIPCallback, 'Separator','on');
-    uimenu(mTools, 'Label','Create Planar from a 3D Series', 'Callback', @convertSeriesToPlanarCallback, 'Separator','on');
-    uimenu(mTools, 'Label','Dice Contours'                 , 'Callback', @diceContoursCallback, 'Separator','on');
+    uimenu(mTools, 'Label','Create Planar from a 3D Series', 'Callback', @convertSeriesToPlanarCallback);
+    uimenu(mTools, 'Label','Dice Contours'                 , 'Callback', @diceContoursCallback);
+    % uimenu(mTools, 'Label','Remove CT Table'               , 'Callback', @removeCTTableAdvancedCallback);
     uimenu(mTools, 'Label','Reset Series'                  , 'Callback', @resetSeriesCallback, 'Separator','on');
 
     % Workflows
@@ -190,6 +195,10 @@ function mainWindowMenu()
     uimenu(mAnalCancer, 'Label','Export Report...', 'Callback'                 , @setAnalCancerReportCallbackmMetastaticBreastCancer);
     uimenu(mAnalCancer, 'Label','Export Contours to RT-structure...','Callback', @writeRTStructCallback);
     uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback'                    , @setPETCTAnalCancerFusionCallback, 'Separator','on');
+
+    % HAI Pump
+    mHAIPump = uimenu(mWorkflows,'Label','HAI Liver Pump');
+    uimenu(mHAIPump, 'Label','Create Liver Tumor Zoning', 'Callback', @createLiverTumorZoningCallback);
 
     % Liver Ablation
 
@@ -211,6 +220,7 @@ function mainWindowMenu()
     mMetastaticBreastCancerThresholdFullAI = uimenu(mMetastaticBreastCancer,'Label','Machine Learning Segmentation');
     uimenu(mMetastaticBreastCancerThresholdFullAI, 'Label','Metastatic Breast Cancer Segmentation using NN-Unet PET Network (Full AI)'     , 'Callback', @setMachineLearningBreastCancerPETFullAICallback);
     uimenu(mMetastaticBreastCancerThresholdFullAI, 'Label','Metastatic Breast Cancer Segmentation using NN-Unet PET & CT Network (Full AI)', 'Callback', @setMachineLearningBreastCancerPETCTFullAICallback);
+    uimenu(mMetastaticBreastCancerThresholdFullAI, 'Label','VOI-Fat Metrics Analyzer for PET-CT (Full AI)'                                 , 'Callback', @setVOIFatMetricsAnalyzerForPETCTCallback);
 
     mMetastaticBreastCancerFullAIToolkit = uimenu(mMetastaticBreastCancerThresholdFullAI,'Label','AI Toolkit', 'Separator','on');
     uimenu(mMetastaticBreastCancerFullAIToolkit, 'Label','Export Metastatic Breast Cancer segmentation to NN-Unet PET Network'     , 'Callback', @setMachineLearningBreastCancerExportToPETNetworkCallback);
@@ -228,7 +238,7 @@ function mainWindowMenu()
 
     mLu177Threshold = uimenu(mLu177,'Label','Threshold-based Segmentation');
     uimenu(mLu177Threshold, 'Label','PSMA Lu177 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationLu177Callback);
-    uimenu(mLu177Threshold, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
+    % uimenu(mLu177Threshold, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
 
     mLu177FullAI = uimenu(mLu177,'Label','Machine Learning Segmentation');
     uimenu(mLu177FullAI, 'Label','PSMA Lu177 Segmentation using NN-Unet SPECT Network (Full AI)'     , 'Callback', @setMachineLearningPSMALu177SPECTFullAICallback);
@@ -240,18 +250,18 @@ function mainWindowMenu()
     uimenu(mLu177FullAIToolkit, 'Label','Export PSMA Lu177 segmentation to NN-Unet SPECT & CT Network', 'Callback', @setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback, 'Separator','on');
     uimenu(mLu177FullAIToolkit, 'Label','Pre-processing NN-Unet PSMA Lu177 SPECT & CT Network'        , 'Callback', @setMachineLearningPSMALu177DataPreProcessingSPECTCTCallback);
 
-    uimenu(mLu177, 'Label','PET/CT Fusion', 'Callback', @setPETCTLu177FusionCallback, 'Separator','on');
+    uimenu(mLu177, 'Label','SPECT/CT Fusion', 'Callback', @setPETCTLu177FusionCallback, 'Separator','on');
 
     % PSMA Ga68
 
     mPSMA = uimenu(mWorkflows,'Label','PSMA - Ga68');
 
     mPSMAThreshold = uimenu(mPSMA,'Label','Threshold-based Segmentation');    
-    uimenu(mPSMAThreshold, 'Label','PSMA Ga68 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationPSMACallback);
-    uimenu(mPSMAThreshold, 'Label','PSMA Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
+    uimenu(mPSMAThreshold, 'Label','PSMA Ga68 Tumor Segmentation (Threshold + AI)'  , 'Callback', @setSegmentationGa68Callback);
+    % uimenu(mPSMAThreshold, 'Label','PSMA Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
 
     mPSMAFullAI = uimenu(mPSMA,'Label','Machine Learning Segmentation');
-    uimenu(mPSMAFullAI, 'Label','PSMA Ga68 Segmentation using NN-Unet PET Network (Full AI)'     , 'Callback', @setMachineLearningPSMAGa68PETFullAICallback);
+    % uimenu(mPSMAFullAI, 'Label','PSMA Ga68 Segmentation using NN-Unet PET Network (Full AI)'     , 'Callback', @setMachineLearningPSMAGa68PETFullAICallback);
     uimenu(mPSMAFullAI, 'Label','PSMA Ga68 Segmentation using NN-Unet PET & CT Network (Full AI)', 'Callback', @setMachineLearningPSMAGa68PETCTFullAICallback);
 
     mPSMAFullAIToolkit = uimenu(mPSMAFullAI,'Label','AI Toolkit', 'Separator','on');
@@ -262,29 +272,41 @@ function mainWindowMenu()
 
     uimenu(mPSMA, 'Label','PET/CT Fusion', 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
 
+    % PSMA
+
+    mFDCFPyL = uimenu(mWorkflows,'Label','PSMA - 18F-FDCFPyL');
+    uimenu(mFDCFPyL, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationFDCFPyLCallback);
+    % uimenu(mPSMA, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
+    uimenu(mFDCFPyL, 'Label','PET/CT Fusion'                                       , 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
+
     % FDG
 
     mFDG = uimenu(mWorkflows,'Label','FDG - fluorodeoxyglucose');
     mFDGTumor = uimenu(mFDG,'Label','Tumor Segmentation');
     uimenu(mFDGTumor, 'Label','FDG Tumor Segmentation (SUV)'                      , 'Callback', @setSegmentationFDGSUVCallback);
     uimenu(mFDGTumor, 'Label','FDG Tumor Segmentation (Percent)'                  , 'Callback', @setSegmentationFDGPercentCallback);
-    uimenu(mFDGTumor, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback', @setMachineLearningFDGLymphNodeSUVCallback);
+    % uimenu(mFDGTumor, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback', @setMachineLearningFDGLymphNodeSUVCallback);
     uimenu(mFDGTumor, 'Label','PET/CT Fusion'                                     , 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
 
     mFDGBrownFat = uimenu(mFDG,'Label','Brown Fat Segmentation');
-    mFDGBrownFatThreshold = uimenu(mFDGBrownFat,'Label','Threshold + AI');
+    mFDGBrownFatThreshold = uimenu(mFDGBrownFat,'Label','Threshold-based');
     uimenu(mFDGBrownFatThreshold, 'Label','FDG BAT Segmentation (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVCallback);
 %     uimenu(mFDGBrownFatThreshold, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
     mFDGBrownFatFullAI = uimenu(mFDGBrownFat,'Label','Machine Learning');
-    uimenu(mFDGBrownFatFullAI, 'Label','FDG BAT Segmentation using NN-Unet PET Network (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
-%     uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET Segmentation, export DICOM-RT structure  (Full AI)'   , 'Callback', @setMachineLearningFDGBrownFatPETFullAIRT_structureCallback);
-    uimenu(mFDGBrownFatFullAI, 'Label','FDG BAT Segmentation using NN-Unet PET & CT Network (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatPETCTFullAICallback);
+    uimenu(mFDGBrownFatFullAI, 'Label','FDG BAT Segmentation using NN-Unet PET & CT Network (Full AI)', 'Callback', @setMachineLearningFDGBrownFatFullAICallback);
+    % uimenu(mFDGBrownFatFullAI, 'Label','FDG BAT Segmentation using NN-Unet PET Network (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
+% %     uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET Segmentation, export DICOM-RT structure  (Full AI)'   , 'Callback', @setMachineLearningFDGBrownFatPETFullAIRT_structureCallback);
+%    uimenu(mFDGBrownFatFullAI, 'Label','FDG BAT Segmentation using NN-Unet PET & CT Network (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatPETCTFullAICallback);
 %     uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET\CT Segmentation, export DICOM-RT structure  (Full AI)', 'Callback', @setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback);    
     mFDGBrownFatAiToolkit = uimenu(mFDGBrownFatFullAI,'Label','AI Toolkit', 'Separator','on');
-    uimenu(mFDGBrownFatAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET Network'     , 'Callback', @setMachineLearningFDGBrownFatExportToPETNetworkCallback);
-    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing NN-Unet BAT PET Network'             , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
-    uimenu(mFDGBrownFatAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
-    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing NN-Unet BAT PET & CT Network'        , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
+    % uimenu(mFDGBrownFatAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET Network'     , 'Callback', @setMachineLearningFDGBrownFatExportToPETNetworkCallback);
+    % uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing NN-Unet BAT PET Network'             , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
+    % uimenu(mFDGBrownFatAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
+    % uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing NN-Unet BAT PET & CT Network'        , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
+    uimenu(mFDGBrownFatAiToolkit,'Label', 'Import .nrrd contours brown fat mask...','Callback', @importNrrdBrownFatMaskCallback);
+    uimenu(mFDGBrownFatAiToolkit,'Label', 'Export contours to .nrrd brown fat mask...','Callback', @exportNrrdBrownFatMaskCallback);
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningFDGBATExportToNetworkCallback, 'Separator','on');
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing NN-Unet BAT PET & CT Network'        , 'Callback', @setMachineLearningFDGBATDataPreProcessingCallback);    
     uimenu(mFDGBrownFat, 'Label','PET/CT Fusion', 'Callback', @setPETCTBrownFatFusionCallback, 'Separator','on');
     
  
@@ -292,15 +314,9 @@ function mainWindowMenu()
 
     mFDHT = uimenu(mWorkflows,'Label','FDHT - fluorodihydrotestosterone');
     uimenu(mFDHT, 'Label','FDHT Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationFDHTCallback);
-    uimenu(mFDHT, 'Label','FDHT Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningFDHTCallback);
+    % uimenu(mFDHT, 'Label','FDHT Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningFDHTCallback);
     uimenu(mFDHT, 'Label','PET/CT Fusion'                           , 'Callback', @setPETCTFDHTFusionCallback, 'Separator','on');
 
-    % PSMA
-
-    mPSMA = uimenu(mWorkflows,'Label','PSMA - 18F-FDCFPyL');
-    uimenu(mPSMA, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationPSMACallback);
-    uimenu(mPSMA, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
-    uimenu(mPSMA, 'Label','PET/CT Fusion'                                       , 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
 
     % Ga68 DOTATATE
 
@@ -343,46 +359,57 @@ function mainWindowMenu()
     % PSMA Lu177
 
     mLu177 = uimenu(mMachineSegmentation,'Label','PSMA - Lu177');
-    uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
+    uimenu(mLu177, 'Label','PSMA Lu177 Segmentation using NN-Unet SPECT Network (Full AI)'     , 'Callback', @setMachineLearningPSMALu177SPECTFullAICallback);
+    uimenu(mLu177, 'Label','PSMA Lu177 Segmentation using NN-Unet SPECT & CT Network (Full AI)', 'Callback', @setMachineLearningPSMALu177SPECTCTFullAICallback);
+    
+    % uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
 
     % PSMA Ga68
 
     mPSMA = uimenu(mMachineSegmentation,'Label','PSMA - Ga68');
-    uimenu(mPSMA, 'Label','PSMA Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
+%    uimenu(mPSMA, 'Label','PSMA Ga68 Segmentation using NN-Unet PET Network (Full AI)'     , 'Callback', @setMachineLearningPSMAGa68PETFullAICallback);
+    uimenu(mPSMA, 'Label','PSMA Ga68 Segmentation using NN-Unet PET & CT Network (Full AI)', 'Callback', @setMachineLearningPSMAGa68PETCTFullAICallback);
+    
+    % uimenu(mPSMA, 'Label','PSMA Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
 
     % FDG
 
     mFDG = uimenu(mMachineSegmentation,'Label','FDG - fluorodeoxyglucose');
-    uimenu(mFDG, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback'                    , @setMachineLearningFDGLymphNodeSUVCallback);
-    uimenu(mFDG, 'Label','FDG BAT Segmentation (Threshold + AI)', 'Callback'                           , @setMachineLearningFDGBrownFatSUVCallback);
+    uimenu(mFDG, 'Label','FDG BAT Segmentation using NN-Unet PET & CT Network (Full AI)', 'Callback', @setMachineLearningFDGBrownFatFullAICallback);
+    
+    % uimenu(mFDG, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback', @setMachineLearningFDGLymphNodeSUVCallback);
+    % uimenu(mFDG, 'Label','FDG BAT Segmentation (Threshold + AI)', 'Callback'             , @setMachineLearningFDGBrownFatSUVCallback);
+    % uimenu(mFDG, 'Label','FDG BAT Segmentation using NN-Unet PET & CT Network (Full AI)' , 'Callback', @setMachineLearningFDGBrownFatFullAICallback);
 %     uimenu(mFDG, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)' , 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
-    uimenu(mFDG, 'Label','FDG BAT Segmentation using NN-Unet PET Network (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
+    % uimenu(mFDG, 'Label','FDG BAT Segmentation using NN-Unet PET Network (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
 %     uimenu(mFDG, 'Label','FDG Brown Fat PET Segmentation, export DICOM-RT structure  (Full AI)'   , 'Callback', @setMachineLearningFDGBrownFatPETFullAIRT_structureCallback);
-    uimenu(mFDG, 'Label','FDG BAT Segmentation using NN-Unet PET & CT Network (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatPETCTFullAICallback);
+    % uimenu(mFDG, 'Label','FDG BAT Segmentation using NN-Unet PET & CT Network (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatPETCTFullAICallback);
 %     uimenu(mFDG, 'Label','FDG Brown Fat PET\CT Segmentation, export DICOM-RT structure  (Full AI)', 'Callback', @setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback);
     mFDGmFDGAiToolkit = uimenu(mFDG,'Label','AI Toolkit', 'Separator','on');
-    uimenu(mFDGmFDGAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET Network'    , 'Callback', @setMachineLearningFDGBrownFatExportToPETNetworkCallback);
-    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing NN-Unet BAT PET Network'                 , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
-    uimenu(mFDGmFDGAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
-    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing NN-Unet BAT PET & CT Network'            , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
+    % uimenu(mFDGmFDGAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET Network'    , 'Callback', @setMachineLearningFDGBrownFatExportToPETNetworkCallback);
+    % uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing NN-Unet BAT PET Network'                 , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
+    % uimenu(mFDGmFDGAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
+    % uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing NN-Unet BAT PET & CT Network'            , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
+    uimenu(mFDGmFDGAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningFDGBATExportToNetworkCallback);
+    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing NN-Unet BAT PET & CT Network'        , 'Callback', @setMachineLearningFDGBATDataPreProcessingCallback);   
 
-    % FDHT
+    % % FDHT
+    % 
+    % mFDHT = uimenu(mMachineSegmentation,'Label','FDHT - fluorodihydrotestosterone');
+    % uimenu(mFDHT, 'Label','FDHT Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningFDHTCallback);
 
-    mFDHT = uimenu(mMachineSegmentation,'Label','FDHT - fluorodihydrotestosterone');
-    uimenu(mFDHT, 'Label','FDHT Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningFDHTCallback);
-
-    % PSMA
-
-    mPSMA = uimenu(mMachineSegmentation,'Label','PSMA - 18F-FDCFPyL');
-    uimenu(mPSMA, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
+    % % PSMA
+    % 
+    % mPSMA = uimenu(mMachineSegmentation,'Label','PSMA - 18F-FDCFPyL');
+    % uimenu(mPSMA, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
 
     % Ga68 DOTATATE
 
     if Ga68_DOTATATE
         mGa68DOTATATE = uimenu(mMachineSegmentation,'Label','DOTATATE - Ga68');
 
-        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
-        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation using ONNX Network(Full AI)'      , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);
+        % uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation using ONNX Network(Full AI)' , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);
     end
 
     mRadiomics = uimenu(mModules, 'Label','Radiomics');
@@ -400,64 +427,19 @@ function mainWindowMenu()
     function copyDisplayCallback(~, ~)
 
         try
-            hFig = fiMainWindowPtr('get');
+            fiMainWindow = fiMainWindowPtr('get');
 
-            set(hFig, 'Pointer', 'watch');
+            set(fiMainWindow, 'Pointer', 'watch');
             drawnow;
 
-            if viewerUIFigure('get') == true
+            copyFigureToClipboard(fiMainWindow);
 
-                try
-
-                % setFigureTopMenuVisible('off');
-                % setFigureToobarsVisible('off');
-                %
-                % resizeFigure();
-
-                aRGBImage = frame2im(getframe(hFig));
-
-                aFigPosition = get(hFig, 'Position');
-
-                axePdfReport = ...
-                   axes(hFig, ...
-                         'Units'   , 'pixels', ...
-                         'Position', [0 0 aFigPosition(3) aFigPosition(4)], ...
-                         'Color'   , 'none',...
-                         'Visible' , 'off'...
-                         );
-                axePdfReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axePdfReport.Toolbar.Visible = 'off';
-                disableDefaultInteractivity(axePdfReport);
-
-                image(axePdfReport, aRGBImage);
-                axePdfReport.Visible = 'off';
-
-                copygraphics(axePdfReport);
-
-                delete(axePdfReport);
-
-                catch
-                end
-                %
-                % setFigureTopMenuVisible('on');
-                % setFigureToobarsVisible('on');
-            else
-    %            rdr = get(hFig,'Renderer');
-                inv = get(hFig,'InvertHardCopy');
-
-    %            set(hFig,'Renderer','Painters');
-                set(hFig,'InvertHardCopy','Off');
-
-                hgexport(hFig,'-clipboard');
-
-    %            set(hFig,'Renderer',rdr);
-                set(hFig,'InvertHardCopy',inv);
-            end
-        catch
-            progressBar(1, 'Error:copyDisplayCallback()');
+        catch ME
+            logErrorToFile(ME);
+            progressBar(1, 'Error: copyDisplayCallback()');
         end
 
-        set(hFig, 'Pointer', 'default');
+        set(fiMainWindow, 'Pointer', 'default');
         drawnow;
 
     end
@@ -744,8 +726,9 @@ function mainWindowMenu()
                 refreshImages();
             end
 
-            catch
-                progressBar(1, 'Error:setOrientationCallback()');
+            catch ME
+                logErrorToFile(ME);
+                progressBar(1, 'Error: setOrientationCallback()');
             end
 
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
@@ -770,7 +753,7 @@ function mainWindowMenu()
 
             dColorMapOffset = colorMapOffset('get');
 
-            if isFusion('get')
+            if isFusion('get') == true
 
                 dFusionWindowLevelMax = fusionWindowLevel('get', 'max');
                 dFusionWindowLevelMin = fusionWindowLevel('get', 'min');
@@ -794,7 +777,10 @@ function mainWindowMenu()
 
                 setColorbarVisible('on');
 
-                setFusionColorbarVisible('on');
+                if isFusion('get') == true
+
+                    setFusionColorbarVisible('on');
+                end
 
             elseif strcmpi(get(hObject, 'Label'), 'V-Splash Coronal') && ...
               ~strcmpi(vSplahView('get'), 'coronal')
@@ -874,7 +860,7 @@ function mainWindowMenu()
 
                 ptrColorbar = uiColorbarPtr('get');
                 if ~isempty(ptrColorbar)
-                    set(ptrColorbar, 'Color',  dOverlayColor);
+                    set(ptrColorbar.Parent, 'YColor',  dOverlayColor);
                 end
 
                 if isFusion('get')
@@ -888,14 +874,14 @@ function mainWindowMenu()
                     ptrFusionColorbar = uiFusionColorbarPtr('get');
                     if ~isempty(ptrFusionColorbar)
 
-                        set(ptrFusionColorbar   , 'Color', dOverlayColor);
+                        set(ptrFusionColorbar.Parent, 'YColor', dOverlayColor);
                     end
                 end
 
                 set(fiMainWindowPtr('get'), 'Color', dBackgroundColor);
 
                 ptrColorbar = uiColorbarPtr('get');
-                colormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
+                setColorbarColormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
 
                 colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
                 colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
@@ -904,7 +890,7 @@ function mainWindowMenu()
                 if isFusion('get') == true
 
                     ptrFusionColorbar = uiFusionColorbarPtr('get');
-                    colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
+                    setColorbarColormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
 
                     colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
                     colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
@@ -977,13 +963,13 @@ function mainWindowMenu()
 
                 % Restore position
 
-                set(uiSliderCorPtr('get'), 'Value', iCoronal / iCoronalSize);
+                set(uiSliderCorPtr('get'), 'Value', iCoronal);
                 sliceNumber('set', 'coronal', iCoronal);
 
-                set(uiSliderSagPtr('get'), 'Value', iSagittal / iSagittalSize);
+                set(uiSliderSagPtr('get'), 'Value', iSagittal);
                 sliceNumber('set', 'sagittal', iSagittal);
 
-                set(uiSliderTraPtr('get'), 'Value', 1 - (iAxial / iAxialSize));
+                set(uiSliderTraPtr('get'), 'Value', iAxialSize - iAxial + 1);
                 sliceNumber('set', 'axial', iAxial);
 
                 refreshImages();
@@ -993,10 +979,21 @@ function mainWindowMenu()
     end
 
     function setViewToolbar(source, ~)
+        
+        persistent pviewerToolbarHeight;
+        if isempty(pviewerToolbarHeight)
+            pviewerToolbarHeight = viewerToolbarHeight('get');
+            
+        end
+
+        if isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
+            return;
+        end
 
         releaseRoiWait();
 
         switch source.Label
+
             case 'Camera Toolbar'
                 cameratoolbar toggle;
 
@@ -1008,78 +1005,51 @@ function mainWindowMenu()
                     camToolbar('set', true);
                 end
 
-            case 'Plot Edit Toolbar'
-                plotedit(fiMainWindowPtr('get'), 'plotedittoolbar', 'toggle');
+            case 'Annotation Toolbar'
 
-                if editToolbar('get')
+                if plotEditToolbar('get')
 
-                    set(mViewEdit, 'Checked', 'off');
-                    editToolbar('set', false);
-
-                    plotEditSetAxeBorder(false);
-                    mainToolBarEnable('on');
-                    plotedit('off');
+                    setPlotEditToolbar('off');
 
                 else
-                    toolButtons = plotedit(fiMainWindowPtr('get'),'gettoolbuttons');
-            %        set(findall(toolButtons, 'tag', 'Annotation.InsertLine'       ), 'Visible', 'off');
-            %        set(findall(toolButtons, 'tag', 'Annotation.InsertEllipse'    ), 'Visible', 'off');
-            %        set(findall(toolButtons, 'tag', 'Annotation.InsertRectangle'  ), 'Visible', 'off');
-            %        set(findall(toolButtons, 'tag', 'Annotation.InsertTextbox'    ), 'Visible', 'off');
-            %        set(findall(toolButtons, 'tag', 'Annotation.InsertTextArrow'  ), 'Visible', 'off');
-            %        set(findall(toolButtons, 'tag', 'Annotation.InsertDoubleArrow'), 'Visible', 'off');
-            %        set(findall(toolButtons, 'tag', 'Annotation.InsertArrow'      ), 'Visible', 'off');
-                    set(findall(toolButtons, 'tag', 'Annotation.AlignDistribute'  ), 'Visible', 'off');
-
-                    set(mViewEdit, 'Checked', 'on');
-                    editToolbar('set', true);
-
-                    plotEditSetAxeBorder(true);
-                    mainToolBarEnable('off');
-                    plotedit('on');
+                    setPlotEditToolbar('on');
                 end
 
             case 'Playback Toolbar'
                 if playback3DToolbar('get')
 
-             %       set(mViewPlayback, 'Checked', 'off');
                     setPlaybackToolbar('off');
 
                 else
-            %        set(mViewPlayback, 'Checked', 'on');
                     setPlaybackToolbar('on');
                 end
 
             case 'Contour Toolbar'
-                if roiToolbar('get')
 
-     %               set(mViewRoi, 'Checked', 'off');
-     %               roiToolbar('set', false);
+                if roiToolbar('get')
 
                     setRoiToolbar('off');
 
                 else
-    %                set(mViewRoi, 'Checked', 'on');
-    %                roiToolbar('set', true);
 
                     setRoiToolbar('on');
                 end
 
-       %     case 'Segmentation Panel'
-
-          %            tbSeg = uitoolbar(fiMainWindowPtr('get'));
-
-         %             uicontrol(fiMainWindowPtr('get'), ...
-         %                     'Style'   , 'Slider', ...
-         %                     'Position', [0 0 14 70], ...
-         %                     'Value'   , 0.5, ...
-         %                     'Enable'  , 'on' ...
-         %                     );
-    %
-
-
-
         end
+
+        if  roiToolbar('get') == false && ...
+            playback3DToolbar('get') == false &&...
+            plotEditToolbar('get') == false
+            
+            viewerToolbarHeight('set', 0);
+            resizeFigure();
+        else
+            if viewerToolbarHeight('get') == 0
+                viewerToolbarHeight('set', pviewerToolbarHeight);   
+                resizeFigure();
+            end
+        end
+
     end
 
     function plotEditSetAxeBorder(bStatus)
@@ -1146,109 +1116,109 @@ function mainWindowMenu()
 
     end
 
-    function setInsertMenuCallback(source, ~)
-
-        releaseRoiWait();
-
-        switch source.Label
-                case 'Line'
-                editPlot('set', true);
-                set(mEditPlot, 'Checked', 'on');
-                mainToolBarEnable('off');
-
-                plotEditSetAxeBorder(true);
-                activePlotObject('line');
-
-            case 'Arrow'
-                editPlot('set', true);
-                set(mEditPlot, 'Checked', 'on');
-                mainToolBarEnable('off');
-
-                plotEditSetAxeBorder(true);
-                activePlotObject('arrow');
-
-            case 'Text Arrow'
-                editPlot('set', true);
-                set(mEditPlot, 'Checked', 'on');
-                mainToolBarEnable('off');
-
-                plotEditSetAxeBorder(true);
-                activePlotObject('textarrow')
-
-            case 'Double Arrow'
-                editPlot('set', true);
-                set(mEditPlot, 'Checked', 'on');
-                mainToolBarEnable('off');
-
-                plotEditSetAxeBorder(true);
-                activePlotObject('doublearrow')
-
-            case 'Text Box'
-                editPlot('set', true);
-                set(mEditPlot, 'Checked', 'on');
-                mainToolBarEnable('off');
-
-                plotEditSetAxeBorder(true);
-                activePlotObject('textbox');
-
-            case 'Rectangle'
-                editPlot('set', true);
-                set(mEditPlot, 'Checked', 'on');
-                set(btnTriangulatePtr('get'), 'Enable', 'off');
-                mainToolBarEnable('off');
-
-                plotEditSetAxeBorder(true);
-                activePlotObject('rectangle');
-
-            case 'Ellipse'
-                editPlot('set', true);
-                set(mEditPlot, 'Checked', 'on');
-                mainToolBarEnable('off');
-
-                plotEditSetAxeBorder(true);
-                activePlotObject('ellipse');
-
-
-            case 'Plot Editor'
-                if editPlot('get')
-                    set(mEditPlot, 'Checked', 'off');
-                    mainToolBarEnable('on');
-
-                    if panTool('get') || zoomTool('get')
-                      set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-                      set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-                    else
-                      set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-                      set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-                    end
-
-                    editPlot('set', false);
-                    plotEditSetAxeBorder(false);
-                    plotedit('off');
-
-                else
-                    set(mEditPlot, 'Checked', 'on');
-
-                    mainToolBarEnable('off');
-
-                    editPlot('set', true);
-                    plotEditSetAxeBorder(false);
-                    plotedit('on');
-                end
-
-        end
-
-    end
-
-    function activePlotObject(sObject)
-
-        hPlotEdit = plotedit(fiMainWindowPtr('get'), 'getmode');
-        hMode = hPlotEdit.ModeStateData.CreateMode;
-        hMode.ModeStateData.ObjectName = sObject;
-
-        activateuimode(hPlotEdit, hMode.Name);
-
-    end
+    % function setInsertMenuCallback(source, ~)
+    % 
+    %     releaseRoiWait();
+    % 
+    %     switch source.Label
+    %             case 'Line'
+    %             editPlot('set', true);
+    %             set(mEditPlot, 'Checked', 'on');
+    %             mainToolBarEnable('off');
+    % 
+    %             plotEditSetAxeBorder(true);
+    %             activePlotObject('line');
+    % 
+    %         case 'Arrow'
+    %             editPlot('set', true);
+    %             set(mEditPlot, 'Checked', 'on');
+    %             mainToolBarEnable('off');
+    % 
+    %             plotEditSetAxeBorder(true);
+    %             activePlotObject('arrow');
+    % 
+    %         case 'Text Arrow'
+    %             editPlot('set', true);
+    %             set(mEditPlot, 'Checked', 'on');
+    %             mainToolBarEnable('off');
+    % 
+    %             plotEditSetAxeBorder(true);
+    %             activePlotObject('textarrow')
+    % 
+    %         case 'Double Arrow'
+    %             editPlot('set', true);
+    %             set(mEditPlot, 'Checked', 'on');
+    %             mainToolBarEnable('off');
+    % 
+    %             plotEditSetAxeBorder(true);
+    %             activePlotObject('doublearrow')
+    % 
+    %         case 'Text Box'
+    %             editPlot('set', true);
+    %             set(mEditPlot, 'Checked', 'on');
+    %             mainToolBarEnable('off');
+    % 
+    %             plotEditSetAxeBorder(true);
+    %             activePlotObject('textbox');
+    % 
+    %         case 'Rectangle'
+    %             editPlot('set', true);
+    %             set(mEditPlot, 'Checked', 'on');
+    %             set(btnTriangulatePtr('get'), 'Enable', 'off');
+    %             mainToolBarEnable('off');
+    % 
+    %             plotEditSetAxeBorder(true);
+    %             activePlotObject('rectangle');
+    % 
+    %         case 'Ellipse'
+    %             editPlot('set', true);
+    %             set(mEditPlot, 'Checked', 'on');
+    %             mainToolBarEnable('off');
+    % 
+    %             plotEditSetAxeBorder(true);
+    %             activePlotObject('ellipse');
+    % 
+    % 
+    %         case 'Plot Editor'
+    %             if editPlot('get')
+    %                 set(mEditPlot, 'Checked', 'off');
+    %                 mainToolBarEnable('on');
+    % 
+    %                 if panTool('get') || zoomTool('get')
+    %                   set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    %                   set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    %                 else
+    %                   set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+    %                   set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+    %                 end
+    % 
+    %                 editPlot('set', false);
+    %                 plotEditSetAxeBorder(false);
+    %                 plotedit('off');
+    % 
+    %             else
+    %                 set(mEditPlot, 'Checked', 'on');
+    % 
+    %                 mainToolBarEnable('off');
+    % 
+    %                 editPlot('set', true);
+    %                 plotEditSetAxeBorder(false);
+    %                 plotedit('on');
+    %             end
+    % 
+    %     end
+    % 
+    % end
+    % 
+    % function activePlotObject(sObject)
+    % 
+    %     hPlotEdit = plotedit(fiMainWindowPtr('get'), 'getmode');
+    %     hMode = hPlotEdit.ModeStateData.CreateMode;
+    %     hMode.ModeStateData.ObjectName = sObject;
+    % 
+    %     activateuimode(hPlotEdit, hMode.Name);
+    % 
+    % end
 
     function resetSeriesCallback(~, ~)
 
@@ -1266,8 +1236,9 @@ function mainWindowMenu()
 
         progressBar(1,'Ready');
 
-        catch
-            progressBar(1, 'Error:resetRegistrationCallback()');
+        catch ME
+            logErrorToFile(ME);
+            progressBar(1, 'Error: resetRegistrationCallback()');
         end
 
         % Reactivate main tool bar
@@ -1314,6 +1285,8 @@ function mainWindowMenu()
                    );
     end
 
+    setObjectIcon(dlgConvertToPlanar);
+
     axeConvertToPlanar = ...
         axes(dlgConvertToPlanar, ...
              'Units'   , 'pixels', ...
@@ -1324,8 +1297,9 @@ function mainWindowMenu()
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'off'...
              );
-     axeConvertToPlanar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-     axeConvertToPlanar.Toolbar.Visible = 'off';
+     axeConvertToPlanar.Interactions = [];
+     % axeConvertToPlanar.Toolbar.Visible = 'off';
+     deleteAxesToolbar(axeConvertToPlanar);
      disableDefaultInteractivity(axeConvertToPlanar);
 
         uicontrol(dlgConvertToPlanar,...
@@ -1624,6 +1598,8 @@ function mainWindowMenu()
                        );
         end
 
+        setObjectIcon(dlgDiceContours);
+
         axeDiceContours = ...
             axes(dlgDiceContours, ...
                  'Units'   , 'pixels', ...
@@ -1634,8 +1610,9 @@ function mainWindowMenu()
                  'ZColor'  , viewerForegroundColor('get'),...
                  'Visible' , 'off'...
                  );
-        axeDiceContours.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axeDiceContours.Toolbar.Visible = 'off';
+        axeDiceContours.Interactions = [];
+        % axeDiceContours.Toolbar.Visible = 'off';
+        deleteAxesToolbar(axeDiceContours);
         disableDefaultInteractivity(axeDiceContours);
 
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
@@ -1869,6 +1846,23 @@ function mainWindowMenu()
             end
         end
 
+    end
+
+    function removeCTTableAdvancedCallback(~, ~)
+
+        aDisplayBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
+        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+        % aDisplayBuffer2 = removeCTTableAdvanced(aDisplayBuffer, atMetaData);
+        aDisplayBuffer2 = removeCTTableAdvanced(aDisplayBuffer);
+
+        dicomBuffer('set', aDisplayBuffer2, get(uiSeriesPtr('get'), 'Value'));
+        mipBuffer('set', computeMIP(aDisplayBuffer2), get(uiSeriesPtr('get'), 'Value'));
+
+        refreshImages();
+
+        clear aDisplayBuffer;
+        clear aDisplayBuffer2;
     end
 
     function closeFigureCallback(~, ~)

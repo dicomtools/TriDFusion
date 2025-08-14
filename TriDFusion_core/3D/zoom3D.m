@@ -32,9 +32,9 @@ function zoom3D(sZoomInOut, lStep)
     if ~isempty(ptrViewer3d)
 
         if strcmpi(sZoomInOut, 'out')
-            ptrViewer3d.CameraZoom = ptrViewer3d.CameraZoom*lStep;
-        else
             ptrViewer3d.CameraZoom = ptrViewer3d.CameraZoom/lStep;
+        else
+            ptrViewer3d.CameraZoom = ptrViewer3d.CameraZoom*lStep;
         end
     else
         volObj = volObject('get');

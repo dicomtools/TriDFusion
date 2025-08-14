@@ -162,8 +162,8 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
                 end       
             end
 
-            [Mdti,~] = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness);
-            [Mtf,~]  = TransformMatrix(atRefMetaData{1}, refSliceThickness);
+            [Mdti,~] = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness, true);
+            [Mtf,~]  = TransformMatrix(atRefMetaData{1}, refSliceThickness, true);
             
             if REFERENCE_IS_2D
                 Mtf=Mdti;

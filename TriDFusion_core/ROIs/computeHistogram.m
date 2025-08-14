@@ -1,5 +1,5 @@
-function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imRoiVoi, atRoiVoiMetaData, ptrRoiVoi, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, ~, bMovementApplied)
-%function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imRoiVoi, atRoiVoiMetaData, ptrRoiVoi, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, ~, bMovementApplied)
+function [imCData, logicalMask] = computeHistogram(imInput, imRoiVoi, atRoiVoiMetaData, ptrRoiVoi, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bMovementApplied)
+%function [imCData, logicalMask] = computeHistogram(imInput, imRoiVoi, atRoiVoiMetaData, ptrRoiVoi, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bMovementApplied)
 %Compute Histogram from ROIs.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -36,14 +36,20 @@ function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imR
         progressBar(0.99, 'Computing Histogram, please wait!');          
         
         if bModifiedMatrix  == false && ... 
-           bMovementApplied == false        % Can't use input buffer if movement have been applied
+           bSegmented       == false && ...
+           bMovementApplied == false % Can't use input buffer if movement have been applied
 
-            if numel(imInput) ~= numel(imRoiVoi)
-                
-                pTemp{1} = ptrRoiVoi;
-                ptrRoiTemp = resampleROIs(imRoiVoi, atRoiVoiMetaData, imInput, atInputMetaData, pTemp, false);
-                ptrRoiVoi = ptrRoiTemp{1};
-            end        
+        %     if numel(imInput) ~= numel(imRoiVoi)
+        % 
+        %         pTemp{1} = ptrRoiVoi;
+        %         ptrRoiTemp = resampleROIs(imRoiVoi, atRoiVoiMetaData, imInput, atInputMetaData, pTemp, false);
+        %         ptrRoiVoi = ptrRoiTemp{1};
+        %     end        
+        % 
+            idx = find(cellfun(@(s) strcmp(s.Tag, ptrRoiVoi.Tag), tRoiInput), 1);
+            if ~isempty(idx)
+                ptrRoiVoi = tRoiInput{idx}; 
+            end
 
             imRoiVoi = imInput;
 
@@ -69,30 +75,34 @@ function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imR
                 return;
         end
         
-        if strcmpi(ptrRoiVoi.Type, 'images.roi.line')
-            logicalMask = createMask(ptrRoiVoi.Object, imCData);
-        else
+        % if strcmpi(ptrRoiVoi.Type, 'images.roi.line')
+        % 
+        %     logicalMask = createMask(ptrRoiVoi.Object, imCData);
+        % else
             logicalMask = roiTemplateToMask(ptrRoiVoi, imCData);
-        end
+        % end
                             
     else
-        imRoiVoiBak = imRoiVoi;
+        % imRoiVoiBak = imRoiVoi;
        
         for bb=1: numel(ptrRoiVoi.RoisTag)
             
             progressBar(bb/numel(ptrRoiVoi.RoisTag), sprintf('Computing Histogram ROI %d/%d, please wait!', bb, numel(ptrRoiVoi.RoisTag)));          
 
             for cc=1:numel(tRoiInput)
+
                 if strcmpi(ptrRoiVoi.RoisTag{bb}, tRoiInput{cc}.Tag)
                     
                     if bModifiedMatrix  == false && ... 
-                       bMovementApplied == false        % Can't use input buffer if movement have been applied
-                        imRoiVoi = imRoiVoiBak;
-                        if numel(imInput) ~= numel(imRoiVoi)
-                            pTemp{1} = tRoiInput{cc};
-                            ptrRoiTemp = resampleROIs(imRoiVoi, atRoiVoiMetaData, imInput, atInputMetaData, pTemp, false);
-                             tRoiInput{cc} = ptrRoiTemp{1};
-                        end        
+                       bSegmented       == false && ...
+                       bMovementApplied == false       % Can't use input buffer if movement have been applied
+
+                        % imRoiVoi = imRoiVoiBak;
+                        % if numel(imInput) ~= numel(imRoiVoi)
+                        %     pTemp{1} = tRoiInput{cc};
+                        %     ptrRoiTemp = resampleROIs(imRoiVoi, atRoiVoiMetaData, imInput, atInputMetaData, pTemp, false);
+                        %      tRoiInput{cc} = ptrRoiTemp{1};
+                        % end        
 
                         imRoiVoi = imInput;
                     end    
@@ -155,6 +165,7 @@ function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imR
          strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
          strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' ) && ...     
          bSUVUnit == true                 
+
         imCData = imCData * dSUVScale;              
     end   
     

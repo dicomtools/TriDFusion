@@ -27,6 +27,12 @@ function initViewerGlobal()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    arrowInstance([]);
+    textInstance([]);
+
+    generateUniqueNumber(true);
+    generateUniqueColor(true);
+
     isPlotContours('set', false);
 
     axesText('set', 'axe'    , '');
@@ -51,6 +57,7 @@ function initViewerGlobal()
     uiMain3DPanelPtr      ('set', []);
     ui3DPanelPtr          ('set', []);
     ui3DPanelSliderPtr    ('set', []);
+    uiTopToolbarPtr       ('set', []);
 
     uiDeleteVoiRoiPanelObject          ('set', []);
     uiLesionTypeVoiRoiPanelObject      ('set', []);
@@ -58,8 +65,10 @@ function initViewerGlobal()
     uiPrevVoiRoiPanelObject            ('set', []);
     uiDelVoiRoiPanelObject             ('set', []);
     uiNextVoiRoiPanelObject            ('set', []);
+    uiUndoVoiRoiPanelObject            ('set', []);
     chkContourVisibilityPanelObject    ('set', []);
     uiSliderRoisFaceAlphaRoiPanelObject('set', []);
+    uiSliderMipFaceAlphaRoiPanelObject ('set', []);
     uiCTRoiPanelSeriesObject           ('set', []);
     uiCreateVoiRoiPanelObject          ('set', []);
 
@@ -67,6 +76,11 @@ function initViewerGlobal()
     btnUiCorWindowFullScreenPtr('set', []);
     btnUiTraWindowFullScreenPtr('set', []);
     btnUiMipWindowFullScreenPtr('set', []);
+
+    chkUiCorWindowSelectedPtr('set', []);
+    chkUiSagWindowSelectedPtr('set', []);
+    chkUiTraWindowSelectedPtr('set', []);
+    chkUiMipWindowSelectedPtr('set', []);
 
     figContourReportPtr    ('set', '');
     fig3DLungShuntReportPtr('set', '');
@@ -143,11 +157,17 @@ function initViewerGlobal()
 
     inputTemplate('set', '');
     inputContours('set', '');
+    inputAnnotations('set', '');
 
     outputDir   ('set', '');
     mainDir     ('set', '');
     roiTemplate ('reset');
     voiTemplate ('reset');
+    roiTemplateEvent ('reset');
+    voiTemplateEvent ('reset');
+    roiTemplateBackup('reset');
+    voiTemplateBackup('reset');
+    plotEditTemplate('reset');
     brush2Dptr  ('set', '');
 
     viewerFullScreenIconBlack('set', []);
@@ -203,6 +223,7 @@ function initViewerGlobal()
     viewPlaybackObject       ('set', []);
     playbackMenuObject       ('set', []);
     roiMenuObject            ('set', []);
+    plotEditMenuObject       ('set', []);
 
     volICObject('set', []);
     mipICObject('set', []);
@@ -238,7 +259,7 @@ function initViewerGlobal()
     axePtr  ('reset');
     axefcPtr('reset');
     axefPtr ('reset');
-    
+
     plotMipPtr('set', []);
 
     imCoronalPtr ('reset');

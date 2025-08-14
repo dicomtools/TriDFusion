@@ -27,7 +27,10 @@ function setFusionWindowMinMax(dMax, dMin, bRefreshImages)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
+    sFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+
     if dMax == dMin
+
         dMax = dMin+1;
     end
         
@@ -45,42 +48,33 @@ function setFusionWindowMinMax(dMax, dMin, bRefreshImages)
 
         % Compute colorbar line y offset
 
-        dYOffsetMax = computeLineFusionColorbarIntensityMaxYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
-        dYOffsetMin = computeLineFusionColorbarIntensityMinYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
-
-        % Ajust the intensity 
-
+        dYOffsetMax = computeLineFusionColorbarIntensityMaxYOffset(sFusionSeriesOffset);
+        dYOffsetMin = computeLineFusionColorbarIntensityMinYOffset(sFusionSeriesOffset);
+    
+        % Ajust the intensity
+    
         set(lineFusionColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
         set(lineFusionColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
-
-        setFusionColorbarIntensityMaxScaleValue(dYOffsetMax, ...
-                                                fusionColorbarScale('get'), ...
-                                                isFusionColorbarDefaultUnit('get'),...
-                                                get(uiFusedSeriesPtr('get'), 'Value')...
-                                               );
-                                            
+    
         setFusionColorbarIntensityMinScaleValue(dYOffsetMin, ...
                                                 fusionColorbarScale('get'), ...
                                                 isFusionColorbarDefaultUnit('get'),...
-                                                get(uiFusedSeriesPtr('get'), 'Value')...
+                                                sFusionSeriesOffset...
                                                 );
-
-        setFusionAxesIntensity(get(uiFusedSeriesPtr('get'), 'Value'));   
-
-%         if size(dicomBuffer('get'), 3) == 1            
-%             set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
-%         else
-%             set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
-%             set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
-%             set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
-%             
-%             if link2DMip('get') == true && isVsplash('get') == false
-%                 set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);            
-%             end
-%         end
+    
+        setFusionColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                                fusionColorbarScale('get'), ...
+                                                isFusionColorbarDefaultUnit('get'),...
+                                                sFusionSeriesOffset...
+                                               );
+    
+    
+        setFusionAxesIntensity(sFusionSeriesOffset);
         
         if exist('bRefreshImages', 'var')
+
             if bRefreshImages == true
+                
                 refreshImages();
             end
         end

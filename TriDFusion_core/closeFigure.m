@@ -28,13 +28,14 @@ function closeFigure(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
     try
         tempDir = viewerTempDirectory('get');
-    
+
         if exist(tempDir, 'dir')
-    
+
             rmdir(tempDir, 's');
         end
 
-    catch
+    catch ME   
+      logErrorToFile(ME);
     end
 
     closereq;

@@ -68,6 +68,8 @@ function setMachineLearningFDHTCallback(hObject, ~)
                            );    
             end
 
+            setObjectIcon(dlgMachineLearningFDHT);
+
             % Exclude organs from AI analysis
     
             uicontrol(dlgMachineLearningFDHT,...

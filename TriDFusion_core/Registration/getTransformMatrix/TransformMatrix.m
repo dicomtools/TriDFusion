@@ -1,5 +1,5 @@
 
-function [M,R] = TransformMatrix(info, sliceThikness)
+function [M,R] = TransformMatrix(info, sliceThikness, bT0CeterPixel)
 
     %This function calculates the 4x4 transform matrix from the image
     %coordinates to patient coordinates. 
@@ -35,11 +35,18 @@ function [M,R] = TransformMatrix(info, sliceThikness)
                      0 0 sliceThikness 0; ...
                      0 0 0 1];
         %    end
+            if bT0CeterPixel == true
 
-            T0 = [ 1 0 0 0; ...
-                   0 1 0 0; ...
-                   0 0 1 0; ...
-                   0 0 0 1];
+                T0 = [1 0 0 -0.5;
+                      0 1 0 -0.5;
+                      0 0 1 -0.5;
+                      0 0 0 1];                
+            else
+                T0 = [ 1 0 0 0; ...
+                       0 1 0 0; ...
+                       0 0 1 0; ...
+                       0 0 0 1];
+            end
 
             M = Tipp * R * S * T0;
         end

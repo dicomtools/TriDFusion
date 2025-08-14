@@ -87,7 +87,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Add',...
-                  'Position',[15 615 32 25],...
+                  'Position',[15 615 30 25],...
                   'Enable'  , 'Off', ...
                   'TooltipString'  , 'Add a freehand to the selected VOI (tab)', ...
                   'BackgroundColor', [0.5300 0.6300 0.4000], ...
@@ -96,11 +96,24 @@ function initRoiPanel()
                   );
     uiAddVoiRoiPanelObject('set', uiAddVoiRoiPanel);
 
+    uiUndoVoiRoiPanel = ...
+        uicontrol(uiRoiPanelPtr('get'),...
+                  'style'   , 'pushbutton',...
+                  'String'  ,'Undo',...
+                  'Position',[46 615 30 25],...
+                  'Enable'  , 'off', ...
+                  'TooltipString'  , 'Undo (Ctrl + Z)', ...
+                  'BackgroundColor', [0.93 0.76 0.1], ...
+                  'ForegroundColor', [0.1 0.1 0.1], ...
+                  'Callback', @undoVoiRoiPanelCallback...
+                  );
+    uiUndoVoiRoiPanelObject('set', uiUndoVoiRoiPanel);
+
     uiPrevVoiRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Previous',...
-                  'Position',[48 615 75 25],...
+                  'Position',[77 615 60 25],...
                   'Enable'  , 'Off', ...
                   'TooltipString'  , 'Go to previous VOI (<)', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -113,11 +126,11 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Delete',...
-                  'Position',[124 615 60 25],...
+                  'Position',[138 615 60 25],...
                   'Enable'  , 'Off', ...
                   'TooltipString'  , 'Delete VOI (delete)', ...
-                  'BackgroundColor', [0.2 0.039 0.027], ...
-                  'ForegroundColor', [0.94 0.94 0.94], ...
+                  'BackgroundColor', [0.3255, 0.1137, 0.1137], ...
+                  'ForegroundColor', [0.94, 0.94, 0.94], ...
                   'Callback', @deleteVoiRoiPanelCallback...
                   );
     uiDelVoiRoiPanelObject('set', uiDelVoiRoiPanel);
@@ -126,7 +139,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Next',...
-                  'Position',[185 615 75 25],...
+                  'Position',[199 615 60 25],...
                   'Enable'  , 'Off', ...
                   'TooltipString'  , 'Go to next VOI (>)', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -181,7 +194,7 @@ function initRoiPanel()
                   'style'   , 'checkbox',...
                   'enable'  , 'on',...
                   'value'   , true,...
-                  'position', [240 550 20 20],...
+                  'position', [220 550 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @chkContourVisibilityPanelCallback...
@@ -205,15 +218,42 @@ function initRoiPanel()
     uiSliderRoisFaceAlphaRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
-                  'Position', [15 505 245 20], ...
+                  'Position', [15 505 220 20], ...
                   'Value'   , roiFaceAlphaValue('get'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderRoisFaceAlphaRoiPanelCallback ...
                   );
+%         uiSliderRoisFaceAlphaRoiPanel = ...
+%             viewerSlider(uiRoiPanelPtr('get'), ...
+%                          [15 505 220 20], ...
+%                          viewerBackgroundColor('get'), ...  % color
+%                          [0.8 0.8 0.8], ...
+%                          [0.5 0.5 0.5], ...
+%                          [0.2 0.2 0.2], ...
+%                          0, 1, ...                          % min, max
+%                          roiFaceAlphaValue('get'), ...      % initial
+%                          @sliderRoisFaceAlphaRoiPanelCallback, ...            % callback
+%                          false, ...                          % In motion callback
+%                          0.2, ...                           % very faint track
+%                          0.6 ...                            % semi-opaque thumb
+%                          );
     uiSliderRoisFaceAlphaRoiPanelObject('set', uiSliderRoisFaceAlphaRoiPanel);
 %    addlistener(uiSliderRoisFaceAlphaRoiPanel, 'Value', 'PreSet', @sliderRoisFaceAlphaRoiPanelCallback);
+
+    uiSliderMipFaceAlphaRoiPanel = ...
+        uicontrol(uiRoiPanelPtr('get'), ...
+                  'Style'   , 'Slider', ...
+                  'Position', [240 505 20 60], ...
+                  'Value'   , mipFaceAlphaValue('get'), ...
+                  'Enable'  , 'on', ...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'CallBack', @sliderMipFaceAlphaRoiPanelCallback ...
+                  );
+    uiSliderMipFaceAlphaRoiPanelObject('set', uiSliderMipFaceAlphaRoiPanel);
+
 
     % Sphere Diameter
 
@@ -700,7 +740,8 @@ function initRoiPanel()
 
             setVoiRoiSegPopup();
 
-            catch
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1, 'Error:setLesionTypeRoiPanelCallback()');
             end
 
@@ -774,7 +815,8 @@ function initRoiPanel()
 
             triangulateRoi(sRoiTag);
 
-            catch
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1, 'Error:setVoiSeriesOffsetRoiPanelCallback()');
             end
 
@@ -793,6 +835,513 @@ function initRoiPanel()
         end
     end
 
+    function undoVoiRoiPanelCallback(hObject, ~)
+
+        try
+
+        dRefreshDisplay = false;
+        bEnableUndoBouton = false;
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        atRoiInputEvent = roiTemplateEvent('get', dSeriesOffset);
+        atVoiInputEvent = voiTemplateEvent('get', dSeriesOffset);
+
+        atRoiInput = roiTemplate('get', dSeriesOffset);
+        atVoiInput = voiTemplate('get', dSeriesOffset);
+
+        if ~isempty(atRoiInputEvent) && ...
+            isfield(atRoiInputEvent, 'Event') && ...
+           ~isempty(atRoiInputEvent.Event)
+
+            if ~isempty(atRoiInputEvent.Event) && numel(atRoiInputEvent.Event) > 2
+
+                tPreviousEven = atRoiInputEvent.Event{end-1}; % Look the previous envent
+                dNbEvents = tPreviousEven.NbEvents;
+            else
+                dNbEvents =1;
+            end
+        else
+            dNbEvents =1;
+
+        end
+
+        % Roi
+
+        for ee=1:dNbEvents
+
+        dUID = [];
+
+        if ~isempty(atRoiInputEvent) && ...
+            isfield(atRoiInputEvent, 'Event') && ...
+           ~isempty(atRoiInputEvent.Event)
+
+            if ~isempty(atRoiInputEvent.Event)
+
+                set(uiDeleteVoiRoiPanel     , 'Enable', 'off');
+                set(uiLesionTypeVoiRoiPanel , 'Enable', 'off');
+
+                set(uiAddVoiRoiPanel , 'Enable', 'off');
+                set(uiPrevVoiRoiPanel, 'Enable', 'off');
+                set(uiNextVoiRoiPanel, 'Enable', 'off');
+                set(uiDelVoiRoiPanel , 'Enable', 'off');
+                set(uiUndoVoiRoiPanel, 'Enable', 'off');
+
+                set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+                drawnow;
+            end
+
+            tEven = atRoiInputEvent.Event{end};
+
+            if ~isempty(tEven)
+
+            dRefreshDisplay = true;
+
+            dUID = tEven.UID;
+
+            dNbRois = numel(tEven.Value);
+
+            for jj = 1 : dNbRois
+
+                sAction = tEven.Action{jj};
+                tRoi    = tEven.Value{jj};
+
+                if strcmpi(sAction, 'added') % We need to delete the ROI
+
+                    dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {tRoi.Tag} ), 1);
+
+                    if ~isempty(dTagOffset)
+
+                        % Clear it constraint
+
+                        [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSeriesOffset);
+
+                        if ~isempty(asConstraintTagList)
+                            dConstraintOffset = find(contains(asConstraintTagList, tRoi.Tag));
+                            if ~isempty(dConstraintOffset) % tag exist
+                                 roiConstraintList('set', dSeriesOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
+                            end
+                        end
+
+                         % Delete farthest distance objects
+
+                        if roiHasMaxDistances(atRoiInput{dTagOffset}) == true
+
+                            maxDistances = atRoiInput{dTagOffset}.MaxDistances; % Cache the field to avoid repeated lookups
+
+                            objectsToDelete = [maxDistances.MaxXY.Line, ...
+                                               maxDistances.MaxCY.Line, ...
+                                               maxDistances.MaxXY.Text, ...
+                                               maxDistances.MaxCY.Text];
+                            % Delete only valid objects
+                            delete(objectsToDelete(isvalid(objectsToDelete)));
+
+                            atRoiInput{dTagOffset} = rmfield(atRoiInput{dTagOffset}, 'MaxDistances');
+                        end
+
+                        if isvalid(atRoiInput{dTagOffset}.Object)
+
+                            delete(atRoiInput{dTagOffset}.Object)
+                        end
+
+                        atRoiInput{dTagOffset} = [];
+                    end
+
+                    atRoiInput(cellfun(@isempty, atRoiInput)) = [];
+
+                elseif strcmpi(sAction, 'deleted') % We need to add a ROI
+
+                    switch lower(tRoi.Axe)
+
+                        case 'axe'
+                            pAxe = axePtr('get', [], dSeriesOffset);
+
+                        case 'axes1'
+                            pAxe = axes1Ptr('get', [], dSeriesOffset);
+
+                        case 'axes2'
+                            pAxe = axes2Ptr('get', [], dSeriesOffset);
+
+                        case 'axes3'
+                            pAxe = axes3Ptr('get', [], dSeriesOffset);
+                    end
+
+                    switch lower(tRoi.Type)
+
+                        case lower('images.roi.line')
+
+                            pRoi = images.roi.Line(pAxe, ...
+                                                   'Position'           , tRoi.Position, ...
+                                                   'Color'              , tRoi.Color, ...
+                                                   'LineWidth'          , tRoi.LineWidth, ...
+                                                   'Label'              , tRoi.Label, ...
+                                                   'LabelVisible'       , tRoi.LabelVisible, ...
+                                                   'Tag'                , tRoi.Tag, ...
+                                                   'StripeColor'        , tRoi.StripeColor, ...
+                                                   'InteractionsAllowed', tRoi.InteractionsAllowed, ...
+                                                   'UserData'           , tRoi.UserData, ...
+                                                   'Visible'            , 'off' ...
+                                                   );
+
+                            uimenu(pRoi.UIContextMenu, 'Label', 'Copy Contour' , 'UserData', pRoi, 'Callback', @copyRoiCallback, 'Separator', 'on');
+                            uimenu(pRoi.UIContextMenu, 'Label', 'Paste Contour', 'UserData', pRoi, 'Callback', @pasteRoiCallback);
+
+                            uimenu(pRoi.UIContextMenu,'Label', 'Snap To Circles'   , 'UserData',pRoi, 'Callback',@snapLinesToCirclesCallback, 'Separator', 'on');
+                            uimenu(pRoi.UIContextMenu,'Label', 'Snap To Rectangles', 'UserData',pRoi, 'Callback',@snapLinesToRectanglesCallback);
+
+                            uimenu(pRoi.UIContextMenu,'Label', 'Edit Label'     , 'UserData',pRoi, 'Callback',@editLabelCallback, 'Separator', 'on');
+                            uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Label', 'UserData',pRoi, 'Callback',@hideViewLabelCallback);
+                            uimenu(pRoi.UIContextMenu,'Label', 'Edit Color'     , 'UserData',pRoi, 'Callback',@editColorCallback);
+
+                            constraintMenu(pRoi);
+
+                            cropMenu(pRoi);
+
+                            uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+
+                        case lower('images.roi.freehand')
+
+                            pRoi = images.roi.Freehand(pAxe, ...
+                                                       'Position'           , tRoi.Position, ...
+                                                       'Smoothing'          , tRoi.Smoothing, ...
+                                                       'Color'              , tRoi.Color, ...
+                                                       'LineWidth'          , tRoi.LineWidth, ...
+                                                       'Label'              , tRoi.Label, ...
+                                                       'LabelVisible'       , tRoi.LabelVisible, ...
+                                                       'FaceSelectable'     , tRoi.FaceSelectable, ...
+                                                       'FaceAlpha'          , tRoi.FaceAlpha, ...
+                                                       'Tag'                , tRoi.Tag, ...
+                                                       'StripeColor'        , tRoi.StripeColor, ...
+                                                       'InteractionsAllowed', tRoi.InteractionsAllowed, ...
+                                                       'UserData'           , tRoi.UserData, ...
+                                                       'Visible'            , 'off' ...
+                                                       );
+
+                            if ~isempty(pRoi.Waypoints(:))
+
+                                pRoi.Waypoints(:) = false;
+                            end
+
+                            addRoiMenu(pRoi);
+
+                        case lower('images.roi.polygon')
+
+                            pRoi = images.roi.Polygon(pAxe, ...
+                                                      'Position'           , tRoi.Position, ...
+                                                      'Color'              , tRoi.Color, ...
+                                                      'FaceAlpha'          , tRoi.FaceAlpha, ...
+                                                      'LineWidth'          , tRoi.LineWidth, ...
+                                                      'Label'              , tRoi.Label, ...
+                                                      'LabelVisible'       , tRoi.LabelVisible, ...
+                                                      'FaceSelectable'     , tRoi.FaceSelectable, ...
+                                                      'FaceAlpha'          , tRoi.FaceAlpha, ...
+                                                      'Tag'                , tRoi.Tag, ...
+                                                      'StripeColor'        , tRoi.StripeColor, ...
+                                                      'InteractionsAllowed', tRoi.InteractionsAllowed, ...
+                                                      'UserData'           , tRoi.UserData, ...
+                                                      'Visible'            , 'off' ...
+                                                      );
+                            addRoiMenu(pRoi);
+
+                        case lower('images.roi.circle')
+
+                            pRoi = images.roi.Circle(pAxe, ...
+                                                     'Position'           , tRoi.Position, ...
+                                                     'Radius'             , tRoi.Radius, ...
+                                                     'Color'              , tRoi.Color, ...
+                                                     'FaceAlpha'          , tRoi.FaceAlpha, ...
+                                                     'LineWidth'          , tRoi.LineWidth, ...
+                                                     'Label'              , tRoi.Label, ...
+                                                     'LabelVisible'       , tRoi.LabelVisible, ...
+                                                     'FaceSelectable'     , tRoi.FaceSelectable, ...
+                                                     'FaceAlpha'          , tRoi.FaceAlpha, ...
+                                                     'Tag'                , tRoi.Tag, ...
+                                                     'StripeColor'        , tRoi.StripeColor, ...
+                                                     'InteractionsAllowed', tRoi.InteractionsAllowed, ...
+                                                     'UserData'           , tRoi.UserData, ...
+                                                     'Visible'            , 'off' ...
+                                                     );
+                            addRoiMenu(pRoi);
+
+                        case lower('images.roi.ellipse')
+
+                            pRoi = images.roi.Ellipse(pAxe, ...
+                                                      'Position'           , tRoi.Position, ...
+                                                      'SemiAxes'           , tRoi.SemiAxes, ...
+                                                      'RotationAngle'      , tRoi.RotationAngle, ...
+                                                      'Color'              , tRoi.Color, ...
+                                                      'FaceAlpha'          , tRoi.FaceAlpha, ...
+                                                      'LineWidth'          , tRoi.LineWidth, ...
+                                                      'Label'              , tRoi.Label, ...
+                                                      'LabelVisible'       , tRoi.LabelVisible, ...
+                                                      'FaceSelectable'     , tRoi.FaceSelectable, ...
+                                                      'FaceAlpha'          , tRoi.FaceAlpha, ...
+                                                      'Tag'                , tRoi.Tag, ...
+                                                      'StripeColor'        , tRoi.StripeColor, ...
+                                                      'InteractionsAllowed', tRoi.InteractionsAllowed, ...
+                                                      'FixedAspectRatio'   , tRoi.FixedAspectRatio, ...
+                                                      'UserData'           , tRoi.UserData, ...
+                                                      'Visible'            , 'off' ...
+                                                      );
+                            addRoiMenu(pRoi);
+                    end
+
+                    tRoi.Object = pRoi;
+                    atRoiInput{end+1} = tRoi;
+
+                else % We need to modify a ROI
+
+                    dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {tRoi.Tag} ), 1);
+
+                    if ~isempty(dTagOffset)
+
+                        switch lower(tRoi.Type)
+
+                            case lower('images.roi.line')
+
+                                atRoiInput{dTagOffset}.Position            = tRoi.Position;
+                                atRoiInput{dTagOffset}.Color               = tRoi.Color;
+                                atRoiInput{dTagOffset}.LineWidth           = tRoi.LineWidth;
+                                atRoiInput{dTagOffset}.Label               = tRoi.Label;
+                                atRoiInput{dTagOffset}.InteractionsAllowed = tRoi.InteractionsAllowed;
+
+                                atRoiInput{dTagOffset}.Object.Position            = tRoi.Position;
+                                atRoiInput{dTagOffset}.Object.Color               = tRoi.Color;
+                                atRoiInput{dTagOffset}.Object.LineWidth           = tRoi.LineWidth;
+                                atRoiInput{dTagOffset}.Object.Label               = tRoi.Label;
+                                atRoiInput{dTagOffset}.Object.InteractionsAllowed = tRoi.InteractionsAllowed;
+
+                            case lower('images.roi.freehand')
+
+                                atRoiInput{dTagOffset}.Position    = tRoi.Position;
+                                atRoiInput{dTagOffset}.Smoothing   = tRoi.Smoothing;
+                                atRoiInput{dTagOffset}.Color       = tRoi.Color;
+                                atRoiInput{dTagOffset}.LineWidth   = tRoi.LineWidth;
+                                atRoiInput{dTagOffset}.Label       = tRoi.Label;
+                                atRoiInput{dTagOffset}.StripeColor = tRoi.StripeColor;
+                                atRoiInput{dTagOffset}.InteractionsAllowed = tRoi.InteractionsAllowed;
+
+                                atRoiInput{dTagOffset}.Object.Position    = tRoi.Position;
+                                atRoiInput{dTagOffset}.Object.Smoothing   = tRoi.Smoothing;
+                                atRoiInput{dTagOffset}.Object.Color       = tRoi.Color;
+                                atRoiInput{dTagOffset}.Object.LineWidth   = tRoi.LineWidth;
+                                atRoiInput{dTagOffset}.Object.Label       = tRoi.Label;
+                                atRoiInput{dTagOffset}.Object.StripeColor = tRoi.StripeColor;
+                                atRoiInput{dTagOffset}.Object.InteractionsAllowed = tRoi.InteractionsAllowed;
+
+                                if ~isempty(atRoiInput{dTagOffset}.Object.Waypoints(:))
+
+                                    atRoiInput{dTagOffset}.Object.Waypoints(:) = false;
+                                end
+
+                            case lower('images.roi.polygon')
+
+                                atRoiInput{dTagOffset}.Position    = tRoi.Position;
+                                atRoiInput{dTagOffset}.Color       = tRoi.Color;
+                                atRoiInput{dTagOffset}.LineWidth   = tRoi.LineWidth;
+                                atRoiInput{dTagOffset}.Label       = tRoi.Label;
+                                atRoiInput{dTagOffset}.StripeColor = tRoi.StripeColor;
+                                atRoiInput{dTagOffset}.InteractionsAllowed = tRoi.InteractionsAllowed;
+
+                                atRoiInput{dTagOffset}.Object.Position    = tRoi.Position;
+                                atRoiInput{dTagOffset}.Object.Color       = tRoi.Color;
+                                atRoiInput{dTagOffset}.Object.LineWidth   = tRoi.LineWidth;
+                                atRoiInput{dTagOffset}.Object.Label       = tRoi.Label;
+                                atRoiInput{dTagOffset}.Object.StripeColor = tRoi.StripeColor;
+                                atRoiInput{dTagOffset}.Object.InteractionsAllowed = tRoi.InteractionsAllowed;
+
+                            case lower('images.roi.circle')
+
+                                atRoiInput{dTagOffset}.Position    = tRoi.Position;
+                                atRoiInput{dTagOffset}.Radius      = tRoi.Radius;
+                                atRoiInput{dTagOffset}.Color       = tRoi.Color;
+                                atRoiInput{dTagOffset}.LineWidth   = tRoi.LineWidth;
+                                atRoiInput{dTagOffset}.Label       = tRoi.Label;
+                                atRoiInput{dTagOffset}.StripeColor = tRoi.StripeColor;
+                                atRoiInput{dTagOffset}.InteractionsAllowed = tRoi.InteractionsAllowed;
+
+                                atRoiInput{dTagOffset}.Object.Position    = tRoi.Position;
+                                atRoiInput{dTagOffset}.Object.Radius      = tRoi.Radius;
+                                atRoiInput{dTagOffset}.Object.Color       = tRoi.Color;
+                                atRoiInput{dTagOffset}.Object.LineWidth   = tRoi.LineWidth;
+                                atRoiInput{dTagOffset}.Object.Label       = tRoi.Label;
+                                atRoiInput{dTagOffset}.Object.StripeColor = tRoi.StripeColor;
+                                atRoiInput{dTagOffset}.Object.InteractionsAllowed = tRoi.InteractionsAllowed;
+
+                            case lower('images.roi.ellipse')
+
+                                atRoiInput{dTagOffset}.Position      = tRoi.Position;
+                                atRoiInput{dTagOffset}.SemiAxes      = tRoi.SemiAxes;
+                                atRoiInput{dTagOffset}.RotationAngle = tRoi.RotationAngle;
+                                atRoiInput{dTagOffset}.Color         = tRoi.Color;
+                                atRoiInput{dTagOffset}.LineWidth     = tRoi.LineWidth;
+                                atRoiInput{dTagOffset}.Label         = tRoi.Label;
+                                atRoiInput{dTagOffset}.StripeColor   = tRoi.StripeColor;
+                                atRoiInput{dTagOffset}.InteractionsAllowed = tRoi.InteractionsAllowed;
+
+                                atRoiInput{dTagOffset}.Object.Position      = tRoi.Position;
+                                atRoiInput{dTagOffset}.Object.SemiAxes      = tRoi.SemiAxes;
+                                atRoiInput{dTagOffset}.Object.RotationAngle = tRoi.RotationAngle;
+                                atRoiInput{dTagOffset}.Object.Color         = tRoi.Color;
+                                atRoiInput{dTagOffset}.Object.LineWidth     = tRoi.LineWidth;
+                                atRoiInput{dTagOffset}.Object.Label         = tRoi.Label;
+                                atRoiInput{dTagOffset}.Object.StripeColor   = tRoi.StripeColor;
+                                atRoiInput{dTagOffset}.Object.InteractionsAllowed = tRoi.InteractionsAllowed;
+
+                        end
+                    end
+                end
+            end
+
+            atRoiInputEvent.Event{end} = [];
+            atRoiInputEvent.Event(cellfun(@isempty, atRoiInputEvent.Event)) = [];
+
+            roiTemplateEvent('set', dSeriesOffset, atRoiInputEvent);
+            roiTemplate('set', dSeriesOffset, atRoiInput);
+
+            if ~isempty(atRoiInputEvent.Event)
+                bEnableUndoBouton = true;
+            end
+
+            end
+        end
+
+        % Voi
+
+        dLastVoiOffset = [];
+
+        if ~isempty(atVoiInputEvent) && ...
+            isfield(atVoiInputEvent, 'Event') && ...
+           ~isempty(atVoiInputEvent.Event)
+
+            if isempty(dUID)
+                dEventNumber = numel(atVoiInputEvent.Event);
+            else
+                dMatches = find(cellfun(@(s) s.UID == dUID, atVoiInputEvent.Event), 1);
+                if isempty(dMatches)
+                    continue;
+                else
+                    dEventNumber = dMatches;
+                end
+            end
+        end
+
+        if ~isempty(atVoiInputEvent) && ...
+            isfield(atVoiInputEvent, 'Event') && ...
+           ~isempty(atVoiInputEvent.Event)
+
+            tEven = atVoiInputEvent.Event{dEventNumber};
+
+            if ~isempty(tEven)
+
+            if dRefreshDisplay == false
+
+                set(uiDeleteVoiRoiPanel     , 'Enable', 'off');
+                set(uiLesionTypeVoiRoiPanel , 'Enable', 'off');
+
+                set(uiAddVoiRoiPanel , 'Enable', 'off');
+                set(uiPrevVoiRoiPanel, 'Enable', 'off');
+                set(uiNextVoiRoiPanel, 'Enable', 'off');
+                set(uiDelVoiRoiPanel , 'Enable', 'off');
+                set(uiUndoVoiRoiPanel, 'Enable', 'off');
+
+                set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+                drawnow;
+            end
+
+            dRefreshDisplay = true;
+
+            dNbVois = numel(tEven.Value);
+
+            for jj = 1 : dNbVois
+
+                sAction = tEven.Action{jj};
+                tVoi    = tEven.Value{jj};
+
+                if strcmpi(sAction, 'added') % We need to delete the VOI
+
+                    dTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {tVoi.Tag} ), 1);
+
+                    if ~isempty(dTagOffset)
+
+                        atVoiInput{dTagOffset} = [];
+                        atVoiInput(cellfun(@isempty, atVoiInput)) = [];
+                    end
+
+                elseif strcmpi(sAction, 'deleted') % We need to add the VOI
+
+                    atVoiInput{end+1} = tVoi;
+
+                    dLastVoiOffset = numel(atVoiInput);
+
+                else % We need to modify the VOI
+
+                    dTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {tVoi.Tag} ), 1);
+
+                    if ~isempty(dTagOffset)
+
+                        atVoiInput{dTagOffset} = tVoi;
+                    end
+                end
+            end
+
+            atVoiInputEvent.Event{dEventNumber} = [];
+            atVoiInputEvent.Event(cellfun(@isempty, atVoiInputEvent.Event)) = [];
+
+            voiTemplateEvent('set', dSeriesOffset, atVoiInputEvent);
+            voiTemplate('set', dSeriesOffset, atVoiInput);
+
+            if ~isempty(atVoiInputEvent.Event)
+                bEnableUndoBouton = true;
+            end
+
+            end
+        end
+        end
+
+        if dRefreshDisplay == true
+
+            if ~isempty(atVoiInput)
+
+                set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
+                set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
+
+                set(uiAddVoiRoiPanel , 'Enable', 'on');
+                set(uiPrevVoiRoiPanel, 'Enable', 'on');
+                set(uiNextVoiRoiPanel, 'Enable', 'on');
+                set(uiDelVoiRoiPanel , 'Enable', 'on');
+           end
+
+           if ~isempty(dLastVoiOffset)
+
+                seletVoiRoiPanelCallback(hObject, dLastVoiOffset);
+            end
+
+            setVoiRoiSegPopup();
+
+            refreshImages();
+
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
+            end
+        end
+
+        if bEnableUndoBouton == true
+
+            set(uiUndoVoiRoiPanel, 'Enable', 'on');
+        end
+
+        catch ME
+            logErrorToFile(ME);
+            progressBar(1, 'Error:undoVoiRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
+
+    end
+
     function addVoiRoiPanelCallback(~, ~)
 
 %        triangulateCallback()
@@ -801,6 +1350,9 @@ function initRoiPanel()
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         atVoiInput = voiTemplate('get', dSeriesOffset);
+
+        atRoiInputBack = roiTemplate('get', dSeriesOffset);
+        atVoiInputBack = voiTemplate('get', dSeriesOffset);
 
         if isempty(atVoiInput)
             return;
@@ -852,7 +1404,31 @@ function initRoiPanel()
 
         dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
 
-        sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+        sRoiTag = num2str(generateUniqueNumber(false));
+
+        atRoiMenu = roiMenuObject('get');
+
+        mFreehand = [];
+
+        if ~isempty(atRoiMenu)
+
+            for ii=1:numel(atRoiMenu)
+
+                toggleTool = atRoiMenu{ii};
+                
+                clickedCallback = func2str(toggleTool.ButtonDownFcn);
+
+                if contains(clickedCallback, 'drawfreehandCallback') 
+                    mFreehand = atRoiMenu{ii};
+                    break;
+                end
+            end
+        end
+
+        if ~isempty(mFreehand)
+
+            set(mFreehand, 'CData', mFreehand.UserData.pressed);
+        end
 
         pRoi = drawfreehand(pAxe, ...
                            'Color'         , atVoiInput{dVoiOffset}.Color, ...
@@ -864,7 +1440,12 @@ function initRoiPanel()
                            'FaceAlpha'     , 0 ...
                            );
 
-        if numel(pRoi.Position) >2
+        if ~isempty(mFreehand)
+            
+            set(mFreehand, 'CData', mFreehand.UserData.default);
+        end
+
+        if isvalid(pRoi) && numel(pRoi.Position) > 2
 
             if ~isempty(pRoi.Waypoints(:))
 
@@ -929,6 +1510,11 @@ function initRoiPanel()
 
             roiTemplate('set', dSeriesOffset, atRoi);
             voiTemplate('set', dSeriesOffset, atVoiInput);
+
+            dUID = generateUniqueNumber(false);
+
+            roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoi, dUID);
+            voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
         else
             delete(pRoi);
         end
@@ -953,8 +1539,9 @@ function initRoiPanel()
         end
 
 
-        catch
-
+        catch ME
+            logErrorToFile(ME);
+            progressBar(1, 'Error:addVoiRoiPanelCallback()');
         end
 
         % drawnow;
@@ -991,7 +1578,8 @@ function initRoiPanel()
 
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:previousVoiRoiPanelCallback()');
         end
 
@@ -1027,7 +1615,8 @@ function initRoiPanel()
             seletVoiRoiPanelCallback(hObject, dVoiOffset);
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:nextVoiRoiPanelCallback()');
         end
 
@@ -1139,6 +1728,9 @@ function initRoiPanel()
         atRoiInput = roiTemplate('get', dSeriesOffset);
         atVoiInput = voiTemplate('get', dSeriesOffset);
 
+        atRoiInputBack = roiTemplate('get', dSeriesOffset);
+        atVoiInputBack = voiTemplate('get', dSeriesOffset);
+
         if ~isempty(atVoiInput)
 
             try
@@ -1150,6 +1742,7 @@ function initRoiPanel()
             set(uiPrevVoiRoiPanel, 'Enable', 'off');
             set(uiNextVoiRoiPanel, 'Enable', 'off');
             set(uiDelVoiRoiPanel , 'Enable', 'off');
+            set(uiUndoVoiRoiPanel, 'Enable', 'off');
 
             if contourVisibilityRoiPanelValue('get') == false
 
@@ -1288,6 +1881,11 @@ function initRoiPanel()
                 set(uiLesionTypeVoiRoiPanel, 'String', ' ');
             end
 
+            dUID = generateUniqueNumber(false);
+
+            roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+            voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+
             if dNbVOIs ~= 0
                 sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
 
@@ -1304,11 +1902,12 @@ function initRoiPanel()
 
             plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
 
-            catch
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1, 'Error:deleteVoiRoiPanelCallback()');
             end
 
-            if numel(atVoiInput)
+            if ~isempty(atVoiInput)
 
                 set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
                 set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
@@ -1318,6 +1917,8 @@ function initRoiPanel()
                 set(uiNextVoiRoiPanel, 'Enable', 'on');
                 set(uiDelVoiRoiPanel , 'Enable', 'on');
             end
+
+            set(uiUndoVoiRoiPanel, 'Enable', 'on');
 
             set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
             drawnow;
@@ -1390,7 +1991,8 @@ function initRoiPanel()
             end
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:chkContourVisibilityPanelCallback()');
         end
 
@@ -1411,8 +2013,9 @@ function initRoiPanel()
 
         roiFaceAlphaValue('set', get(uiSliderRoisFaceAlphaRoiPanel, 'Value'));
 
-        tRefreshRoi = roiTemplate('get', dSeriesOffset);
-        if ~isempty(tRefreshRoi)
+        tRoiTemplate = roiTemplate('get', dSeriesOffset);
+
+        if ~isempty(tRoiTemplate)
 
             if contourVisibilityRoiPanelValue('get') == false
 
@@ -1427,24 +2030,28 @@ function initRoiPanel()
                 end
             end
 
-            for bb=1:numel(tRefreshRoi)
-                if isvalid(tRefreshRoi{bb}.Object)
-                    if ~strcmpi(tRefreshRoi{bb}.Type, 'images.roi.line')
-                        tRefreshRoi{bb}.Object.FaceAlpha = roiFaceAlphaValue('get');
-                        tRefreshRoi{bb}.FaceAlpha = roiFaceAlphaValue('get');
+            for bb=1:numel(tRoiTemplate)
+
+                if isvalid(tRoiTemplate{bb}.Object)
+
+                    if ~strcmpi(tRoiTemplate{bb}.Type, 'images.roi.line')
+
+                        tRoiTemplate{bb}.Object.FaceAlpha = roiFaceAlphaValue('get');
+                        tRoiTemplate{bb}.FaceAlpha = roiFaceAlphaValue('get');
                     end
                end
             end
 
-            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRefreshRoi);
+            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiTemplate);
         end
 
-        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+        % if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+        %
+        %     plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
+        % end
 
-            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
-        end
-
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:sliderRoisFaceAlphaRoiPanelCallback()');
         end
 
@@ -1452,6 +2059,64 @@ function initRoiPanel()
         drawnow;
     end
 
+    function sliderMipFaceAlphaRoiPanelCallback(~, ~)
+
+        try
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
+        mipFaceAlphaValue('set', get(uiSliderMipFaceAlphaRoiPanel, 'Value'));
+        tRoiTemplate = roiTemplate('get', dSeriesOffset);
+
+        if ~isempty(tRoiTemplate)
+
+            if contourVisibilityRoiPanelValue('get') == false
+
+                contourVisibilityRoiPanelValue('set', true);
+
+                set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+                refreshImages();
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
+                end
+            end
+
+            for bb=1:numel(tRoiTemplate)
+
+                if isvalid(tRoiTemplate{bb}.Object)
+
+                    if ~strcmpi(tRoiTemplate{bb}.Type, 'images.roi.line')
+
+                        tRoiTemplate{bb}.Object.FaceAlpha = roiFaceAlphaValue('get');
+                        tRoiTemplate{bb}.FaceAlpha = roiFaceAlphaValue('get');
+                    end
+               end
+            end
+
+            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiTemplate);
+        end
+
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
+        end
+
+        catch ME
+            logErrorToFile(ME);
+            progressBar(1, 'Error:sliderRoisFaceAlphaRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
+        drawnow;
+    end
     function edtSphereDiameterCallback(hObject, ~)
 
         dSphereDiameter = str2double(get(hObject, 'String'));
@@ -1521,7 +2186,8 @@ function initRoiPanel()
                         'Color', 'white',...
                         'MenuBar', 'none',...
                         'WindowStyle', 'modal', ...
-                        'Name' , 'Click-VOI Sensibility Calibration'...
+                        'Name' , 'Click-VOI Sensibility Calibration',...
+                        'SizeChangedFcn', @resizePreSegmentationCalibrationCallback...
                         );
         else
             figClickVoiPreSegmentationCalibration = ...
@@ -1535,13 +2201,15 @@ function initRoiPanel()
                        'Resize', 'on', ...
                        'Color', 'white', ...
                        'WindowStyle', 'modal', ...
-                       'Toolbar','none'...
+                       'Toolbar','none',...
+                        'SizeChangedFcn', @resizePreSegmentationCalibrationCallback...
                        );
         end
 
+        setObjectIcon(figClickVoiPreSegmentationCalibration);
+
         atMetaData = dicomMetaData('get', [], dSeriesOffset);
         aBuffer    = dicomBuffer  ('get', [], dSeriesOffset);
-
 
          if ~strcmpi(atMetaData{1}.Modality, 'CT') && ...
             ~strcmpi(atMetaData{1}.Modality, 'MR')
@@ -1564,10 +2232,10 @@ function initRoiPanel()
             uicontrol(figClickVoiPreSegmentationCalibration, ...
                       'Style'   , 'Slider', ...
                       'Units'   , 'normalize',...
-                      'Position', [0 0.1 0.05 0.9], ...
+                      'Position', [0 0.1 0.1 0.9], ...
                       'Value'   , dIntensity, ...
                       'Enable'  , 'on', ...
-                      'Tooltip' , 'Intensity', ...
+                      'Tooltip' , 'MIP intensity', ...
                       'BackgroundColor', 'White', ...
                       'CallBack', @slider3DintensityCallback ...
                       );
@@ -1580,7 +2248,7 @@ function initRoiPanel()
                           'Position', [0 0 1 0.1], ...
                           'Value'   , clickVoiPreSegmentationValue('get')/100, ...
                           'Enable'  , 'on', ...
-                          'Tooltip' , 'Sensibility', ...
+                          'Tooltip' , 'Caliration sensibility', ...
                           'BackgroundColor', 'White', ...
                           'CallBack', @slider3DsensibilityCallback ...
                           );
@@ -1609,7 +2277,7 @@ function initRoiPanel()
 
             addlistener(uiSlider3Dsensibility, 'ContinuousValueChange', @slider3DintensityCallback);
 
-         end
+        end
 
         x = aspectRatioValue('get', 'x');
         y = aspectRatioValue('get', 'y');
@@ -1654,43 +2322,28 @@ function initRoiPanel()
 
         ptrViewer3d = [];
 
-        if ~isMATLABReleaseOlderThan('R2022b')
+        bUseViewer3d = shouldUseViewer3d();
 
-            if viewerUIFigure('get') == true
+        if bUseViewer3d == true
 
-                [Mdti,~] = TransformMatrix(atMetaData{1}, computeSliceSpacing(atMetaData));
+            [Mdti,~] = TransformMatrix(atMetaData{1}, computeSliceSpacing(atMetaData), true);
 
-                % if volume3DZOffset('get') == false
+            % if volume3DZOffset('get') == false
 
-                    Mdti(1,4) = 0;
-                    Mdti(2,4) = 0;
-                    Mdti(3,4) = 0;
-                    Mdti(4,4) = 1;
-                % end
+                Mdti(1,4) = 0;
+                Mdti(2,4) = 0;
+                Mdti(3,4) = 0;
+                Mdti(4,4) = 1;
+            % end
 
-                tform = affinetform3d(Mdti);
+            tform = affinetform3d(Mdti);
 
-                ptrViewer3d = viewer3d('Parent'         , ui3DWindow, ...
-                                       'BackgroundColor', 'white', ...
-                                       'Lighting'       , 'off', ...
-                                       'GradientColor'  , [0.98 0.98 0.98], ...
-                                       'CameraZoom'     , 1.5000, ...
-                                       'Lighting'       ,'off');
+            ptrViewer3d = viewer3d('Parent'         , ui3DWindow, ...
+                                   'BackgroundColor', 'white', ...
+                                   'GradientColor'  , [0.98 0.98 0.98], ...
+                                   'CameraZoom'     , 1.5000, ...
+                                   'Lighting'       ,'off');
 
-                % sz = size(aBuffer);
-                % center = sz/2 + 0.5;
-                %
-                % numberOfFrames = 360;
-                % vec = linspace(0,2*pi,numberOfFrames)';
-                % dist = sqrt(sz(1)^2 + sz(2)^2 + sz(3)^2);
-                % myPosition = center + ([cos(vec) sin(vec) ones(size(vec))]*dist);
-                %
-                % aPosition = myPosition(250, :);
-                %
-                % aCameraPosition = myPosition(250, :);
-                % aCameraUpVector = [0 0 1];
-
-            end
         end
 
         if ~isempty(aBuffer)
@@ -1722,12 +2375,33 @@ function initRoiPanel()
                                          'Alphamap'      , aAlphamap, ...
                                          'Colormap'      , aColormap, ...
                                          'Transformation', tform);
+
+                    aFiPosition = get(figClickVoiPreSegmentationCalibration, 'Position');
+
+                    if ~strcmpi(atMetaData{1}.Modality, 'CT') && ...
+                       ~strcmpi(atMetaData{1}.Modality, 'MR')
+
+                        xOffset = 0;
+                        yOffset = 0;
+                        xSize   = 0.9 * aFiPosition(3);
+                        ySize   = 0.9 * aFiPosition(4);
+                    else
+                        xOffset = 0;
+                        yOffset = 0;
+                        xSize   = aFiPosition(3);
+                        ySize   = 0.9 * aFiPosition(4);
+                    end
+
+                    set(ptrViewer3d, 'Position', [xOffset yOffset xSize ySize]);
+
                 else
                     gp3DObject = images.compatibility.volshow.R2022a.volshow(squeeze(aBuffer), aInputArguments{:});
                 end
             end
 
             if ~isempty(ptrViewer3d)
+
+                set3DView(ptrViewer3d, 1, 1);
             else
                 gp3DObject.CameraPosition = aCameraPosition;
                 gp3DObject.CameraUpVector = aCameraUpVector;
@@ -1735,19 +2409,18 @@ function initRoiPanel()
 
             aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'Isosurface', 'Isovalue', uiSlider3Dsensibility.Value, 'IsosurfaceColor', 'Red', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
 
-
             if isMATLABReleaseOlderThan('R2022b')
 
                 gpIsoObject = volshow(squeeze(aBuffer),  aInputArguments{:});
             else
                 if ~isempty(ptrViewer3d)
 
-                    gpIsoObject = volshow(squeeze(aBuffer), ...
-                                          'Parent'        , ptrViewer3d, ...
-                                          'RenderingStyle', 'VolumeRendering',...
-                                          'Alphamap'      , aAlphamap, ...
-                                          'Colormap'      , aColormap, ...
-                                          'Transformation', tform);
+                    gpIsoObject = volshow(squeeze(aBuffer) , ...
+                                          'Parent'         , ptrViewer3d, ...
+                                          'RenderingStyle' , 'Isosurface',...
+                                          'Colormap'       , 'Red', ...
+                                          'IsosurfaceValue', uiSlider3Dsensibility.Value, ...
+                                          'Transformation' , tform);
                 else
                     gpIsoObject = images.compatibility.volshow.R2022a.volshow(squeeze(aBuffer), aInputArguments{:});
                 end
@@ -1759,9 +2432,44 @@ function initRoiPanel()
                 gpIsoObject.CameraUpVector = aCameraUpVector;
             end
 
+            if ~isempty(ptrViewer3d)
+
+                set(ptrViewer3d, 'Lighting', 'on');
+            end
+        end
+
+        function resizePreSegmentationCalibrationCallback(hObject, ~)
+
+            if shouldUseViewer3d() == true
+
+                if exist('ptrViewer3d', 'var') && ~isempty(ptrViewer3d)
+
+                    aFiPosition = get(hObject, 'Position');
+
+                    atMetaData = dicomMetaData('get', [], dSeriesOffset);
+                    aBuffer    = dicomBuffer  ('get', [], dSeriesOffset);
+
+                    if ~strcmpi(atMetaData{1}.Modality, 'CT') && ...
+                       ~strcmpi(atMetaData{1}.Modality, 'MR')
+
+                        xOffset = 0;
+                        yOffset = 0;
+                        xSize   = 0.9 * aFiPosition(3);
+                        ySize   = 0.9 * aFiPosition(4);
+                    else
+                        xOffset = 0;
+                        yOffset = 0;
+                        xSize   = aFiPosition(3);
+                        ySize   = 0.9 * aFiPosition(4);
+                    end
+
+                    set(ptrViewer3d, 'Position', [xOffset yOffset xSize ySize]);
+                end
+            end
         end
 
         function slider3DintensityCallback(~, ~)
+
             aAlphamap = compute3DLinearAlphaMap(get(uiSlider3Dintensity,'value'));
 
             set(gp3DObject, 'Alphamap', aAlphamap);
@@ -1771,7 +2479,11 @@ function initRoiPanel()
 
             dSensibility = get(uiSlider3Dsensibility, 'Value');
 
-            set(gpIsoObject, 'Isovalue', dSensibility);
+            if shouldUseViewer3d() == true
+                set(gpIsoObject, 'IsosurfaceValue', dSensibility);
+            else
+                set(gpIsoObject, 'Isovalue', dSensibility);
+            end
 
             set(edtClickVoiPreSegmentation, 'string', num2str(dSensibility*100));
 
@@ -1848,7 +2560,8 @@ function initRoiPanel()
         set(uiEditMinThresholdRoiPanel, 'String', num2str(dMinValue));
         set(uiEditMaxThresholdRoiPanel, 'String', num2str(dMaxValue));
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:btnUnitTypeRoiPanelCallback()');
         end
 
@@ -1956,7 +2669,8 @@ function initRoiPanel()
             set(uiEditMaxThresholdRoiPanel, 'String', num2str(dMaxValue));
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:chkUseCTRoiPanelCallback()');
         end
 
@@ -1990,7 +2704,8 @@ function initRoiPanel()
 
         holesRoiPanel('set', get(chkHolesRoiPanel, 'Value'));
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:chkHolesRoiPanelCallback()');
         end
 
@@ -2018,7 +2733,8 @@ function initRoiPanel()
 
         pixelEdge('set', get(chkPixelEdge, 'Value'));
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:chkPixelEdgeCallback()');
         end
 
@@ -2052,7 +2768,8 @@ function initRoiPanel()
 
         multipleObjectsRoiPanel('set', get(chkMultipleObjectsRoiPanel, 'Value'));
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:chkMultipleObjectsRoiPanelCallback()');
         end
 
@@ -2086,7 +2803,8 @@ function initRoiPanel()
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:edtSmalestRegionCallback()');
         end
 
@@ -2167,7 +2885,8 @@ function initRoiPanel()
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:sliderMaxThresholdRoiPanelCallback()');
         end
 
@@ -2274,7 +2993,8 @@ function initRoiPanel()
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:editMaxThresholdRoiPanelCallback()');
         end
 
@@ -2361,7 +3081,8 @@ function initRoiPanel()
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:sliderMinThresholdRoiPanelCallback()');
         end
 
@@ -2468,7 +3189,8 @@ function initRoiPanel()
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:editMinThresholdRoiPanelCallback()');
         end
 
@@ -2574,7 +3296,8 @@ function initRoiPanel()
 
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:chkRelativeToMaxRoiPanelCallback()');
         end
 
@@ -2716,7 +3439,8 @@ function initRoiPanel()
 
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:chkInPercentRoiPanelCallback()');
         end
 
@@ -2812,7 +3536,8 @@ function initRoiPanel()
             end
 
             if bPixelEdge == true
-                aBuffer = imresize(aBuffer , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+              %  aBuffer = imresize(aBuffer , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+               aBuffer = repelem(aBuffer, PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way
             end
 
             if bHoles == true
@@ -2952,9 +3677,14 @@ function initRoiPanel()
             end
 
             if bPixelEdge == true
-                aCoronal  = imresize(aCoronal , PIXEL_EDGE_RATIO, 'nearest');
-                aSagittal = imresize(aSagittal, PIXEL_EDGE_RATIO, 'nearest');
-                aAxial    = imresize(aAxial   , PIXEL_EDGE_RATIO, 'nearest');
+
+                aCoronal  = repelem(aCoronal , PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way
+                aSagittal = repelem(aSagittal, PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way
+                aAxial    = repelem(aAxial   , PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way
+
+                % aCoronal  = imresize(aCoronal , PIXEL_EDGE_RATIO, 'nearest');
+                % aSagittal = imresize(aSagittal, PIXEL_EDGE_RATIO, 'nearest');
+                % aAxial    = imresize(aAxial   , PIXEL_EDGE_RATIO, 'nearest');
             end
 
             if bHoles == true
@@ -3048,7 +3778,7 @@ function initRoiPanel()
 
             set(uiCreateVoiRoiPanel, 'String', 'Cancel');
 
-            set(uiCreateVoiRoiPanel, 'Background', [0.2 0.039 0.027]);
+            set(uiCreateVoiRoiPanel, 'Background', [0.3255, 0.1137, 0.1137]);
             set(uiCreateVoiRoiPanel, 'Foreground', [0.94 0.94 0.94]);
 
             if contourVisibilityRoiPanelValue('get') == false
@@ -3065,6 +3795,7 @@ function initRoiPanel()
             end
 
             if is2DBrush('get') == true
+
                 releaseRoiWait();
             end
 
@@ -3188,7 +3919,9 @@ function initRoiPanel()
             end
 
             if bPixelEdge == true
-                aBuffer = imresize(aBuffer , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+
+                % aBuffer = imresize(aBuffer , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                aBuffer = repelem(aBuffer, PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way
             end
 
             if bHoles == true
@@ -3212,9 +3945,10 @@ function initRoiPanel()
                 if ~isempty(maskAxe)
 
                     if bMultipleObjects == false
-                        xmin=0.5;
-                        xmax=1;
-                        aColor=xmin+rand(1,3)*(xmax-xmin);
+                        % xmin=0.5;
+                        % xmax=1;
+                        % aColor=xmin+rand(1,3)*(xmax-xmin);
+                        aColor = generateUniqueColor(false);
                     end
 
                     dMaskSize = numel(maskAxe);
@@ -3229,14 +3963,15 @@ function initRoiPanel()
                         end
 
                         if bMultipleObjects == true
-                            xmin=0.5;
-                            xmax=1;
-                            aColor=xmin+rand(1,3)*(xmax-xmin);
+                            % xmin=0.5;
+                            % xmax=1;
+                            % aColor=xmin+rand(1,3)*(xmax-xmin);
+                            aColor = generateUniqueColor(false);
                         end
 
                         curentMask = maskAxe(jj);
 
-                        sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                        sTag = num2str(generateUniqueNumber(false));
 
                         aPosition = flip(curentMask{1}, 2);
 
@@ -3475,9 +4210,10 @@ function initRoiPanel()
                     progressBar( bb/dNbElements-0.0001, sprintf('Computing Volume %d/%d, please wait', bb, dNbElements) );
                 end
 
-                xmin=0.5;
-                xmax=1;
-                aColor=xmin+rand(1,3)*(xmax-xmin);
+                % xmin=0.5;
+                % xmax=1;
+                % aColor=xmin+rand(1,3)*(xmax-xmin);
+                aColor = generateUniqueColor(false);
 
                 aBufferSize = size(BW, 3);
 
@@ -3518,7 +4254,8 @@ function initRoiPanel()
 
                         if bPixelEdge
 
-                            aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % Avoid pixel center adjustment
+                            aAxial = repelem(aAxial, PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way
+                            % aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % Avoid pixel center adjustment
                         end
 
                         % Extract boundaries after optional resizing
@@ -3554,7 +4291,7 @@ function initRoiPanel()
 
                                 sliceNumber('set', 'axial', aa);
 
-                                sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                                sTag = num2str(generateUniqueNumber(false));
 
                                 aPosition = flip(curentMask{1}, 2);
 
@@ -3678,7 +4415,8 @@ function initRoiPanel()
 
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:createVoiRoi()');
         end
 

@@ -87,7 +87,8 @@ function aBufferEdge = getEdgeDetection(aBuffer, sMethod, dFudgeFactor)
     
     aBufferEdge = aBuffer;
     
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, 'Error: getEdgeDetection()');           
     end
     

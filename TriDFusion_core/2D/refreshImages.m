@@ -45,7 +45,7 @@ function refreshImages(clickedPtX, clickedPtY)
 
     im = dicomBuffer('get', [], dSeriesOffset);
 
-    tQuantification = quantificationTemplate('get', [], dSeriesOffset);
+    % tQuantification = quantificationTemplate('get', [], dSeriesOffset);
     atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
     aBufferSize = size(im);
@@ -85,7 +85,7 @@ function refreshImages(clickedPtX, clickedPtY)
 %            end
 
 %            if gaussFilter('get') == true
-%   %             imagesc(imgaussfilt(im, 1), 'Parent', axe);
+%   %             imshow(imgaussfilt(im, 1), 'Parent', axe);
 %                surface(imgaussfilt(im), 'linestyle','none', 'Parent', axe);
 %            else
          %   surface(im, 'linestyle','none', 'Parent', axe);
@@ -141,7 +141,7 @@ function refreshImages(clickedPtX, clickedPtY)
 
          end
 
-%   %             imagesc(im, 'Parent', axe);
+%   %             imshow(im, 'Parent', axe);
 %            end
 
 %             if isShading('get') == true
@@ -223,7 +223,7 @@ function refreshImages(clickedPtX, clickedPtY)
             lMin = windowLevel('get', 'min');
             lMax = windowLevel('get', 'max');
 
-            sAxeText = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin: %s\nMax: %s\nTotal: %s\nCurrent: %s\nLookup Table: %s - %s\n[X,Y] %d,%d', ...
+            sAxeText = sprintf('%s\n%s\n%s\n%s\nMin: %s\nMax: %s\nTotal: %s\nCurrent: %s\nLookup Table: %s - %s\n[X,Y] %d,%d', ...
                 sPatientName, ...
                 sPatientID,  ...
                 sSeriesDescription, ...
@@ -696,8 +696,9 @@ function refreshImages(clickedPtX, clickedPtY)
             
                  imM = mipBuffer('get', [], dSeriesOffset);
                 
-                 % imMip.CData = permute(imM(iMipAngle,:,:), [3 2 1]);
-                 imMip.CData = reshape(imM(iMipAngle,:,:), aBufferSize(2), aBufferSize(3))';     
+                 % aMipSize = size(imM);
+                 imMip.CData = permute(imM(iMipAngle,:,:), [3 2 1]);
+                 %imMip.CData = reshape(imM(iMipAngle,:,:), aMipSize(2), aMipSize(3))';     
              end
 
              if isFusion('get') == true
@@ -714,6 +715,7 @@ function refreshImages(clickedPtX, clickedPtY)
                 %         aBlueColorMap  = getBlueColorMap();
                 %     end
                 % end
+
 
                 dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                 for rr=1:dNbFusedSeries
@@ -785,16 +787,20 @@ function refreshImages(clickedPtX, clickedPtY)
                             end
                         end
 
-                        % if bAxeClicked == false
-    
+                        %if bAxeClicked == false
+                        if bAxeClicked == false || isCombineMultipleFusion('get') == true
+
                            imMf = mipFusionBuffer('get', [], rr);
     
                            if ~isempty(imMf)
+
                                 imMipF = imMipFPtr('get', [], rr);
+
                                 if ~isempty(imMipF)
     
                                     imMipF.CData = permute(imMf(iMipAngle,:,:), [3 2 1]);
-    
+                                    % imMipF.CData  = reshape(imMf(iMipAngle,:,:), aBufferSize(2), aBufferSize(3))';     
+  
                                     if isCombineMultipleFusion('get') == true
     
                                         if colormap(imMipF.Parent) == aRedColorMap
@@ -811,7 +817,7 @@ function refreshImages(clickedPtX, clickedPtY)
                                     end
                                 end
                             end
-                        % end
+                        end
                     end
                 end
 
@@ -890,8 +896,8 @@ function refreshImages(clickedPtX, clickedPtY)
                         if bAxeClicked == false
     
                             if ~isempty(imMipFc)
-                                % imMipFc.ZData  = permute(imMf(iMipAngle,:,:), [3 2 1]);
-                                imMipFc.ZData  = reshape(imMf(iMipAngle,:,:), aFusionBufferSize(2), aFusionBufferSize(3))';     
+                                imMipFc.ZData  = permute(imMf(iMipAngle,:,:), [3 2 1]);
+                               % imMipFc.ZData  = reshape(imMf(iMipAngle,:,:), aFusionBufferSize(2), aFusionBufferSize(3))';     
                             end
                         end
                     end
@@ -971,6 +977,41 @@ function refreshImages(clickedPtX, clickedPtY)
                     % catch
                     % end
                     % end
+                end
+            end
+        end
+
+        % Plot Edit
+
+        atPlotEditInput = plotEditTemplate('get', dSeriesOffset);
+
+        if ~isempty(atPlotEditInput) && isVsplash('get') == false
+
+            dNumPlotEditInputs = numel(atPlotEditInput);
+
+            % Precompute axis and slice conditions 
+
+            axesConditions = {'Axes1', 'Axes2', 'Axes3', 'AxesMip'};
+
+            for bb = 1:dNumPlotEditInputs
+                % try
+                currentPlotEdit = atPlotEditInput{bb};
+
+                % Check matching axis and slice condition
+                isCoronal  = strcmpi(currentPlotEdit.Axe, axesConditions{1}) && iCoronal  == currentPlotEdit.SliceNb;
+                isSagittal = strcmpi(currentPlotEdit.Axe, axesConditions{2}) && iSagittal == currentPlotEdit.SliceNb;
+                isAxial    = strcmpi(currentPlotEdit.Axe, axesConditions{3}) && iAxial    == currentPlotEdit.SliceNb;                         
+                isMip      = strcmpi(currentPlotEdit.Axe, axesConditions{4}) && iMipAngle == currentPlotEdit.SliceNb;                         
+
+                % If the ROI matches one of the axis/slice conditions, make it visible
+
+                if isCoronal || isSagittal || isAxial || isMip 
+
+                    currentPlotEdit.Object.Visible = 'on';
+
+                else
+
+                    currentPlotEdit.Object.Visible = 'off';                     
                 end
             end
         end
@@ -1272,15 +1313,18 @@ function refreshImages(clickedPtX, clickedPtY)
                 tAxes2ViewText = axesText('get', 'axes2View');
                 tAxes2ViewText.Color  = overlayColor('get');
             end
+        
 
             bDisplayAxe3 = true;
             mGate = gateIconMenuObject('get');
             if multiFramePlayback('get') == true && ...
-               strcmpi(get(mGate, 'State'), 'on')
+               ~isempty(mGate) && mGate.UserData.isSelected == true
                 bDisplayAxe3 = false;
             end
-
+          
             if bDisplayAxe3 == true
+
+                tQuantification = quantificationTemplate('get', [], dSeriesOffset);
 
                 if isVsplash('get') == true && ...
                    (strcmpi(vSplahView('get'), 'axial') || ...
@@ -1289,7 +1333,7 @@ function refreshImages(clickedPtX, clickedPtY)
                     [lFirst, lLast] = computeVsplashLayout(im, 'axial', aBufferSize(3)-sliceNumber('get', 'axial')+1);
                     % sAxialSliceNumber = [num2str(lFirst) '-' num2str(lLast)];
                     sAxialSliceNumber = sprintf('%d-%d', lFirst, lLast);
-                    sAxe3Text = sprintf('\n\n\n%s\n%s\n%s\nA: %s/%d', ...
+                    sAxe3Text = sprintf('%s\n%s\n%s\nA: %s/%d', ...
                         sPatientName, ...
                         sPatientID, ...
                         sSeriesDescription, ...
@@ -1314,7 +1358,7 @@ function refreshImages(clickedPtX, clickedPtY)
                     end
                     
                     if atInputTemplate(dSeriesOffset).bDoseKernel == true
-                        sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin (%s): %2.f\nMax (%s): %.2f\nTotal (%s): %.2f\nCurrent (%s): %.2f\nLookup Table: %.2f - %.2f\nA: %d/%d', ...
+                        sAxe3Text = sprintf('%s\n%s\n%s\n%s\nMin (%s): %2.f\nMax (%s): %.2f\nTotal (%s): %.2f\nCurrent (%s): %.2f\nLookup Table: %.2f - %.2f\nA: %d/%d', ...
                             sPatientName, ...
                             sPatientID, ...
                             sSeriesDescription, ...
@@ -1359,7 +1403,7 @@ function refreshImages(clickedPtX, clickedPtY)
                                     suvValue = double(im(iCoronal,iSagittal,iAxial)) * tQuantification.tSUV.dScale;
 
                                     if isempty(sRadiopharmaceutical)
-                                        sAxe3Text = sprintf('\n\n\n\n\n\n\n\n%s\n%s\n%s\n%s\n%s\nMin SUV/%s: %.2f -- %.2f Bq/cc\nMax SUV/%s: %.2f -- %.2f Bq/cc\nTotal activity: %.2f MBq -- %.2f mCi\nCurrent SUV/%s: %.2f -- %.2f Bq/cc\nLookup Table SUV/%s: %.2f - %.2f\nA: %d/%d', ...
+                                        sAxe3Text = sprintf('%s\n%s\n%s\n%s\n%s\nMin SUV/%s: %.2f -- %.2f Bq/cc\nMax SUV/%s: %.2f -- %.2f Bq/cc\nTotal activity: %.2f MBq -- %.2f mCi\nCurrent SUV/%s: %.2f -- %.2f Bq/cc\nLookup Table SUV/%s: %.2f - %.2f\nA: %d/%d', ...
                                             sPatientName, ...
                                             sPatientID, ...
                                             sSeriesDescription, ...
@@ -1383,7 +1427,7 @@ function refreshImages(clickedPtX, clickedPtY)
                                             aBufferSize(3));                                        
                                     else  
 
-                                        sAxe3Text = sprintf('\n\n\n\n\n\n\n\n\n%s\n%s\n%s\n%s\n%s\n%s\nMin SUV/%s: %.2f -- %.2f Bq/cc\nMax SUV/%s: %.2f -- %.2f Bq/cc\nTotal activity: %.2f MBq -- %.2f mCi\nCurrent SUV/%s: %.2f -- %.2f Bq/cc\nLookup Table SUV/%s: %.2f - %.2f\nA: %d/%d', ...
+                                        sAxe3Text = sprintf('%s\n%s\n%s\n%s\n%s\n%s\nMin SUV/%s: %.2f -- %.2f Bq/cc\nMax SUV/%s: %.2f -- %.2f Bq/cc\nTotal activity: %.2f MBq -- %.2f mCi\nCurrent SUV/%s: %.2f -- %.2f Bq/cc\nLookup Table SUV/%s: %.2f - %.2f\nA: %d/%d', ...
                                             sPatientName, ...
                                             sPatientID, ...
                                             sSeriesDescription, ...
@@ -1412,7 +1456,7 @@ function refreshImages(clickedPtX, clickedPtY)
                                 else
                                     if isempty(sRadiopharmaceutical)
 
-                                        sAxe3Text = sprintf('\n\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin: %.2f\nMax: %.2f\nTotal: %.2f\nCurrent: %.2f\nLookup Table: %.2f - %.2f\nA: %d/%d', ...
+                                        sAxe3Text = sprintf('%s\n%s\n%s\n%s\nMin: %.2f\nMax: %.2f\nTotal: %.2f\nCurrent: %.2f\nLookup Table: %.2f - %.2f\nA: %d/%d', ...
                                             sPatientName, ...
                                             sPatientID, ...
                                             sSeriesDescription, ...
@@ -1426,7 +1470,7 @@ function refreshImages(clickedPtX, clickedPtY)
                                             dAxialSliceNumber, ...
                                             aBufferSize(3));                                        
                                     else
-                                        sAxe3Text = sprintf('\n\n\n\n\n\n\n\n%s\n%s\n%s\n%s\n%s\nMin: %.2f\nMax: %.2f\nTotal: %.2f\nCurrent: %.2f\nLookup Table: %.2f - %.2f\nA: %d/%d', ...
+                                        sAxe3Text = sprintf('%s\n%s\n%s\n%s\n%s\nMin: %.2f\nMax: %.2f\nTotal: %.2f\nCurrent: %.2f\nLookup Table: %.2f - %.2f\nA: %d/%d', ...
                                             sPatientName, ...
                                             sPatientID, ...
                                             sSeriesDescription, ...
@@ -1447,7 +1491,7 @@ function refreshImages(clickedPtX, clickedPtY)
     
                                 [dWindow, dLevel] = computeWindowMinMax(windowLevel('get', 'max'), windowLevel('get', 'min'));
                                 sWindowName = getWindowName(dWindow, dLevel);
-                                sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin HU: %d\nMax HU: %d\nCurrent HU: %d\nWindow/Level (%s): %.2f/%.2f\nA: %d/%d', ...
+                                sAxe3Text = sprintf('%s\n%s\n%s\n%s\nMin HU: %d\nMax HU: %d\nCurrent HU: %d\nWindow/Level (%s): %.2f/%.2f\nA: %d/%d', ...
                                     sPatientName, ...
                                     sPatientID, ...
                                     sSeriesDescription, ...
@@ -1460,12 +1504,9 @@ function refreshImages(clickedPtX, clickedPtY)
                                     dLevel, ...
                                     dAxialSliceNumber, ...
                                     aBufferSize(3));
-
-
-
-    
+   
                            otherwise
-                                sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin: %.2f\nMax: %.2f\nTotal: %.2f\nCurrent: %.2f\nLookup Table: %.2f - %.2f\nA: %d/%d', ...
+                                sAxe3Text = sprintf('%s\n%s\n%s\n%s\nMin: %.2f\nMax: %.2f\nTotal: %.2f\nCurrent: %.2f\nLookup Table: %.2f - %.2f\nA: %d/%d', ...
                                     sPatientName, ...
                                     sPatientID, ...
                                     sSeriesDescription, ...
@@ -1708,5 +1749,5 @@ function refreshImages(clickedPtX, clickedPtY)
 
     % plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), im, iMipAngle);
      % drawnow nocallbacks;
-    % drawnow limitrate nocallbacks;
+     % drawnow limitrate nocallbacks;
 end

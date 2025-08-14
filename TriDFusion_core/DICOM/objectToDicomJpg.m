@@ -30,8 +30,17 @@ function objectToDicomJpg(sOutDir, pObject, sSeriesDescription, dSeriesOffset)
     % Get object cdata
     
     try
-        tObjectFrame = getframe(pObject);
-    catch
+        if viewerUIFigure('get') == true || ...
+           ~isMATLABReleaseOlderThan('R2025a')
+
+            tObjectFrame = getObjectFrame(pObject);
+        else
+            tObjectFrame = getframe(pObject);
+            tObjectFrame = tObjectFrame.cdata;
+        end
+
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, 'Error: objectToDicomJpg() invalid object');
         return;
     end
@@ -47,7 +56,7 @@ function objectToDicomJpg(sOutDir, pObject, sSeriesDescription, dSeriesOffset)
     sDicomDummyFile = sprintf('%sdummy.dcm', sDcmTmpDir);
     % Write a dummy dicom file
     
-    dicomwrite(tObjectFrame.cdata, sDicomDummyFile);
+    dicomwrite(tObjectFrame, sDicomDummyFile);
 
     % Read dummy dicom file
     atMetaData{1} = dicominfo(sDicomDummyFile);

@@ -27,29 +27,83 @@ function aboutViewerCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-
     sRootPath  = viewerRootPath('get');
     sAboutFile = sprintf('%s/about.txt', sRootPath);
 
     sDisplayBuffer = '';
-    fFileID = fopen(sAboutFile,'r');
-    if fFileID ~= -1
+
+    % Open the file for reading
+    fFileID = fopen(sAboutFile, 'r');
+    if fFileID == -1
+        % If the file couldn't be opened, display a warning and exit
+        warning('Could not open file: %s', sAboutFile);
+        return;
+    end
+    
+    dNbLines = 0;
+    % Read the file line by line
+    tline = fgetl(fFileID);
+    while ischar(tline)
+        % Append the line to the display buffer
+        sDisplayBuffer = sprintf('%s%s\n',sDisplayBuffer, tline);  % More efficient string concatenation
         tline = fgetl(fFileID);
-        while ischar(tline)
-            sDisplayBuffer = sprintf('%s%s\n', sDisplayBuffer, tline);
-            tline = fgetl(fFileID);
-        end
-        fclose(fFileID);
 
-        h = msgbox(sDisplayBuffer, 'About');
-%        if integrateToBrowser('get') == true
-%            sLogo = './TriDFusion/logo.png';
-%        else
-%            sLogo = './logo.png';
-%        end
+        dNbLines = dNbLines+1;
+    end
+    
+    % Close the file after reading
+    fclose(fFileID);
 
-%        javaFrame = get(h, 'JavaFrame');
-%        javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
+    % % Show the content in a message box
+    % h = msgbox(sDisplayBuffer, 'About','help');
 
+    xSize = 420;
+    ySize = round(25*dNbLines);
+
+    dlgAbout = ...
+        uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-xSize/2) ...
+                        (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-ySize/2) ...
+                        xSize ...
+                        ySize ...
+                        ],...
+               'Resize'     , 'off', ...
+               'Color'      , viewerBackgroundColor('get'),...
+               'WindowStyle', 'modal', ...
+               'Name'       , 'About'...
+               );
+
+    sRootPath = viewerRootPath('get');
+            
+    if ~isempty(sRootPath) 
+                    
+        dlgAbout.Icon = fullfile(sRootPath, 'logo.png');
+    end
+
+    aDlgPosition = get(dlgAbout, 'Position');
+
+    uicontrol(dlgAbout,...
+              'String','OK',...
+              'Position',[(aDlgPosition(3)/2)-(75/2) 7 75 25],...
+              'BackgroundColor', viewerBackgroundColor('get'), ...
+              'ForegroundColor', viewerForegroundColor('get'), ...               
+              'Callback', @okAboutCallback...
+              );   
+
+    % Display text with line breaks
+    uicontrol(dlgAbout, ...
+              'Style'   , 'text', ...
+              'HorizontalAlignment','left', ...
+              'String'  , sDisplayBuffer, ...
+              'Position', [10 40 aDlgPosition(3)-20 aDlgPosition(4)-50], ... % Adjusted padding              'HorizontalAlignment', 'left', ...
+              'BackgroundColor', viewerBackgroundColor('get'), ...
+              'ForegroundColor', viewerForegroundColor('get'),...
+              'FontSize', 10, ...
+              'FontName', 'Arial');
+    
+    drawnow;
+
+    function okAboutCallback(~, ~)
+
+        delete(dlgAbout);
     end
 end

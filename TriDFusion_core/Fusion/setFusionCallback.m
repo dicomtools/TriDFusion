@@ -28,7 +28,7 @@ function setFusionCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     try
-        
+
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
        switchToMIPMode('get')    == false        
@@ -54,7 +54,8 @@ function setFusionCallback(~, ~)
 
             set(btnFusionPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            set(btnFusionPtr('get'), 'FontWeight', 'bold');
+
+            set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_white.png'));           
 
             atInputTemplate  = inputTemplate('get');
             dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
@@ -141,7 +142,8 @@ function setFusionCallback(~, ~)
 
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnFusionPtr('get'), 'FontWeight', 'normal');
+
+            set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));           
 
             if isempty(viewer3dObject('get'))
 
@@ -186,30 +188,42 @@ function setFusionCallback(~, ~)
         
         atInputTemplate = inputTemplate('get');
         if numel(atInputTemplate) == 0
+
             isFusion('set', false);
+
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnFusionPtr('get'), 'FontWeight', 'normal');
+
+            set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));           
+
             fusionBuffer('reset');
-            return
+            return;
         end
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
         if dSeriesOffset > numel(atInputTemplate)
+
             isFusion('set', false);
+
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnFusionPtr('get'), 'FontWeight', 'normal');
+
+            set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));           
+
             fusionBuffer('reset');
             return;
         end
 
         dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
         if dFusionSeriesOffset > numel(atInputTemplate)
+
             isFusion('set', false);
+
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnFusionPtr('get'), 'FontWeight', 'normal');
+
+            set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));           
+
             fusionBuffer('reset');
             return;
         end
@@ -269,23 +283,42 @@ function setFusionCallback(~, ~)
             uiAlphaSlider = uiAlphaSliderPtr('get');
             if isempty(uiAlphaSlider) 
 
-                uiAlphaSlider = ...
-                    uicontrol(fiMainWindowPtr('get'), ...
-                              'Style'   , 'Slider', ...
-                              'Value'   , sliderAlphaValue('get'), ...
-                              'Enable'  , 'on', ...
-                              'BackgroundColor', backgroundColor('get'), ...
-                              'String'  , 'Alpha',...
-                              'ToolTip', 'Fusion Alpha', ...
-                              'CallBack', @sliderAlphaCallback ...
-                              );    
-                uiAlphaSliderPtr('set', uiAlphaSlider);                  
-
+                % uiAlphaSlider = ...
+                %     uicontrol(fiMainWindowPtr('get'), ...
+                %               'Style'   , 'Slider', ...
+                %               'Value'   , sliderAlphaValue('get'), ...
+                %               'Enable'  , 'on', ...
+                %               'BackgroundColor', backgroundColor('get'), ...
+                %               'String'  , 'Alpha',...
+                %               'ToolTip', 'Fusion Alpha', ...
+                %               'CallBack', @sliderAlphaCallback ...
+                %               );    
+                % uiAlphaSliderPtr('set', uiAlphaSlider); 
+                % 
                 % addlistener(uiAlphaSlider,'Value','PreSet',@sliderAlphaCallback);                        
-                addlistener(uiAlphaSlider, 'ContinuousValueChange', @sliderAlphaCallback);
+                % %addlistener(uiAlphaSlider, 'ContinuousValueChange', @sliderAlphaCallback);
+                % 
+                % set(uiAlphaSlider, 'Visible', 'off'); 
 
-                set(uiAlphaSlider, 'Visible', 'off');   
-         
+                uiAlphaSlider = ...
+                    viewerSlider(fiMainWindowPtr('get'), ...
+                                 [0 0 30 30], ...              % position
+                                 [0 0 0], ...                  % color
+                                 [0.8 0.8 0.8], ...
+                                 [0.5 0.5 0.5], ...
+                                 [0.2 0.2 0.2], ...                        
+                                 0, 1, ...                     % min, max
+                                 sliderAlphaValue('get'), ...  % initial
+                                 @sliderAlphaCallback, ...     % callback
+                                 true, ...                     % In motion callback
+                                 0.2, ...                      % very faint track
+                                 0.6 ...                       % semi-opaque thumb
+                                 );
+
+                  uiAlphaSliderPtr('set', uiAlphaSlider); 
+
+                  set(uiAlphaSlider, 'Visible', 'off');
+  
             end
             
             % Set buffer
@@ -307,9 +340,12 @@ function setFusionCallback(~, ~)
             if numel(size(A))~=numel(size(B)) %Fuse 2D with 3D
 if 1
                 isFusion('set', false);
+
                 set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
                 set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-                set(btnFusionPtr('get'), 'FontWeight', 'normal');
+
+                set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));           
+
                 fusionBuffer('reset');
                 return;
 
@@ -360,13 +396,14 @@ end
                         'Position', [0 0 1 1], ...
                         'Visible' , 'off', ...
                         'Ydir'    , 'reverse', ...
+                        'Box'     , 'off', ...
                         'Tag'     , 'axeF', ...   
                         'XLim'    , [0 inf], ...
                         'YLim'    , [0 inf], ...
                         'CLim'    , [0 inf] ...
                         );
                 axeF.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axeF.Toolbar.Visible = 'off';                
+                deleteAxesToolbar(axeF);
 
                 set(axeF, 'HitTest', 'off');  % Disable hit testing for axes
                 set(axeF, 'XLimMode', 'manual', 'YLimMode', 'manual');  
@@ -384,26 +421,28 @@ end
                 if isempty(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
 
                      axesFusionColorbar = ...
-                        axes(uiOneWindowPtr('get'), ...
-                               'Units'   , 'normalized', ...
+                        uiaxes(uiOneWindowPtr('get'), ...
+                               'Units'   , 'pixels', ...
                                'Position', [0 0 1 1], ...
-                               'Visible' , 'off', ...
-                               'Ydir'    , 'reverse', ...
+                               'Visible' , 'on', ...
+                               'Ydir'    , 'normal', ...
                                'Tag'     , 'fusion colorbar', ...   
+                               'Box'     , 'off', ...
                                'XLim'    , [0 inf], ...
                                'YLim'    , [0 inf], ...
                                'CLim'    , [0 inf] ...
                              );
-                    axesFusionColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                    axesFusionColorbar.Toolbar.Visible = 'off';           
+                    axesFusionColorbar.Interactions = [];
+                    % axesFusionColorbar.Toolbar.Visible = 'off';           
                     axesFusionColorbarPtr('set', axesFusionColorbar, get(uiFusedSeriesPtr('get'), 'Value'));                               
                     disableDefaultInteractivity(axesFusionColorbar);
+                    deleteAxesToolbar(axesFusionColorbar);
 
                     uistack(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
                 end
 
                 axAxefText = ...
-                    axes(uiOneWindowPtr('get'), ...
+                    uiaxes(uiOneWindowPtr('get'), ...
                          'Units'   , 'normalized', ...
                          'Ydir'    , 'reverse', ...
                          'xlimmode', 'manual',...
@@ -412,14 +451,16 @@ end
                          'climmode', 'manual',...
                          'alimmode', 'manual',...
                          'Position', [0 0 0.95 1], ...
+                         'Box'     , 'off', ...
                          'Tag'     , 'axAxefText', ...
                          'Visible' , 'off',...
                          'HandleVisibility', 'off' ...
                          );
-                axAxefText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axAxefText.Toolbar.Visible = 'off'; 
+                axAxefText.Interactions = [];
+                % axAxefText.Toolbar.Visible = 'off'; 
                 disableDefaultInteractivity(axAxefText);
-
+                deleteAxesToolbar(axAxefText);
+             
                 if isfield(atFusionMetaData{1}, 'SeriesDescription')
                     sFusedSeriesDescription = atFusionMetaData{1}.SeriesDescription;
                     sFusedSeriesDescription = strrep(sFusedSeriesDescription,'_',' ');
@@ -463,6 +504,8 @@ end
                                 );
 
                 tAxefText  = text(axAxefText, 1, 0, sAxefText, 'Color', overlayColor('get'), 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
+                
+                disableAxesToolbar(axAxefText);
 
                 axesText('set', 'axef', tAxefText);
         
@@ -498,24 +541,24 @@ end
 
                     if isInterpolated('get')
 
-                        imAxeF = imagesc(imgaussfilt(imf)   , ...
+                        imAxeF = imshow(imgaussfilt(imf)   , ...
                                         'Parent'       , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                         'Interpolation', 'bilinear'... 
                                         );    
                     else
-                        imAxeF = imagesc(imgaussfilt(imf)   , ...
+                        imAxeF = imshow(imgaussfilt(imf)   , ...
                                         'Parent'       , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                         'Interpolation', 'nearest'... 
                                         );                        
                     end
                 else    
                     if isInterpolated('get')
-                        imAxeF = imagesc(imf, ...
+                        imAxeF = imshow(imf, ...
                                         'Parent'   , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                         'Interpolation', 'bilinear'... 
                                         ); 
                     else
-                        imAxeF = imagesc(imf, ...
+                        imAxeF = imshow(imf, ...
                                        'Parent'   , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                        'Interpolation', 'nearest'... 
                                         );                         
@@ -527,7 +570,8 @@ end
                 set(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); % Patch
 
                 % adjAxeCameraViewAngle(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
-               
+                disableAxesToolbar(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+
                 imAxeFPtr('set', imAxeF, get(uiFusedSeriesPtr('get'), 'Value'));          
                 rightClickMenu('add', imAxeF);                   
                       
@@ -583,12 +627,13 @@ end
                         'Visible' , 'off', ...
                         'Ydir'    , 'reverse', ...
                         'Tag'     , 'axes1f', ...   
+                        'Box'     , 'off', ...
                         'XLim'    , [0 inf], ...
                         'YLim'    , [0 inf], ...
                         'CLim'    , [0 inf] ...
                         );
                 axes1f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes1f.Toolbar.Visible = 'off';     
+                deleteAxesToolbar(axes1f);     
 
                 set(axes1f, 'HitTest', 'off');  % Disable hit testing for axes
                 set(axes1f, 'XLimMode', 'manual', 'YLimMode', 'manual');  
@@ -600,7 +645,7 @@ end
                 axes1fPtr('set', axes1f, get(uiFusedSeriesPtr('get'), 'Value'));
                 disableDefaultInteractivity(axes1f);
                 
-                linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xyz');                
+                % linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xyz');                                
                 uistack(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
 
                 if ~isempty(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
@@ -617,12 +662,13 @@ end
                         'Visible' , 'off', ...
                         'Ydir'    , 'reverse', ...
                         'Tag'     , 'axes2f', ...   
+                        'Box'     , 'off', ...
                         'XLim'    , [0 inf], ...
                         'YLim'    , [0 inf], ...
                         'CLim'    , [0 inf] ...
                         );
                 axes2f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes2f.Toolbar.Visible = 'off';       
+                deleteAxesToolbar(axes2f);       
 
                 set(axes2f, 'HitTest', 'off');  % Disable hit testing for axes
                 set(axes2f, 'XLimMode', 'manual', 'YLimMode', 'manual');  
@@ -634,7 +680,7 @@ end
                 axes2fPtr('set', axes2f, get(uiFusedSeriesPtr('get'), 'Value'));
                 disableDefaultInteractivity(axes2f);
 
-                linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
+                % linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
                 uistack(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
                 
                 if ~isempty(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
@@ -644,7 +690,6 @@ end
                     end
                 end
 
-
                 axes3f = ...
                    axes(uiTraWindowPtr('get'), ...
                         'Units'   , 'normalized', ...
@@ -652,12 +697,13 @@ end
                         'Visible' , 'off', ...
                         'Tag'     , 'axes3f', ...   
                         'Ydir'    ,'reverse', ...
+                        'Box'     , 'off', ...
                         'XLim'    , [0 inf], ...
                         'YLim'    , [0 inf], ...
                         'CLim'    , [0 inf] ...
                         );
                 axes3f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes3f.Toolbar.Visible = 'off';     
+                deleteAxesToolbar(axes3f);       
 
                 set(axes3f, 'HitTest', 'off');  % Disable hit testing for axes
                 set(axes3f, 'XLimMode', 'manual', 'YLimMode', 'manual');  
@@ -673,7 +719,8 @@ end
 %                set(axes3f, 'YLim', axes3.YLim); 
                 
                 axes3fPtr('set', axes3f, get(uiFusedSeriesPtr('get'), 'Value'));
-                linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'xy');                
+
+                % linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'xy');                
                 uistack(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
                 
                 % Axe colorbar
@@ -681,28 +728,30 @@ end
                 if isempty(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
 
                     axesFusionColorbar = ...
-                        axes(uiTraWindowPtr('get'), ...
-                               'Units'   , 'normalized', ...
+                        uiaxes(uiTraWindowPtr('get'), ...
+                               'Units'   , 'pixels', ...
                                'Position', [0 0 1 1], ...
-                               'Visible' , 'off', ...
-                               'Ydir'    , 'reverse', ...
+                               'Visible' , 'on', ...
+                               'Ydir'    , 'normal', ...
                                'Tag'     , 'fusion colorbar', ...   
+                               'Box'     , 'off', ...
                                'XLim'    , [0 inf], ...
                                'YLim'    , [0 inf], ...
                                'CLim'    , [0 inf] ...
                              );
     
-                    axesFusionColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                    axesFusionColorbar.Toolbar.Visible = 'off';           
+                    axesFusionColorbar.Interactions = [];
+                    % axesFusionColorbar.Toolbar.Visible = 'off';           
                     axesFusionColorbarPtr('set', axesFusionColorbar, get(uiFusedSeriesPtr('get'), 'Value'));                               
                     disableDefaultInteractivity(axesFusionColorbar);
                     uistack(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
+                    deleteAxesToolbar(axesFusionColorbar);
                 end
 
                 % Set fusion display text
                
                 axAxes3fText = ...
-                    axes(uiTraWindowPtr('get'), ...
+                    uiaxes(uiTraWindowPtr('get'), ...
                          'Units'   , 'normalized', ...
                          'Ydir'    , 'reverse', ...
                          'xlimmode', 'manual',...
@@ -710,14 +759,16 @@ end
                          'zlimmode', 'manual',...
                          'climmode', 'manual',...
                          'alimmode', 'manual',...
-                         'Position', [0 0 0.90 1], ...
+                         'Position', [0 0 0.9 1], ...
+                         'Box'     , 'off', ...
                          'Tag'     , 'axAxes3fText', ...
                          'Visible' , 'off',...
                          'HandleVisibility', 'off' ...
                          );
-                axAxes3fText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axAxes3fText.Toolbar.Visible = 'off';      
+                axAxes3fText.Interactions = [];
+                % axAxes3fText.Toolbar.Visible = 'off';      
                 disableDefaultInteractivity(axAxes3fText);
+                deleteAxesToolbar(axAxes3fText);
 
                 if isfield(atFusionMetaData{1}, 'SeriesDescription')
                     sFusedSeriesDescription = atFusionMetaData{1}.SeriesDescription;
@@ -770,7 +821,9 @@ end
                     delete(tAxes3fText)
                 end
                 tAxes3fText  = text(axAxes3fText, 1, 0, sAxe3fText, 'Color', overlayColor('get'), 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
-                
+               
+                disableAxesToolbar(axAxes3fText);    
+
                 axesText('set', 'axes3f', tAxes3fText);
 
                 if overlayActivate('get') == false
@@ -792,13 +845,15 @@ end
                             'Visible' , 'off', ...
                             'Ydir'    ,'reverse', ...
                             'Tag'     , 'axeMipf', ...   
+                            'Box'     , 'off', ...
                             'XLim'    , [0 inf], ...
                             'YLim'    , [0 inf], ...
                             'CLim'    , [0 inf] ...
                             );
                     axesMipf.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                    axesMipf.Toolbar.Visible = 'off';  
+                    % axesMipf.Toolbar.Visible = 'off';  
                     set(axesMipf, 'HitTest', 'off');  % Disable hit testing for axes
+                    deleteAxesToolbar(axesMipf);
 
                     set(axesMipf, 'XLimMode', 'manual', 'YLimMode', 'manual');  
                     set(axesMipf, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
@@ -809,8 +864,8 @@ end
                     disableDefaultInteractivity(axesMipf);
 
                     axesMipfPtr('set', axesMipf, get(uiFusedSeriesPtr('get'), 'Value'));
+                    % linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
 
-                    linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
                     uistack(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');                    
                 end                                                             
                 
@@ -955,12 +1010,12 @@ end
 
                         if isInterpolated('get')
 
-                            imCoronalF = imagesc(imgaussfilt(imComputed), ...
+                            imCoronalF = imshow(imgaussfilt(imComputed), ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                 'Interpolation', 'bilinear'... 
                                                 );        
                         else
-                            imCoronalF = imagesc(imgaussfilt(imComputed), ...
+                            imCoronalF = imshow(imgaussfilt(imComputed), ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                 'Interpolation', 'nearest'... 
                                                 );                                      
@@ -968,12 +1023,12 @@ end
                     else      
                         if isInterpolated('get')
 
-                            imCoronalF = imagesc(imComputed, ...
+                            imCoronalF = imshow(imComputed, ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                 'Interpolation', 'bilinear'... 
                                                 );                             
                         else
-                            imCoronalF = imagesc(imComputed, ...
+                            imCoronalF = imshow(imComputed, ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                 'Interpolation', 'nearest'... 
                                                 ); 
@@ -992,12 +1047,12 @@ end
 
                         if isInterpolated('get')
              
-                            imCoronalF = imagesc(imgaussfilt(permute(imf(iCoronal,:,:), [3 2 1])), ...
+                            imCoronalF = imshow(imgaussfilt(permute(imf(iCoronal,:,:), [3 2 1])), ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                 'Interpolation', 'bilinear'... 
                                                  );   
                         else
-                            imCoronalF = imagesc(imgaussfilt(permute(imf(iCoronal,:,:), [3 2 1])), ...
+                            imCoronalF = imshow(imgaussfilt(permute(imf(iCoronal,:,:), [3 2 1])), ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                 'Interpolation', 'nearest'... 
                                                  );                                      
@@ -1005,12 +1060,12 @@ end
                     else      
                         if isInterpolated('get')
 
-                            imCoronalF = imagesc(permute(imf(iCoronal,:,:), [3 2 1]), ...
+                            imCoronalF = imshow(permute(imf(iCoronal,:,:), [3 2 1]), ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                 'Interpolation', 'bilinear'... 
                                                 ); 
                         else
-                            imCoronalF = imagesc(permute(imf(iCoronal,:,:), [3 2 1]), ...
+                            imCoronalF = imshow(permute(imf(iCoronal,:,:), [3 2 1]), ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                 'Interpolation', 'nearest'... 
                                                 );                             
@@ -1025,6 +1080,8 @@ end
                 
                 set(imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
+
+                disableAxesToolbar(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
                 % adjAxeCameraViewAngle(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
@@ -1044,12 +1101,12 @@ end
 
                         if isInterpolated('get')
 
-                            imSagittalF = imagesc(imgaussfilt(imComputed), ...
+                            imSagittalF = imshow(imgaussfilt(imComputed), ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                  'Interpolation', 'bilinear'... 
                                                  );  
                         else
-                            imSagittalF = imagesc(imgaussfilt(imComputed), ...
+                            imSagittalF = imshow(imgaussfilt(imComputed), ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                  'Interpolation', 'nearest'... 
                                                  );                                                                                                  
@@ -1057,12 +1114,12 @@ end
                     else                    
                         if isInterpolated('get')
 
-                            imSagittalF = imagesc(imComputed, ...
+                            imSagittalF = imshow(imComputed, ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                  'Interpolation', 'bilinear'... 
                                                  );    
                         else
-                            imSagittalF = imagesc(imComputed, ...
+                            imSagittalF = imshow(imComputed, ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                  'Interpolation', 'nearest'... 
                                                  );                            
@@ -1079,24 +1136,24 @@ end
 
                         if isInterpolated('get')
 
-                            imSagittalF = imagesc(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2])), ...
+                            imSagittalF = imshow(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2])), ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                  'Interpolation', 'bilinear'... 
                                                  );    
                         else
-                            imSagittalF = imagesc(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2])), ...
+                            imSagittalF = imshow(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2])), ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                  'Interpolation', 'nearest'... 
                                                  );                                 
                         end
                     else
                         if isInterpolated('get')
-                            imSagittalF = imagesc(permute(imf(:,iSagittal,:), [3 1 2]), ...
+                            imSagittalF = imshow(permute(imf(:,iSagittal,:), [3 1 2]), ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                  'Interpolation', 'bilinear'... 
                                                  );    
                         else
-                            imSagittalF = imagesc(permute(imf(:,iSagittal,:), [3 1 2]), ...
+                            imSagittalF = imshow(permute(imf(:,iSagittal,:), [3 1 2]), ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                  'Interpolation', 'nearest'... 
                                                  );                              
@@ -1110,6 +1167,8 @@ end
                 
                 set(imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
+
+                disableAxesToolbar(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
                 % adjAxeCameraViewAngle(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
                
@@ -1138,12 +1197,12 @@ end
 
                         if isInterpolated('get')
                             
-                            imAxialF = imagesc(imgaussfilt(imComputed),  ...
+                            imAxialF = imshow(imgaussfilt(imComputed),  ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                               'Interpolation', 'bilinear'... 
                                               ); 
                         else
-                            imAxialF = imagesc(imgaussfilt(imComputed),  ...
+                            imAxialF = imshow(imgaussfilt(imComputed),  ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                               'Interpolation', 'nearest'... 
                                               );                                                                                                                    
@@ -1151,12 +1210,12 @@ end
                     else     
                         if isInterpolated('get')
 
-                            imAxialF = imagesc(imComputed,  ...
+                            imAxialF = imshow(imComputed,  ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                               'Interpolation', 'bilinear'... 
                                               );                          
                         else
-                            imAxialF = imagesc(imComputed,  ...
+                            imAxialF = imshow(imComputed,  ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                               'Interpolation', 'nearest'... 
                                               );                                                                                    
@@ -1173,12 +1232,12 @@ end
 
                         if isInterpolated('get')
                        
-                            imAxialF = imagesc(imgaussfilt(imf(:,:,iAxial)), ...
+                            imAxialF = imshow(imgaussfilt(imf(:,:,iAxial)), ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                               'Interpolation', 'bilinear'... 
                                               );    
                         else
-                            imAxialF = imagesc(imgaussfilt(imf(:,:,iAxial)), ...
+                            imAxialF = imshow(imgaussfilt(imf(:,:,iAxial)), ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                               'Interpolation', 'nearest'... 
                                               );                                
@@ -1186,12 +1245,12 @@ end
                     else
                         if isInterpolated('get')
 
-                            imAxialF = imagesc(imf(:,:,iAxial),  ...
+                            imAxialF = imshow(imf(:,:,iAxial),  ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                               'Interpolation', 'bilinear'... 
                                               );                                
                         else
-                            imAxialF = imagesc(imf(:,:,iAxial),  ...
+                            imAxialF = imshow(imf(:,:,iAxial),  ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                               'Interpolation', 'nearest'... 
                                               );                                                                                                                               
@@ -1205,6 +1264,8 @@ end
                 
                 set(imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
+
+                disableAxesToolbar(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
                 % adjAxeCameraViewAngle(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
                             
@@ -1224,13 +1285,13 @@ end
 
                         if isInterpolated('get')
 
-                            imMipF = imagesc(imgaussfilt(permute(imComputedMipF(iMipAngle,:,:), [3 2 1])), ...
+                            imMipF = imshow(imgaussfilt(permute(imComputedMipF(iMipAngle,:,:), [3 2 1])), ...
                                             'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                             'Interpolation', 'bilinear'... 
                                             );                                                                
                         else
 
-                            imMipF = imagesc(imgaussfilt(permute(imComputedMipF(iMipAngle,:,:), [3 2 1])), ...
+                            imMipF = imshow(imgaussfilt(permute(imComputedMipF(iMipAngle,:,:), [3 2 1])), ...
                                             'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                             'Interpolation', 'nearest'... 
                                             );                              
@@ -1238,12 +1299,12 @@ end
 
                     else
                         if isInterpolated('get')
-                            imMipF = imagesc(permute(imComputedMipF(iMipAngle,:,:), [3 2 1]),  ...
+                            imMipF = imshow(permute(imComputedMipF(iMipAngle,:,:), [3 2 1]),  ...
                                             'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                             'Interpolation', 'bilinear'... 
                                             );               
                         else
-                            imMipF = imagesc(permute(imComputedMipF(iMipAngle,:,:), [3 2 1]),  ...
+                            imMipF = imshow(permute(imComputedMipF(iMipAngle,:,:), [3 2 1]),  ...
                                             'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                             'Interpolation', 'nearest'... 
                                             );                             
@@ -1256,6 +1317,8 @@ end
                 
                 set(imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
+
+                disableAxesToolbar(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
                 % adjAxeCameraViewAngle(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
@@ -1341,9 +1404,7 @@ end
                 fusionAspectRatioValue('set', 'y', yf);
                 fusionAspectRatioValue('set', 'z', zf);
             end
-
-            progressBar(1, 'Ready');
-
+           
             set(btnFusionPtr('get')    , 'Enable', 'on');
             set(uiFusedSeriesPtr('get'), 'Enable', 'on');
 
@@ -1351,10 +1412,11 @@ end
 
             set(btnFusionPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            set(btnFusionPtr('get'), 'FontWeight', 'bold');
+
+            set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_white.png'));           
         else
                                                 
-            if numel(atInputTemplate) == 1
+            if isscalar(atInputTemplate)
                 if atInputTemplate(dFusionSeriesOffset).bEdgeDetection == false
                     atInputTemplate(dFusionSeriesOffset).bFusedEdgeDetection = false;
                 end
@@ -1371,9 +1433,11 @@ end
 
            set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
            set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-           set(btnFusionPtr('get'), 'FontWeight', 'normal');
-          
+
+           set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));           
+         
            if isPlotContours('get') == true % Deactivate plot contours
+
                setPlotContoursCallback();
            end
            
@@ -1476,27 +1540,31 @@ end
             
             if ~bIsGraphic 
 
-                ptrFusionColorbar = ...
-                    colorbar(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
-                             'AxisLocation' , 'in', ...
-                             'Tag'          , 'Fusion Colorbar', ...
-                             'EdgeColor'    , overlayColor('get'), ...
-                             'Units'        , 'pixels', ...
-                             'Box'          , 'off', ...
-                             'Location'     , 'east', ...
-                             'ButtonDownFcn', @colorbarCallback ...
-                             );   
-                         
-                ptrFusionColorbar.TickLabels = [];         
-                ptrFusionColorbar.Ticks = [];
-                ptrFusionColorbar.TickLength = 0;
-                ptrFusionColorbar.Interruptible = 'off'; % Prevent interruptions
+                % ptrFusionColorbar = ...
+                %     colorbar(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
+                %              'AxisLocation' , 'in', ...
+                %              'Tag'          , 'Fusion Colorbar', ...
+                %              'EdgeColor'    , overlayColor('get'), ...
+                %              'Units'        , 'pixels', ...
+                %              'Box'          , 'off', ...
+                %              'Location'     , 'east', ...
+                %              'ButtonDownFcn', @colorbarCallback ...
+                %              );   
+                % 
+                % ptrFusionColorbar.TickLabels = [];         
+                % ptrFusionColorbar.Ticks = [];
+                % ptrFusionColorbar.TickLength = 0;
+                % ptrFusionColorbar.Interruptible = 'off'; % Prevent interruptions
+
+                ptrFusionColorbar = viewerColorbar(axesFusionColorbarPtr('get', [], dFusionSeriesOffset),  ...
+                                            'Fusion Colorbar', ...
+                                            getColorMap('one', fusionColorMapOffset('get')));
 
                 uiFusionColorbarPtr('set', ptrFusionColorbar);
                 colorbarCallback(ptrFusionColorbar); % Fix for Linux
                                 
             else
-                colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
+                setColorbarColormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
                 colormap(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));                
             end
         else
@@ -1515,68 +1583,73 @@ end
             
             if ~bIsGraphic
 
-                if isVsplash('get') == true && ...
-                   ~strcmpi(vSplahView('get'), 'all')
-                    if strcmpi(vSplahView('get'), 'coronal')
-                        ptrFusionColorbar = ...
-                            colorbar(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
-                                     'AxisLocation' , 'in', ...
-                                     'Tag'          , 'Fusion Colorbar', ...
-                                     'EdgeColor'    , overlayColor('get'), ...
-                                     'Units'        , 'pixels', ...
-                                     'Box'          , 'off', ...
-                                     'Location'     , 'east', ...
-                                     'ButtonDownFcn', @colorbarCallback ...
-                                     );            
-                    elseif strcmpi(vSplahView('get'), 'sagittal')
-                        ptrFusionColorbar = ...
-                            colorbar(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
-                                     'AxisLocation' , 'in', ...
-                                     'Tag'          , 'Fusion Colorbar', ...
-                                     'EdgeColor'    , overlayColor('get'), ...
-                                     'Units'        , 'pixels', ...
-                                     'Box'          , 'off', ...
-                                     'Location'     , 'east', ...
-                                     'ButtonDownFcn', @colorbarCallback ...
-                                     );            
-                    else
-                        ptrFusionColorbar = ...
-                            colorbar(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
-                                     'AxisLocation' , 'in', ...
-                                     'Tag'          , 'Fusion Colorbar', ...
-                                     'EdgeColor'    , overlayColor('get'), ...
-                                     'Units'        , 'pixels', ...
-                                     'Box'          , 'off', ...
-                                     'Location'     , 'east', ...
-                                     'ButtonDownFcn', @colorbarCallback ...
-                                     );            
-                    end
+                % if isVsplash('get') == true && ...
+                %    ~strcmpi(vSplahView('get'), 'all')
+                % 
+                %     if strcmpi(vSplahView('get'), 'coronal')
+                %         ptrFusionColorbar = ...
+                %             colorbar(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                %                      'AxisLocation' , 'in', ...
+                %                      'Tag'          , 'Fusion Colorbar', ...
+                %                      'EdgeColor'    , overlayColor('get'), ...
+                %                      'Units'        , 'pixels', ...
+                %                      'Box'          , 'off', ...
+                %                      'Location'     , 'east', ...
+                %                      'ButtonDownFcn', @colorbarCallback ...
+                %                      );            
+                %     elseif strcmpi(vSplahView('get'), 'sagittal')
+                %         ptrFusionColorbar = ...
+                %             colorbar(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                %                      'AxisLocation' , 'in', ...
+                %                      'Tag'          , 'Fusion Colorbar', ...
+                %                      'EdgeColor'    , overlayColor('get'), ...
+                %                      'Units'        , 'pixels', ...
+                %                      'Box'          , 'off', ...
+                %                      'Location'     , 'east', ...
+                %                      'ButtonDownFcn', @colorbarCallback ...
+                %                      );            
+                %     else
+                %         ptrFusionColorbar = ...
+                %             colorbar(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                %                      'AxisLocation' , 'in', ...
+                %                      'Tag'          , 'Fusion Colorbar', ...
+                %                      'EdgeColor'    , overlayColor('get'), ...
+                %                      'Units'        , 'pixels', ...
+                %                      'Box'          , 'off', ...
+                %                      'Location'     , 'east', ...
+                %                      'ButtonDownFcn', @colorbarCallback ...
+                %                      );            
+                %     end
+                % 
+                % else
+                %     ptrFusionColorbar = ...
+                %         colorbar(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                %                  'AxisLocation' , 'in', ...
+                %                  'Tag'          , 'Fusion Colorbar', ...
+                %                  'EdgeColor'    , overlayColor('get'), ...
+                %                  'Units'        , 'pixels', ...
+                %                  'Box'          , 'off', ...
+                %                  'Location'     , 'east', ...
+                %                  'ButtonDownFcn', @colorbarCallback ...
+                %                  );            
+                % end
+                % 
+                % ptrFusionColorbar.TickLabels = [];                 
+                % ptrFusionColorbar.Ticks = [];
+                % ptrFusionColorbar.TickLength = 0;
+                % ptrFusionColorbar.Interruptible = 'off';
 
-                else
-                    ptrFusionColorbar = ...
-                        colorbar(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
-                                 'AxisLocation' , 'in', ...
-                                 'Tag'          , 'Fusion Colorbar', ...
-                                 'EdgeColor'    , overlayColor('get'), ...
-                                 'Units'        , 'pixels', ...
-                                 'Box'          , 'off', ...
-                                 'Location'     , 'east', ...
-                                 'ButtonDownFcn', @colorbarCallback ...
-                                 );            
-                end
-                
-                ptrFusionColorbar.TickLabels = [];                 
-                ptrFusionColorbar.Ticks = [];
-                ptrFusionColorbar.TickLength = 0;
-                ptrFusionColorbar.Interruptible = 'off';
-   
+               ptrFusionColorbar = viewerColorbar(axesFusionColorbarPtr('get', [], dFusionSeriesOffset),  ...
+                                                  'Fusion Colorbar', ...
+                                                  getColorMap('one', fusionColorMapOffset('get')));
+
                 uiFusionColorbarPtr('set', ptrFusionColorbar);
 
 %                 colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));    
                
                 colorbarCallback(ptrFusionColorbar); % Fix for Linux  
             else
-                colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));    
+                setColorbarColormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));    
                 
                 colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                 colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
@@ -1594,6 +1667,7 @@ end
         if ~isempty(ptrFusionColorbar)
 
             setFusionColorbarPosition(ptrFusionColorbar);
+            ptrFusionColorbar.Parent.YLabel.Position = [ptrFusionColorbar.Parent.YLabel.Position(1) - 10, ptrFusionColorbar.Parent.YLabel.Position(2), ptrFusionColorbar.Parent.YLabel.Position(3)];            
         end
 
 
@@ -1667,36 +1741,37 @@ end
 
             if size(fusionBuffer('get', 'get', get(uiFusedSeriesPtr('get'), 'Value')), 3) == 1
                 axeFusionColorbar = axes(uiOneWindowPtr('get'), ...
-                                         'Units'   , 'pixel', ...
+                                         'Units'   , 'pixels', ...
                                          'Ydir'    , 'reverse', ...
                                          'xlimmode', 'manual',...
                                          'ylimmode', 'manual',...
                                          'zlimmode', 'manual',...
                                          'climmode', 'manual',...
                                          'alimmode', 'manual',...
-                                         'Position', [get(ptrFusionColorbar, 'Position')], ...
+                                         'Box'     , 'off', ...
+                                         'Position', [get(ptrFusionColorbar.Parent, 'Position')], ...
                                          'Visible' , 'off'...
                                          );                
-                axeFusionColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axeFusionColorbar.Toolbar.Visible = 'off';                 
-                disableDefaultInteractivity(axeFusionColorbar);
            else
                 axeFusionColorbar = axes(uiTraWindowPtr('get'), ...
-                                         'Units'   , 'pixel', ...
+                                         'Units'   , 'pixels', ...
                                          'Ydir'    , 'reverse', ...
                                          'xlimmode', 'manual',...
                                          'ylimmode', 'manual',...
                                          'zlimmode', 'manual',...
                                          'climmode', 'manual',...
                                          'alimmode', 'manual',...
-                                         'Position', [get(ptrFusionColorbar, 'Position')], ...
+                                         'Box'     , 'off', ...
+                                         'Position', [get(ptrFusionColorbar.Parent, 'Position')], ...
                                          'Visible' , 'off'...
                                          );
 
-                axeFusionColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axeFusionColorbar.Toolbar.Visible = 'off';                 
-                disableDefaultInteractivity(axeFusionColorbar);
             end
+
+            axeFusionColorbar.Interactions = [];
+            % axeFusionColorbar.Toolbar.Visible = 'off';                 
+            disableDefaultInteractivity(axeFusionColorbar);
+            deleteAxesToolbar(axeFusionColorbar);
 
             axeFusionColorbarPtr('set', axeFusionColorbar);
     
@@ -1707,8 +1782,8 @@ end
             
             % Line on colorbar
     
-            lineFusionColorbarIntensityMax = line(axeFusionColorbar, [0, 1], [dYOffsetMax, dYOffsetMax], 'Color', viewerFusionColorbarIntensityMaxLineColor('get'), 'LineWidth', 10); 
-            lineFusionColorbarIntensityMin = line(axeFusionColorbar, [0, 1], [dYOffsetMin, dYOffsetMin], 'Color', viewerFusionColorbarIntensityMinLineColor('get'), 'LineWidth', 10); 
+            lineFusionColorbarIntensityMax = line(axeFusionColorbar, [0.1, 0.9], [dYOffsetMax, dYOffsetMax], 'Color', viewerFusionColorbarIntensityMaxLineColor('get'), 'LineWidth', 15); 
+            lineFusionColorbarIntensityMin = line(axeFusionColorbar, [0.1, 0.9], [dYOffsetMin, dYOffsetMin], 'Color', viewerFusionColorbarIntensityMinLineColor('get'), 'LineWidth', 15); 
             
             lineFusionColorbarIntensityMaxPtr('set', lineFusionColorbarIntensityMax);
             lineFusionColorbarIntensityMinPtr('set', lineFusionColorbarIntensityMin);
@@ -1723,8 +1798,8 @@ end
     
             % Text on colorbar line
         
-            textFusionColorbarIntensityMax = text(axeFusionColorbar, 0.0,lineFusionColorbarIntensityMax.YData(1), ' ','Color', viewerFusionColorbarIntensityMaxTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
-            textFusionColorbarIntensityMin = text(axeFusionColorbar, 0.0,lineFusionColorbarIntensityMin.YData(1), ' ','Color', viewerFusionColorbarIntensityMinTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
+            textFusionColorbarIntensityMax = text(axeFusionColorbar, 0.1,lineFusionColorbarIntensityMax.YData(1), ' ','Color', viewerFusionColorbarIntensityMaxTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
+            textFusionColorbarIntensityMin = text(axeFusionColorbar, 0.1,lineFusionColorbarIntensityMin.YData(1), ' ','Color', viewerFusionColorbarIntensityMinTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
         
             textFusionColorbarIntensityMaxPtr('set', textFusionColorbarIntensityMax);
             textFusionColorbarIntensityMinPtr('set', textFusionColorbarIntensityMin);
@@ -1734,7 +1809,7 @@ end
         
             set(textFusionColorbarIntensityMax,'ButtonDownFcn',@lineFusionColorbarIntensityMaxClick);
             set(textFusionColorbarIntensityMin,'ButtonDownFcn',@lineFusionColorbarIntensityMinClick);
-    
+
             if isempty(isFusionColorbarDefaultUnit('get'))
                 isFusionColorbarDefaultUnit('set', true);
             end
@@ -1763,7 +1838,8 @@ end
                     set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [dLevelMin dLevelMax]);
                 end        
             end
-                   
+            
+            disableAxesToolbar(axeFusionColorbar);
         end
 
 %         uiFusionSliderWindow = uiFusionSliderWindowPtr('get');
@@ -1923,6 +1999,7 @@ end
              if ~isempty(ptrColorbar)
 
                 setColorbarPosition(ptrColorbar);
+                ptrColorbar.Parent.YLabel.Position = [ptrColorbar.Parent.YLabel.Position(1) - 10, ptrColorbar.Parent.YLabel.Position(2), ptrColorbar.Parent.YLabel.Position(3)];       
              end
 
 %             aFigurePosition = ptrColorbar.Parent.Position;
@@ -2141,11 +2218,26 @@ end
                 aUiTraPosition = get(uiTraWindowPtr('get'), 'Position');
     
                 if isFusion('get') == true
-                    set(btnUiTraWindowFullScreen, 'Position', [aUiTraPosition(3)-73 30 20 20]);
+                    set(btnUiTraWindowFullScreen, 'Position', [aUiTraPosition(3)-73 34 20 20]);
                 else
                     set(btnUiTraWindowFullScreen, 'Position', [aUiTraPosition(3)-73 10 20 20]);
                 end
-            end          
+            end
+
+            chkUitraWindowSelected = chkUiTraWindowSelectedPtr('get');
+    
+            if ~isempty(chkUitraWindowSelected)
+                
+                aUiTraPosition = get(uiTraWindowPtr('get'), 'Position');
+    
+                if isFusion('get') == true
+                    set(chkUitraWindowSelected, 'Position', [aUiTraPosition(3)-93 34 20 20]);
+                else
+                    set(chkUitraWindowSelected, 'Position', [aUiTraPosition(3)-93 10 20 20]);
+                end                
+            end
+
+
         end
 
         if isFusion('get') == true
@@ -2176,7 +2268,9 @@ end
                  axe  = axePtr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                  axef = axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                 setAxesLimitsFromSource(axe, axef);
+                 XLim = get(axe, 'XLim');
+                 YLim = get(axe, 'YLim');
+
                  %adjAxeCameraViewAngle(axef); 
           
             % 
@@ -2185,7 +2279,29 @@ end
            % 
                  % set(axef, 'XLim', [0 aFusionSize(2)]);
                  % set(axef, 'YLim', [0 aFusionSize(1)]);
-                 linkaxes([axe axef], 'xy');    
+                 % linkaxes([axe axef], 'xy');  
+
+                dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+
+                axefusion = [];
+                for rr=1:dNbFusedSeries
+
+                    if ~isempty(axefPtr('get', [], rr))
+
+                        axefusion{end+1} = axefPtr('get', [], rr);
+                    end
+
+                end
+
+                 if ~isempty(axefusion)
+
+                    linkaxes([axe axefusion{:}], 'xy'); 
+                 end
+
+                 set(axe, 'XLim', XLim);
+                 set(axe, 'YLim', YLim);
+
+                 setAxesLimitsFromSource(axe, axef);
 
                  initAxePlotView(axe);
                  initAxePlotView(axef);               
@@ -2193,7 +2309,9 @@ end
                 axes1  = axes1Ptr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                 axes1f = axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                setAxesLimitsFromSource(axes1, axes1f);
+                XLim = get(axes1, 'XLim');
+                YLim = get(axes1, 'YLim');
+
                 %adjAxeCameraViewAngle(axes1f); 
 
 
@@ -2206,15 +2324,39 @@ end
                 %     set(axes1f, 'YLim', [0 aFusionSize(3)]); 
                 % end
 
-                linkaxes([axes1 axes1f], 'xy'); 
+                % linkaxes([axes1 axes1f], 'xy'); 
 
+                dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+
+                axes1fusion = [];
+                for rr=1:dNbFusedSeries
+
+                    if ~isempty(axes1fPtr('get', [], rr))
+
+                        axes1fusion{end+1} = axes1fPtr('get', [], rr);
+                    end
+
+                end
+
+                if ~isempty(axes1fusion)
+
+                    linkaxes([axes1 axes1fusion{:}], 'xy'); 
+                end             
+
+                set(axes1, 'XLim', XLim);
+                set(axes1, 'YLim', YLim);
+
+                setAxesLimitsFromSource(axes1, axes1f);
+         
                 initAxePlotView(axes1);
                 initAxePlotView(axes1f);
 
                 axes2  = axes2Ptr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                 axes2f = axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                setAxesLimitsFromSource(axes2, axes2f);
+                XLim = get(axes2, 'XLim');
+                YLim = get(axes2, 'YLim');
+
                 % adjAxeCameraViewAngle(axes2f); 
 
 
@@ -2228,15 +2370,37 @@ end
                 %     set(axes2f, 'YLim', [0 aFusionSize(3)]); 
                 % end
 
-                linkaxes([axes2 axes2f], 'xy'); 
-                initAxePlotView(axes2f);
+                % linkaxes([axes2 axes2f], 'xy'); 
 
+                axes2fusion = [];
+                for rr=1:dNbFusedSeries
+                    
+                    if ~isempty(axes2fPtr('get', [], rr))
+
+                        axes2fusion{end+1} = axes2fPtr('get', [], rr);
+                    end
+
+                end
+
+                if ~isempty(axes2fusion)
+
+                    linkaxes([axes2 axes2fusion{:}], 'xy'); 
+                end
+
+                set(axes2, 'XLim', XLim);
+                set(axes2, 'YLim', YLim);
+
+                setAxesLimitsFromSource(axes2, axes2f);
+
+                initAxePlotView(axes2f);
                 initAxePlotView(axes2);
 
                 axes3  = axes3Ptr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                 axes3f = axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
-                
-                setAxesLimitsFromSource(axes3, axes3f);
+
+                XLim = get(axes3, 'XLim');
+                YLim = get(axes3, 'YLim');
+
                 %adjAxeCameraViewAngle(axes3f); 
             
                 % if isVsplash('get') == true
@@ -2247,7 +2411,27 @@ end
                     % set(axes3f, 'YLim', [0 aFusionSize(1)]); 
                 % end
 
-                linkaxes([axes3 axes3f], 'xy');                 
+                % linkaxes([axes3 axes3f], 'xy');       
+
+                axes3fusion = [];
+                for rr=1:dNbFusedSeries
+
+                    if ~isempty(axes3fPtr('get', [], rr))
+
+                        axes3fusion{end+1} = axes3fPtr('get', [], rr);
+                    end
+
+                end
+
+                if ~isempty(axes3fusion)
+
+                    linkaxes([axes3 axes3fusion{:}], 'xy'); 
+                end
+
+                set(axes3, 'XLim', XLim);
+                set(axes3, 'YLim', YLim);
+
+                setAxesLimitsFromSource(axes3, axes3f);
 
                 initAxePlotView(axes3);
                 initAxePlotView(axes3f);
@@ -2257,7 +2441,9 @@ end
                     axesMip  = axesMipPtr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                     axesMipf = axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                    setAxesLimitsFromSource(axesMip, axesMipf);
+                    XLim = get(axesMip, 'XLim');
+                    YLim = get(axesMip, 'YLim');
+
                     %adjAxeCameraViewAngle(axesMipf); 
 
                     % set(axesMipf, 'XLim', axesMip.XLim);
@@ -2267,7 +2453,26 @@ end
                     % set(axesMipf, 'XLim', [0 aFusionSize(2)]);
                     % set(axesMipf, 'YLim', [0 aFusionSize(3)]);
 
-                    linkaxes([axesMip axesMipf], 'xy');   
+                    % linkaxes([axesMip axesMipf], 'xy');   
+
+                    axesMipfusion = [];
+                    for rr=1:dNbFusedSeries
+    
+                        if ~isempty(axesMipfPtr('get', [], rr))
+                            axesMipfusion{end+1} = axesMipfPtr('get', [], rr);
+                        end
+    
+                    end
+    
+                    if ~isempty(axesMipfusion)
+    
+                        linkaxes([axesMip axesMipfusion{:}], 'xy'); 
+                    end
+
+                    set(axesMip, 'XLim', XLim);
+                    set(axesMip, 'YLim', YLim);
+
+                    setAxesLimitsFromSource(axesMip, axesMipf);
 
                     initAxePlotView(axesMip);
                     initAxePlotView(axesMipf);
@@ -2282,28 +2487,33 @@ end
                 alpha( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),   get(uiAlphaSliderPtr('get'), 'Value'));
                 alpha( imAxePtr ('get', [], get(uiSeriesPtr('get')     , 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value'));   
 
-                axef = axefPtr('get', [], get(uiSeriesPtr('get'), 'Value'));    
-                axef.Toolbar.Visible = 'off';
-            else
+                % axef = axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));    
+                % axef.Toolbar.Visible = 'off'; % We need to keep the toolbar for 3D visualisation
+                % deleteAxesToolbar(axef);
+           else
 
                 set( imCoronalFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
                 set( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
                 set( imAxialFPtr   ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
 
-                axe1f = axes1fPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                axe2f = axes2fPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                axe3f = axes3fPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                % axe1f = axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                % axe2f = axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                % axe3f = axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
     
-                axe1f.Toolbar.Visible = 'off';
-                axe2f.Toolbar.Visible = 'off';
-                axe3f.Toolbar.Visible = 'off';
+                % axe1f.Toolbar.Visible = 'off';
+                % axe2f.Toolbar.Visible = 'off';
+                % axe3f.Toolbar.Visible = 'off';
+
+                % delete(axe1f.Toolbar);
+                % delete(axe2f.Toolbar);
+                % delete(axe3f.Toolbar);
 
                 if link2DMip('get') == true && isVsplash('get') == false      
 
                     set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
 
-                    axeMipf = axesMipfPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                    axeMipf.Toolbar.Visible = 'off';                    
+                    % axeMipf = axesMipfPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    % axeMipf.Toolbar.Visible = 'off';                    
                 end
 
                 alpha( imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
@@ -2314,6 +2524,12 @@ end
 
                     alpha( imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );                                
                 end 
+                
+                if isVsplash('get') == false
+
+                    axeMipf = axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                    % delete(axeMipf.Toolbar);
+                end
 
                 alpha( imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
                 alpha( imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
@@ -2351,22 +2567,27 @@ end
             delete(textFusionColorbarIntensityMaxPtr('get'));
             delete(textFusionColorbarIntensityMinPtr('get'));            
             
-            delete(axeFusionColorbarPtr('get'));
-
             lineFusionColorbarIntensityMaxPtr('set', []);
             lineFusionColorbarIntensityMinPtr('set', []);
             textFusionColorbarIntensityMaxPtr('set', []);
             textFusionColorbarIntensityMinPtr('set', []);            
 
-            delete(axeFusionColorbarPtr('set', []));
+            delete(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+            axesFusionColorbarPtr('set', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
             delete(uiFusionColorbarPtr('get'));
-            delete(uiAlphaSliderPtr('get'));
+            uiFusionColorbarPtr('set', []);
 
-            uiFusionColorbarPtr    ('set', '');
+            delete(axeFusionColorbarPtr('get'));
+            axeFusionColorbarPtr('set', []);
+
+            delete(uiAlphaSliderPtr('get'));
+            uiAlphaSliderPtr       ('set', []);                  
+
+            % uiFusionColorbarPtr    ('set', '');
 %             uiFusionSliderWindowPtr('set', '');
 %             uiFusionSliderLevelPtr ('set', '');
-            uiAlphaSliderPtr       ('set', '');                  
+            
             
             if size(dicomBuffer('get'), 3) == 1
                 
@@ -2407,9 +2628,9 @@ end
                     axesMipfcPtr('reset');
                 end
 
-                imCoronal = imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                imCoronal  = imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
                 imSagittal = imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                imAxial = imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                imAxial    = imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
 
                 % axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
                 % axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
@@ -2463,9 +2684,9 @@ end
             isVsplash('get') == true && ...
             strcmpi(vSplahView('get'), 'sagittal'))
 
-            set(uiLogo, 'Position', [5 35 70 30]);
+            set(uiLogo, 'Position', [-20 35 70 20]);
         else
-            set(uiLogo, 'Position', [5 15 70 30]);
+            set(uiLogo, 'Position', [-20 15 70 20]);
         end
 
         setViewerDefaultColor(true, atMetaData, atFusionMetaData);
@@ -2473,11 +2694,6 @@ end
         refreshImages();            
     end
 
-    catch   
-
-        progressBar(1, 'Error:setFusionCallback()');
-    end
-    
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
        switchToMIPMode('get')    == false
@@ -2571,6 +2787,13 @@ end
 
         end
 
+    end
+
+    progressBar(1, 'Ready');
+
+    catch ME   
+        logErrorToFile(ME);
+        progressBar(1, 'Error:setFusionCallback()');
     end
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');

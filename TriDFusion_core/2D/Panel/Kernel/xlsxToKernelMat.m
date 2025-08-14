@@ -55,13 +55,13 @@ function [tKernel, sMatFile] = xlsxToKernelMat(sFileName)
                 sFieldName1 = cleanString(aRaw{2,dFieldOffset});
                 aFieldData1 = aRaw(3:end,dFieldOffset);
                 aFieldData1 = cell2mat(aFieldData1);
-                aFieldData1(find(isnan(aFieldData1)))=[];  % Remove NAN
+                aFieldData1(isnan(aFieldData1))=[];  % Remove NAN
                 dFieldOffset = dFieldOffset+1;
 
                 sFieldName2 = cleanString(aRaw{2,dFieldOffset});
                 aFieldData2 = aRaw(3:end,dFieldOffset);
                 aFieldData2 = cell2mat(aFieldData2);
-                aFieldData2(find(isnan(aFieldData2)))=[]; % Remove NAN
+                aFieldData2(isnan(aFieldData2))=[]; % Remove NAN
                 dFieldOffset = dFieldOffset+1;
                                 
                 tKernel.(sHeteroName).(sIsotopeName) = struct(sFieldName1, aFieldData1, sFieldName2, aFieldData2);              
@@ -82,7 +82,9 @@ function [tKernel, sMatFile] = xlsxToKernelMat(sFileName)
         end
 
         save(sMatFile, 'tKernel');
-    catch
+        
+    catch ME   
+        logErrorToFile(ME);
         tKernel = [];
         sMatFile = '';        
     end

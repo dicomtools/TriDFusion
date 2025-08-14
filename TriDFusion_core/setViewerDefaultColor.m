@@ -94,7 +94,6 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 
             if dNbFusedAxes < 2
 
-
                sModality = atMetaData{1}.Modality;
                if strcmpi(sModality, 'RTDOSE') 
                    sModality = 'pt';
@@ -217,7 +216,8 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                                 overlayColor    ('set', 'white' );
 
                                 if ~isempty(uiLogo)
-                                    set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);
+                                    % set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);
+                                    setLogoColor(uiLogo, [0.8500 0.8500 0.8500]);
                                 end
                             else
 
@@ -227,8 +227,9 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                                 overlayColor    ('set', 'black' );
 
                                 if ~isempty(uiLogo)
-                                    set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]);
-                                end
+                                    % set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]);
+                                    setLogoColor(uiLogo, [0.1500 0.1500 0.1500]);
+                               end
                             end
 
                         else
@@ -240,7 +241,8 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                             overlayColor    ('set', 'black' );
 
                             if ~isempty(uiLogo)
-                                set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]);
+
+                                setLogoColor(uiLogo, [0.1500, 0.1500, 0.1500]);
                             end
 
                         end
@@ -252,13 +254,15 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                                 backgroundColor ('set', 'white' );
                                 overlayColor    ('set', 'black' );
 
-                                set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]);
+                                % set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]);
+                                setLogoColor(uiLogo, [0.1500, 0.1500, 0.1500]);
                             else
                                 invertColor     ('set', false   );
                                 backgroundColor ('set', 'black' );
                                 overlayColor    ('set', 'white' );
 
-                                set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);
+                                % set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);
+                                setLogoColor(uiLogo, [0.8500 0.8500 0.8500]);
                            end
                         else
 
@@ -266,7 +270,8 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                             backgroundColor ('set', 'black' );
                             overlayColor    ('set', 'white' );
 
-                            set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);
+                            % set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);
+                            setLogoColor(uiLogo, [0.8500 0.8500 0.8500]);
                         end
 
                     end
@@ -306,24 +311,35 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 
                 uiAlphaSlider = uiAlphaSliderPtr('get');
                 if ~isempty(uiAlphaSlider)
-                    set(uiAlphaSlider, 'BackgroundColor',  backgroundColor('get'));
+
+                    bgColor = backgroundColor('get');
+                    uiAlphaSlider = uiAlphaSliderPtr('get');
+
+%                     if strcmpi(char(bgColor),'white'), bgColor=[1 1 1]; end
+%                     if strcmpi(char(bgColor),'black'), bgColor=[0 0 0]; end
+%                     if numel(bgColor)==3
+%                         uiAlphaSlider.Panel.BackgroundColor = bgColor;
+%                     end
+
+                    set(uiAlphaSlider, 'BackgroundColor',  bgColor);
                 end
 
                 ptrColorbar = uiColorbarPtr('get');
                 if ~isempty(ptrColorbar)
-                    set(ptrColorbar, 'Color',  overlayColor('get'));
+                    set(ptrColorbar.Parent, 'YColor',  overlayColor('get'));
                 end
 
                 ptrFusionColorbar = uiFusionColorbarPtr('get');
                 if ~isempty(ptrFusionColorbar)
-                    set(ptrFusionColorbar   , 'Color',  overlayColor('get'));
+                    set(ptrFusionColorbar.Parent, 'YColor',  overlayColor('get'));
                 end
 
                 set(fiMainWindowPtr('get'), 'Color', backgroundColor('get'));
             end
             
             ptrColorbar = uiColorbarPtr('get');
-            colormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
+           
+            setColorbarColormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
 
             if size(dicomBuffer('get'), 3) == 1
 
@@ -333,7 +349,7 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 
                     if dNbFusedAxes < 2
 
-                        colormap(uiFusionColorbarPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
+                        setColorbarColormap(uiFusionColorbarPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
 
                         colormap(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                     end
@@ -352,7 +368,7 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 
                     if dNbFusedAxes < 2
                         
-                        colormap(uiFusionColorbarPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
+                        setColorbarColormap(uiFusionColorbarPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
 
                         colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                         colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
@@ -396,6 +412,23 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                         set(btnUiSagWindowFullScreen, 'BackgroundColor', get(uiSagWindowPtr('get'), 'BackgroundColor'));
                         set(btnUiMipWindowFullScreen, 'BackgroundColor', get(uiMipWindowPtr('get'), 'BackgroundColor'));
                     end
+
+                    chkUiCorWindowSelected = chkUiCorWindowSelectedPtr('get');
+                    chkUiSagWindowSelected = chkUiSagWindowSelectedPtr('get');
+                    chkUiTraWindowSelected = chkUiTraWindowSelectedPtr('get');
+                    chkUiMipWindowSelected = chkUiMipWindowSelectedPtr('get');
+            
+                    if ~isempty(chkUiCorWindowSelected)&& ...
+                       ~isempty(chkUiSagWindowSelected)&& ...
+                       ~isempty(chkUiTraWindowSelected)&& ...
+                       ~isempty(chkUiMipWindowSelected)
+            
+                        set(chkUiCorWindowSelected, 'BackgroundColor', get(uiCorWindowPtr('get'), 'BackgroundColor'));
+                        set(chkUiSagWindowSelected, 'BackgroundColor', get(uiSagWindowPtr('get'), 'BackgroundColor'));
+                        set(chkUiTraWindowSelected, 'BackgroundColor', get(uiTraWindowPtr('get'), 'BackgroundColor'));
+                        set(chkUiMipWindowSelected, 'BackgroundColor', get(uiMipWindowPtr('get'), 'BackgroundColor'));
+                    end
+
                 end
 
             end

@@ -56,7 +56,8 @@ function selectForContourReviewCallback(hObject, ~)
 
             callbackFunction(hObject.Parent.UserData, dVoiTagOffset);
 
-            catch
+            catch ME
+                logErrorToFile(ME);  
                 progressBar(1, 'Error:selectForContourReviewCallback()');
             end
 

@@ -53,7 +53,8 @@ function importCerrPlanCCallback(~, ~)
         try
             importCERRLastUsedDir = sPathName;
             save(sMatFile, 'importCERRLastUsedDir');
-        catch
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
 %            h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                if integrateToBrowser('get') == true
@@ -76,8 +77,10 @@ function importCerrPlanCCallback(~, ~)
         try
             planC = loadPlanC(cerrFileName, viewerTempDirectory('get'));
             planC = updatePlanFields(planC);
-            planC = quality_assure_planC(cerrFileName,planC);        
-        catch
+            planC = quality_assure_planC(cerrFileName,planC);
+            
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1, 'Error: importCerrPlanCCallback() Cant Load CERR PlanC!');
             return;
         end

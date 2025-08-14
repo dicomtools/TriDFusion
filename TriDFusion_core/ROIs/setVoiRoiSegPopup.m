@@ -37,6 +37,7 @@ function setVoiRoiSegPopup()
     uiPrevVoiRoiPanel = uiPrevVoiRoiPanelObject('get');
     uiDelVoiRoiPanel  = uiDelVoiRoiPanelObject ('get');
     uiNextVoiRoiPanel = uiNextVoiRoiPanelObject('get');
+    uiUndoVoiRoiPanel = uiUndoVoiRoiPanelObject('get');
 
     asVOIsList = repmat({''},numel(atVoiInput),1);
     dNbVOIs = numel(atVoiInput);
@@ -78,7 +79,8 @@ function setVoiRoiSegPopup()
             set(uiPrevVoiRoiPanel, 'Enable', 'on');
             set(uiDelVoiRoiPanel , 'Enable', 'on');
             set(uiNextVoiRoiPanel, 'Enable', 'on');
-        else
+            set(uiUndoVoiRoiPanel, 'Enable', 'on');
+       else
             set(uiDeleteVoiRoiPanel, 'Value' , 1);
             set(uiDeleteVoiRoiPanel, 'Enable', 'off');
             set(uiDeleteVoiRoiPanel, 'String', ' ');
@@ -105,6 +107,7 @@ function setVoiRoiSegPopup()
         set(uiPrevVoiRoiPanel, 'Enable', 'off');
         set(uiDelVoiRoiPanel , 'Enable', 'off');
         set(uiNextVoiRoiPanel, 'Enable', 'off');
+        set(uiUndoVoiRoiPanel, 'Enable', 'off');
     end
 
 end

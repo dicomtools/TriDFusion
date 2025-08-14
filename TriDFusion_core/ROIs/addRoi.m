@@ -1,5 +1,5 @@
-function addRoi(ptrRoi, dOffset, sLesionType)
-%function addRoi(ptrRoi, dOffset, sLesionType)
+function addRoi(ptrRoi, dSeriesOffset, sLesionType)
+%function addRoi(ptrRoi, dSeriesOffset, sLesionType)
 %Add ROI to input template.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,25 +27,25 @@ function addRoi(ptrRoi, dOffset, sLesionType)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tAddInput = inputTemplate('get');
+    atInput = inputTemplate('get');
 
-    iCurrentOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(tAddInput)
+    dCurrentSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    if dSeriesOffset > numel(atInput)
         return;
     end
 
-    if iCurrentOffset == dOffset
+    if dCurrentSeriesOffset == dSeriesOffset
 
-        atDicomInfo = dicomMetaData('get', [], dOffset);
-        imRoi = dicomBuffer('get', [], dOffset);
+        atDicomInfo = dicomMetaData('get', [], dSeriesOffset);
+        % imRoi = dicomBuffer('get', [], dSeriesOffset);
     else
-        atDicomInfo = tAddInput(dOffset).atDicomInfo;
+        atDicomInfo = atInput(dSeriesOffset).atDicomInfo;
 
-        aInput = inputBuffer('get');
-        imRoi  = aInput{dOffset};
+        % atInput = inputBuffer('get');
+        % imRoi  = atInput{dSeriesOffset};
     end
 
-    atRoiInput = roiTemplate('get', dOffset);
+    atRoiInput = roiTemplate('get', dSeriesOffset);
 
     addlistener(ptrRoi, 'DeletingROI', @deleteRoiEvents);
     addlistener(ptrRoi, 'ROIMoved'   , @movedRoiEvents );
@@ -54,7 +54,7 @@ function addRoi(ptrRoi, dOffset, sLesionType)
     sSOPInstanceUID = '';
     sFrameOfReferenceUID = '';
 
-    if size(dicomBuffer('get', [], dOffset), 3) ~= 1 && ...
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1 && ...
        switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
        switchToMIPMode('get')    == false
@@ -172,6 +172,6 @@ function addRoi(ptrRoi, dOffset, sLesionType)
         atRoiInput{numel(atRoiInput)+1} = tRoi;
     end
 
-    roiTemplate('set', dOffset, atRoiInput);
+    roiTemplate('set', dSeriesOffset, atRoiInput);
 
 end

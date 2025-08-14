@@ -40,8 +40,8 @@ function generate3DLungLobeReport(bInitReport)
 
     atInput = inputTemplate('get');
 
-    dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(atInput)
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    if dSeriesOffset > numel(atInput)
         return;
     end
 
@@ -73,6 +73,8 @@ function generate3DLungLobeReport(bInitReport)
                    'Toolbar','none'...
                    );
     end
+    
+    setObjectIcon(fig3DLobeLungReport);
 
     if viewerUIFigure('get') == true
         set(fig3DLobeLungReport, 'Renderer', 'opengl'); 
@@ -94,8 +96,9 @@ function generate3DLungLobeReport(bInitReport)
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'off'...
              );
-     axe3DLobeLungReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-     axe3DLobeLungReport.Toolbar.Visible = 'off';
+     axe3DLobeLungReport.Interactions = [];
+     % axe3DLobeLungReport.Toolbar.Visible = 'off';
+     deleteAxesToolbar(axe3DLobeLungReport);
      disableDefaultInteractivity(axe3DLobeLungReport);
 
      ui3DLobeLungReport = ...
@@ -506,11 +509,13 @@ function generate3DLungLobeReport(bInitReport)
              'Color'   , 'white',...
              'Visible' , 'off'...
              );
-     axe3DLungRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-     axe3DLungRectangle.Toolbar.Visible = 'off';
+     axe3DLungRectangle.Interactions = [];
      disableDefaultInteractivity(axe3DLungRectangle);
+     deleteAxesToolbar(axe3DLungRectangle);
 
      rectangle(axe3DLungRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
+
+     disableAxesToolbar(axe3DLungRectangle);
 
          uiReport3DLobeUpperLobeLeftLungRatio = ...
          uicontrol(ui3DLobeLungReport,...
@@ -584,11 +589,14 @@ function generate3DLungLobeReport(bInitReport)
              'Color'   , 'white',...
              'Visible' , 'off'...
              );
-     axe3DLobesRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-     axe3DLobesRectangle.Toolbar.Visible = 'off';
+     axe3DLobesRectangle.Interactions = [];
+     % axe3DLobesRectangle.Toolbar.Visible = 'off';
      disableDefaultInteractivity(axe3DLobesRectangle);
+     deleteAxesToolbar(axe3DLobesRectangle);
 
      rectangle(axe3DLobesRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
+
+     disableAxesToolbar(axe3DLobesRectangle);
 
     % Liver volume-of-interest oversized
 
@@ -764,28 +772,28 @@ function generate3DLungLobeReport(bInitReport)
     mReportOptions = uimenu(fig3DLobeLungReport,'Label','Options', 'Callback', @figLobeLungRatioReportRefreshOption);
 
     if suvMenuUnitOption('get') == true && ...
-       atInput(dOffset).bDoseKernel == false
+       atInput(dSeriesOffset).bDoseKernel == false
 
-        sUnitDisplay = getSerieUnitValue(dOffset);
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);
         if strcmpi(sUnitDisplay, 'SUV')
             sSuvChecked = 'on';
         else
-            if suvMenuUnitOption('get') == true
-                suvMenuUnitOption('set', false);
-            end
+            % if suvMenuUnitOption('get') == true
+            %     suvMenuUnitOption('set', false);
+            % end
             sSuvChecked = 'off';
         end
     else
-        if suvMenuUnitOption('get') == true
-            suvMenuUnitOption('set', false);
-        end
+        % if suvMenuUnitOption('get') == true
+        %     suvMenuUnitOption('set', false);
+        % end
         sSuvChecked = 'off';
     end
 
-    if atInput(dOffset).bDoseKernel == true
+    if atInput(dSeriesOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
-        sUnitDisplay = getSerieUnitValue(dOffset);
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);
         if strcmpi(sUnitDisplay, 'SUV')
             sSuvEnable = 'on';
         else
@@ -999,18 +1007,31 @@ function generate3DLungLobeReport(bInitReport)
                 aLiverMask = gtReport.Liver.Mask;
 
                 for jj=1:size(aLiverMask, 3)
-                    dOffset = find(aLiverMask(:,:,jj), 1);
-                    if ~isempty(dOffset)
+                    dSeriesOffset = find(aLiverMask(:,:,jj), 1);
+                    if ~isempty(dSeriesOffset)
                         if isempty(dFirstSlice)
                             dFirstSlice = jj;
                         end
                     end
                 end
 
+                atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+
                 if dLiverMaskOffset ~= 0
+
                     if dNbExtraSlicesAtTop < 0
 
-                        aLiverMaskTemp = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
+                        xVoxelSize = atMetaData{1}.PixelSpacing(1);
+                        yVoxelSize = atMetaData{1}.PixelSpacing(2);
+                        zVoxelSize = computeSliceSpacing(atMetaData);
+
+                        dMarginSizeX = xVoxelSize * dLiverMaskOffset;
+                        dMarginSizeY = yVoxelSize * dLiverMaskOffset;
+                        dMarginSizeZ = zVoxelSize * dLiverMaskOffset;
+
+                        aLiverMaskTemp = applyMarginToMask(aLiverMask, xVoxelSize, yVoxelSize, zVoxelSize, dMarginSizeX, dMarginSizeY, dMarginSizeZ);
+
+                        % aLiverMaskTemp = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
 
                         aLiverMaskTemp(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
 
@@ -1023,7 +1044,17 @@ function generate3DLungLobeReport(bInitReport)
 
                         clear aLiverMaskTemp;
                     else
-                        aLiverMask = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
+                        xVoxelSize = atMetaData{1}.PixelSpacing(1);
+                        yVoxelSize = atMetaData{1}.PixelSpacing(2);
+                        zVoxelSize = computeSliceSpacing(atMetaData);
+
+                        dMarginSizeX = xVoxelSize * dLiverMaskOffset;
+                        dMarginSizeY = yVoxelSize * dLiverMaskOffset;
+                        dMarginSizeZ = zVoxelSize * dLiverMaskOffset;
+
+                        aLiverMask = applyMarginToMask(aLiverMask, xVoxelSize, yVoxelSize, zVoxelSize, dMarginSizeX, dMarginSizeY, dMarginSizeZ);
+                                         
+                        % aLiverMask = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
 
                         aLiverMask(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
                     end
@@ -1273,7 +1304,8 @@ function generate3DLungLobeReport(bInitReport)
 
             progressBar(1, 'Ready');
 
-            catch
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1, 'Error: proceed3DLobesLiverVolumeOversize()');
             end
 
@@ -1430,9 +1462,9 @@ function generate3DLungLobeReport(bInitReport)
         atMetaData = dicomMetaData('get');
 
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        if atInput(dOffset).bDoseKernel == true
+        if atInput(dSeriesOffset).bDoseKernel == true
 
             if isfield(atMetaData{1}, 'DoseUnits')
 
@@ -1447,7 +1479,7 @@ function generate3DLungLobeReport(bInitReport)
             end
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                sUnit = getSerieUnitValue(dOffset);
+                sUnit = getSerieUnitValue(dSeriesOffset);
                 if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
                     strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
                     strcmpi(sUnit, 'SUV' )
@@ -1464,7 +1496,7 @@ function generate3DLungLobeReport(bInitReport)
                  if (strcmpi(atMetaData{1}.Modality, 'ct'))
                     sUnit =  'HU';
                  else
-                    sUnit = getSerieUnitValue(dOffset);
+                    sUnit = getSerieUnitValue(dSeriesOffset);
                     if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
                         strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
                         strcmpi(sUnit, 'SUV' )
@@ -1933,9 +1965,9 @@ function generate3DLungLobeReport(bInitReport)
         tReport = [];
 
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
+        bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
 
         sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
         tQuantification = quantificationTemplate('get');
@@ -1951,18 +1983,18 @@ function generate3DLungLobeReport(bInitReport)
            bMovementApplied == false        % Can't use input buffer if movement have been applied
 
             atDicomMeta = dicomMetaData('get');
-            atMetaData  = atInput(dOffset).atDicomInfo;
+            atMetaData  = atInput(dSeriesOffset).atDicomInfo;
             aImage      = inputBuffer('get');
 
 %            if     strcmpi(imageOrientation('get'), 'axial')
-%                aImage = permute(aImage{dOffset}, [1 2 3]);
+%                aImage = permute(aImage{dSeriesOffset}, [1 2 3]);
 %            elseif strcmpi(imageOrientation('get'), 'coronal')
-%                aImage = permute(aImage{dOffset}, [3 2 1]);
+%                aImage = permute(aImage{dSeriesOffset}, [3 2 1]);
 %            elseif strcmpi(imageOrientation('get'), 'sagittal')
-%                aImage = permute(aImage{dOffset}, [3 1 2]);
+%                aImage = permute(aImage{dSeriesOffset}, [3 1 2]);
 %            end
 
-            aImage = aImage{dOffset};
+            aImage = aImage{dSeriesOffset};
 
             if     strcmpi(imageOrientation('get'), 'axial')
 %                 aImage = aImage;
@@ -1974,30 +2006,30 @@ function generate3DLungLobeReport(bInitReport)
 
             if size(aImage, 3) ==1
 
-                if atInput(dOffset).bFlipLeftRight == true
+                if atInput(dSeriesOffset).bFlipLeftRight == true
                     aImage=aImage(:,end:-1:1);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
+                if atInput(dSeriesOffset).bFlipAntPost == true
                     aImage=aImage(end:-1:1,:);
                 end
             else
-                if atInput(dOffset).bFlipLeftRight == true
+                if atInput(dSeriesOffset).bFlipLeftRight == true
                     aImage=aImage(:,end:-1:1,:);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
+                if atInput(dSeriesOffset).bFlipAntPost == true
                     aImage=aImage(end:-1:1,:,:);
                 end
 
-                if atInput(dOffset).bFlipHeadFeet == true
+                if atInput(dSeriesOffset).bFlipHeadFeet == true
                     aImage=aImage(:,:,end:-1:1);
                 end
             end
 
         else
-            atMetaData = dicomMetaData('get');
-            aImage     = dicomBuffer('get');
+            atMetaData = dicomMetaData('get', [], dSeriesOffset);
+            aImage     = dicomBuffer('get', [], dSeriesOffset);
         end
 
         % Set Voxel Size
@@ -2015,6 +2047,16 @@ function generate3DLungLobeReport(bInitReport)
         end
 
         dVoxVolume = xPixel * yPixel * zPixel;
+
+        aDicomImage = dicomBuffer('get', [], dSeriesOffset);
+    
+        if bModifiedMatrix == false && ...
+           bMovementApplied == false        % Can't use input buffer if movement have been applied
+    
+            if ~isequal(size(aImage), size(aDicomImage))
+                [atRoiInput, atVoiInput] = resampleROIs(aDicomImage, atDicomMeta, aImage, atMetaData, atRoiInput, false, atVoiInput, dSeriesOffset);
+            end
+        end
 
         % Count contour Type number
 
@@ -2275,16 +2317,16 @@ function generate3DLungLobeReport(bInitReport)
                 aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Liver.RoisTag{uu}]} );
 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-
-                if bModifiedMatrix  == false && ...
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end
-                end
+                % 
+                % if bModifiedMatrix  == false && ...
+                %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                % 
+                %     if numel(aImage) ~= numel(dicomBuffer('get'))
+                %         pTemp{1} = tRoi;
+                %         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                %         tRoi = ptrRoiTemp{1};
+                %     end
+                % end
 
                 switch lower(tRoi.Axe)
 
@@ -2407,15 +2449,15 @@ function generate3DLungLobeReport(bInitReport)
 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
 
-                if bModifiedMatrix  == false && ...
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end
-                end
+                % if bModifiedMatrix  == false && ...
+                %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                % 
+                %     if numel(aImage) ~= numel(dicomBuffer('get'))
+                %         pTemp{1} = tRoi;
+                %         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                %         tRoi = ptrRoiTemp{1};
+                %     end
+                % end
 
                 switch lower(tRoi.Axe)
 
@@ -2535,15 +2577,15 @@ function generate3DLungLobeReport(bInitReport)
 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
 
-                if bModifiedMatrix  == false && ...
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end
-                end
+                % if bModifiedMatrix  == false && ...
+                %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                % 
+                %     if numel(aImage) ~= numel(dicomBuffer('get'))
+                %         pTemp{1} = tRoi;
+                %         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                %         tRoi = ptrRoiTemp{1};
+                %     end
+                % end
 
                 switch lower(tRoi.Axe)
 
@@ -2663,15 +2705,15 @@ function generate3DLungLobeReport(bInitReport)
 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
 
-                if bModifiedMatrix  == false && ...
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end
-                end
+                % if bModifiedMatrix  == false && ...
+                %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                % 
+                %     if numel(aImage) ~= numel(dicomBuffer('get'))
+                %         pTemp{1} = tRoi;
+                %         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                %         tRoi = ptrRoiTemp{1};
+                %     end
+                % end
 
                 switch lower(tRoi.Axe)
 
@@ -2791,15 +2833,15 @@ function generate3DLungLobeReport(bInitReport)
 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
 
-                if bModifiedMatrix  == false && ...
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end
-                end
+                % if bModifiedMatrix  == false && ...
+                %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                % 
+                %     if numel(aImage) ~= numel(dicomBuffer('get'))
+                %         pTemp{1} = tRoi;
+                %         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                %         tRoi = ptrRoiTemp{1};
+                %     end
+                % end
 
                 switch lower(tRoi.Axe)
 
@@ -2919,15 +2961,15 @@ function generate3DLungLobeReport(bInitReport)
 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
 
-                if bModifiedMatrix  == false && ...
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end
-                end
+                % if bModifiedMatrix  == false && ...
+                %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                % 
+                %     if numel(aImage) ~= numel(dicomBuffer('get'))
+                %         pTemp{1} = tRoi;
+                %         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                %         tRoi = ptrRoiTemp{1};
+                %     end
+                % end
 
                 switch lower(tRoi.Axe)
 
@@ -3047,15 +3089,15 @@ function generate3DLungLobeReport(bInitReport)
 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
 
-                if bModifiedMatrix  == false && ...
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end
-                end
+                % if bModifiedMatrix  == false && ...
+                %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                % 
+                %     if numel(aImage) ~= numel(dicomBuffer('get'))
+                %         pTemp{1} = tRoi;
+                %         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                %         tRoi = ptrRoiTemp{1};
+                %     end
+                % end
 
                 switch lower(tRoi.Axe)
 
@@ -3175,15 +3217,15 @@ function generate3DLungLobeReport(bInitReport)
 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
 
-                if bModifiedMatrix  == false && ...
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end
-                end
+                % if bModifiedMatrix  == false && ...
+                %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                % 
+                %     if numel(aImage) ~= numel(dicomBuffer('get'))
+                %         pTemp{1} = tRoi;
+                %         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                %         tRoi = ptrRoiTemp{1};
+                %     end
+                % end
 
                 switch lower(tRoi.Axe)
 
@@ -3303,15 +3345,15 @@ function generate3DLungLobeReport(bInitReport)
 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
 
-                if bModifiedMatrix  == false && ...
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end
-                end
+                % if bModifiedMatrix  == false && ...
+                %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                % 
+                %     if numel(aImage) ~= numel(dicomBuffer('get'))
+                %         pTemp{1} = tRoi;
+                %         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                %         tRoi = ptrRoiTemp{1};
+                %     end
+                % end
 
                 switch lower(tRoi.Axe)
 
@@ -3474,7 +3516,9 @@ function generate3DLungLobeReport(bInitReport)
             try
                 saveReportLastUsedDir = path;
                 save(sMatFile, 'saveReportLastUsedDir');
-            catch
+                
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
             end
 
@@ -3488,54 +3532,19 @@ function generate3DLungLobeReport(bInitReport)
                 sFileName = [sFileName, '.pdf'];
             end
 
-            if viewerUIFigure('get') == true
-
-                aRGBImage = frame2im(getframe(fig3DLobeLungReport));
-
-                axePdfReport = ...
-                   axes(fig3DLobeLungReport, ...
-                         'Units'   , 'pixels', ...
-                         'Position', [0 0 FIG_REPORT_X FIG_REPORT_Y], ...
-                         'Color'   , 'none',...
-                         'Visible' , 'off'...
-                         );
-                axePdfReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axePdfReport.Toolbar.Visible = 'off';
-                disableDefaultInteractivity(axePdfReport);
-
-                image(axePdfReport, aRGBImage);
-                axePdfReport.Visible = 'off';
-
-                exportgraphics(axePdfReport, sFileName);
-
-                delete(axePdfReport);
-            else
-
-                set(axe3DLobeLungReport,'LooseInset', get(axe3DLobeLungReport,'TightInset'));
-                unit = get(fig3DLobeLungReport,'Units');
-                set(fig3DLobeLungReport,'Units','inches');
-                pos = get(fig3DLobeLungReport,'Position');
-
-                set(fig3DLobeLungReport, ...
-                    'PaperPositionMode', 'auto',...
-                    'PaperUnits'       , 'inches',...
-                    'PaperPosition'    , [0,0,pos(3),pos(4)],...
-                    'PaperSize'        , [pos(3), pos(4)]);
-
-                print(fig3DLobeLungReport, sFileName, '-image', '-dpdf', '-r0');
-
-                set(fig3DLobeLungReport,'Units', unit);
-            end
+            exportContourReportToPdf(fig3DLobeLungReport, axe3DLobeLungReport, sFileName);
 
             progressBar( 1 , sprintf('Export %s completed.', sFileName));
 
             try
                 winopen(sFileName);
-            catch
+            catch ME
+                logErrorToFile(ME);
             end
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar( 1 , 'Error: exportCurrentLobeLungReportToPdfCallback() cant export report' );
         end
 
@@ -3549,7 +3558,8 @@ function generate3DLungLobeReport(bInitReport)
 
         atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
-        bMipPlayback = playback2DMipOnly('get');
+        % bMipPlayback = playback2DMipOnly('get');
+        sPlaybackPlane = default2DPlaybackPlane('get');
 
         dAxialSliceNumber = sliceNumber('get', 'axial');
 
@@ -3600,7 +3610,8 @@ function generate3DLungLobeReport(bInitReport)
             try
                 saveReportLastUsedDir = path;
                 save(sMatFile, 'saveReportLastUsedDir');
-            catch
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
             end
 
@@ -3614,7 +3625,14 @@ function generate3DLungLobeReport(bInitReport)
                 file = [file, '.avi'];
             end
 
-            playback2DMipOnly('set', false);
+            % playback2DMipOnly('set', false);
+
+            set(chkUiCorWindowSelectedPtr('get'), 'Value', false);
+            set(chkUiSagWindowSelectedPtr('get'), 'Value', false);
+            set(chkUiTraWindowSelectedPtr('get'), 'Value', true);
+            set(chkUiMipWindowSelectedPtr('get'), 'Value', false);
+
+            default2DPlaybackPlane('set', 'axial');
 
             sliceNumber('set', 'axial', size(dicomBuffer('get', [], dSeriesOffset), 3));
 
@@ -3622,15 +3640,34 @@ function generate3DLungLobeReport(bInitReport)
 
             set(recordIconMenuObject('get'), 'State', 'on');
 
-            recordMultiFrame(recordIconMenuObject('get'), path, file, 'avi', axes3Ptr('get', [], dSeriesOffset));
+            recordMultiFrame(recordIconMenuObject('get'), path, file, 'avi');
 
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar( 1 , 'Error: exportCurrentLobeLungAxialSlicesToAviCallback() cant export report' );
         end
 
-        playback2DMipOnly('set', bMipPlayback);
+        % playback2DMipOnly('set', bMipPlayback);
+
+        set(chkUiCorWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiSagWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiTraWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiMipWindowSelectedPtr('get'), 'Value', false);
+
+        switch lower(sPlaybackPlane)
+            case 'coronal'
+                set(chkUiCorWindowSelectedPtr('get'), 'Value', true);
+            case 'sagittal'
+                set(chkUiSagWindowSelectedPtr('get'), 'Value', true);
+            case 'axial'
+                set(chkUiTraWindowSelectedPtr('get'), 'Value', true);
+            otherwise
+                set(chkUiMipWindowSelectedPtr('get'), 'Value', true);
+        end
+
+        default2DPlaybackPlane('set', sPlaybackPlane);
 
         multiFrameRecord('set', false);
 
@@ -3648,7 +3685,8 @@ function generate3DLungLobeReport(bInitReport)
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        bMipPlayback = playback2DMipOnly('get');
+        % bMipPlayback = playback2DMipOnly('get');
+        sPlaybackPlane = default2DPlaybackPlane('get');
 
         dAxialSliceNumber = sliceNumber('get', 'axial');
 
@@ -3696,7 +3734,9 @@ function generate3DLungLobeReport(bInitReport)
             try
                 exportDicomLastUsedDir = sOutDir;
                 save(sMatFile, 'exportDicomLastUsedDir');
-            catch
+
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
             end
         end
@@ -3704,7 +3744,14 @@ function generate3DLungLobeReport(bInitReport)
         set(fig3DLobeLungReport, 'Pointer', 'watch');
         drawnow;
 
-        playback2DMipOnly('set', false);
+        % playback2DMipOnly('set', false);
+
+        set(chkUiCorWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiSagWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiTraWindowSelectedPtr('get'), 'Value', true);
+        set(chkUiMipWindowSelectedPtr('get'), 'Value', false);
+
+        default2DPlaybackPlane('set', 'axial');
 
         sliceNumber('set', 'axial', size(dicomBuffer('get', [], dSeriesOffset), 3));
 
@@ -3712,15 +3759,34 @@ function generate3DLungLobeReport(bInitReport)
 
         set(recordIconMenuObject('get'), 'State', 'on');
 
-        recordMultiFrame(recordIconMenuObject('get'), sOutDir, [], 'dcm', axes3Ptr('get', [], dSeriesOffset));
+        recordMultiFrame(recordIconMenuObject('get'), sOutDir, [], 'dcm');
 
 %         objectToDicomJpg(sWriteDir, fig3DLobeLungReport, '3DF MFSC', get(uiSeriesPtr('get'), 'Value'))
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar( 1 , 'Error: exportCurrentLobeLungAxialSlicesToDicomMovieCallback() cant export report' );
         end
 
-        playback2DMipOnly('set', bMipPlayback);
+        % playback2DMipOnly('set', bMipPlayback);
+
+        set(chkUiCorWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiSagWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiTraWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiMipWindowSelectedPtr('get'), 'Value', false);
+
+        switch lower(sPlaybackPlane)
+            case 'coronal'
+                set(chkUiCorWindowSelectedPtr('get'), 'Value', true);
+            case 'sagittal'
+                set(chkUiSagWindowSelectedPtr('get'), 'Value', true);
+            case 'axial'
+                set(chkUiTraWindowSelectedPtr('get'), 'Value', true);
+            otherwise
+                set(chkUiMipWindowSelectedPtr('get'), 'Value', true);
+        end
+
+        default2DPlaybackPlane('set', sPlaybackPlane);
 
         multiFrameRecord('set', false);
 
@@ -3741,37 +3807,10 @@ function generate3DLungLobeReport(bInitReport)
             set(fig3DLobeLungReport, 'Pointer', 'watch');
             drawnow;
 
-            if viewerUIFigure('get') == true
+            copyFigureToClipboard(fig3DLobeLungReport);
 
-                aRGBImage = frame2im(getframe(fig3DLobeLungReport));
-
-                axePdfReport = ...
-                   axes(fig3DLobeLungReport, ...
-                         'Units'   , 'pixels', ...
-                         'Position', [0 0 FIG_REPORT_X FIG_REPORT_Y], ...
-                         'Color'   , 'none',...
-                         'Visible' , 'off'...
-                         );
-                axePdfReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axePdfReport.Toolbar.Visible = 'off';
-                disableDefaultInteractivity(axePdfReport);
-
-                image(axePdfReport, aRGBImage);
-                axePdfReport.Visible = 'off';
-
-                copygraphics(axePdfReport);
-
-                delete(axePdfReport);
-            else
-                inv = get(fig3DLobeLungReport,'InvertHardCopy');
-
-                set(fig3DLobeLungReport,'InvertHardCopy','Off');
-
-                hgexport(fig3DLobeLungReport,'-clipboard');
-
-                set(fig3DLobeLungReport,'InvertHardCopy', inv);
-            end
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar( 1 , 'Error: copyLobeLungReportDisplayCallback() cant copy report' );
         end
 
@@ -3846,41 +3885,28 @@ function generate3DLungLobeReport(bInitReport)
 
         ptrViewer3d = [];
 
-        if ~isMATLABReleaseOlderThan('R2022b')
 
-            if viewerUIFigure('get') == true
+        bUseViewer3d = shouldUseViewer3d();
 
-                [Mdti,~] = TransformMatrix(atCTMetaData{1}, computeSliceSpacing(atCTMetaData));
+        if bUseViewer3d == true
 
-                % if volume3DZOffset('get') == false
+            [Mdti,~] = TransformMatrix(atCTMetaData{1}, computeSliceSpacing(atCTMetaData), true);
 
-                    Mdti(1,4) = 0;
-                    Mdti(2,4) = 0;
-                    Mdti(3,4) = 0;
-                    Mdti(4,4) = 1;
-                % end
+            % if volume3DZOffset('get') == false
 
-                tform = affinetform3d(Mdti);
+                Mdti(1,4) = 0;
+                Mdti(2,4) = 0;
+                Mdti(3,4) = 0;
+                Mdti(4,4) = 1;
+            % end
 
-                ptrViewer3d = viewer3d('Parent'         , ui3DWindow, ...
-                                       'BackgroundColor', 'white', ...
-                                       'Lighting'       , 'off', ...
-                                       'GradientColor'  , [0.98 0.98 0.98], ...
-                                       'CameraZoom'     , 1.5, ...
-                                       'Lighting'       ,'off');
-                % sz = size(aCTBuffer);
-                % center = sz/2 + 0.5;
-                %
-                % numberOfFrames = 360;
-                % vec = linspace(0,2*pi,numberOfFrames)';
-                % dist = sqrt(sz(1)^2 + sz(2)^2 + sz(3)^2);
-                % myPosition = center + ([cos(vec) sin(vec) ones(size(vec))]*dist);
-                %
-                % aPosition = myPosition(250, :);
-                %
-                % aCameraPosition = [aPosition(1) -aPosition(3) abs(aPosition(2))];
-                % aCameraUpVector = [0 0 1];
-            end
+            tform = affinetform3d(Mdti);
+
+            ptrViewer3d = viewer3d('Parent'         , ui3DWindow, ...
+                                   'BackgroundColor', 'white', ...
+                                   'GradientColor'  , [0.98 0.98 0.98], ...
+                                   'CameraZoom'     , 1.5, ...
+                                   'Lighting'       ,'off');
         end
 
         if ~isempty(aCTBuffer)
@@ -3940,10 +3966,7 @@ function generate3DLungLobeReport(bInitReport)
 
             if ~isempty(ptrViewer3d)
 
-
-                 % ptrViewer3d.CameraTarget   = aCameraTarget;
-                 % ptrViewer3d.CameraPosition = aCameraPosition;
-                 % ptrViewer3d.CameraUpVector = aCameraUpVector;
+                set3DView(ptrViewer3d, 1, 1);
             else
                 pObject.CameraPosition = aCameraPosition;
                 pObject.CameraUpVector = aCameraUpVector;

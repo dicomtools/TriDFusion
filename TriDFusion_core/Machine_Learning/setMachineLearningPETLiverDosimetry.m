@@ -27,7 +27,6 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-
     atInput = inputTemplate('get');
 
     % Modality validation
@@ -82,8 +81,8 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
 
     try
 
-    roiFaceAlphaValue('set', 0.1);
-    set(uiSliderRoisFaceAlphaRoiPanelObject('get'), 'Value', roiFaceAlphaValue('get'));
+%    roiFaceAlphaValue('set', 0.1);
+%    set(uiSliderRoisFaceAlphaRoiPanelObject('get'), 'Value', roiFaceAlphaValue('get'));
 
     pixelEdge('set', true);
 
@@ -92,11 +91,11 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-    
+
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
@@ -137,6 +136,8 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
 
     dDoseSerieOffset = get(uiSeriesPtr('get'), 'Value');
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
 
     if isempty(sNiiFullFileName)
 
@@ -241,10 +242,12 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
                     mipBuffer('set', aMip, dDoseSerieOffset);
 
                     atRoi = roiTemplate('get', dDoseSerieOffset);
+                    atVoi = voiTemplate('get', dDoseSerieOffset);
 
-                    atResampledRoi = resampleROIs(aDoseImage, atDoseMetaData, aResampledDoseImage, atResampledDoseMeta, atRoi, true);
+                    [atResampledRoi, atResampledVoi] = resampleROIs(aDoseImage, atDoseMetaData, aResampledDoseImage, atResampledDoseMeta, atRoi, true, atVoi, dDoseSerieOffset);
 
                     roiTemplate('set', dDoseSerieOffset, atResampledRoi);
+                    voiTemplate('set', dDoseSerieOffset, atResampledVoi);
 
                     setQuantification(dDoseSerieOffset);
 
@@ -273,6 +276,8 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
                     if isFusion('get') == false
 
                         set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+                        sliderAlphaValue('set', 0.65);
 
                         setFusionCallback();
                     end
@@ -334,7 +339,7 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
 
     setFusionSeriesCallback();
 
-    setPlotContoursCallback();
+    % setPlotContoursCallback();
 
     progressBar(6/7, 'Computing Y90 dosimetry, please wait.');
 
@@ -348,7 +353,8 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         progressBar( 1 , 'Error: setMachineLearningPETLiverDosimetry()' );
     end
 

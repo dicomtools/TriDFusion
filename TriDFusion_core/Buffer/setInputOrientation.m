@@ -59,8 +59,42 @@ function setInputOrientation(dSeriesOffset)
             
                 bFlip = getImagePosition(pp);
                
-                if bFlip == true                   
+                if bFlip == true    
+
+                    %--- flip the pixel data
                     atInput(pp).aDicomBuffer{1} = atInput(pp).aDicomBuffer{1}(:,:,end:-1:1);
+                    
+                    % %--- pull out the header and volume
+                    % info = atInput(pp).atDicomInfo{1};   % if atDicomInfo is a cell
+                    % vol  = atInput(pp).aDicomBuffer{1};
+                    % [~,~,Ns] = size(vol);
+                    % 
+                    % %--- get orientation cosines & compute new ImagePositionPatient
+                    % dirs       = reshape(info.ImageOrientationPatient,3,2);
+                    % slice_norm = cross(dirs(:,1), dirs(:,2));
+                    % 
+                    % %--- determine slice spacing with a proper if/else
+                    % if isfield(info,'SpacingBetweenSlices') && ~isempty(info.SpacingBetweenSlices)
+                    %     dz = info.SpacingBetweenSlices;
+                    % else
+                    %     dz = info.SliceThickness;
+                    % end
+                    % 
+                    % origIPP = info.ImagePositionPatient(:);
+                    % newIPP0 = origIPP + (Ns-1)*dz*slice_norm;
+                    % info.ImagePositionPatient = newIPP0.';          % (0020,0032)
+                    % if isfield(info,'SliceLocation')
+                    %     info.SliceLocation = newIPP0(3);            % (0020,1041)
+                    % end
+                    % 
+                    % %--- reverse the NM/RTDOSE frame offsets
+                    % if isfield(info,'GridFrameOffsetVector')
+                    %     info.GridFrameOffsetVector = info.GridFrameOffsetVector(end:-1:1);
+                    % end
+                    % 
+                    % %--- store modified header
+                    % atInput(pp).atDicomInfo{1} = info;
+
                 end
                                
             end
@@ -70,3 +104,19 @@ function setInputOrientation(dSeriesOffset)
     inputTemplate('set', atInput);
 
 end
+% function zPos = computeZPosition(atMetaData, aImage)
+% 
+%     n = size(aImage,3);
+%     meta0 = atMetaData{1}; meta0.PixelSpacing(meta0.PixelSpacing==0)=1;
+%     iop   = meta0.ImageOrientationPatient;
+%     normv = cross(iop(1:3),iop(4:6)); normv=normv/norm(normv);
+%     if numel(atMetaData)==n
+%         zPos=zeros(n,1);
+%         for k=1:n, zPos(k)=normv'*atMetaData{k}.ImagePositionPatient(:); end
+%     else
+%         dZ = computeSliceSpacing(atMetaData);
+%         if dZ==0, dZ=meta0.PixelSpacing(1); end
+%         base = normv'*meta0.ImagePositionPatient(:);
+%         zPos = base + (0:n-1)'*dZ;
+%     end
+% end

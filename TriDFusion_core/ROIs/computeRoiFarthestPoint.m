@@ -248,7 +248,9 @@ function tMaxDistances = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlot
                     end
                 end
             end
-        catch
+            
+        catch ME
+            logErrorToFile(ME);
             tMaxDistances = []; 
         end
     end

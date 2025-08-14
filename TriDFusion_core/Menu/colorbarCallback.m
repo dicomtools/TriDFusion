@@ -1,5 +1,5 @@
 function colorbarCallback(hObject, ~)
-%function colorbarCallback(~, ~)
+%function colorbarCallback(hObject, ~)
 %Display 2D Colorbar Menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -26,20 +26,20 @@ function colorbarCallback(hObject, ~)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/
-
+    
     windowButton('set', 'up'); % Fix for Linux
 
     atInput = inputTemplate('get');
 
-    dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
-    if dFuseOffset > numel(atInput)
-        return;
-    end
+    dFusedSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+    % if dFusedSeriesOffset > numel(atInput)
+    %     return;
+    % end
 
-    dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(atInput)
-        return;
-    end
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    % if dSeriesOffset > numel(atInput)
+    %     return;
+    % end
 
     % if(numel(hObject.UIContextMenu.Children) > 1)
     % 
@@ -62,11 +62,16 @@ function colorbarCallback(hObject, ~)
     %     end
     % end
     
+    
+    if ~isempty(hObject.ContextMenu)
+        
+        refreshColorbar(hObject);
+    end
+
     c = uicontextmenu(fiMainWindowPtr('get'));
     set(c, 'tag', get(hObject, 'Tag'));
     % set(c, 'MenuSelectedFcn', @handleColormapSelection);
 
-  %  hObject.UIContextMenu = c;
     set(hObject, 'UIContextMenu', c);
 
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar') && isVsplash('get') == false
@@ -114,7 +119,7 @@ function colorbarCallback(hObject, ~)
             set(mUpdateDescription, 'Enable' , 'off');
         end
 
-        sModality = atInput(dFuseOffset).atDicomInfo{1}.Modality;
+        sModality = atInput(dFusedSeriesOffset).atDicomInfo{1}.Modality;
 %        if ~strcmpi(sModality, 'CT')
 
             mPlot = uimenu(d,'Label','Plot Contours');
@@ -192,23 +197,27 @@ function colorbarCallback(hObject, ~)
     end
 
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+
         if isscalar(atInput)
-            if atInput(dFuseOffset).bFusedEdgeDetection == true
+
+            if atInput(dFusedSeriesOffset).bFusedEdgeDetection == true
+
                 set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
             end
         else
-            if atInput(dFuseOffset).bEdgeDetection == true
+            if atInput(dFusedSeriesOffset).bEdgeDetection == true
+
                 set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
             end
         end
-        sModality = atInput(dFuseOffset).atDicomInfo{1}.Modality;
+        sModality = atInput(dFusedSeriesOffset).atDicomInfo{1}.Modality;
 
     else
-%        if atInput(dOffset).bEdgeDetection == true
+%        if atInput(dSeriesOffset).bEdgeDetection == true
 %            set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
 %        end
 
-        sModality = atInput(dOffset).atDicomInfo{1}.Modality;
+        sModality = atInput(dSeriesOffset).atDicomInfo{1}.Modality;
     end
 
     e = uimenu(c,'Label','Window');
@@ -319,7 +328,7 @@ function colorbarCallback(hObject, ~)
 
         menus = gobjects(1, numel(asMenuLabels));
         for i = 1:numel(asMenuLabels)
-            menus(i) = uimenu(e, 'Label', asMenuLabels{i}, 'Callback', @setCTColorbarWindowLevel, 'Tag', asMenuTags{i});
+            menus(i) = uimenu(e, 'Label', asMenuLabels{i}, 'Checked', 'off', 'Callback', @setCTColorbarWindowLevel, 'Tag', asMenuTags{i});
         end
         set(menus(end), 'Enable', 'off');
 
@@ -346,31 +355,41 @@ function colorbarCallback(hObject, ~)
     end
 
     asColorMap = getColorMapsName();
-    
-    for i = 1:numel(asColorMap)
-        uimenu(c, 'Label', asColorMap{i}, 'Callback', @setColorOffset);
-    end
-    
+
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
 
         dColorbarOffset = fusionColorMapOffset('get');
     else
         dColorbarOffset = colorMapOffset('get');
     end
-    
-    set(findall(c.Children, 'Type', 'uimenu'), 'Checked', 'off');
-    set(findall(c.Children, 'Label', asColorMap{dColorbarOffset}), 'Checked', 'on');
-    
+     
+    menuItems = gobjects(numel(asColorMap), 1);
+    for i = 1:numel(asColorMap)
+
+        if i==dColorbarOffset
+            sChecked = 'on';
+        else
+            sChecked = 'off';
+        end
+
+        menuItems(i) = uimenu(c, 'Label', asColorMap{i}, 'Checked', sChecked, 'Callback', @setColorOffset);
+    end
+
+    % set(hObject, 'UIContextMenu', c);
+
     function setColorOffset(hObject, ~)
+
+        dColormapOffset = getColorMapOffset(get(hObject, 'Label'));
 
         if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
 
-            fusionColorMapOffset('set', getColorMapOffset(get(hObject, 'Label')));
+            fusionColorMapOffset('set', dColormapOffset);
         else
-            colorMapOffset('set', getColorMapOffset(get(hObject, 'Label')));
-        end
+            colorMapOffset('set', dColormapOffset);
+        end     
 
-        refreshColorMap();
+        refreshColorMap();   
+
     end
 
     function setColorbarEdgeDetection(hObject, ~)
@@ -537,14 +556,14 @@ function colorbarCallback(hObject, ~)
 
         if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
 
-             dColorbarScale = fusionColorbarScale('get');
+            dColorbarScale = fusionColorbarScale('get');
 
             dMax = fusionWindowLevel('get', 'max');
             dMin = fusionWindowLevel('get', 'min');
 
-            dOffset = get(uiFusedSeriesPtr('get'), 'Value');
+            dSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
 
-            sUnitDisplay = getSerieUnitValue(dOffset);
+            sUnitDisplay = getSerieUnitValue(dSeriesOffset);
 
             bDefaultUnit = isFusionColorbarDefaultUnit('get');
 
@@ -555,9 +574,9 @@ function colorbarCallback(hObject, ~)
             dMax = windowLevel('get', 'max');
             dMin = windowLevel('get', 'min');
 
-            dOffset = get(uiSeriesPtr('get'), 'Value');
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-            sUnitDisplay = getSerieUnitValue(dOffset);
+            sUnitDisplay = getSerieUnitValue(dSeriesOffset);
 
             bDefaultUnit = isColorbarDefaultUnit('get');
         end
@@ -620,9 +639,9 @@ function colorbarCallback(hObject, ~)
             else
                 if bDefaultUnit == true
 
-                    if isfield(atInput(dOffset).tQuant, 'tSUV')
-                        dMax = dMax*atInput(dOffset).tQuant.tSUV.dScale;
-                        dMin = dMin*atInput(dOffset).tQuant.tSUV.dScale;
+                    if isfield(atInput(dSeriesOffset).tQuant, 'tSUV')
+                        dMax = dMax*atInput(dSeriesOffset).tQuant.tSUV.dScale;
+                        dMin = dMin*atInput(dSeriesOffset).tQuant.tSUV.dScale;
                     end
                 end
             end
@@ -635,7 +654,7 @@ function colorbarCallback(hObject, ~)
 
             if bDefaultUnit == true
                 sSUVtype = viewerSUVtype('get');
-                if isfield(atInput(dOffset).tQuant, 'tSUV')
+                if isfield(atInput(dSeriesOffset).tQuant, 'tSUV')
                     sUnitType = sprintf('Unit in SUV/%s', sSUVtype);
                 else
                     sUnitType = 'Unit in BQML';
@@ -825,10 +844,10 @@ function colorbarCallback(hObject, ~)
 
                 case 'SUV'
 
-                    if isfield(atInput(dOffset).tQuant, 'tSUV')
+                    if isfield(atInput(dSeriesOffset).tQuant, 'tSUV')
     
-                        sMinValue = dMinValue*atInput(dOffset).tQuant.tSUV.dScale;
-                        sMaxValue = dMaxValue*atInput(dOffset).tQuant.tSUV.dScale;
+                        sMinValue = dMinValue*atInput(dSeriesOffset).tQuant.tSUV.dScale;
+                        sMaxValue = dMaxValue*atInput(dSeriesOffset).tQuant.tSUV.dScale;
                     end
 
                 case 'BQML'
@@ -842,7 +861,8 @@ function colorbarCallback(hObject, ~)
         end
 
         function cancelWindowLCallback(~, ~)
-            delete(dlgWindowLevel)
+
+            delete(dlgWindowLevel);
         end
 
         function proceedWindowLCallback(~, ~)
@@ -858,10 +878,10 @@ function colorbarCallback(hObject, ~)
 
             if strcmpi(sUnitDisplay, 'SUV')
              
-                if isfield(atInput(dOffset).tQuant, 'tSUV')
+                if isfield(atInput(dSeriesOffset).tQuant, 'tSUV')
 
-                    lMin = lMin/atInput(dOffset).tQuant.tSUV.dScale;
-                    lMax = lMax/atInput(dOffset).tQuant.tSUV.dScale;
+                    lMin = lMin/atInput(dSeriesOffset).tQuant.tSUV.dScale;
+                    lMax = lMax/atInput(dSeriesOffset).tQuant.tSUV.dScale;
                 end
             end
 
@@ -1137,21 +1157,16 @@ function colorbarCallback(hObject, ~)
 
         atInput = inputTemplate('get');
     
-        dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
-        if dFuseOffset > numel(atInput)
-            return;
-        end
-    
-        dOffset = get(uiSeriesPtr('get'), 'Value');
-        if dOffset > numel(atInput)
-            return;
-        end
+        dFusedSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+        dSeriesOffset      = get(uiSeriesPtr('get'), 'Value');
+
 
         if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
-            sModality = atInput(dFuseOffset).atDicomInfo{1}.Modality;
+
+            sModality = atInput(dFusedSeriesOffset).atDicomInfo{1}.Modality;
     
         else
-            sModality = atInput(dOffset).atDicomInfo{1}.Modality;
+            sModality = atInput(dSeriesOffset).atDicomInfo{1}.Modality;
         end
 
         if strcmpi(sModality, 'CT')
@@ -1281,12 +1296,14 @@ function colorbarCallback(hObject, ~)
         end
 
         if isShowFaceAlphaContours('get') == true
+
             set(findall(hObject.Children, 'Label', 'Show Face Alpha'), 'Checked', 'on');
         else
             set(findall(hObject.Children, 'Label', 'Show Face Alpha'), 'Checked', 'off');
         end
 
-        if size(dicomBuffer('get'), 3) == 1 % 2D Image
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1 % 2D Image
+
             if isShowTextContours('get', 'axe') == true
                 set(findall(hObject.Children, 'Label', 'Show Text'), 'Checked', 'on');
             else
@@ -1313,7 +1330,9 @@ function colorbarCallback(hObject, ~)
         set(findall(hObject.Children, 'Label', 'Normalize to Liver'), 'Checked', 'off');
         if isCombineMultipleFusion('get') == true && ...
            isVsplash('get') == false
+
             if isRGBFusionNormalizeToLiver('get') == false
+
                 set(findall(hObject.Children, 'Label', 'Normalize to Liver'), 'Enable', 'on');
             else
                 set(findall(hObject.Children, 'Label', 'Normalize to Liver'), 'Enable', 'off');
@@ -1329,8 +1348,9 @@ function colorbarCallback(hObject, ~)
             set(findall(hObject.Children, 'Label', 'Intensity Min\Max'), 'Enable', 'off');
         end
 
-        if size(dicomBuffer('get'), 3) == 1 || ...
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1 || ...
            isVsplash('get') == true
+
             set(findall(hObject.Children, 'Label', 'Show RGB Colormap'), 'Enable', 'off');
         else
             set(findall(hObject.Children, 'Label', 'Show RGB Colormap'), 'Enable', 'on');
@@ -1338,13 +1358,14 @@ function colorbarCallback(hObject, ~)
 
         axeRGBImage = axeRGBImagePtr('get');
         if ~isempty(axeRGBImage)
+
             set(findall(hObject.Children, 'Label', 'Show RGB Colormap'), 'Checked', 'on');
         else
             set(findall(hObject.Children, 'Label', 'Show RGB Colormap'), 'Checked', 'off');
         end
 
         if ~isempty(axeRGBImage) && ...
-           size(dicomBuffer('get'), 3) ~= 1 && ...
+           size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1 && ...
            isVsplash('get') == false
 
             set(findall(hObject.Children, 'Label', 'RGB plus' ), 'Enable', 'on');
@@ -1371,6 +1392,683 @@ function colorbarCallback(hObject, ~)
             set(findall(hObject.Children, 'Label', 'RGB cube'), 'Checked', 'on');
         else
         end       
+    end
+    
+    function  refreshColorbar(hObject)
+
+        if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+            
+            sModality = atInput(dFusedSeriesOffset).atDicomInfo{1}.Modality;
+
+            dColorbarOffset = fusionColorMapOffset('get');
+        else
+            sModality = atInput(dSeriesOffset).atDicomInfo{1}.Modality;
+
+            dColorbarOffset = colorMapOffset('get');
+        end
+
+        asColorMap = getColorMapsName();
+        sColorMap = asColorMap{dColorbarOffset};
+
+        dToolsMenuOffset = [];
+        dWindowMenuOffset = [];
+        dMultiFusionMenuOffset = [];
+
+        for tt = 1:numel(hObject.ContextMenu.Children)
+
+            if strcmpi(hObject.ContextMenu.Children(tt).Text, 'Tools') 
+                dToolsMenuOffset = tt;
+                continue;
+            end
+
+            if strcmpi(hObject.ContextMenu.Children(tt).Text, 'Window') 
+                dWindowMenuOffset = tt;
+                continue;
+            end
+
+            if strcmpi(hObject.ContextMenu.Children(tt).Text, 'Multi-Fusion')
+                dMultiFusionMenuOffset = tt;
+                continue;
+            end
+
+            if strcmpi(hObject.ContextMenu.Children(tt).Text, sColorMap)
+                hObject.ContextMenu.Children(tt).Checked = true;
+            else
+                hObject.ContextMenu.Children(tt).Checked = false;
+            end
+
+            drawnow;
+        end
+
+        % Window
+
+        if ~isempty(dWindowMenuOffset)
+
+            if isCombineMultipleFusion('get') == true && ...
+               strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+                
+                set(hObject.ContextMenu.Children(dWindowMenuOffset), 'Enable', 'off');
+            else
+                set(hObject.ContextMenu.Children(dWindowMenuOffset), 'Enable', 'on');
+            end
+        end
+
+        if strcmpi(sModality, 'CT')
+
+            % Create uimenus with labels and tags
+            asMenuLabels = {'(F1) Lung', '(F2) Soft Tissue', '(F3) Bone', '(F4) Liver', ...
+                            '(F5) Brain', '(F6) Head and Neck', '(F7) Enchanced Lung', ...
+                            '(F8) Mediastinum', '(F9) Temporal Bone', '(F9) Vertebra', ...
+                            '(F9) All', 'Custom'};
+    
+            asMenuTags = {'Lung', 'SoftTissue', 'Bone', 'Liver', 'Brain', 'HeadAndNeck', ...
+                          'EnhancedLung', 'Mediastinum', 'TemporalBone', 'Vertebra', ...
+                          'All', 'Custom'};
+    
+            menus = gobjects(1, numel(asMenuLabels));
+    
+            % Get window and level
+            if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+                dMax = fusionWindowLevel('get', 'max');
+                dMin = fusionWindowLevel('get', 'min');
+            else
+                dMax = windowLevel('get', 'max');
+                dMin = windowLevel('get', 'min');
+            end
+            [dWindow, dLevel] = computeWindowMinMax(dMax, dMin);
+            sWindowName = getWindowName(dWindow, dLevel);
+    
+            dWindowOffset = find(~cellfun('isempty', strfind(asMenuTags, sWindowName)), 1); % Find non-empty matches
+            
+            if ~isempty(dWindowMenuOffset)
+
+                if ~isempty(dWindowOffset)
+
+
+                    bCustomWindow = true;
+
+                    for jj=1:numel(hObject.ContextMenu.Children(dWindowMenuOffset).Children)
+
+                        if strcmpi(hObject.ContextMenu.Children(dWindowMenuOffset).Children(jj).Text, sWindowName)
+
+                            bCustomWindow = false;
+                            hObject.ContextMenu.Children(dWindowMenuOffset).Children(jj).Checked = 'on';
+                        else
+                            hObject.ContextMenu.Children(dWindowMenuOffset).Children(jj).Checked = false;
+                        end
+                    end
+
+                    if bCustomWindow == true
+
+                        for jj=1:numel(hObject.ContextMenu.Children(dWindowMenuOffset).Children)
+
+                            if strcmpi(hObject.ContextMenu.Children(dWindowMenuOffset).Children(jj).Text, 'Custom')
+
+                                hObject.ContextMenu.Children(dWindowMenuOffset).Children(jj).Checked = true;
+                            end                           
+                        end    
+                    end
+
+                end
+            end
+        end
+
+        % Update tools
+
+        if ~isempty(dToolsMenuOffset)
+
+            if isCombineMultipleFusion('get') == true
+
+                set(hObject.ContextMenu.Children(dToolsMenuOffset), 'Enable', 'off');
+            else
+                set(hObject.ContextMenu.Children(dToolsMenuOffset), 'Enable', 'on');
+            end
+            
+            % Update Tools submenu
+
+            dToolsEdgeDetectionMenuOffset = [];
+            dToolsManualAlignmentMenuOffset = [];
+            dToolsPlotContoursMenuOffset = [];
+
+            for tt=1:numel(hObject.ContextMenu.Children(dToolsMenuOffset).Children) 
+
+                if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(tt).Text, 'Edge Detection') 
+
+                    dToolsEdgeDetectionMenuOffset = tt;
+                end
+
+                if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(tt).Text, 'Manual Alignment') 
+
+                    dToolsManualAlignmentMenuOffset = tt;
+                end
+
+                if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(tt).Text, 'Plot Contours') 
+
+                    dToolsPlotContoursMenuOffset = tt;
+                end                
+            end
+
+            % Manual Alignment
+
+            if ~isempty(dToolsManualAlignmentMenuOffset)
+
+                dToolsManualAlignmentMoveImageMenuOffset = [];
+                dToolsManualAlignmentMoveAssociatedSeriesMenuOffset = [];
+                dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset = [];
+
+                for ta=1:numel(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children)
+
+                    % Move Image                    
+                    if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(ta).Text, 'Move Image') 
+
+                        dToolsManualAlignmentMoveImageMenuOffset = ta;
+                    end
+
+                    % Move Associated Series
+                    if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(ta).Text, 'Move Associated Series') 
+
+                        dToolsManualAlignmentMoveAssociatedSeriesMenuOffset = ta;
+                    end
+
+                    % Update Series Description    
+                    if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(ta).Text, 'Update Series Description') 
+
+                        dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset = ta;
+                    end                    
+                end
+                
+                % Move Associated Series
+
+                if ~isempty(dToolsManualAlignmentMoveAssociatedSeriesMenuOffset)
+
+                    if associateRegistrationModality('get') == true
+                        
+                        hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(dToolsManualAlignmentMoveAssociatedSeriesMenuOffset).Checked = true;
+
+                    else
+                        hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(dToolsManualAlignmentMoveAssociatedSeriesMenuOffset).Checked = false;
+                    end
+                end
+
+                % Update Series Description
+
+                if ~isempty(dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset)
+
+                    if updateDescription('get') == true
+    
+                        hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset).Checked = true;
+    
+                    else
+                        hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset).Checked = false;
+                    end
+                end
+                
+                if isMoveImageActivated('get') == true
+
+                    % Menu Edge
+                    if ~isempty(dToolsEdgeDetectionMenuOffset)
+
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsEdgeDetectionMenuOffset), 'Enable' , 'off');
+                    end
+
+                    % Menu Move Image
+                    if ~isempty(dToolsManualAlignmentMoveImageMenuOffset)
+
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(dToolsManualAlignmentMoveImageMenuOffset), 'Checked', true);
+                    end
+
+                    % Menu Move Associated
+                    if ~isempty(dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset)
+
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(dToolsManualAlignmentMoveAssociatedSeriesMenuOffset), 'Enable', 'on');
+                    end
+
+                    % Menu Update Description
+                    if ~isempty(dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset)
+
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset), 'Enable' , 'on');
+                    end
+                else
+                    % Menu Edge
+                    if ~isempty(dToolsEdgeDetectionMenuOffset)
+
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsEdgeDetectionMenuOffset), 'Enable' , 'on');
+                    end
+
+                    % Menu Move Image
+                    if ~isempty(dToolsManualAlignmentMoveImageMenuOffset)
+
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(dToolsManualAlignmentMoveImageMenuOffset), 'Checked', false);
+                    end
+
+                    % Menu Move Associated
+                    if ~isempty(dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset)
+
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(dToolsManualAlignmentMoveAssociatedSeriesMenuOffset), 'Enable', 'off');
+                    end
+
+                    % Menu Update Description
+                    if ~isempty(dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset)
+
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsManualAlignmentMenuOffset).Children(dToolsManualAlignmentUpdateSeriesDescriptionMenuOffset), 'Enable' , 'off');
+                    end
+                end
+            end
+
+            % Plot Contours
+
+            if ~isempty(dToolsPlotContoursMenuOffset)
+                
+                dToolsPlotContoursShowContoursMenuOffset = [];
+                dToolsPlotContoursShowFaceAlphaMenuOffset = [];
+                dToolsPlotContoursSetLevelListMenuOffset = [];
+                dToolsPlotContoursSetLevelStepMenuOffset = [];
+                dToolsPlotContoursSetLineWidthMenuOffset = [];
+                dToolsPlotContoursShowTextMenuOffset = [];
+                dToolsPlotContoursSetTextListMenuOffset = [];
+         
+                for pc=1:numel(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children)
+
+                    % Show Contours
+                    if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(pc).Text, 'Show Contours') 
+
+                        dToolsPlotContoursShowContoursMenuOffset = pc;
+                    end
+
+                    % Show Face Alpha
+                    if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(pc).Text, 'Show Face Alpha') 
+
+                        dToolsPlotContoursShowFaceAlphaMenuOffset = pc;
+                    end
+
+                    % Set Level List
+                    if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(pc).Text, 'Set Level List') 
+
+                        dToolsPlotContoursSetLevelListMenuOffset = pc;
+                    end
+
+                    % Set Level Step
+                    if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(pc).Text, 'Set Level Step') 
+
+                        dToolsPlotContoursSetLevelStepMenuOffset = pc;
+                    end
+
+                    % Set Line Width
+                    if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(pc).Text, 'Set Line Width') 
+
+                        dToolsPlotContoursSetLineWidthMenuOffset = pc;
+                    end
+
+                    % Show Text
+                    if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(pc).Text, 'Show Text') 
+
+                        dToolsPlotContoursShowTextMenuOffset = pc;
+                    end
+
+                    % Set Text List
+                    if strcmpi(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(pc).Text, 'Set Text List') 
+
+                        dToolsPlotContoursSetTextListMenuOffset = pc;
+                    end                    
+                end
+
+                % Show Contours
+
+                if ~isempty(dToolsPlotContoursShowContoursMenuOffset)
+
+                    if isPlotContours('get') == true
+
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowContoursMenuOffset), 'Checked', true);
+                    else
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowContoursMenuOffset), 'Checked', false);
+                    end                
+                end
+              
+                % Show Face Alpha
+
+                if ~isempty(dToolsPlotContoursShowFaceAlphaMenuOffset)
+
+                    if isShowFaceAlphaContours('get') == true
+
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowFaceAlphaMenuOffset), 'Checked', true);
+                    else
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowFaceAlphaMenuOffset), 'Checked', false);
+                    end
+                end
+
+                % Set Level List
+
+                if ~isempty(dToolsPlotContoursSetLevelListMenuOffset)
+
+                    set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetLevelListMenuOffset), 'Checked', false);
+                end
+
+                % Set Level Step
+
+                if ~isempty(dToolsPlotContoursSetLevelStepMenuOffset)
+
+                    set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetLevelStepMenuOffset), 'Checked', false);
+                end
+
+                % Set Line Width
+
+                if ~isempty(dToolsPlotContoursSetLineWidthMenuOffset)
+
+                    set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetLineWidthMenuOffset), 'Checked', false);
+                end
+
+                % Show Text
+
+                if ~isempty(dToolsPlotContoursShowTextMenuOffset)
+            
+                    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1 % 2D Image
+
+                        if isShowTextContours('get', 'axe') == true
+
+                            set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowTextMenuOffset), 'Checked', true);
+                        else
+                            set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowTextMenuOffset), 'Checked', false);
+                        end
+                    else
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowTextMenuOffset), 'Checked', false);
+                    end
+                end
+
+                % Set Text List
+
+                if ~isempty(dToolsPlotContoursSetTextListMenuOffset)
+
+                    set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetTextListMenuOffset), 'Checked', false);
+                end
+
+                % Show Contours
+
+                if ~isempty(dToolsPlotContoursShowContoursMenuOffset)  && ... % Show Contours
+                   ~isempty(dToolsPlotContoursShowFaceAlphaMenuOffset) && ... % Show Face Alpha
+                   ~isempty(dToolsPlotContoursSetLevelListMenuOffset)  && ... % Set Level List
+                   ~isempty(dToolsPlotContoursSetLevelStepMenuOffset)  && ... % Set Level Step
+                   ~isempty(dToolsPlotContoursSetLineWidthMenuOffset)  && ... % Set Line Width                 
+                   ~isempty(dToolsPlotContoursShowTextMenuOffset)      && ... % Show Text
+                   ~isempty(dToolsPlotContoursSetTextListMenuOffset)          % Set Text List
+
+                    if isPlotContours('get') == true
+                      
+                        % Show Text
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowTextMenuOffset)     , 'Enable', 'on');
+
+                        % Show Face Alpha
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowFaceAlphaMenuOffset), 'Enable', 'on');
+
+                        % Set Level List
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetLevelListMenuOffset) , 'Enable', 'on');
+
+                        % Set Level Step
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetLevelStepMenuOffset) , 'Enable', 'on');
+
+                        % Set Line Width        
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetLineWidthMenuOffset) , 'Enable', 'on');
+
+                        % Set Text List
+                        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1 % 2D Image
+
+                            if isShowTextContours('get', 'axe') == true
+
+                                set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetTextListMenuOffset)  , 'Enable', 'on');
+                            else
+                                set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetTextListMenuOffset)  , 'Enable', 'off');
+                            end
+                        else
+                            if isShowTextContours('get', 'coronal')  == true || ...
+                               isShowTextContours('get', 'sagittal') == true || ...
+                               isShowTextContours('get', 'axial')    == true || ...
+                               isShowTextContours('get', 'mip')      == true
+                                
+                                set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetTextListMenuOffset)  , 'Enable', 'on');
+                            else
+                                set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetTextListMenuOffset)  , 'Enable', 'off');
+                            end
+                        end
+                    else
+                        % Show Text
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowTextMenuOffset)     , 'Enable', 'off');
+                        % Show Face Alpha
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursShowFaceAlphaMenuOffset), 'Enable', 'off');
+                        % Set Level List
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetLevelListMenuOffset) , 'Enable', 'off');
+                        % Set Level Step
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetLevelStepMenuOffset) , 'Enable', 'off');
+                        % Set Line Width        
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetLineWidthMenuOffset) , 'Enable', 'off');
+                        % Set Text List
+                        set(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsPlotContoursMenuOffset).Children(dToolsPlotContoursSetTextListMenuOffset)  , 'Enable', 'off');
+                    end
+                end
+
+                % Edge Detection
+
+                if ~isempty(dToolsEdgeDetectionMenuOffset)
+
+                    if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+
+                        if isscalar(atInput)
+
+                            if atInput(dFusedSeriesOffset).bFusedEdgeDetection == true
+
+                                set(findall(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsEdgeDetectionMenuOffset), 'Label', 'Edge Detection'), 'Checked', 'on');
+                            end
+                        else
+                            if atInput(dFusedSeriesOffset).bEdgeDetection == true
+
+                                set(findall(hObject.ContextMenu.Children(dToolsMenuOffset).Children(dToolsEdgeDetectionMenuOffset), 'Label', 'Edge Detection'), 'Checked', 'on');
+                            end
+                        end
+
+                        % sModality = atInput(dFusedSeriesOffset).atDicomInfo{1}.Modality;
+                    % else
+                
+                        % sModality = atInput(dSeriesOffset).atDicomInfo{1}.Modality;
+                    end         
+                end
+            end
+        end
+
+        % Multi Fusion
+
+        if ~isempty(dMultiFusionMenuOffset)
+
+            if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+
+                dMultiFusionCombineRGBMenuOffset = [];
+                dMultiFusionNormalizeToLiverMenuOffset = [];
+                dMultiFusionIntensityMinMaxMenuOffset = [];
+                dMultiFusionShowRGBColormapMenuOffset = [];
+                dMultiFusionRGBPlusMenuOffset = [];
+                dMultiFusionRGBBlockMenuOffset = [];
+                dMultiFusionRGBWheelMenuOffset = [];
+                dMultiFusionRGBCubeMenuOffset = [];
+                 
+                for mf=1:numel(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children)
+
+                    % Combine RGB 
+                    if strcmpi(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(mf).Text, 'Combine RGB') 
+
+                        dMultiFusionCombineRGBMenuOffset = mf;
+                    end
+
+                    % Normalize to Liver
+                    if strcmpi(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(mf).Text, 'Normalize to Liver') 
+
+                        dMultiFusionNormalizeToLiverMenuOffset = mf;
+                    end    
+
+                    % Intensity Min\Max
+                    if strcmpi(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(mf).Text, 'Intensity Min\Max') 
+
+                        dMultiFusionIntensityMinMaxMenuOffset = mf;
+                    end    
+
+                    % Show RGB Colormap
+                    if strcmpi(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(mf).Text, 'Show RGB Colormap') 
+
+                        dMultiFusionShowRGBColormapMenuOffset = mf;
+                    end  
+
+                    % RGB plus
+                    if strcmpi(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(mf).Text, 'RGB plus') 
+
+                        dMultiFusionRGBPlusMenuOffset = mf;
+                    end    
+
+                    % RGB block
+                    if strcmpi(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(mf).Text, 'RGB block') 
+
+                        dMultiFusionRGBBlockMenuOffset = mf;
+                    end        
+
+                    % RGB wheel
+                    if strcmpi(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(mf).Text, 'RGB wheel') 
+
+                        dMultiFusionRGBWheelMenuOffset = mf;
+                    end  
+
+                    % RGB cube 
+                    if strcmpi(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(mf).Text, 'RGB cube') 
+
+                        dMultiFusionRGBCubeMenuOffset = mf;
+                    end                 
+
+                end
+
+                % Combine RGB
+
+                if ~isempty(dMultiFusionCombineRGBMenuOffset)
+        
+                    if isCombineMultipleFusion('get') == true
+
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionCombineRGBMenuOffset), 'Checked', true);
+                    else
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionCombineRGBMenuOffset), 'Checked', false);
+                    end
+
+                    set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionCombineRGBMenuOffset), 'Enable', 'on');
+                end
+
+                % Normalize to Liver
+
+                if ~isempty(dMultiFusionNormalizeToLiverMenuOffset)
+
+                    set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionNormalizeToLiverMenuOffset), 'Checked', false);
+
+                    if isCombineMultipleFusion('get') == true && ...
+                       isVsplash('get') == false
+
+                        if isRGBFusionNormalizeToLiver('get') == false
+
+                            set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionNormalizeToLiverMenuOffset), 'Enable', 'on');
+                        else
+                            set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionNormalizeToLiverMenuOffset), 'Enable', 'off');
+                        end
+                    else
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionNormalizeToLiverMenuOffset), 'Enable', 'off');
+                    end
+                end
+
+                % Intensity Min\Max
+
+                if ~isempty(dMultiFusionIntensityMinMaxMenuOffset)
+                    
+                    set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionIntensityMinMaxMenuOffset), 'Checked', false);
+
+                    if isCombineMultipleFusion('get') == true
+
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionIntensityMinMaxMenuOffset), 'Enable', 'on');
+                    else
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionIntensityMinMaxMenuOffset), 'Enable', 'off');
+                    end
+                end
+                
+                % Show RGB Colormap
+
+                if ~isempty(dMultiFusionShowRGBColormapMenuOffset)
+                    
+                    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1 || ...
+                       isVsplash('get') == true
+
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionShowRGBColormapMenuOffset), 'Enable', 'off');
+                    else
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionShowRGBColormapMenuOffset), 'Enable', 'on');
+                    end
+
+                    axeRGBImage = axeRGBImagePtr('get');
+                    if ~isempty(axeRGBImage)
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionShowRGBColormapMenuOffset), 'Checked', false);
+                    else
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionShowRGBColormapMenuOffset), 'Checked', true);
+                    end
+                end
+
+                % RGB plus
+                % RGB block    
+                % RGB wheel
+                % RGB cube 
+
+                if ~isempty(dMultiFusionRGBPlusMenuOffset)  && ... % RGB plus
+                   ~isempty(dMultiFusionRGBBlockMenuOffset) && ... % RGB block
+                   ~isempty(dMultiFusionRGBWheelMenuOffset) && ... % RGB wheel
+                   ~isempty(dMultiFusionRGBCubeMenuOffset)         % RGB cube
+
+                    if ~isempty(axeRGBImage) && ...
+                       size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1 && ...
+                       isVsplash('get') == false
+
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBPlusMenuOffset) , 'Enable', 'on'); % RGB plus
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBBlockMenuOffset), 'Enable', 'on'); % RGB block
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBWheelMenuOffset), 'Enable', 'on'); % RGB wheel
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBCubeMenuOffset) , 'Enable', 'on'); % RGB cube
+                    else
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBPlusMenuOffset) , 'Enable', 'off'); % RGB plus
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBBlockMenuOffset), 'Enable', 'off'); % RGB block
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBWheelMenuOffset), 'Enable', 'off'); % RGB wheel
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBCubeMenuOffset) , 'Enable', 'off'); % RGB cube
+                    end
+            
+                    sImageName = getRGBColormapImage('get');
+
+                    % RGB plus
+                    if strcmpi(sImageName, 'rgb-plus.png')
+
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBPlusMenuOffset) , 'Checked', true);  % RGB plus
+                    else
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBPlusMenuOffset) , 'Checked', false); % RGB plus
+                    end
+                    
+                    % RGB block
+                    if strcmpi(sImageName, 'rgb-block.png')
+
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBBlockMenuOffset), 'Checked', true);  % RGB block
+                    else
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBBlockMenuOffset), 'Checked', false); % RGB block
+                    end
+                    
+                    % RGB wheel
+                    if strcmpi(sImageName, 'rgb-wheel.png')
+
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBWheelMenuOffset), 'Checked', true);  % RGB wheel
+                    else
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBWheelMenuOffset), 'Checked', false); % RGB wheel
+                    end 
+                    
+                    % RGB cube
+                    if strcmpi(sImageName, 'rgb-cube.png')
+
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBCubeMenuOffset) , 'Checked', true);  % RGB cube
+                    else
+                        set(hObject.ContextMenu.Children(dMultiFusionMenuOffset).Children(dMultiFusionRGBCubeMenuOffset) , 'Checked', false); % RGB cube
+                    end
+                end
+            end
+
+        end        
     end
 
 end

@@ -1,5 +1,5 @@
-function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip, bViewContourPanel, dSeries1Offset, dSeries2Offset)
-%function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip, bViewContourPanel, dSeries1Offset, dSeries2Offset)
+function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, dFusionAlpha, bLink2DMip, bViewContourPanel, dSeries1Offset, dSeries2Offset)
+%function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, dFusionAlpha, bLink2DMip, bViewContourPanel, dSeries1Offset, dSeries2Offset)
 %Run fusion between 2 modalities. The second modality is use as resample source.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -61,18 +61,17 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
     atSerie1MetaData = dicomMetaData('get', [], dSeries1Offset);
     atSerie2MetaData = dicomMetaData('get', [], dSeries2Offset);
 
+    aInputBuffer = inputBuffer('get');
+
     aSerie1Image = dicomBuffer('get', [], dSeries1Offset);
     if isempty(aSerie1Image)
-        aInputBuffer = inputBuffer('get');
         aSerie1Image = aInputBuffer{dSeries1Offset};
-        clear aInputBuffer;
     end
 
     aSerie2Image = dicomBuffer('get', [], dSeries2Offset);
     if isempty(aSerie2Image)
         aInputBuffer = inputBuffer('get');
         aSerie2Image = aInputBuffer{dSeries2Offset};
-        clear aInputBuffer;
     end
 
     if isempty(atSerie1MetaData)
@@ -83,22 +82,34 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
         atSerie2MetaData = atInput(dSeries2Offset).atDicomInfo;
     end
 
+    if size(aSerie1Image, 3) ~= 1
+        dCoronal  = sliceNumber('get', 'coronal');
+        dSagittal = sliceNumber('get', 'sagittal');
+        dAxial    = sliceNumber('get', 'axial');        
+    end
+
     if get(uiSeriesPtr('get'), 'Value') ~= dSeries1Offset
 
         set(uiSeriesPtr('get'), 'Value', dSeries1Offset);
 
         setSeriesCallback();
     end
-    
+
+    % imgVol  = dicomBuffer('get', [], dSeries2Offset);
+    % atMetaData = dicomMetaData('get', [], dSeries2Offset);
+    %
+    % imgCleaned = removeCTTableAdvanced(imgVol, atMetaData);
+    % dicomBuffer('set', imgCleaned, dSeries2Offset);
+
     try
-    
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
     if isInterpolated('get') == false
 
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
@@ -136,62 +147,78 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     setImagesAspectRatio();
 
-    refreshImages();
+    % refreshImages();
 
-    drawnow;
+    % drawnow;
+    atPlotEdit = plotEditTemplate('get', dSeries1Offset);
+
+    atPlotEdit = resamplePlotEdit(aSerie1Image, atSerie1MetaData, aResampledImage, atResampledMetaData, atPlotEdit, true);
+
+    plotEditTemplate('set', dSeries1Offset, atPlotEdit);
 
     progressBar(2/4, 'Resampling roi, please wait.');
 
     atRoi = roiTemplate('get', dSeries1Offset);
+    atVoi = voiTemplate('get', dSeries1Offset);
 
     if ~isempty(atRoi)
 
-        atResampledRois = resampleROIs(aSerie1Image, atSerie1MetaData, aResampledImage, atResampledMetaData, atRoi, true);
+        [atResampledRois, atResampledVois] = resampleROIs(aSerie1Image, atSerie1MetaData, aResampledImage, atResampledMetaData, atRoi, true, atVoi, dSeries1Offset);
 
         roiTemplate('set', dSeries1Offset, atResampledRois);
+        voiTemplate('set', dSeries1Offset, atResampledVois);
 
         if size(dicomBuffer('get', [], dSeries1Offset), 3) ~= 1
 
              % Triangulate on 1st VOI
-    
+
             atVoiInput = voiTemplate('get', dSeries1Offset);
-    
+
             if ~isempty(atVoiInput)
-    
+
                 dRoiOffset = round(numel(atVoiInput{1}.RoisTag)/2);
-    
+
                 triangulateRoi(atVoiInput{1}.RoisTag{dRoiOffset});
             else
-    
-                aImageSize = size(aResampledImage);
-    
-                set(uiSliderSagPtr('get'), 'Value', 0.5);
-                set(uiSliderCorPtr('get'), 'Value', 0.5);
-                set(uiSliderTraPtr('get'), 'Value', 0.5);
-    
-                sliceNumber('set', 'coronal' , round(aImageSize(1)/2));
-                sliceNumber('set', 'sagittal', round(aImageSize(2)/2));
-                sliceNumber('set', 'axial'   , round(aImageSize(3)/2)); 
+            % 
+            %     aImageSize = size(aResampledImage);
+            % 
+            %     set(uiSliderSagPtr('get'), 'Value', round(aImageSize(1)/2));
+            %     set(uiSliderCorPtr('get'), 'Value', round(aImageSize(2)/2));
+            %     set(uiSliderTraPtr('get'), 'Value', round(aImageSize(3)/2));
+            % 
+            %     sliceNumber('set', 'coronal' , round(aImageSize(1)/2));
+            %     sliceNumber('set', 'sagittal', round(aImageSize(2)/2));
+            %     sliceNumber('set', 'axial'   , round(aImageSize(3)/2));
+
+                resetTriangulation(aInputBuffer{dSeries1Offset}, dCoronal, dSagittal, dAxial);
+                
             end
-           
-            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeries1Offset), dicomBuffer('get', [], dSeries1Offset), mipAngle('get'));       
-        end  
-    else
-        if size(dicomBuffer('get', [], dSeries1Offset), 3) ~= 1
 
-            aImageSize = size(aResampledImage);
-
-            set(uiSliderSagPtr('get'), 'Value', 0.5);
-            set(uiSliderCorPtr('get'), 'Value', 0.5);
-            set(uiSliderTraPtr('get'), 'Value', 0.5);
-
-            sliceNumber('set', 'coronal' , round(aImageSize(1)/2));
-            sliceNumber('set', 'sagittal', round(aImageSize(2)/2));
-            sliceNumber('set', 'axial'   , round(aImageSize(3)/2));  
+            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeries1Offset), dicomBuffer('get', [], dSeries1Offset), mipAngle('get'));
         end
+    else
+    %     if size(dicomBuffer('get', [], dSeries1Offset), 3) ~= 1
+    % 
+    %         aImageSize = size(aResampledImage);
+    % 
+    %         set(uiSliderSagPtr('get'), 'Value', round(aImageSize(1)/2));
+    %         set(uiSliderCorPtr('get'), 'Value', round(aImageSize(2)/2));
+    %         set(uiSliderTraPtr('get'), 'Value', round(aImageSize(3)/2));
+    % 
+    %         sliceNumber('set', 'coronal' , round(aImageSize(1)/2));
+    %         sliceNumber('set', 'sagittal', round(aImageSize(2)/2));
+    %         sliceNumber('set', 'axial'   , round(aImageSize(3)/2));
+    %     end
+        if size(dicomBuffer('get', [], dSeries1Offset), 3) ~= 1
+            
+            resetTriangulation(aInputBuffer{dSeries1Offset}, dCoronal, dSagittal, dAxial);
+        end    
     end
 
     clear aResampledImage;
+    
+    refreshImages();
 
     % Activate ROI Panel
     if bViewContourPanel == true
@@ -199,7 +226,7 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
         if viewRoiPanel('get') == false
 
             if ~isempty(voiTemplate('get', dSeries1Offset))
-                
+
                 setViewRoiPanel();
             end
         end
@@ -235,7 +262,7 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
         case 'hu'
 
-            [dSeries1Max, dSeries1Min] = computeWindowLevel(dModality1IntensityMax   , dModality1IntensityMin   );
+            [dSeries1Max, dSeries1Min] = computeWindowLevel(dModality1IntensityMax, dModality1IntensityMin);
 
             if size(aSerie1Image, 3) ~= 1
                 [dSeries1MIPMax, dSeries1MIPMin] = computeWindowLevel(dModality1MIPIntensityMax, dModality1MIPIntensityMin);
@@ -262,8 +289,10 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 %     set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
 %     set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
 
-    windowLevel('set', 'max', dSeries1Max);
-    windowLevel('set', 'min', dSeries1Min);
+    % windowLevel('set', 'max', dSeries1Max);
+    % windowLevel('set', 'min', dSeries1Min);
+    %
+    % getInitWindowMinMax('set', dSeries1Max, dSeries1Min);
 
     setWindowMinMax(dSeries1Max, dSeries1Min);
 
@@ -281,21 +310,26 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
             set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
+            % set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
+            set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_white.png'));
         else
             link2DMip('set', false);
 
             set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
-        end
+            % set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+            set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
+       end
     end
+
 
     % Set fusion
 
     if isFusion('get') == false
 
         set(uiFusedSeriesPtr('get'), 'Value', dSeries2Offset);
+
+        sliderAlphaValue('set', dFusionAlpha/100);
 
         setFusionCallback();
     end
@@ -370,7 +404,7 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
     end
 
 %     if size(aSerie1Image, 3) ~= 1
-% 
+%
 %         progressBar(3/4, 'Set fusion, please wait.');
 
 %         sliderCorCallback();
@@ -378,17 +412,20 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 %         sliderTraCallback();
 %         sliderMipCallback();
 %     end
+  
 
-    refreshImages();
     %triangulateImages();
+    
+    refreshImages();
 
     clear aSerie1Image;
     clear aSerie2Image;
-
+    clear aInputBuffer;
 
     progressBar(1, 'Ready');
-    
-    catch
+
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dSeries2Offset, true);
         progressBar( 1 , 'Error: setModalitiesFusion()' );
     end

@@ -30,9 +30,11 @@ function flip3Dobject(sOrientation)
     if multiFrame3DRecord('get') == true
         return;
     end
-    
-    if  strcmpi(get(gateIconMenuObject('get'), 'State'), 'off') || ...
-        ( strcmpi(get(gateIconMenuObject('get'), 'State'), 'on') && ...     
+
+    mGate = gateIconMenuObject('get');
+
+    if  ~isempty(mGate) && mGate.UserData.isSelected == false || ...
+        ( ~isempty(mGate) && mGate.UserData.isSelected == true && ...     
           multiFrame3DPlayback('get') == false ) 
 
         if ~isempty(viewer3dObject('get'))

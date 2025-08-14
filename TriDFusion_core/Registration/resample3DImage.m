@@ -43,8 +43,11 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
         else
             dRatio = dimsRef/dimsRsp*100;
         end
-    
-         if dRatio < 70  % The z is to far, need to change the method 
+
+        if strcmpi(atRspMetaData{1}.Modality, 'nm') || ...
+           strcmpi(atRefMetaData{1}.Modality, 'nm') || ...
+           dRatio < 70  % The z is to far, need to change the method 
+            
             [aRspImage, atRspMetaData] = ...
                 resampleImageTransformMatrix(aRspImage, ...
                                              atRspMetaData, ...
@@ -126,7 +129,7 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
                                              aRefImage, ...
                                              atRefMetaData, ...
                                              sInterpolation, ...
-                                             false ...
+                                             true ...
                                              );             
         else
             Btemp = aRspImage;
@@ -175,9 +178,12 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
   %      yMoveOffset = -startIndex(2);
 
         if xMoveOffset ~= 0 || yMoveOffset ~= 0 
+            
             if xMoveOffset < 1 && yMoveOffset < 1
-               if xMoveOffset > 0 && yMoveOffset > 0    
-                    aRspImage=imresize3(aRspImage, size(aRefImage));
+
+               if xMoveOffset > 0 && yMoveOffset > 0  
+
+                    aRspImage = imresize3(aRspImage, size(aRefImage));
                end
             else
                 xPixelSizeRatio = atRefMetaData{1}.PixelSpacing(1);
@@ -186,7 +192,7 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
            end
         end
     end
-    
+
     dimsRef = size(aRefImage);         
     dimsRsp = size(aRspImage);         
     xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
@@ -195,13 +201,15 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
     zMoveOffset = 0;
   
     if xMoveOffset ~= 0 || yMoveOffset ~= 0 || zMoveOffset ~= 0
+
         if xMoveOffset < 0 || yMoveOffset < 0 || zMoveOffset < 0 
+
             aRspImage = imtranslate(aRspImage,[-xMoveOffset-xPixelSizeRatio, -yMoveOffset-xPixelSizeRatio, -zMoveOffset-zPixelSizeRatio], 'nearest', 'OutputView', 'full', 'FillValues', min(aRspImage, [], 'all') ); 
         else                              
             aRspImage = imtranslate(aRspImage,[-xMoveOffset+xPixelSizeRatio, -yMoveOffset+yPixelSizeRatio, -zMoveOffset+zPixelSizeRatio], 'nearest', 'OutputView', 'same', 'FillValues', min(aRspImage, [], 'all') ); 
         end
     end
-
+  
 end
 
                     

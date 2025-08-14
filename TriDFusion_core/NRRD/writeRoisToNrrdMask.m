@@ -1,5 +1,5 @@
-function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex)
-%function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex)
+function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bIndex)
+%function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bIndex)
 %Export ROIs To .nrrd mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -28,7 +28,7 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
 % along with TriDFusion.cIf not, see <http://www.gnu.org/licenses/>.
 
     atInput = inputTemplate('get');
-    if dOffset > numel(atInput)
+    if dSeriesOffset > numel(atInput)
         return;
     end
 
@@ -50,13 +50,13 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
 %         atDicomMeta{sd}.SeriesDescription = sSeriesDescription;
 %     end
         
-    tRoiInput = roiTemplate('get', dOffset);
-    tVoiInput = voiTemplate('get', dOffset);
+    tRoiInput = roiTemplate('get', dSeriesOffset);
+    tVoiInput = voiTemplate('get', dSeriesOffset);
     
     bUseRoiTemplate = false;
     if numel(aInputBuffer) ~= numel(aDicomBuffer)              
         
-        tRoiInput = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, tRoiInput, false); 
+        [tRoiInput, tVoiInput] = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, tRoiInput, false, tVoiInput, dSeriesOffset); 
         
         atDicomMeta  = atInputMeta; 
         aDicomBuffer = aInputBuffer;      
@@ -291,6 +291,19 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
 
     if size(aMaskBuffer, 3) ~=1
 
+        % if isfield(atDicomMeta{1}, 'PatientPosition') && strcmpi(atDicomMeta{1}.PatientPosition, 'FFS')
+        %     aMaskBuffer = aMaskBuffer(:,:,end:-1:1);
+        % elseif isfield(atDicomMeta{1}, 'PatientPosition') && strcmpi(atDicomMeta{1}.PatientPosition, 'FFP')
+        %     aMaskBuffer = aMaskBuffer(end:-1:1,:,:);
+        % else
+        % 
+        %     bFlip = getImagePosition(dSeriesOffset);
+        % 
+        %     if bFlip == true                   
+        %         aMaskBuffer = aMaskBuffer(:,:,end:-1:1);
+        %     end                         
+        % end
+
         aMaskBuffer = aMaskBuffer(:,:,end:-1:1);
     end
 
@@ -298,7 +311,8 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
 
     progressBar(1, sprintf('Export NRRD mask to %s completed', char(sWriteDir)));
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         progressBar(1, 'Error:writeRoisToNrrdMask()');
     end
 

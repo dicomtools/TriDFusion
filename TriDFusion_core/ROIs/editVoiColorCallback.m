@@ -29,16 +29,16 @@ function editVoiColorCallback(hObject,~)
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-    atVoiInput = voiTemplate('get', dSeriesOffset); 
-    atRoiInput = roiTemplate('get', dSeriesOffset);                
+    atVoiInput = voiTemplate('get', dSeriesOffset);
+    atRoiInput = roiTemplate('get', dSeriesOffset);
 
-    if isempty(atVoiInput) 
-        
+    if isempty(atVoiInput)
+
         return;
     end
 
-    dVoiTagOffset = find(cellfun(@(c) any(strcmp(c.RoisTag, hObject.UserData.Tag)), atVoiInput), 1);         
-   
+    dVoiTagOffset = find(cellfun(@(c) any(strcmp(c.RoisTag, hObject.UserData.Tag)), atVoiInput), 1);
+
     if ~isempty(dVoiTagOffset)
 
         if ~isempty(dVoiTagOffset)
@@ -46,11 +46,11 @@ function editVoiColorCallback(hObject,~)
         else
             aColor = '';
         end
-    
+
         aColor = uisetcolor(aColor,'Select a color');
-        if aColor == 0
+        if isequal(aColor,0)
             return;
-        end   
+        end
 
         atVoiInput{dVoiTagOffset}.Color = aColor;
 
@@ -60,7 +60,7 @@ function editVoiColorCallback(hObject,~)
 
             dRoiTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{dVoiTagOffset}.RoisTag{vv} ) );
 
-            if ~isempty(dRoiTagOffset) % Found the Tag 
+            if ~isempty(dRoiTagOffset) % Found the Tag
 
                 atRoiInput{dRoiTagOffset}.Color = aColor;
 
@@ -68,16 +68,16 @@ function editVoiColorCallback(hObject,~)
 
                     atRoiInput{dRoiTagOffset}.Object.Color = aColor;
                 end
-                         
+
             end
 
         end
 
         roiTemplate('set', dSeriesOffset, atRoiInput);
         voiTemplate('set', dSeriesOffset, atVoiInput);
-        
-    end         
 
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
-    
+    end
+
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
+
 end

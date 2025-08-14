@@ -108,6 +108,7 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
         if isempty(aVoiTransparencyList)
             for aa=1:numel(atVoiInput)
                 aVoiTransparencyList{aa} = slider3DVoiTransparencyValue('get');
+
             end
         end
         voi3DTransparencyList('set', aVoiTransparencyList);
@@ -120,6 +121,7 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
             aLabelBuffer = zeros((size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))));
             aLabelColorMap = zeros(numel(atVoiInput)+1, 3);
             aLabelAlphaMap = zeros(numel(atVoiInput)+1, 1);
+            aAlphaData = zeros((size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))));
         else
             if strcmpi(voi3DRenderer('get'), 'LabelRendering')  
                 aLabelBuffer = zeros((size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))));
@@ -270,19 +272,69 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
         end
    
         % aLabelBuffer = aLabelBuffer(:,:,end:-1:1);
-        if ~isempty(viewer3dObject('get')) % with viewer3d, we are now using the LabelOverlay for the voi           
+        if ~isempty(viewer3dObject('get')) % with viewer3d, we are now using the LabelOverlay for the voi   
 
-            voiObj{1} = volshow(squeeze(false(size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))))), ...
-                                'Parent'          , viewer3dObject('get'), ...
-                                'RenderingStyle'  , 'VolumeRendering',...
-                                'OverlayColormap' , aLabelColorMap, ...
-                                'OverlayAlphamap' , aLabelAlphaMap, ...
-                                'OverlayData'     , aLabelBuffer, ...
-                                'IsosurfaceValue' , aIsovalue, ...
-                                'OverlayThreshold', 0, ...
-                                'Transformation'  , tform);  
-            
-            clear aLabelBuffer;
+            if isMATLABReleaseOlderThan('R2025a')
+
+                voiObj{1} = volshow(squeeze(false(size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))))), ...
+                                    'Parent'          , viewer3dObject('get'), ...
+                                    'RenderingStyle'  , 'VolumeRendering',...
+                                    'OverlayColormap' , aLabelColorMap, ...
+                                    'OverlayAlphamap' , aLabelAlphaMap, ...
+                                    'OverlayData'     , aLabelBuffer, ...
+                                    'IsosurfaceValue' , aIsovalue, ...
+                                    'OverlayThreshold', 0, ...
+                                    'Transformation'  , tform);  
+
+                clear aLabelBuffer;
+            else
+
+                % In MATALAB 2025a,the label doesn't works. 
+
+                % Set an RGB image so each VOI has it color
+
+                aVOIBuffer = zeros([size(aLabelBuffer), 3]);
+                
+                for i = 1:size(aLabelColorMap, 1)
+
+                    % Find the voxels in aLabelBuffer that correspond to the current label
+
+                    label_mask = (aLabelBuffer == (i - 1));
+                    
+                    % Assign the RGB color to the corresponding voxels 
+
+                    aVOIBuffer(repmat(label_mask, [1, 1, 1, 3])) = repmat(aLabelColorMap(i, :), sum(label_mask(:)), 1);
+                end
+
+                % Set the transparency
+
+                aAlphaData = zeros(size(aLabelBuffer));
+                
+                for i = 1:length(aLabelAlphaMap)
+
+                    % For each label in aLabelBuffer, set the corresponding alpha value from aLabelAlphaMap
+
+                    aAlphaData(aLabelBuffer == (i - 1)) = aLabelAlphaMap(i);
+                end
+
+                voiObj{1} = volshow( squeeze(aVOIBuffer), ...
+                                    'Parent'          , viewer3dObject('get'), ...
+                                    'RenderingStyle'  , 'VolumeRendering',...
+                                    'OverlayColormap' , aLabelColorMap, ...
+                                    'OverlayAlphamap' , aLabelAlphaMap, ...
+                                    'OverlayData'     , aLabelBuffer, ...
+                                    'IsosurfaceValue' , aIsovalue, ...
+                                    'OverlayThreshold', 0, ...
+                                    'Transformation'  , tform); 
+
+                voiObj{1}.AlphaData = squeeze(aAlphaData);
+
+                clear aAlphaData;
+                clear aVOIBuffer;
+                clear aLabelBuffer;
+            end
+                               
+                                
         else
             if strcmpi(voi3DRenderer('get'), 'LabelRendering')
 

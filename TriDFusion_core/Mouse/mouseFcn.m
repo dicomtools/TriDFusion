@@ -41,7 +41,7 @@ function mouseFcn(sAction)
         set(fiMainWindowPtr('get'), 'WindowKeyPressFcn'    , @catchKeyPress);
         set(fiMainWindowPtr('get'), 'WindowButtonMotionFcn', @mouseMove    );
         set(fiMainWindowPtr('get'), 'WindowButtonUpFcn'    , @clickUp      );
-        set(fiMainWindowPtr('get'), 'WindowKeyReleaseFcn'  , @keyRelease    );
+        set(fiMainWindowPtr('get'), 'WindowKeyReleaseFcn'  , @keyRelease   );
         % set(fiMainWindowPtr('get'), 'CloseRequestFcn'      , @closeFigure  );
     end
 

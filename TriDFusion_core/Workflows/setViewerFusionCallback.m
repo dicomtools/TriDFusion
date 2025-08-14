@@ -123,7 +123,9 @@ function setViewerFusionCallback(~, ~)
             dMax2 = 7; 
         end
 
-        setModalitiesFusion(sModality1, dMin1, dMax1, dMin1, dMax1, sModality2, dMin2, dMax2, dMin2, dMax2, false, true, dSerie1Offset, dSerie2Offset);
+        dAlphaFusion = 65;
+
+        setModalitiesFusion(sModality1, dMin1, dMax1, dMin1, dMax1, sModality2, dMin2, dMax2, dMin2, dMax2, dAlphaFusion, false, true, dSerie1Offset, dSerie2Offset);
     end
     
     clear aInputBuffer;

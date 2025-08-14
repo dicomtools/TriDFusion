@@ -1,29 +1,61 @@
 function TriDFusion(varargin)
 %function TriDFusion(varargin)
 %Triple Dimention Fusion (3DF) Image Viewer main function.
-%See TriDFuison.doc (or pdf) for more information about options.
 %
-% Note: Option settings must fit on one line and can contain at most one semicolon.
-% -3d    : Display 2D View using 3D engine.
-% -b     : Display 2D Border.
-% -i     : TriDFusion is integrated with DIDOM Database Browser.
-% -fusion: Activate the fusion. *Requires 2 volumes.
-% -mip   : Activate the 3D MIP. *The order of activation of the MIP, vol, and iso dictates the emphasis of each feature of the 3D resulting image.
-% -vol   : Activate the 3D volume rendering. *The order of activation of the MIP, vol, and iso dictates the emphasis of each feature of the 3D resulting image.
-% -iso   : Activate the 3D iso surface. *The order of activation of the MIP, vol, and iso dictates the emphasis of each feature of the 3D resulting image.
-% -w name: Execute a workflow.
-% -r path: Set a destination path. 
+% TriDFusion is a powerful tool for visualizing and processing DICOM images 
+% with 3D rendering capabilities. It supports multiple visualization modes, 
+% including MIP, volume rendering, and iso surface generation, along with 
+% image fusion and workflow execution.
 %
-% Example:
-% TriDFusion(); Open the graphical user interface.
-% TriDFusion('path_to_dicom_series_folder'); Open the graphical user interface with a DICOM image.
-% TriDFusion('path_to_dicom_series_folder_1', 'path_to_dicom_series_folder_2');  Open the graphical user interface with 2 DICOM images.
-% TriDFusion('path_to_dicom_series_folder_1', 'path_to_dicom_series_folder_2', '-fusion'); Open the graphical user interface with 2 DICOM images and fuse them.
-% TriDFusion('path_to_dicom_series_folder', '-mip'); Open the graphical user interface with a DICOM image and create a 3D MIP.
-% TriDFusion('path_to_dicom_series_folder', '-iso'); Open the graphical user interface with a DICOM image and create a 3D iso surface model.
-% TriDFusion('path_to_dicom_series_folder', '-vol'); Open the graphical user interface with a DICOM image and create a 3D volume rendering.
-% TriDFusion('path_to_dicom_series_folder', '-mip', '-iso', '-vol'); Open the graphical user interface with a DICOM image and create a fusion of a 3D MIP, iso surface, and volume rendering. Any combination can be used. 
-% TriDFusion('path_to_dicom_series_folder', '-w', 'workflow_name'); Open the graphical user interface with a DICOM image and execute a workflow. Refer to processWorkflow.m for a list of available options. Refer to dicomViewer.m for workflows the default values. 
+% For more details on options and usage, refer to TriDFusion.doc (or .pdf).
+%
+% **Option Settings:** 
+% - Must fit on a single line.
+%
+% **Options:**
+% - '-3d'     : Display a 2D view using the 3D engine.
+% - '-b'      : Display a 2D border.
+% - '-i'      : Integrates TriDFusion with the DIDOM Database Browser.
+% - '-fusion' : Activate image fusion (*requires two volumes*).
+% - '-mip'    : Enable 3D Maximum Intensity Projection (MIP). 
+% - '-vol'    : Enable 3D volume rendering.
+% - '-iso'    : Enable 3D iso surface rendering.
+% - '-w name' : Execute a workflow.
+% - '-r path' : Set a destination path.
+%
+% **Rendering Note:**
+% The activation order of '-mip', '-vol', and '-iso' influences the emphasis 
+% of each feature in the final 3D image.
+%
+% **Usage Examples:**
+% - TriDFusion();  
+%   Opens the graphical user interface.
+% 
+% - TriDFusion('path_to_dicom_series_folder');
+%   Opens the GUI with a DICOM image.
+% 
+% - TriDFusion('path_to_dicom_series_folder_1', 'path_to_dicom_series_folder_2');
+%   Opens the GUI with two DICOM images.
+% 
+% - TriDFusion('path_to_dicom_series_folder_1', 'path_to_dicom_series_folder_2', '-fusion');
+%   Opens the GUI with two DICOM images and fuses them.
+% 
+% - TriDFusion('path_to_dicom_series_folder', '-mip');
+%   Opens the GUI with a DICOM image and generates a 3D MIP.
+% 
+% - TriDFusion('path_to_dicom_series_folder', '-iso');
+%   Opens the GUI with a DICOM image and creates a 3D iso surface model.
+% 
+% - TriDFusion('path_to_dicom_series_folder', '-vol');
+%   Opens the GUI with a DICOM image and performs 3D volume rendering.
+% 
+% - TriDFusion('path_to_dicom_series_folder', '-mip', '-iso', '-vol');
+%   Opens the GUI with a DICOM image and applies a combination of 3D MIP, 
+%   iso surface, and volume rendering. Any combination can be used.
+% 
+% - TriDFusion('path_to_dicom_series_folder', '-w', 'workflow_name');
+%   Opens the GUI with a DICOM image and executes a specified workflow.  
+%   See 'processWorkflow.m' for available options. Default values are in 'dicomViewer.m'.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -78,9 +110,18 @@ function TriDFusion(varargin)
     viewerFusionColorbarIntensityMaxTextColor('set', [0 0 0]);
     viewerFusionColorbarIntensityMinTextColor('set', [0 0 0]);
 
-    viewerCrossLinesColor('set', [0 1 1]);
+    % viewerCrossLinesColor('set', [0.85, 0.25, 0.85]);
+    viewerCrossLinesColor('set', [0.0000, 0.9608, 0.8275]); % Cyan
+    viewerProgressBarLineColor('set',  [0.0000, 0.9608, 0.8275]);
+    
+    viewerToolbarHeight('set', 35);
+    viewerToolbarIconSize('set', 25);
 
-    viewerProgressBarLineColor('set',  [0 1 1]);
+    viewerTopBarHeight('set', 65);
+    viewerTopBarIconSize('set', 50);
+    viewerTopBarColor('set', [0.2 0.2 0.2]);
+
+    addOnWidth('set', 0);
 
     arg3DEngine = false;
     argBorder   = false;
@@ -88,13 +129,11 @@ function TriDFusion(varargin)
     argFusion   = false;
     
     dOutputDirOffset = 0;
- 
-    asRendererPriority = [];
-    sWorkflowName = [];
+    dRendererPriorityOffset = 1;
 
-%    varargin = replace(varargin, '"', '');
-%    varargin = replace(varargin, ']', '');
-%    varargin = replace(varargin, '[', '');
+    asRendererPriority = cell(1, 1000);
+    asMainDirArg = cell(1, 1000);
+    sWorkflowName = [];
     
     argLoop=1;
     for k = 1 : length(varargin)
@@ -105,40 +144,33 @@ function TriDFusion(varargin)
         sSwitchAndArgument = replace(sSwitchAndArgument, ']', '');
         sSwitchAndArgument = replace(sSwitchAndArgument, '[', '');
 
+        % sSwitchAndArgument = erase(char(varargin{k}), ['"', '[', ']']);
+
         switch lower(sSwitchAndArgument)
             
             case '-r' % Output directory
+
                 if k+1 <= length(varargin)
 
                     if dOutputDirOffset == 0
 
                         sOutputPath = char(varargin{k+1});
+                        sOutputPath = strrep(strrep(strrep(sOutputPath, '"', ''), '[', ''), ']', '');
+                    
+                        if ~endsWith(sOutputPath, {'/', '\'}) 
 
-                        sOutputPath = replace(sOutputPath, '"', '');
-                        sOutputPath = replace(sOutputPath, ']', '');
-                        sOutputPath = replace(sOutputPath, '[', '');
-
-                        if sOutputPath(end) ~= '/' && ...
-                           sOutputPath(end) ~= '\'
-
-                            sOutputPath = [sOutputPath '/'];   
+                            sOutputPath = sprintf('%s/', sOutputPath);   
                         end
-
+                    
                         dOutputDirOffset = k+1;
-                        outputDir('set', sOutputPath);                                                         
+                        outputDir('set', sOutputPath);
                     end
                 end
 
             case '-w' % Workflow name
 
                 if k+1 <= length(varargin)
-
-                    sWorkflowName = char(varargin{k+1});
-
-                    sWorkflowName = replace(sWorkflowName, '"', '');
-                    sWorkflowName = replace(sWorkflowName, ']', '');
-                    sWorkflowName = replace(sWorkflowName, '[', '');
-                                  
+                    sWorkflowName = strrep(strrep(strrep(char(varargin{k+1}), '"', ''), '[', ''), ']', '');
                 end
 
             case '-3d' % 2D display using 3D engine
@@ -154,28 +186,42 @@ function TriDFusion(varargin)
                 argFusion = true;                
                 
             case '-vol' % Activate 3D Volume Rendering
-                asRendererPriority{numel(asRendererPriority)+1} = 'vol';
-                    
+                asRendererPriority{dRendererPriorityOffset} = 'vol';
+
+                dRendererPriorityOffset = dRendererPriorityOffset+1;
+
             case '-iso' % Activate 3D ISO Surface
-                asRendererPriority{numel(asRendererPriority)+1} = 'iso';
+                asRendererPriority{dRendererPriorityOffset} = 'iso';
+
+                dRendererPriorityOffset = dRendererPriorityOffset+1;
                 
             case '-mip' % Activate 3D MIP
-                asRendererPriority{numel(asRendererPriority)+1} = 'mip';                                                
-                
+                asRendererPriority{dRendererPriorityOffset} = 'mip';   
+
+                dRendererPriorityOffset = dRendererPriorityOffset+1;
+               
             otherwise
                 
                 if k ~= dOutputDirOffset % The output dir is set before
 
                     asMainDirArg{argLoop} = sSwitchAndArgument;
-                    if asMainDirArg{argLoop}(end) ~= '/'
-                        asMainDirArg{argLoop} = [asMainDirArg{argLoop} '/'];                     
+
+                    if ~endsWith(asMainDirArg{argLoop}, {'/', '\'}) 
+                    
+                        asMainDirArg{argLoop} = sprintf('%s/',asMainDirArg{argLoop});                     
                     end
                     argLoop = argLoop+1; 
-                    mainDir('set', asMainDirArg);                                 
                 end
         end
     end            
-       
+
+    % Remove all empty cell
+
+    asMainDirArg = asMainDirArg(~cellfun(@isempty, asMainDirArg)); 
+    asRendererPriority = asRendererPriority(~cellfun(@isempty, asRendererPriority)); 
+
+    mainDir('set', asMainDirArg);                                 
+
     viewerTempDirectory('set', char([tempname '/']));
     
     if exist(viewerTempDirectory('get'), 'dir')
@@ -205,20 +251,36 @@ function TriDFusion(varargin)
     
     viewerSetFullScreenIcon();
 
+    sRootPath = viewerRootPath('get');
+
+    if isempty(sRootPath)
+
+        imSplash = zeros([300 620 3]);
+    else       
+        sSplashFile = sprintf('%sscreenDefault.png', sRootPath);
+        if exist(sSplashFile, 'file')
+            [imSplash, ~] = imread(sSplashFile);
+        else
+            imSplash = zeros([300 620 3]);
+        end
+    end 
+    
+    [imgHeight, imgWidth, ~] = size(imSplash);
+
     aScreenSize  = get(groot, 'Screensize');
 
-    xPosition = (aScreenSize(3) /2) - (620 /2);
-    yPosition = (aScreenSize(4) /2) - (330 /2);
+    xPosition = (aScreenSize(3) /2) - (imgWidth /2);
+    yPosition = (aScreenSize(4) /2) - (imgHeight /2);
 
     if viewerUIFigure('get') == true
-        
+
         fiMainWindow = ...
             uifigure('Name', 'TriDFusion (3DF) Image Viewer',...
                      'NumberTitle','off',...                           
                      'Position'   ,[xPosition, ...
                                    yPosition, ...
-                                   620, ...
-                                   330 ...
+                                   imgWidth, ...
+                                   imgHeight ...
                                    ],... 
                     'MenuBar'    , 'none',...
                     'AutoResizeChildren', 'off', ...
@@ -233,84 +295,50 @@ function TriDFusion(varargin)
                    'NumberTitle','off',...                           
                    'Position'   ,[xPosition, ...
                                   yPosition, ...
-                                  620, ...
-                                  330 ...
+                                  imgWidth, ...
+                                  imgHeight ...
                                   ],... 
                    'MenuBar'    , 'none',...
                    'AutoResizeChildren', 'off', ...
                    'Toolbar'    , 'none',...
                    'color'      , 'black',...
+                   'WindowStyle', 'normal',...
                    'SizeChangedFcn',@resizeFigureCallback...
                  );        
     end
 
-    if viewerUIFigure('get') == true
+    if viewerUIFigure('get') == true 
 
-        DnD_uifigure(fiMainWindow, @openDnDImagesCallback);
+        if isMATLABReleaseOlderThan('R2025a')
+
+            DnD_uifigure(fiMainWindow, @openDnDImagesCallback);
+        end
     end
 
     fiMainWindowPtr('set', fiMainWindow);
 
     set(fiMainWindow, 'DefaultUipanelUnits', 'normalized');
-% 
-%     set(fiMainWindow, 'DefaultLineHitTest' , 'off');
-%     set(fiMainWindow, 'DefaultPatchHitTest', 'off');
-%     set(fiMainWindow, 'DefaultTextHitTest' , 'off');
-
-
-    % set(fiMainWindow, 'AutoResizeChildren', 'off');
-
-    % if viewerUIFigure('get') == true
-    %     set(fiMainWindow, 'Renderer', 'opengl'); 
-    %     set(fiMainWindow, 'GraphicsSmoothing', 'off'); 
-    % else
-    %     set(fiMainWindow, 'Renderer', 'opengl'); 
-    %     set(fiMainWindow, 'doublebuffer', 'on');   
-    % end
 
     setFigureDefaults(fiMainWindowPtr('get'));
 
     iptPointerManager(fiMainWindowPtr('get'));
 
-    sRootPath = viewerRootPath('get');
-    
-    if ~isempty(sRootPath)
-
-        javaFrame = get(fiMainWindowPtr('get'), 'JavaFrame');
-
-        if ~isempty(javaFrame)
-            
-            javaFrame.setFigureIcon(javax.swing.ImageIcon(sprintf('%s/logo.png', sRootPath)));       
-        end
-    end
-
-%      
-%     
-%     if argInternal == true
-%         sLogoPath = './TriDFusion/logo.png';
-%     else
-%         sLogoPath = './logo.png';
-%     end
-% 
-%     javaFrame = get(fiMainWindowPtr('get'), 'JavaFrame');
-%     javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogoPath));
-   
-
- %   movegui(fiMainWindowPtr('get'), 'center');                  
+    setObjectIcon(fiMainWindow);                
     
     uiSplashWindow = ...
         axes(fiMainWindowPtr('get'),...
              'Units'   , 'pixels',...
              'HitTest' , 'off', ...
-             'position', [0 30 620 300]...
+             'position', [0 30 imgWidth imgHeight]...
              );   
-    uiSplashWindow.Toolbar.Visible = 'off';
+    % uiSplashWindow.Toolbar.Visible = 'off';
+    deleteAxesToolbar(uiSplashWindow);
     disableDefaultInteractivity(uiSplashWindow);
 
     uiProgressWindow = ...
         uipanel(fiMainWindowPtr('get'),...
                 'Units'          , 'pixels',...
-                'position'       , [0 0 620 30],...
+                'position'       , [0 0 imgWidth 30],...
                 'title'          , 'Ready',...
                 'HitTest'        , 'off', ...
                 'BackgroundColor', viewerBackgroundColor ('get'), ...
@@ -325,23 +353,10 @@ function TriDFusion(varargin)
     set(uiBar, 'Position', [0 0 1 1]);  
     
     uiBarPtr('set', uiBar);    
-        
-%     sRootPath = viewerRootPath('get');
-    if isempty(sRootPath)
-        imSplash = zeros([300 620 3]);
-    else       
-        sSplashFile = sprintf('%sscreenDefault.png', sRootPath);
-        if exist(sSplashFile, 'file')
-            [imSplash, ~] = imread(sSplashFile);
-        else
-            imSplash = zeros([300 620 3]);
-        end
-    end    
-
-  %  imshow(imSplash, 'border', 'tight', 'Parent', uiSplashWindow);
-%     image(imSplash, 'Parent', uiSplashWindow);
+          
     imshow(imSplash,'border','tight','Parent', uiSplashWindow);
-    uiSplashWindow.Toolbar.Visible = 'off';
+    disableAxesToolbar(uiSplashWindow);
+    % uiSplashWindow.Toolbar.Visible = 'off';
        
     if useLocalTempFolder('get') == true
 
@@ -350,7 +365,7 @@ function TriDFusion(varargin)
         sMousePointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-        drawnow update; 
+        drawnow; 
 
         asMainDir = mainDir('get');
         if ~isempty(asMainDir)
@@ -388,13 +403,15 @@ function TriDFusion(varargin)
 
             mainDir('set', asMainDir);
         end
-        catch
+        
+        catch ME
+            logErrorToFile(ME);
         end
 
         progressBar(1, 'Ready');
 
         set(fiMainWindowPtr('get'), 'Pointer', sMousePointer);
-        drawnow update; 
+        drawnow; 
 
     end
     
@@ -402,37 +419,30 @@ function TriDFusion(varargin)
       
     delete(uiSplashWindow);
         
-%     aScreenSize  = get(groot, 'Screensize');
-
- %   alPosition = get(fiMainWindowPtr('get'), 'Position');
-        
- %   lMiddleX = alPosition(1) + (alPosition(3) /2);
- %   lMiddleY = alPosition(2) + (alPosition(4) /2);        
-
-    
     set(fiMainWindowPtr('get'), 'Position', aScreenSize);   
 
     set(uiProgressWindowPtr('get'), 'Position', [0, 0, aScreenSize(3), 30]);
 
     set(uiBarPtr('get'), 'Position', [0, 0,  aScreenSize(3), 1]);
 
-    drawnow update;
-
-      %  uiProgressWindow.Position = [0, 0, 1440, 30];
-        
-     %   movegui(fiMainWindowPtr('get'), 'center');                                                         
-      
     set(fiMainWindowPtr('get'), 'Resize'     , 'on');
     set(fiMainWindowPtr('get'), 'WindowState', 'maximized');
 
-    drawnow update;
-
-    % set(fiMainWindowPtr('get'), 'WindowState', 'maximized');
-    
+    drawnow;
+    drawnow;
+                                                            
     resizeViewer = dicomViewer(); 
+    
+    set(fiMainWindowPtr('get'), 'Resize'     , 'on');
+    set(fiMainWindowPtr('get'), 'WindowState', 'maximized');
+
+    drawnow;
+    drawnow;
 
     setContours();
-    
+    setAnnotations();
+   
+    drawnow;
     drawnow;
 
  %   refreshImages();
@@ -458,8 +468,7 @@ function TriDFusion(varargin)
 
             setMIPCallback();
         end        
-    end                    
-        
+    end                           
 
     if ~isempty(sWorkflowName)
 

@@ -59,6 +59,8 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
     
             if isfield(tDatasets, 'Contours')
                 inputContours('add', tDatasets.Contours{:});
+            elseif isfield(tDatasets, 'Annotations')
+                inputAnnotations('add', tDatasets.Annotations{:});                
             end
     
             if isfield(tDatasets, 'FileNames'   ) && ...

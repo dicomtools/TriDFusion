@@ -68,6 +68,8 @@ function setMachineLearningBreastCancerPETCTFullAICallback(hObject, ~)
                            );    
             end
 
+            setObjectIcon(dlgBreastCancerPETCTFullAISegmentation);
+
             % Trainer with Dice and CE Loss
         
                 uicontrol(dlgBreastCancerPETCTFullAISegmentation,...

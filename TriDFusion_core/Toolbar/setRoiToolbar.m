@@ -27,201 +27,206 @@ function setRoiToolbar(sVisible)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    atRoiMenu = roiMenuObject('get');
+    uiTopToolbar = uiTopToolbarPtr('get');
+    if isempty(uiTopToolbar)
+        return;
+    end
 
-    if isempty(atRoiMenu)
+    mViewRoi = viewRoiObject('get');
 
+    if strcmp(sVisible, 'off')
+        mViewRoi.Checked = 'off';
+        roiToolbar('set', false);
+    else
+        mViewRoi.Checked = 'on';
+        roiToolbar('set', true);
+    end
+
+    acRoiMenu = roiMenuObject('get');
+    if isempty(acRoiMenu)
         sRootPath  = viewerRootPath('get');
         sIconsPath = sprintf('%s/icons/', sRootPath);
 
-    %    f = figure('ToolBar','none');
-        atRoiMenu = uitoolbar(fiMainWindowPtr('get'));
+        % draw line
+        mMeasure = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'measure_grey.png'), ...
+            fullfile(sIconsPath,'measure_cyan.png'), ...
+            fullfile(sIconsPath,'measure_white.png'), ...
+            'Line', ...
+            'Line Measurement (M): Draw a line by clicking and dragging. Measurement appears, and right-click to view the profile.', ...
+            @drawlineCallback, ...
+            'Separator', true, ... 
+            'SeparatorWidth', 2);
+        acRoiMenu{1} = mMeasure;
+    
+        % freehand
+        mFreehand = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'freehand_grey.png'), ...
+            fullfile(sIconsPath,'freehand_cyan.png'), ...
+            fullfile(sIconsPath,'freehand_white.png'), ...
+            'Freehand', ...
+            'Draw Freehand (D): Draw a freeform shape by clicking and dragging; release to finish.', ...
+            @drawfreehandCallback);
+        acRoiMenu{2} = mFreehand;
+    
+        % polygon
+        mPolygon = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'polygon_grey.png'), ...
+            fullfile(sIconsPath,'polygon_cyan.png'), ...
+            fullfile(sIconsPath,'polygon_white.png'), ...
+            'Polygon', ...
+            'Draw Polygon (P): Draw a polygon by clicking to set each vertex; double-click to complete.', ...
+            @drawpolygonCallback);
+        acRoiMenu{3} = mPolygon;
+    
+        % circle
+        mCircle = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'circle_grey.png'), ...
+            fullfile(sIconsPath,'circle_cyan.png'), ...
+            fullfile(sIconsPath,'circle_white.png'), ...
+            'Circle', ...
+            'Draw Circle', ...
+            @drawcircleCallback);  
+        acRoiMenu{4} = mCircle;
+    
+        % elipse
+        mEllipse = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'elipse_grey.png'), ...
+            fullfile(sIconsPath,'elipse_cyan.png'), ...
+            fullfile(sIconsPath,'elipse_white.png'), ...
+            'Elipse', ...
+            'Draw Elipse', ...
+            @drawellipseCallback);  
+        acRoiMenu{5} = mEllipse;
+    
+        % rectangle
+        mRectangle = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'rectangle_grey.png'), ...
+            fullfile(sIconsPath,'rectangle_cyan.png'), ...
+            fullfile(sIconsPath,'rectangle_white.png'), ...
+            'Rectangle', ...
+            'Draw Rectangle', ...
+            @drawrectangleCallback);      
+        acRoiMenu{6} = mRectangle;
+    
+        % Sphere
+        mSphere = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'sphere_grey.png'), ...
+            fullfile(sIconsPath,'sphere_cyan.png'), ...
+            fullfile(sIconsPath,'sphere_white.png'), ...
+            'Sphere', ...
+            'Draw Sphere (E): Click on the image to create a sphere. Modify its diameter from the View/Contour Panel.', ...
+            @drawsphereCallback); 
+        acRoiMenu{7} = mSphere;
+    
+        % Click voi
+        mClickVoi = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'clickvoi_grey.png'), ...
+            fullfile(sIconsPath,'clickvoi_cyan.png'), ...
+            fullfile(sIconsPath,'clickvoi_white.png'), ...
+            'Click-VOI', ...
+            'Click-VOI (V): Create a VOI by clicking on the image. Adjust it relative to the maximum value in the View/Contour Panel.', ...
+            @drawClickVoiCallback); 
+        acRoiMenu{8} = mClickVoi;
+    
+        % Infinite
+        mInfinite = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'infinite_grey.png'), ...
+            fullfile(sIconsPath,'infinite_light_grey.png'), ...
+            fullfile(sIconsPath,'infinite_white.png'), ...
+            'Infinite', ...
+            'Infinite mode', ...
+            @setContinuousCallback);
+        acRoiMenu{9} = mInfinite;
+    
+        % Interpolate
+        mInterpolate = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'interpolate_grey.png'), ...
+            fullfile(sIconsPath,'interpolate_cyan.png'), ...
+            fullfile(sIconsPath,'interpolate_white.png'), ...
+            'Interpolate', ...
+            'Interpolate (X): Generate VOI by interpolating between ROIs.', ...
+            @setInterpolateCallback); 
+        acRoiMenu{10} = mInterpolate;
+    
+        % Farthest distances
+        mFarthest = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'farthest_grey.png'), ...
+            fullfile(sIconsPath,'farthest_light_grey.png'), ...
+            fullfile(sIconsPath,'farthest_cyan.png'), ...
+            'Farthest', ...
+            'View Farthest Distances.', ...
+            @viewFarthestDistancesCallback); 
+        acRoiMenu{11} = mFarthest;
+    
+        % Brush
+        m2DBrush = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'brush_grey.png'), ...
+            fullfile(sIconsPath,'brush_cyan.png'), ...
+            fullfile(sIconsPath,'brush_white.png'), ...
+            '2D-Brush', ...
+            '2D Brush (B): Click on the image to activate the brush. Hold Ctrl and scroll to adjust brush diameter.', ...
+            @set2DBrushCallback); 
+        acRoiMenu{12} = m2DBrush;
+    
+        % Knife
+        m2DKnife = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'knife_grey.png'), ...
+            fullfile(sIconsPath,'knife_light_grey.png'), ...
+            fullfile(sIconsPath,'knife_white.png'), ...
+            'Knife', ...
+            'Knife (K): Split the contour into two objects by drawing a line across it.', ...
+            @set2DScissorCallback); 
+        acRoiMenu{13} = m2DKnife;
+        
+        % Statistics
+        mStatistics = addToolbarIcon(uiTopToolbar, ...
+            fullfile(sIconsPath,'statistics_grey.png'), ...
+            fullfile(sIconsPath,'statistics_light_grey.png'), ...
+            fullfile(sIconsPath,'statistics_white.png'), ...
+            'Statistics', ...
+            'Display Statistics.', ...
+            @figRoiDialogCallback); 
+        acRoiMenu{14} = mStatistics;
 
-%        jToolbar = atRoiMenu.JavaContainer.getComponentPeer;
-%        jToolbar.setBackground();
-
-        roiMenuObject('set', atRoiMenu);
-
-        mViewRoi = viewRoiObject('get');
-
-        if strcmp(sVisible, 'off')
-            mViewRoi.Checked = 'off';
-            atRoiMenu.Visible = 'off';
-            roiToolbar('set', false);
-       else
-            mViewRoi.Checked = 'on';
-            atRoiMenu.Visible = 'on';
-            roiToolbar('set', true);
+        roiMenuObject('set', acRoiMenu);
+    else
+        panelH = uiTopToolbarPtr('get');
+ 
+        bExit = false;
+        for i = 1:numel(acRoiMenu)
+            hBtn = acRoiMenu{i};
+            if ishghandle(hBtn)
+                if strcmpi(get(hBtn, 'Visible'), sVisible)
+                    bExit = true;
+                    break;
+                end
+            end
         end
 
-        % Draw line
+        if bExit == true
+            return;
+        end
 
-        [img,~] = imread(sprintf('%s//line.png', sIconsPath));
-        img = double(img)/255;
+        setToolbarObjectVisibility(panelH, acRoiMenu, sVisible);
 
-        t8 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Line Measurement (M)<br>Draw a line by clicking and dragging; measurement appears, and right-click to view the profile</html>');
-        t8.ClickedCallback = @drawlineCallback;
-
-        % Draw freehand
-
-        [img,~] = imread(sprintf('%s//freehand.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-    %    icon = ind2rgb(img,map);
-
-        t = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Draw Freehand (D)<br>Draw a freeform shape by clicking and dragging; release to finish</html>');
-        t.ClickedCallback = @drawfreehandCallback;
-
-%            img = zeros(16,16,3);
-  %      [img,~] = imread(sprintf('%s//assisted.png', sIconsPath));
-  %      img = double(img)/255;
-
-  %      t7 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Draw Assisted');
-  %      t7.ClickedCallback = @drawassistedCallback;
-
-        % Draw polygon
-
-        [img,~] = imread(sprintf('%s//polygon.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        t6 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Draw Polygon (P)<br>Draw a polygon by clicking to set each vertex; double-click to complete</html>');
-        t6.ClickedCallback = @drawpolygonCallback;
-
-        % Draw circle
-
-        [img,~] = imread(sprintf('%s//circle.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        t2 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Draw Circle');
-        t2.ClickedCallback = @drawcircleCallback;
-
-        % Draw elipse
-
-        [img,~] = imread(sprintf('%s//elipse.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        t5 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Draw Elipse');
-        t5.ClickedCallback = @drawellipseCallback;
-
-        % Draw rectangle
-
-        [img,~] = imread(sprintf('%s//rectangle.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        t3 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Draw Rectangle');
-        t3.ClickedCallback = @drawrectangleCallback;
-
-        % Click Sphere
-
-        [img,~] = imread(sprintf('%s//sphere.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        t11 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Draw Sphere (E)<br>Click on the image to create a sphere. Modify its diameter from the View/Contour Panel</html>', 'Separator', 'on');
-        t11.ClickedCallback = @drawsphereCallback;
-
-        % Click VOI
-
-        [img,~] = imread(sprintf('%s//voi-click.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        t12 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Click-VOI (V)<br>Create a VOI by clicking on the image. Adjust it relative to the maximum value in the View/Contour Panel</html>');
-        t12.ClickedCallback = @drawClickVoiCallback;
-
-        % Continuous
-
-        [img,~] = imread(sprintf('%s//continuous.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        tContinuous = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Continuous', 'Separator', 'on');
-        tContinuous.ClickedCallback = @setContinuousCallback;
-
-        % Interpolate
-
-        [img,~] = imread(sprintf('%s//interpolate.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        tInterpolate = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Interpolate (X)<br>Generate VOI by interpolating between ROIs</html>');
-        tInterpolate.ClickedCallback = @setInterpolateCallback;
-
-        % Farthest distances
-
-        [img,~] = imread(sprintf('%s//farthest.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        tFarthest = uitoggletool(atRoiMenu,'CData',img,'TooltipString','View Farthest Distances');
-        tFarthest.ClickedCallback = @viewFarthestDistancesCallback;
-
-        % Brush
-
-        [img,~] = imread(sprintf('%s//brush.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        t2Dbrush = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>2D Brush (B)<br>Click on the image to activate the brush. Hold Ctrl and scroll to adjust brush diameter</html>');
-        t2Dbrush.ClickedCallback = @set2DBrushCallback;
-
-        % Scissor
-
-        [img,~] = imread(sprintf('%s//knife.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        t2Dscissor = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Knife (K)<br>Split the contour into two objects by drawing a line across it</html>');
-        t2Dscissor.ClickedCallback = @set2DScissorCallback;
-
-        % Result
-
-        [img,~] = imread(sprintf('%s//result.png', sIconsPath));
-        img = rescaleAndRemoveIconBackground(img);
-
-        t10 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Display Statistics', 'Tag', 'toolbar', 'Separator', 'on');
-        t10.ClickedCallback = @figRoiDialogCallback;
-
-
-%         [img,~] = imread(sprintf('%s//cuboid.png', sIconsPath));
-%         img = double(img)/255;
-
-%         t4 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Draw Cuboid', 'Separator', 'on');
-%         t4.ClickedCallback = @drawcuboidCallback;
-    else
-        mViewRoi = viewRoiObject('get');
-
-        if strcmp(sVisible, 'off')
-            mViewRoi.Checked = 'off';
-            atRoiMenu.Visible = 'off';
-            roiToolbar('set', false);
-        else
-            mViewRoi.Checked = 'on';
-            atRoiMenu.Visible = 'on';
-            roiToolbar('set', true);
-       end
     end
 
-    function img = rescaleAndRemoveIconBackground(img)
-
-        whiteThresh = 0.95; % You can adjust this threshold
-
-        img = double(img)/255;
-
-        backgroundMask = img(:,:,1) > whiteThresh & img(:,:,2) > whiteThresh & img(:,:,3) > whiteThresh;
-        img(repmat(backgroundMask, [1 1 3])) = NaN;
-    end
-
-    function releaseRoiAxeWait(tMenu)
+    function releaseRoiAxeWait(pMenu)
 
         axeClicked('set', true);
         uiresume(fiMainWindowPtr('get'));
 
-        set(t  , 'State', 'off');
-        set(t2 , 'State', 'off');
-        set(t3 , 'State', 'off');
-  %      set(t4, 'State', 'off');
-        set(t5 , 'State', 'off');
-        set(t6 , 'State', 'off');
-      %  set(t7, 'State', 'off');
-        set(t8 , 'State', 'off');
-        set(t11, 'State', 'off');
-        set(t12, 'State', 'off');
+        set(mMeasure  , 'CData', mMeasure.UserData.default);
+        set(mFreehand , 'CData', mFreehand.UserData.default);
+        set(mPolygon  , 'CData', mPolygon.UserData.default);
+        set(mCircle   , 'CData', mCircle.UserData.default);
+        set(mEllipse  , 'CData', mEllipse.UserData.default);
+        set(mRectangle, 'CData', mRectangle.UserData.default);
+        set(mSphere   , 'CData', mSphere.UserData.default);
+        set(mClickVoi , 'CData', mClickVoi.UserData.default);   
 
-        set(tMenu, 'State', 'on');
+        set(pMenu, 'CData', pMenu.UserData.pressed);
 
     end
 
@@ -231,7 +236,9 @@ function setRoiToolbar(sVisible)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
-            set(t8, 'State', 'off');
+            % set(t8, 'State', 'off');
+            
+            set(mMeasure, 'CData', mMeasure.UserData.default);
             return;
         end
 
@@ -242,12 +249,14 @@ function setRoiToolbar(sVisible)
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
 
-        if strcmpi(get(t8, 'State'), 'off')
+        % if strcmpi(get(t8, 'State'), 'off')
+        if isequal(mMeasure.CData, mMeasure.UserData.pressed)
 
  %           robotReleaseKey();
 
-            set(t8, 'State', 'off');
+            % set(t8, 'State', 'off');
             % roiSetAxeBorder(false);
+            set(mMeasure, 'CData', mMeasure.UserData.default);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -257,7 +266,7 @@ function setRoiToolbar(sVisible)
             return;
         end
 
-        releaseRoiAxeWait(t8);
+        releaseRoiAxeWait(mMeasure);
 
 %         robotReleaseKey();
 
@@ -295,15 +304,19 @@ function setRoiToolbar(sVisible)
                 end
             end
 
-            if ~isvalid(t8)
+            if ~isvalid(mMeasure)
                 return;
             end
 
-            if strcmpi(get(t8, 'State'), 'off')
+            % if strcmpi(get(t8, 'State'), 'off')
+            if isequal(mMeasure.CData, mMeasure.UserData.default)
                 return;
             end
      %       if w == 0
             if  strcmpi(windowButton('get'), 'down')
+
+                atRoiInputBack = roiTemplate('get', dSeriesOffset);
+                % atVoiInputBack = voiTemplate('get', dSeriesOffset);
 
                 robotClick();
 
@@ -327,13 +340,14 @@ function setRoiToolbar(sVisible)
 
          %       while strcmpi(get(t8, 'State'), 'on')
 
-                    a = drawline(pAxe, 'Color', 'cyan', 'lineWidth', 1, 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'LabelVisible', 'on');
+                    a = drawline(pAxe, 'Color', [0.0000, 0.9608, 0.8275], 'lineWidth', 1, 'Tag', num2str(generateUniqueNumber(false)), 'LabelVisible', 'on');
                     a.LabelVisible = 'on';
-                    if ~isvalid(t8)
+                    if ~isvalid(mMeasure)
                         return;
                     end
 
-                    if strcmpi(get(t8, 'State'), 'off')
+                    % if strcmpi(get(t8, 'State'), 'off')
+                    if isequal(mMeasure.CData, mMeasure.UserData.default)
                         % roiSetAxeBorder(false);
 
                    %     windowButton('set', 'up');
@@ -377,7 +391,9 @@ function setRoiToolbar(sVisible)
                         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                     end
 
-                    if strcmpi(get(tContinuous, 'State'), 'off')
+                    % if strcmpi(get(tContinuous, 'State'), 'off')
+                    if isequal(mInfinite.CData, mInfinite.UserData.default)
+
                         doWhileContinuous = false;
                     end
 
@@ -385,26 +401,41 @@ function setRoiToolbar(sVisible)
 
                 % roiSetAxeBorder(false);
 
+                % Set undo event
+
+                atRoiInput = roiTemplate('get', dSeriesOffset);
+                % atVoiInput = voiTemplate('get', dSeriesOffset);
+
+                dUID = generateUniqueNumber(false);
+
+                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+                % voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+
+                enableUndoVoiRoiPanel();
+
+                % End set undo event
+
                 windowButton('set', 'up');
                 mouseFcn('set');
                 mainToolBarEnable('on');
             end
         end
 
-        set(t8, 'State', 'off');
+        % set(t8, 'State', 'off');
+        set(mMeasure, 'CData', mMeasure.UserData.default);
 
         setCrossVisibility(true);
 
     end
-%test hf=[];
-%test he=[];
+
     function drawfreehandCallback(~, ~)
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
-            set(t, 'State', 'off');
+
+            set(mFreehand, 'CData', mFreehand.UserData.default);
             return;
         end
 
@@ -416,11 +447,13 @@ function setRoiToolbar(sVisible)
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
 
-        if strcmpi(get(t, 'State'), 'off')
+        % if strcmpi(get(t, 'State'), 'off')
+        if isequal(mFreehand.CData, mFreehand.UserData.pressed)
 %                   robotReleaseKey();
 
-            set(t, 'State', 'off');
+            % set(t, 'State', 'off');
             % roiSetAxeBorder(false);
+            set(mFreehand, 'CData', mFreehand.UserData.default);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -430,7 +463,7 @@ function setRoiToolbar(sVisible)
             return;
         end
 
-        releaseRoiAxeWait(t);
+        releaseRoiAxeWait(mFreehand);
 
 %
 %               robotReleaseKey();
@@ -476,11 +509,12 @@ function setRoiToolbar(sVisible)
                 end
             end
 
-            if ~isvalid(t)
+            if ~isvalid(mFreehand)
                 return;
             end
 
-            if strcmpi(get(t, 'State'), 'off')
+            % if strcmpi(get(t, 'State'), 'off')
+            if isequal(mFreehand.CData, mFreehand.UserData.default)
                 return;
             end
 
@@ -491,7 +525,10 @@ function setRoiToolbar(sVisible)
 
      %       if w == 0
             if  strcmpi(windowButton('get'), 'down')
-               
+
+                atRoiInputBack = roiTemplate('get', dSeriesOffset);
+                % atVoiInputBack = voiTemplate('get', dSeriesOffset);
+
                 robotClick();
 
     %                 gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
@@ -517,12 +554,12 @@ function setRoiToolbar(sVisible)
 
                 a = drawfreehand(pAxe, ...
                                 'Smoothing'     , 1, ...
-                                'Color'         , 'cyan', ...
+                                'Color'         , [0.0000, 0.9608, 0.8275], ...
                                 'LineWidth'     , 1, ...
                                 'Label'         , roiLabelName(), ...
                                 'LabelVisible'  , 'off', ...
-                                'Tag'           , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
-                                'FaceSelectable', 0, ...
+                                'Tag'           , num2str(generateUniqueNumber(false)), ...
+                                'FaceSelectable', 1, ...
                                 'FaceAlpha'     , 0 ...
                                 );
 
@@ -532,12 +569,13 @@ function setRoiToolbar(sVisible)
 
                     a.Waypoints(:) = false;
     %test hf=a;
-                    if ~isvalid(t)
+                    if ~isvalid(mFreehand)
 
                         return;
                     end
 
-                    if strcmpi(get(t, 'State'), 'off')
+                    % if strcmpi(get(t, 'State'), 'off')
+                    if isequal(mFreehand.CData, mFreehand.UserData.default)
 
                         % roiSetAxeBorder(false);
 
@@ -552,24 +590,24 @@ function setRoiToolbar(sVisible)
                     addRoi(a, dSeriesOffset, 'Unspecified');
 
                     addRoiMenu(a);
-                    
+
                     % addlistener(a, 'WaypointAdded'  , @waypointEvents);
                     % addlistener(a, 'WaypointRemoved', @waypointEvents);
 
 
 % %                     voiDefaultMenu(a);
-% % 
+% %
 % % %                    setVoiRoiSegPopup();
-% % 
+% %
 % %                     roiDefaultMenu(a);
-% % 
+% %
 % %                     uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
 % %                     uimenu(a.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',a, 'Callback', @clearWaypointsCallback);
-% % 
+% %
 % %                     constraintMenu(a);
-% % 
+% %
 % %                     cropMenu(a);
-% % 
+% %
 % %                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
@@ -580,14 +618,16 @@ function setRoiToolbar(sVisible)
                         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                     end
 
-                    if strcmpi(get(tContinuous, 'State'), 'off')
+                    % if strcmpi(get(tContinuous, 'State'), 'off')
+                    if isequal(mInfinite.CData, mInfinite.UserData.default)
 
                         doWhileContinuous = false;
                     end
 
-                    if strcmpi(get(tInterpolate, 'State'), 'on')
+                    % if strcmpi(get(tInterpolate, 'State'), 'on')
+                    if isequal(mInterpolate.CData, mInterpolate.UserData.pressed)
 
-                        interpolateROIsByTag(a.Tag, lastRoiTag());                       
+                        interpolateROIsByTag(a.Tag, lastRoiTag());
                     end
              %   end
                 else
@@ -596,6 +636,20 @@ function setRoiToolbar(sVisible)
 
                 % roiSetAxeBorder(false);
 
+                % Set undo event
+
+                atRoiInput = roiTemplate('get', dSeriesOffset);
+                % atVoiInput = voiTemplate('get', dSeriesOffset);
+
+                dUID = generateUniqueNumber(false);
+
+                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+                % voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+
+                enableUndoVoiRoiPanel();
+
+                % End set undo event
+
                 windowButton('set', 'up');
                 mouseFcn('set');
                 mainToolBarEnable('on');
@@ -603,7 +657,8 @@ function setRoiToolbar(sVisible)
             end
         end
 
-        set(t, 'State', 'off');
+        % set(t, 'State', 'off');
+        set(mFreehand, 'CData', mFreehand.UserData.default);
 
         setCrossVisibility(true);
 
@@ -615,8 +670,10 @@ function setRoiToolbar(sVisible)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
-            set(t2, 'State', 'off');
-            return;
+
+           % set(t2, 'State', 'off');
+            set(mCircle, 'CData', mCircle.UserData.default);
+           return;
         end
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
@@ -626,10 +683,12 @@ function setRoiToolbar(sVisible)
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
 
-        if strcmpi(get(t2, 'State'), 'off')
+        % if strcmpi(get(t2, 'State'), 'off')
+        if isequal(mCircle.CData, mCircle.UserData.pressed)
 %                    robotReleaseKey();
 
-            set(t2, 'State', 'off');
+           % set(t2, 'State', 'off');
+            set(mCircle, 'CData', mCircle.UserData.default);
             % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
@@ -640,7 +699,7 @@ function setRoiToolbar(sVisible)
             return;
         end
 
-        releaseRoiAxeWait(t2);
+        releaseRoiAxeWait(mCircle);
 
 %               robotReleaseKey();
 
@@ -678,16 +737,20 @@ function setRoiToolbar(sVisible)
                 end
             end
 
-            if ~isvalid(t2)
+            if ~isvalid(mCircle)
                 return;
             end
 
-            if strcmpi(get(t2, 'State'), 'off')
+            % if strcmpi(get(t2, 'State'), 'off')
+            if isequal(mCircle.CData, mCircle.UserData.default)
                 return;
             end
 
     %        if w == 0
             if  strcmpi(windowButton('get'), 'down')
+
+                atRoiInputBack = roiTemplate('get', dSeriesOffset);
+                % atVoiInputBack = voiTemplate('get', dSeriesOffset);
 
                 robotClick();
 
@@ -714,11 +777,11 @@ function setRoiToolbar(sVisible)
                 % hListener = addlistener(fiMainWindowPtr('get'), 'WaitStatus', 'PostSet', @(src, event) checkWaitStatus(src));
 
                 a = drawcircle(pAxe, ...
-                               'Color'         , 'cyan', ...
+                               'Color'         , [0.0000, 0.9608, 0.8275], ...
                                'lineWidth'     , 1, ...
                                'Label'         , roiLabelName(), ...
                                'LabelVisible'  , 'off', ...
-                               'Tag'           , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
+                               'Tag'           , num2str(generateUniqueNumber(false)), ...
                                'FaceSelectable', 1, ...
                                'FaceAlpha'     , 0 ...
                                );
@@ -729,12 +792,13 @@ function setRoiToolbar(sVisible)
 
                     % delete(hListener);
 
-                    if ~isvalid(t2)
+                    if ~isvalid(mCircle)
                         return;
                     end
 
-                    if strcmpi(get(t2, 'State'), 'off')
-                        % roiSetAxeBorder(false);
+                    % if strcmpi(get(t2, 'State'), 'off')
+                    if isequal(mCircle.CData, mCircle.UserData.default)
+                       % roiSetAxeBorder(false);
 
     %                            windowButton('set', 'up');
     %                            mouseFcn('set');
@@ -754,15 +818,15 @@ function setRoiToolbar(sVisible)
 
     %                    setVoiRoiSegPopup();
                     % voiDefaultMenu(a);
-                    % 
+                    %
                     % roiDefaultMenu(a);
-                    % 
+                    %
                     % uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-                    % 
+                    %
                     % constraintMenu(a);
-                    % 
+                    %
                     % cropMenu(a);
-                    % 
+                    %
                     % uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
     %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
@@ -773,13 +837,16 @@ function setRoiToolbar(sVisible)
                         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                     end
 
-                    if strcmpi(get(tContinuous, 'State'), 'off')
+                    % if strcmpi(get(tContinuous, 'State'), 'off')
+                    if isequal(mInfinite.CData, mInfinite.UserData.default)
+
                         doWhileContinuous = false;
                     end
 
-                    if strcmpi(get(tInterpolate, 'State'), 'on')
+                   % if strcmpi(get(tInterpolate, 'State'), 'on')
+                    if isequal(mInterpolate.CData, mInterpolate.UserData.pressed)
 
-                        interpolateROIsByTag(a.Tag, lastRoiTag());                       
+                        interpolateROIsByTag(a.Tag, lastRoiTag());
                     end
 
             %    end
@@ -789,13 +856,28 @@ function setRoiToolbar(sVisible)
 
                 % roiSetAxeBorder(false);
 
+                % Set undo event
+
+                atRoiInput = roiTemplate('get', dSeriesOffset);
+                % atVoiInput = voiTemplate('get', dSeriesOffset);
+
+                dUID = generateUniqueNumber(false);
+
+                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+                % voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+
+                enableUndoVoiRoiPanel();
+
+                % End set undo event
+
                 windowButton('set', 'up');
                 mouseFcn('set');
                 mainToolBarEnable('on');
             end
         end
 
-        set(t2, 'State', 'off');
+       % set(t2, 'State', 'off');
+        set(mCircle, 'CData', mCircle.UserData.default);
 
         setCrossVisibility(true);
     end
@@ -812,7 +894,7 @@ function setRoiToolbar(sVisible)
 
 %                    roiSetAxeBorder(1);
 
-%                    a = drawcuboid(gca, 'Color', 'cyan', 'lineWidth', 1);
+%                    a = drawcuboid(gca, 'Color', [0.0000, 0.9608, 0.8275], 'lineWidth', 1);
 %                    set(t4, 'State', 'off');
 
 %                    uimenu(a.UIContextMenu,'Label', 'Crop Inside' , 'UserData',a, 'Callback',@cropInsideCallback, 'Separator', 'on');
@@ -838,7 +920,9 @@ function setRoiToolbar(sVisible)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
-            set(t5, 'State', 'off');
+
+            % set(t5, 'State', 'off');
+            set(mEllipse, 'CData', mEllipse.UserData.default);
             return;
         end
 
@@ -849,10 +933,13 @@ function setRoiToolbar(sVisible)
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
 
-        if strcmpi(get(t5, 'State'), 'off')
+       % if strcmpi(get(t5, 'State'), 'off')
+        if isequal(mEllipse.CData, mEllipse.UserData.pressed)
+            
 %                    robotReleaseKey();
 
-            set(t5, 'State', 'off');
+          %  set(t5, 'State', 'off');
+            set(mEllipse, 'CData', mEllipse.UserData.default);
             % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
@@ -863,7 +950,7 @@ function setRoiToolbar(sVisible)
             return;
         end
 
-        releaseRoiAxeWait(t5);
+        releaseRoiAxeWait(mEllipse);
 
 %              robotReleaseKey();
 
@@ -900,11 +987,12 @@ function setRoiToolbar(sVisible)
                 end
             end
 
-            if ~isvalid(t5)
+            if ~isvalid(mEllipse)
                 return;
             end
 
-            if strcmpi(get(t5, 'State'), 'off')
+          %  if strcmpi(get(t5, 'State'), 'off')
+            if isequal(mEllipse.CData, mEllipse.UserData.default)
                 return;
             end
 
@@ -912,6 +1000,9 @@ function setRoiToolbar(sVisible)
 
 %                if w == 0
             if  strcmpi(windowButton('get'), 'down')
+
+                atRoiInputBack = roiTemplate('get', dSeriesOffset);
+                % atVoiInputBack = voiTemplate('get', dSeriesOffset);
 
                 robotClick();
 
@@ -936,20 +1027,22 @@ function setRoiToolbar(sVisible)
          %       while strcmpi(get(t5, 'State'), 'on')
 
                     a = drawellipse(pAxe, ...
-                                    'Color'         , 'cyan', ...
+                                    'Color'         , [0.0000, 0.9608, 0.8275], ...
                                     'lineWidth'     , 1, ...
                                     'Label'         , roiLabelName(), ...
                                     'LabelVisible'  , 'off', ...
-                                    'Tag'           , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
+                                    'Tag'           , num2str(generateUniqueNumber(false)), ...
                                     'FaceSelectable', 1, ...
                                     'FaceAlpha'     , 0 ...
                                     );
                     a.FaceAlpha = roiFaceAlphaValue('get');
 
-                    if ~isvalid(t5)
+                    if ~isvalid(mEllipse)
                         return;
                     end
-                    if strcmpi(get(t5, 'State'), 'off')
+
+                   % if strcmpi(get(t5, 'State'), 'off')
+                    if isequal(mEllipse.CData, mEllipse.UserData.default)
                         % roiSetAxeBorder(false);
 
 %                            windowButton('set', 'up');
@@ -966,15 +1059,15 @@ function setRoiToolbar(sVisible)
 
 %                    setVoiRoiSegPopup();
                     % voiDefaultMenu(a);
-                    % 
+                    %
                     % roiDefaultMenu(a);
-                    % 
+                    %
                     % uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-                    % 
+                    %
                     % constraintMenu(a);
-                    % 
+                    %
                     % cropMenu(a);
-                    % 
+                    %
                     % uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll  );
@@ -985,18 +1078,34 @@ function setRoiToolbar(sVisible)
                         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                     end
 
-                    if strcmpi(get(tContinuous, 'State'), 'off')
+                   % if strcmpi(get(tContinuous, 'State'), 'off')
+                    if isequal(mInfinite.CData, mInfinite.UserData.default)
 
                         doWhileContinuous = false;
                     end
 
-                    if strcmpi(get(tInterpolate, 'State'), 'on')
+                 %   if strcmpi(get(tInterpolate, 'State'), 'on')
+                    if isequal(mInterpolate.CData, mInterpolate.UserData.pressed)
 
-                        interpolateROIsByTag(a.Tag, lastRoiTag());                       
-                    end                    
+                        interpolateROIsByTag(a.Tag, lastRoiTag());
+                    end
             %    end
 
                 % roiSetAxeBorder(false);
+
+                % Set undo event
+
+                atRoiInput = roiTemplate('get', dSeriesOffset);
+                % atVoiInput = voiTemplate('get', dSeriesOffset);
+
+                dUID = generateUniqueNumber(false);
+
+                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+                % voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+
+                enableUndoVoiRoiPanel();
+
+                % End set undo event
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -1004,7 +1113,8 @@ function setRoiToolbar(sVisible)
             end
         end
 
-        set(t5, 'State', 'off');
+       % set(t5, 'State', 'off');
+        set(mEllipse, 'CData', mEllipse.UserData.default);
 
         setCrossVisibility(true);
     end
@@ -1015,7 +1125,8 @@ function setRoiToolbar(sVisible)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
-            set(t3, 'State', 'off');
+           % set(t3, 'State', 'off');
+            set(mRectangle, 'CData', mRectangle.UserData.default);
             return;
         end
 
@@ -1026,10 +1137,12 @@ function setRoiToolbar(sVisible)
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
 
-        if strcmpi(get(t3, 'State'), 'off')
+      %  if strcmpi(get(t3, 'State'), 'off')
+        if isequal(mRectangle.CData, mRectangle.UserData.pressed)
 %                    robotReleaseKey();
 
-            set(t3, 'State', 'off');
+          %  set(t3, 'State', 'off');
+            set(mRectangle, 'CData', mRectangle.UserData.default);
             % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
@@ -1040,7 +1153,7 @@ function setRoiToolbar(sVisible)
             return;
         end
 
-        releaseRoiAxeWait(t3);
+        releaseRoiAxeWait(mRectangle);
 
 %          robotReleaseKey();
 
@@ -1077,11 +1190,12 @@ function setRoiToolbar(sVisible)
                 end
             end
 
-            if ~isvalid(t3)
+            if ~isvalid(mRectangle)
                 return;
             end
 
-            if strcmpi(get(t3, 'State'), 'off')
+           % if strcmpi(get(t3, 'State'), 'off')
+            if isequal(mRectangle.CData, mRectangle.UserData.default)
                 return;
             end
 
@@ -1089,6 +1203,9 @@ function setRoiToolbar(sVisible)
 
     %        if w == 0
             if  strcmpi(windowButton('get'), 'down')
+
+                atRoiInputBack = roiTemplate('get', dSeriesOffset);
+                % atVoiInputBack = voiTemplate('get', dSeriesOffset);
 
                 robotClick();
 
@@ -1114,22 +1231,23 @@ function setRoiToolbar(sVisible)
 
                 a = drawrectangle(pAxe, ...
                                   'Rotatable'     , false, ...
-                                  'Color'         , 'cyan', ...
+                                  'Color'         , [0.0000, 0.9608, 0.8275], ...
                                   'lineWidth'     , 1, ...
                                   'Label'         , roiLabelName(), ...
                                   'LabelVisible'  , 'off', ...
-                                  'Tag'           , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
+                                  'Tag'           , num2str(generateUniqueNumber(false)), ...
                                   'FaceSelectable', 1, ...
                                   'FaceAlpha'     , 0 ...
                                   );
                 a.FaceAlpha = roiFaceAlphaValue('get');
 
-                if ~isvalid(t3)
+                if ~isvalid(mRectangle)
                     return;
                 end
 
-                if strcmpi(get(t3, 'State'), 'off')
-                    % roiSetAxeBorder(false);
+               % if strcmpi(get(t3, 'State'), 'off')
+                if isequal(mRectangle.CData, mRectangle.UserData.default)
+                   % roiSetAxeBorder(false);
 
 %                            windowButton('set', 'up');
 %                            mouseFcn('set');
@@ -1145,15 +1263,15 @@ function setRoiToolbar(sVisible)
 
 %                    setVoiRoiSegPopup();
                 % voiDefaultMenu(a);
-                % 
+                %
                 % roiDefaultMenu(a);
-                % 
+                %
                 % uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-                % 
+                %
                 % constraintMenu(a);
-                % 
+                %
                 % cropMenu(a);
-                % 
+                %
                 % uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
@@ -1164,18 +1282,34 @@ function setRoiToolbar(sVisible)
                     plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                 end
 
-                if strcmpi(get(tContinuous, 'State'), 'off')
+               % if strcmpi(get(tContinuous, 'State'), 'off')
+                if isequal(mInfinite.CData, mInfinite.UserData.default)
 
                     doWhileContinuous = false;
                 end
 
-                if strcmpi(get(tInterpolate, 'State'), 'on')
+                if isequal(mInterpolate.CData, mInterpolate.UserData.pressed)
+               % if strcmpi(get(tInterpolate, 'State'), 'on')
 
-                    interpolateROIsByTag(a.Tag, lastRoiTag());                       
-                end                
+                    interpolateROIsByTag(a.Tag, lastRoiTag());
+                end
           %      end
 
                 % roiSetAxeBorder(false);
+
+                % Set undo event
+
+                atRoiInput = roiTemplate('get', dSeriesOffset);
+                % atVoiInput = voiTemplate('get', dSeriesOffset);
+
+                dUID = generateUniqueNumber(false);
+
+                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+                % voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+
+                enableUndoVoiRoiPanel();
+
+                % End set undo event
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -1183,7 +1317,8 @@ function setRoiToolbar(sVisible)
             end
         end
 
-        set(t3, 'State', 'off');
+       % set(t3, 'State', 'off');
+        set(mRectangle, 'CData', mRectangle.UserData.default);
 
         setCrossVisibility(true);
     end
@@ -1194,8 +1329,9 @@ function setRoiToolbar(sVisible)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
-            
-            set(t6, 'State', 'off');
+
+           % set(t6, 'State', 'off');
+            set(mPolygon, 'CData', mPolygon.UserData.default);
             return;
         end
 
@@ -1205,10 +1341,12 @@ function setRoiToolbar(sVisible)
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
 
-        if strcmpi(get(t6, 'State'), 'off')
+      %  if strcmpi(get(t6, 'State'), 'off')
+        if isequal(mPolygon.CData, mPolygon.UserData.pressed)
   %          robotReleaseKey();
 
-            set(t6, 'State', 'off');
+            set(mPolygon, 'CData', mPolygon.UserData.default);
+           % set(t6, 'State', 'off');
             % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
@@ -1219,7 +1357,7 @@ function setRoiToolbar(sVisible)
             return;
         end
 
-        releaseRoiAxeWait(t6);
+        releaseRoiAxeWait(mPolygon);
 
 %             robotReleaseKey();
 
@@ -1256,18 +1394,22 @@ function setRoiToolbar(sVisible)
                 end
             end
 
-            if ~isvalid(t6)
+            if ~isvalid(mPolygon)
                 return;
             end
 
-            if strcmpi(get(t6, 'State'), 'off')
-                return;
+           % if strcmpi(get(t6, 'State'), 'off')
+            if isequal(mPolygon.CData, mPolygon.UserData.default)
+               return;
             end
 
 %               w = waitforbuttonpress;
 
 %            if w == 0
             if  strcmpi(windowButton('get'), 'down')
+
+                atRoiInputBack = roiTemplate('get', dSeriesOffset);
+                % atVoiInputBack = voiTemplate('get', dSeriesOffset);
 
                 robotClick();
 %                 gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
@@ -1293,12 +1435,12 @@ function setRoiToolbar(sVisible)
             %    while strcmpi(get(t6, 'State'), 'on')
 
                 a = drawpolygon(pAxe, ...
-                                'Color'         , 'cyan', ...
+                                'Color'         , [0.0000, 0.9608, 0.8275], ...
                                 'lineWidth'     , 1, ...
                                 'Label'         , roiLabelName(), ...
                                 'LabelVisible'  , 'off', ...
-                                'Tag'           , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
-                                'FaceSelectable', 0, ...
+                                'Tag'           , num2str(generateUniqueNumber(false)), ...
+                                'FaceSelectable', 1, ...
                                 'FaceAlpha'     , 0 ...
                                 );
 
@@ -1306,12 +1448,13 @@ function setRoiToolbar(sVisible)
 
                     a.FaceAlpha = roiFaceAlphaValue('get');
 
-                    if ~isvalid(t6)
+                    if ~isvalid(mPolygon)
                         return;
                     end
 
-                    if strcmpi(get(t6, 'State'), 'off')
-                        % roiSetAxeBorder(false);
+                   % if strcmpi(get(t6, 'State'), 'off')
+                    if isequal(mPolygon.CData, mPolygon.UserData.default)
+                       % roiSetAxeBorder(false);
 
     %                            windowButton('set', 'up');
     %                            mouseFcn('set');
@@ -1327,16 +1470,16 @@ function setRoiToolbar(sVisible)
 
     %                    setVoiRoiSegPopup();
                     % voiDefaultMenu(a);
-                    % 
+                    %
                     % roiDefaultMenu(a);
-                    % 
+                    %
                     % uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-                    % 
+                    %
                     % constraintMenu(a);
-                    % 
+                    %
                     % cropMenu(a);
-                    % 
-                    % 
+                    %
+                    %
                     % uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
     %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
@@ -1347,14 +1490,16 @@ function setRoiToolbar(sVisible)
                         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                     end
 
-                    if strcmpi(get(tContinuous, 'State'), 'off')
+                   % if strcmpi(get(tContinuous, 'State'), 'off')
+                    if isequal(mInfinite.CData, mInfinite.UserData.default)
 
                         doWhileContinuous = false;
                     end
 
-                    if strcmpi(get(tInterpolate, 'State'), 'on')
+                   % if strcmpi(get(tInterpolate, 'State'), 'on')
+                    if isequal(mInterpolate.CData, mInterpolate.UserData.pressed)
 
-                        interpolateROIsByTag(a.Tag, lastRoiTag());                       
+                        interpolateROIsByTag(a.Tag, lastRoiTag());
                     end
 
                  %   end
@@ -1364,13 +1509,29 @@ function setRoiToolbar(sVisible)
 
                 % roiSetAxeBorder(false);
 
+                % Set undo event
+
+                atRoiInput = roiTemplate('get', dSeriesOffset);
+                % atVoiInput = voiTemplate('get', dSeriesOffset);
+
+                dUID = generateUniqueNumber(false);
+
+                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+                % voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+
+                enableUndoVoiRoiPanel();
+
+                % End set undo event
+
                 windowButton('set', 'up');
                 mouseFcn('set');
                 mainToolBarEnable('on');
+
             end
         end
 
-        set(t6, 'State', 'off');
+       % set(t6, 'State', 'off');
+        set(mPolygon, 'CData', mPolygon.UserData.default);
 
         setCrossVisibility(true);
 
@@ -1382,7 +1543,9 @@ function setRoiToolbar(sVisible)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
-            set(t11, 'State', 'off');
+
+           % set(t11, 'State', 'off');
+            set(mSphere, 'CData', mSphere.UserData.default);
             return;
         end
 
@@ -1392,7 +1555,8 @@ function setRoiToolbar(sVisible)
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
 
-        if strcmpi(get(t11, 'State'), 'off')
+       % if strcmpi(get(t11, 'State'), 'off')
+        if isequal(mSphere.CData, mSphere.UserData.pressed)
   %          robotReleaseKey();
             if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
                 set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
@@ -1401,12 +1565,14 @@ function setRoiToolbar(sVisible)
                 set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on');
                 set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on');
                 set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
+                set(uiUndoVoiRoiPanelObject      ('get'), 'Enable', 'on');
             end
 
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;
 
-            set(t11, 'State', 'off');
+           % set(t11, 'State', 'off');
+            set(mSphere, 'CData', mSphere.UserData.default);
             % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
@@ -1417,7 +1583,7 @@ function setRoiToolbar(sVisible)
             return;
         end
 
-        releaseRoiAxeWait(t11);
+        releaseRoiAxeWait(mSphere);
 
 %             robotReleaseKey();
 
@@ -1433,6 +1599,7 @@ function setRoiToolbar(sVisible)
         set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'off');
         set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'off');
         set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'off');
+        set(uiUndoVoiRoiPanelObject      ('get'), 'Enable', 'off');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'cross');
         drawnow;
@@ -1457,11 +1624,12 @@ function setRoiToolbar(sVisible)
 
             uiwait(fiMainWindowPtr('get'));
 
-            if ~isvalid(t11)
+            if ~isvalid(mSphere)
                 return;
             end
 
-            if strcmpi(get(t11, 'State'), 'off')
+           % if strcmpi(get(t11, 'State'), 'off')
+            if isequal(mSphere.CData, mSphere.UserData.default)
                 return;
             end
 
@@ -1472,6 +1640,9 @@ function setRoiToolbar(sVisible)
 
     %            if w == 0
             if  strcmpi(windowButton('get'), 'down')
+
+                atRoiInputBack = roiTemplate('get', dSeriesOffset);
+                atVoiInputBack = voiTemplate('get', dSeriesOffset);
 
         %        robotClick();
                 set(fiMainWindowPtr('get'), 'Pointer', 'watch');
@@ -1551,7 +1722,7 @@ function setRoiToolbar(sVisible)
 
                 asTag = cell(dBufferSize, 1);
 
-                sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                sTag = num2str(generateUniqueNumber(false));
 
                 a = images.roi.Ellipse(pAxe, ...
                                        'Center'          , [clickedPtX clickedPtY], ...
@@ -1560,7 +1731,7 @@ function setRoiToolbar(sVisible)
                                        'Deletable'       , 0, ...
                                        'FixedAspectRatio', 1, ...
                                        'StripeColor'     , 'k', ...
-                                       'Color'           , 'cyan', ...
+                                       'Color'           , [0.0000, 0.9608, 0.8275], ...
                                        'lineWidth'       , 1, ...
                                        'Label'           , roiLabelName(), ...
                                        'LabelVisible'    , 'off', ...
@@ -1574,11 +1745,12 @@ function setRoiToolbar(sVisible)
 
                  asTag{1} = sTag;
 
-                if ~isvalid(t11)
+                if ~isvalid(mSphere)
                     return;
                 end
 
-                if strcmpi(get(t11, 'State'), 'off')
+               % if strcmpi(get(t11, 'State'), 'off')
+                if isequal(mSphere.CData, mSphere.UserData.default)
 
                     % roiSetAxeBorder(false);
 
@@ -1598,15 +1770,15 @@ function setRoiToolbar(sVisible)
 
 
                 % voiDefaultMenu(a);
-                % 
+                %
                 % roiDefaultMenu(a);
-                % 
+                %
                 % uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-                % 
+                %
                 % constraintMenu(a);
-                % 
+                %
                 % cropMenu(a);
-                % 
+                %
                 % uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
     %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
@@ -1717,7 +1889,7 @@ function setRoiToolbar(sVisible)
 
                         sliceNumber('set', sPlane, zz);
 
-                        sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                        sTag = num2str(generateUniqueNumber(false));
 
                         a = images.roi.Ellipse(pAxe, ...
                                                'Center'             , [clickedPtX clickedPtY], ...
@@ -1727,7 +1899,7 @@ function setRoiToolbar(sVisible)
                                                'FixedAspectRatio'   , 1, ...
                                                'InteractionsAllowed', 'none', ...
                                                'StripeColor'        , 'k', ...
-                                               'Color'              , 'cyan', ...
+                                               'Color'              , [0.0000, 0.9608, 0.8275], ...
                                                'lineWidth'          , 1, ...
                                                'Label'              , roiLabelName(), ...
                                                'LabelVisible'       , 'off', ...
@@ -1750,20 +1922,20 @@ function setRoiToolbar(sVisible)
 
                 if size(aDicomBuffer, 3) ~= 1
                     createVoiFromRois(dSeriesOffset, asTag, sprintf('Sphere %d mm', dSphereDiameter), [0 1 1], 'Unspecified');
-    
+
                     setVoiRoiSegPopup();
 
                     uiDeleteVoiRoiPanel = uiDeleteVoiRoiPanelObject('get');
                     uiLesionTypeVoiRoiPanel = uiLesionTypeVoiRoiPanelObject('get');
-    
+
                     if ~isempty(uiDeleteVoiRoiPanel) && ...
                        ~isempty(uiLesionTypeVoiRoiPanel)
-    
+
                         atVoiInput = voiTemplate('get', dSeriesOffset);
                         dVoiOffset = numel(atVoiInput);
-    
+
                         set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
-    
+
                         sLesionType = atVoiInput{dVoiOffset}.LesionType;
                         [bLesionOffset, ~, ~] = getLesionType(sLesionType);
                         set(uiLesionTypeVoiRoiPanel, 'Value', bLesionOffset);
@@ -1776,9 +1948,25 @@ function setRoiToolbar(sVisible)
 
                 sliceNumber('set', sPlane, dSliceNb);
 
-                if strcmpi(get(tContinuous, 'State'), 'off')
-                    doWhileContinuous = false;
+               % if strcmpi(get(tContinuous, 'State'), 'off')
+                if isequal(mInfinite.CData, mInfinite.UserData.default)
+
+                   doWhileContinuous = false;
                 end
+
+                % Set undo event
+
+                atRoiInput = roiTemplate('get', dSeriesOffset);
+                atVoiInput = voiTemplate('get', dSeriesOffset);
+
+                dUID = generateUniqueNumber(false);
+
+                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+                voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+
+                enableUndoVoiRoiPanel();
+
+                % End set undo event
 
                 set(fiMainWindowPtr('get'), 'Pointer', 'cross');
                 drawnow;
@@ -1786,7 +1974,8 @@ function setRoiToolbar(sVisible)
 
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:drawsphereCallback()');
         end
 
@@ -1798,9 +1987,11 @@ function setRoiToolbar(sVisible)
             set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on');
             set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on');
             set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
+            set(uiUndoVoiRoiPanelObject      ('get'), 'Enable', 'on');
         end
 
-        set(t11, 'State', 'off');
+      %  set(t11, 'State', 'off');
+        set(mSphere, 'CData', mSphere.UserData.default);
 
         setCrossVisibility(true);
 
@@ -1814,14 +2005,16 @@ function setRoiToolbar(sVisible)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
-            set(t12, 'State', 'off');
+
+           % set(t12, 'State', 'off');
+            set(mClickVoi, 'CData', mClickVoi.UserData.default);
             return;
         end
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         % if isa(actionData, 'matlab.graphics.axis.Axes')
-        % 
+        %
         %     bGetAxeFromMousePosition = false;
         % else
         %     bGetAxeFromMousePosition = true;
@@ -1832,7 +2025,8 @@ function setRoiToolbar(sVisible)
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
 
-        if strcmpi(get(t12, 'State'), 'off')
+        if isequal(mClickVoi.CData, mClickVoi.UserData.pressed)
+       % if strcmpi(get(t12, 'State'), 'off')
 %                   robotReleaseKey();
 %             if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
 %                 set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
@@ -1846,7 +2040,8 @@ function setRoiToolbar(sVisible)
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;
 
-            set(t12, 'State', 'off');
+           % set(t12, 'State', 'off');
+            set(mClickVoi, 'CData', mClickVoi.UserData.default);
             % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
@@ -1857,7 +2052,7 @@ function setRoiToolbar(sVisible)
             return;
         end
 
-        releaseRoiAxeWait(t12);
+        releaseRoiAxeWait(mClickVoi);
 
 %               robotReleaseKey();
 
@@ -1898,7 +2093,7 @@ function setRoiToolbar(sVisible)
             axeClicked('set', false);
 
             % if bGetAxeFromMousePosition == true
-            % 
+            %
                  doWhile = true;
             % else
             %     doWhile = false;
@@ -1914,11 +2109,12 @@ function setRoiToolbar(sVisible)
                 end
             end
 
-            if ~isvalid(t12)
+            if ~isvalid(mClickVoi)
                 return;
             end
 
-            if strcmpi(get(t12, 'State'), 'off')
+           % if strcmpi(get(t12, 'State'), 'off')
+            if isequal(mClickVoi.CData, mClickVoi.UserData.default)
                 return;
             end
 
@@ -1931,6 +2127,10 @@ function setRoiToolbar(sVisible)
             if  strcmpi(windowButton('get'), 'down')
 %
  %               robotClick();
+
+                atRoiInputBack = roiTemplate('get', dSeriesOffset);
+                atVoiInputBack = voiTemplate('get', dSeriesOffset);
+
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 switch pAxe
@@ -1987,7 +2187,7 @@ function setRoiToolbar(sVisible)
 
                 set(uiCreateVoiRoiPanel, 'String', 'Cancel');
 
-                set(uiCreateVoiRoiPanel, 'Background', [0.2 0.039 0.027]);
+                set(uiCreateVoiRoiPanel, 'Background', [0.3255, 0.1137, 0.1137]);
 
                 set(uiCreateVoiRoiPanel, 'Foreground', [0.94 0.94 0.94]);
 
@@ -2031,11 +2231,12 @@ function setRoiToolbar(sVisible)
 
   %                  a.Waypoints(:) = false;
 %test hf=a;
-                    if ~isvalid(t12)
+                    if ~isvalid(mClickVoi)
                         return;
                     end
 
-                    if strcmpi(get(t12, 'State'), 'off')
+                   % if strcmpi(get(t12, 'State'), 'off')
+                    if isequal(mClickVoi.CData, mClickVoi.UserData.default)
 
                         % roiSetAxeBorder(false);
 
@@ -2051,7 +2252,8 @@ function setRoiToolbar(sVisible)
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                     refreshImages();
 
-                    if strcmpi(get(tContinuous, 'State'), 'off')
+                  %  if strcmpi(get(tContinuous, 'State'), 'off')
+                    if isequal(mInfinite.CData, mInfinite.UserData.default)
 
                         doWhileContinuous = false;
                     end
@@ -2060,13 +2262,28 @@ function setRoiToolbar(sVisible)
 
                 % roiSetAxeBorder(false);
 
+                % Set undo event
+
+                atRoiInput = roiTemplate('get', dSeriesOffset);
+                atVoiInput = voiTemplate('get', dSeriesOffset);
+
+                dUID = generateUniqueNumber(false);
+
+                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+                voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+
+                enableUndoVoiRoiPanel();
+
+                % End set undo event
+
                 windowButton('set', 'up');
                 mouseFcn('set');
                 mainToolBarEnable('on');
             end
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:drawClickVoiCallback()');
         end
 
@@ -2080,7 +2297,8 @@ function setRoiToolbar(sVisible)
 %             set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
 %         end
 
-        set(t12, 'State', 'off');
+       % set(t12, 'State', 'off');
+        set(mClickVoi, 'CData', mClickVoi.UserData.default);
 
         setCrossVisibility(true);
 
@@ -2088,13 +2306,18 @@ function setRoiToolbar(sVisible)
         drawnow;
     end
 
-    function viewFarthestDistancesCallback(hObject, ~)
+    function viewFarthestDistancesCallback(~, ~)
 
-        if strcmpi(get(hObject, 'State'), 'on')
+       % if strcmpi(get(hObject, 'State'), 'on')
+        if ~isequal(mFarthest.CData, mFarthest.UserData.pressed)
 
             viewFarthestDistances('set', true);
+
+            set(mFarthest, 'CData', mFarthest.UserData.pressed);
         else
             viewFarthestDistances('set', false);
+
+            set(mFarthest, 'CData', mFarthest.UserData.default);
         end
 
         if viewFarthestDistances('get') == false
@@ -2114,8 +2337,8 @@ function setRoiToolbar(sVisible)
                         currentRoi.MaxDistances.MaxXY.Line.Visible = 'off';
                         currentRoi.MaxDistances.MaxCY.Line.Visible = 'off';
                         currentRoi.MaxDistances.MaxXY.Text.Visible = 'off';
-                        currentRoi.MaxDistances.MaxCY.Text.Visible = 'off';                           
-                    end                   
+                        currentRoi.MaxDistances.MaxCY.Text.Visible = 'off';
+                    end
                 end
             end
         end
@@ -2141,19 +2364,21 @@ function setRoiToolbar(sVisible)
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
 
-        if strcmpi(get(t2Dbrush, 'State'), 'off')
-  %          robotReleaseKey();
-
-            set(t2Dbrush, 'State', 'off');
-%            roiSetAxeBorder(false);
-
-            windowButton('set', 'up');
-            mouseFcn('set');
-            mainToolBarEnable('on');
-            setCrossVisibility(true);
-
-            return;
-        end
+%        % if strcmpi(get(t2Dbrush, 'State'), 'off')
+%         if isequal(m2DBrush.CData, m2DBrush.UserData.pressed)
+%   %          robotReleaseKey();
+% 
+%            % set(t2Dbrush, 'State', 'off');
+%             set(m2DBrush, 'CData', m2DBrush.UserData.default);
+% %            roiSetAxeBorder(false);
+% 
+%             windowButton('set', 'up');
+%             mouseFcn('set');
+%             mainToolBarEnable('on');
+%             setCrossVisibility(true);
+% 
+%             return;
+%         end
 
         % aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
 
@@ -2162,7 +2387,7 @@ function setRoiToolbar(sVisible)
         setCrossVisibility(false);
 
         if bGetAxeFromMousePosition == true
-            
+
             % triangulateCallback();
 
 
@@ -2171,12 +2396,13 @@ function setRoiToolbar(sVisible)
             uiwait(fiMainWindowPtr('get'));
         end
 
-        if ~isvalid(t2Dbrush)
+        if ~isvalid(m2DBrush)
 
             return;
         end
 
-        if strcmpi(get(t2Dbrush, 'State'), 'off')
+       % if strcmpi(get(t2Dbrush, 'State'), 'off')
+        if isequal(m2DBrush.CData, m2DBrush.UserData.default)
 
             return;
         end
@@ -2214,7 +2440,7 @@ function setRoiToolbar(sVisible)
             clickedPtX = clickedPt(1,1);
             clickedPtY = clickedPt(1,2);
 
-            atMetaData = dicomMetaData('get');
+            atMetaData = dicomMetaData('get', [], dSeriesOffset);
             dSliceThickness = computeSliceSpacing(atMetaData);
 
             switch(pAxe)
@@ -2283,11 +2509,12 @@ function setRoiToolbar(sVisible)
 
             brush2Dptr('set', pRoiPtr);
 
-            if ~isvalid(t2Dbrush)
+            if ~isvalid(m2DBrush)
                 return;
             end
 
-            if strcmpi(get(t2Dbrush, 'State'), 'off')
+           % if strcmpi(get(t2Dbrush, 'State'), 'off')
+            if isequal(m2DBrush.CData, m2DBrush.UserData.default)
 
                 roiSetAxeBorder(false);
 
@@ -2307,8 +2534,6 @@ function setRoiToolbar(sVisible)
             windowButton('set', 'up');
             mouseFcn('set');
             mainToolBarEnable('on');
-
-
         end
 
     end
@@ -2319,7 +2544,9 @@ function setRoiToolbar(sVisible)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
-            set(t2Dscissor, 'State', 'off');
+
+           % set(t2Dscissor, 'State', 'off');
+            set(m2DKnife, 'CData', m2DKnife.UserData.default);
             return;
         end
 
@@ -2343,20 +2570,22 @@ function setRoiToolbar(sVisible)
             end
         end
 
-        if strcmpi(get(t2Dscissor, 'State'), 'off')
-
- %           robotReleaseKey();
-
-            set(t2Dscissor, 'State', 'off');
-            % roiSetAxeBorder(false);
-
-            windowButton('set', 'up');
-            mouseFcn('set');
-            mainToolBarEnable('on');
-            setCrossVisibility(true);
-
-            return;
-        end
+ %       % if strcmpi(get(t2Dscissor, 'State'), 'off')
+ %        if isequal(m2DKnife.CData, m2DKnife.UserData.default)
+ % 
+ % %           robotReleaseKey();
+ % 
+ %           % set(t2Dscissor, 'State', 'off');
+ %            set(m2DKnife, 'CData', m2DKnife.UserData.default);
+ %            % roiSetAxeBorder(false);
+ % 
+ %            windowButton('set', 'up');
+ %            mouseFcn('set');
+ %            mainToolBarEnable('on');
+ %            setCrossVisibility(true);
+ % 
+ %            return;
+ %        end
 
         % releaseRoiAxeWait(t2Dscissor);
 
@@ -2382,15 +2611,19 @@ function setRoiToolbar(sVisible)
                 end
             end
 
-            if ~isvalid(t2Dscissor)
+            if ~isvalid(m2DKnife)
                 return;
             end
 
-            if strcmpi(get(t2Dscissor, 'State'), 'off')
-                return;
+           % if strcmpi(get(t2Dscissor, 'State'), 'off')
+            if isequal(m2DKnife.CData, m2DKnife.UserData.default)
+               return;
             end
      %       if w == 0
             if  strcmpi(windowButton('get'), 'down')
+
+                % atRoiInputBack = roiTemplate('get', dSeriesOffset);
+                % atVoiInputBack = voiTemplate('get', dSeriesOffset);
 
                 robotClick();
 
@@ -2414,16 +2647,17 @@ function setRoiToolbar(sVisible)
 
          %       while strcmpi(get(t8, 'State'), 'on')
 
-                    pRoiPtr = drawline(pAxe, 'Color', 'red', 'lineWidth', 1, 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'LabelVisible', 'off');
+                    pRoiPtr = drawline(pAxe, 'Color', 'red', 'lineWidth', 1, 'Tag', num2str(generateUniqueNumber(false)), 'LabelVisible', 'off');
                     pRoiPtr.LabelVisible = 'off';
 
                     scissor2Dptr('set', pRoiPtr);
 
-                    if ~isvalid(t2Dscissor)
+                    if ~isvalid(m2DKnife)
                         return;
                     end
 
-                    if strcmpi(get(t2Dscissor, 'State'), 'off')
+                   % if strcmpi(get(t2Dscissor, 'State'), 'off')
+                    if isequal(m2DKnife.CData, m2DKnife.UserData.default)
 
                         % roiSetAxeBorder(false);
 
@@ -2443,19 +2677,33 @@ function setRoiToolbar(sVisible)
                 set(fiMainWindowPtr('get'), 'Pointer', 'watch');
                 drawnow;
 
+                splitContour(pAxe, pRoiPtr);
+
+                delete(pRoiPtr);
+
                 % roiSetAxeBorder(false);
+
+                % Set undo event
+                % 
+                % atRoiInput = roiTemplate('get', dSeriesOffset);
+                % atVoiInput = voiTemplate('get', dSeriesOffset);
+                % 
+                % dUID = generateUniqueNumber(false);
+
+                % roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID, 2);
+                % voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+
+                enableUndoVoiRoiPanel();
+
+                % End set undo event
 
                 windowButton('set', 'up');
                 mouseFcn('set');
                 mainToolBarEnable('on');
 
-                splitContour(pAxe, pRoiPtr);
-
-                delete(pRoiPtr);
-
-                catch
+                catch ME
+                    logErrorToFile(ME);
                     progressBar(1, 'Error:draw2Dscissor()');
-
                 end
 
                 set(fiMainWindowPtr('get'), 'Pointer', sMainWindowPtrPointer);
@@ -2463,28 +2711,30 @@ function setRoiToolbar(sVisible)
             end
         end
 
-        set(t2Dscissor, 'State', 'off');
+       % set(t2Dscissor, 'State', 'off');
+        set(m2DKnife, 'CData', m2DKnife.UserData.default);
 
         setCrossVisibility(true);
     end
 
-    function setContinuousCallback(hObject, ~)
+    function setContinuousCallback(~, ~)
 
         axeClicked('set', true);
         uiresume(fiMainWindowPtr('get'));
+   
+        set(mMeasure  , 'CData', mMeasure.UserData.default);
+        set(mFreehand , 'CData', mFreehand.UserData.default);
+        set(mPolygon  , 'CData', mPolygon.UserData.default);
+        set(mCircle   , 'CData', mCircle.UserData.default);
+        set(mEllipse  , 'CData', mEllipse.UserData.default);
+        set(mRectangle, 'CData', mRectangle.UserData.default);
+        set(mSphere   , 'CData', mSphere.UserData.default);
+        set(mClickVoi , 'CData', mClickVoi.UserData.default);          
 
-        set(t  , 'State', 'off');
-        set(t2 , 'State', 'off');
-        set(t3 , 'State', 'off');
-  %      set(t4, 'State', 'off');
-        set(t5 , 'State', 'off');
-        set(t6 , 'State', 'off');
-      %  set(t7, 'State', 'off');
-        set(t8 , 'State', 'off');
-        set(t11, 'State', 'off');
-        set(t12, 'State', 'off');
+        toggleToolbarIcon(mInfinite);
 
-        if strcmpi(get(hObject, 'State'), 'off')
+        if isequal(mInfinite.CData, mInfinite.UserData.default)
+
             setCrossVisibility(true);
         end
 
@@ -2494,18 +2744,26 @@ function setRoiToolbar(sVisible)
 
     function setInterpolateCallback(~, ~)
 
-       lastRoiTag('');
+        if ~isequal(mInterpolate.CData, mInterpolate.UserData.pressed)
+
+            set(mInterpolate, 'CData', mInterpolate.UserData.pressed);
+        else
+            set(mInterpolate, 'CData', mInterpolate.UserData.default);
+        end
+       
+        lastRoiTag('');
     end
 
-    function set2DBrushCallback(hObject, actionData)
+    function set2DBrushCallback(~, actionData)
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
 
-           set(hObject, 'State', 'off');
-           return;
+          % set(hObject, 'State', 'off');
+            set(m2DBrush, 'CData', m2DBrush.UserData.default);          
+            return;
         end
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
@@ -2518,27 +2776,37 @@ function setRoiToolbar(sVisible)
         end
 
         try
-        % 
+        %
         % set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         % drawnow;
 
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
+        set(mMeasure  , 'CData', mMeasure.UserData.default);
+        set(mFreehand , 'CData', mFreehand.UserData.default);
+        set(mPolygon  , 'CData', mPolygon.UserData.default);
+        set(mCircle   , 'CData', mCircle.UserData.default);
+        set(mEllipse  , 'CData', mEllipse.UserData.default);
+        set(mRectangle, 'CData', mRectangle.UserData.default);
+        set(mSphere   , 'CData', mSphere.UserData.default);
+        set(mClickVoi , 'CData', mClickVoi.UserData.default);    
+        set(m2DKnife  , 'CData', m2DKnife.UserData.default);    
 
-        set(t  , 'State', 'off');
-        set(t2 , 'State', 'off');
-        set(t3 , 'State', 'off');
-        set(t5 , 'State', 'off');
-        set(t6 , 'State', 'off');
-        set(t8 , 'State', 'off');
-        set(t11, 'State', 'off');
-        set(t12, 'State', 'off');
-        set(t2Dscissor, 'State', 'off');
+        % set(t  , 'State', 'off');
+        % set(t2 , 'State', 'off');
+        % set(t3 , 'State', 'off');
+        % set(t5 , 'State', 'off');
+        % set(t6 , 'State', 'off');
+        % set(t8 , 'State', 'off');
+        % set(t11, 'State', 'off');
+        % set(t12, 'State', 'off');
+        % set(t2Dscissor, 'State', 'off');
 
         % if strcmpi(get(hObject, 'State'), 'on')
         if viewFarthestDistances('get') == true
 
-            set(tFarthest, 'State', 'off');
+         %   set(tFarthest, 'State', 'off');
+            set(mFarthest, 'CData', mFarthest.UserData.default);          
 
             viewFarthestDistances('set', false);
 
@@ -2551,13 +2819,13 @@ function setRoiToolbar(sVisible)
                 for bb = 1:numRoiInputs
 
                     currentRoi = atRoiInput{bb};
-                       
+
                     if roiHasMaxDistances(currentRoi) == true
 
                         currentRoi.MaxDistances.MaxXY.Line.Visible = 'off';
                         currentRoi.MaxDistances.MaxCY.Line.Visible = 'off';
                         currentRoi.MaxDistances.MaxXY.Text.Visible = 'off';
-                        currentRoi.MaxDistances.MaxCY.Text.Visible = 'off';                           
+                        currentRoi.MaxDistances.MaxCY.Text.Visible = 'off';
                      end
 
                 end
@@ -2567,22 +2835,45 @@ function setRoiToolbar(sVisible)
 
         if is2DBrush('get') == false
 
-            set(hObject, 'State', 'on');
+           % set(hObject, 'State', 'on');
+            set(m2DBrush, 'CData', m2DBrush.UserData.pressed);          
 
             is2DBrush('set', true);
 
             setCrossVisibility(false);
 
-            set(t  , 'Enable', 'off');
-            set(t2 , 'Enable', 'off');
-            set(t3 , 'Enable', 'off');
-            set(t5 , 'Enable', 'off');
-            set(t6 , 'Enable', 'off');
-            set(t8 , 'Enable', 'off');
-            set(t11, 'Enable', 'off');
-            set(t12, 'Enable', 'off');
-            set(tFarthest, 'Enable', 'off');
-            set(t2Dscissor, 'Enable', 'off');
+            % set(t  , 'Enable', 'off');
+            % set(t2 , 'Enable', 'off');
+            % set(t3 , 'Enable', 'off');
+            % set(t5 , 'Enable', 'off');
+            % set(t6 , 'Enable', 'off');
+            % set(t8 , 'Enable', 'off');
+            % set(t11, 'Enable', 'off');
+            % set(t12, 'Enable', 'off');
+            % set(tFarthest, 'Enable', 'off');
+            % set(t2Dscissor, 'Enable', 'off');
+
+            set(mMeasure  , 'HitTest', 'off');
+            set(mFreehand , 'HitTest', 'off');
+            set(mPolygon  , 'HitTest', 'off');
+            set(mCircle   , 'HitTest', 'off');
+            set(mEllipse  , 'HitTest', 'off');
+            set(mRectangle, 'HitTest', 'off');
+            set(mSphere   , 'HitTest', 'off');
+            set(mClickVoi , 'HitTest', 'off');    
+            set(m2DKnife  , 'HitTest', 'off');   
+            set(mFarthest , 'HitTest', 'off');          
+
+            set(mMeasure  , 'CData', mMeasure.UserData.disable);
+            set(mFreehand , 'CData', mFreehand.UserData.disable);
+            set(mPolygon  , 'CData', mPolygon.UserData.disable);
+            set(mCircle   , 'CData', mCircle.UserData.disable);
+            set(mEllipse  , 'CData', mEllipse.UserData.disable);
+            set(mRectangle, 'CData', mRectangle.UserData.disable);
+            set(mSphere   , 'CData', mSphere.UserData.disable);
+            set(mClickVoi , 'CData', mClickVoi.UserData.disable);
+            set(m2DKnife  , 'CData', m2DKnife.UserData.disable);
+            set(mFarthest , 'CData', mFarthest.UserData.disable);
 
             atRoiInput = roiTemplate('get', dSeriesOffset);
 
@@ -2590,12 +2881,15 @@ function setRoiToolbar(sVisible)
 
                 for rr=1:numel(atRoiInput)
                     set(atRoiInput{rr}.Object, 'InteractionsAllowed', 'none');
-                end            
+                    atRoiInput{rr}.InteractionsAllowed = 'none';
+                end
+                roiTemplate('set', dSeriesOffset, atRoiInput);
             end
 
             draw2Dbrush(actionData);
 
-            if strcmpi(get(t2Dbrush, 'State'), 'on')
+           % if strcmpi(get(t2Dbrush, 'State'), 'on')
+            if isequal(m2DBrush.CData, m2DBrush.UserData.pressed) % To verify
 
                 if bGetAxeFromMousePosition == true
 
@@ -2635,10 +2929,11 @@ function setRoiToolbar(sVisible)
                     set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);
                     set(uiTraWindowPtr('get'), 'BorderType', 'line');
                 end
-               
+
             end
         else
-            set(hObject, 'State', 'off');
+          %  set(hObject, 'State', 'off');
+            set(m2DBrush, 'CData', m2DBrush.UserData.default);          
 
             is2DBrush('set', false);
 
@@ -2657,12 +2952,13 @@ function setRoiToolbar(sVisible)
                     if ~strcmpi(get(atRoiInput{rr}.Object, 'UserData'), 'SphereROI')
 
                         set(atRoiInput{rr}.Object, 'InteractionsAllowed', 'all');
+                        atRoiInput{rr}.InteractionsAllowed = 'all';
 
                         if strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.freehand') || ...
                            strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.assistedfreehand')
 
                             if isempty(find(atRoiInput{rr}.Waypoints, 1))
-                                
+
                                 atRoiInput{rr}.Object.Waypoints(:) = false;
                                 atRoiInput{rr}.Waypoints = atRoiInput{rr}.Object.Waypoints;
                             end
@@ -2683,19 +2979,43 @@ function setRoiToolbar(sVisible)
 
             setCrossVisibility(true);
 
-            set(t  , 'Enable', 'on');
-            set(t2 , 'Enable', 'on');
-            set(t3 , 'Enable', 'on');
-            set(t5 , 'Enable', 'on');
-            set(t6 , 'Enable', 'on');
-            set(t8 , 'Enable', 'on');
-            set(t11, 'Enable', 'on');
-            set(t12, 'Enable', 'on');
-            set(tFarthest, 'Enable', 'on');
-            set(t2Dscissor, 'Enable', 'on');
+            % set(t  , 'Enable', 'on');
+            % set(t2 , 'Enable', 'on');
+            % set(t3 , 'Enable', 'on');
+            % set(t5 , 'Enable', 'on');
+            % set(t6 , 'Enable', 'on');
+            % set(t8 , 'Enable', 'on');
+            % set(t11, 'Enable', 'on');
+            % set(t12, 'Enable', 'on');
+            % set(tFarthest, 'Enable', 'on');
+            % set(t2Dscissor, 'Enable', 'on');
+
+            set(mMeasure  , 'HitTest', 'on');
+            set(mFreehand , 'HitTest', 'on');
+            set(mPolygon  , 'HitTest', 'on');
+            set(mCircle   , 'HitTest', 'on');
+            set(mEllipse  , 'HitTest', 'on');
+            set(mRectangle, 'HitTest', 'on');
+            set(mSphere   , 'HitTest', 'on');
+            set(mClickVoi , 'HitTest', 'on');    
+            set(m2DKnife  , 'HitTest', 'on');   
+            set(mFarthest , 'HitTest', 'on');
+
+            set(mMeasure  , 'CData', mMeasure.UserData.default);
+            set(mFreehand , 'CData', mFreehand.UserData.default);
+            set(mPolygon  , 'CData', mPolygon.UserData.default);
+            set(mCircle   , 'CData', mCircle.UserData.default);
+            set(mEllipse  , 'CData', mEllipse.UserData.default);
+            set(mRectangle, 'CData', mRectangle.UserData.default);
+            set(mSphere   , 'CData', mSphere.UserData.default);
+            set(mClickVoi , 'CData', mClickVoi.UserData.default);
+            set(m2DKnife  , 'CData', m2DKnife.UserData.default);
+            set(mFarthest , 'CData', mFarthest.UserData.default);
+
         end
-        % 
-        catch
+        %
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:set2DBrushCallback()');
         end
 
@@ -2703,13 +3023,16 @@ function setRoiToolbar(sVisible)
         drawnow;
     end
 
-    function set2DScissorCallback(hObject, ~)
+    function set2DScissorCallback(~, ~)
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
-           set(hObject, 'State', 'off');
+
+
+          % set(hObject, 'State', 'off');
+           set(m2DKnife, 'CData', m2DKnife.UserData.default);
            return;
         end
 
@@ -2721,39 +3044,74 @@ function setRoiToolbar(sVisible)
         % axeClicked('set', true);
         % uiresume(fiMainWindowPtr('get'));
 
-        set(t  , 'State', 'off');
-        set(t2 , 'State', 'off');
-        set(t3 , 'State', 'off');
-        set(t5 , 'State', 'off');
-        set(t6 , 'State', 'off');
-        set(t8 , 'State', 'off');
-        set(t11, 'State', 'off');
-        set(t12, 'State', 'off');
-        set(t2Dbrush, 'State', 'off');
+        % set(t  , 'State', 'off');
+        % set(t2 , 'State', 'off');
+        % set(t3 , 'State', 'off');
+        % set(t5 , 'State', 'off');
+        % set(t6 , 'State', 'off');
+        % set(t8 , 'State', 'off');
+        % set(t11, 'State', 'off');
+        % set(t12, 'State', 'off');
+        % set(t2Dbrush, 'State', 'off');
+
+        set(mMeasure  , 'HitTest', 'off');
+        set(mFreehand , 'HitTest', 'off');
+        set(mPolygon  , 'HitTest', 'off');
+        set(mCircle   , 'HitTest', 'off');
+        set(mEllipse  , 'HitTest', 'off');
+        set(mRectangle, 'HitTest', 'off');
+        set(mSphere   , 'HitTest', 'off');
+        set(mClickVoi , 'HitTest', 'off');    
+        set(m2DBrush  , 'HitTest', 'off');   
 
         if is2DScissor('get') == false
+
+            set(m2DKnife, 'CData', m2DKnife.UserData.pressed);
 
             is2DScissor('set', true);
 
             setCrossVisibility(false);
 
-            set(t  , 'Enable', 'off');
-            set(t2 , 'Enable', 'off');
-            set(t3 , 'Enable', 'off');
-            set(t5 , 'Enable', 'off');
-            set(t6 , 'Enable', 'off');
-            set(t8 , 'Enable', 'off');
-            set(t11, 'Enable', 'off');
-            set(t12, 'Enable', 'off');
-            set(tFarthest, 'Enable', 'off');
-            set(t2Dbrush, 'Enable', 'off');
+            % set(t  , 'Enable', 'off');
+            % set(t2 , 'Enable', 'off');
+            % set(t3 , 'Enable', 'off');
+            % set(t5 , 'Enable', 'off');
+            % set(t6 , 'Enable', 'off');
+            % set(t8 , 'Enable', 'off');
+            % set(t11, 'Enable', 'off');
+            % set(t12, 'Enable', 'off');
+            % set(tFarthest, 'Enable', 'off');
+            % set(t2Dbrush, 'Enable', 'off');
 
+            set(mMeasure  , 'CData', mMeasure.UserData.disable);
+            set(mFreehand , 'CData', mFreehand.UserData.disable);
+            set(mPolygon  , 'CData', mPolygon.UserData.disable);
+            set(mCircle   , 'CData', mCircle.UserData.disable);
+            set(mEllipse  , 'CData', mEllipse.UserData.disable);
+            set(mRectangle, 'CData', mRectangle.UserData.disable);
+            set(mSphere   , 'CData', mSphere.UserData.disable);
+            set(mClickVoi , 'CData', mClickVoi.UserData.disable);
+            set(m2DBrush  , 'CData', m2DBrush.UserData.disable);
+            set(mFarthest , 'CData', mFarthest.UserData.disable);
+      
             draw2Dscissor();
 
             is2DScissor('set', false);
 
+            set(m2DKnife, 'CData', m2DKnife.UserData.default);
+        else
+            set(m2DKnife , 'CData', m2DKnife.UserData.default);
+    
+            is2DScissor('set', false);
+
+            windowButton('set', 'up');
+            mouseFcn('set');
+            mainToolBarEnable('on');
+            setCrossVisibility(true);
         end
-        catch
+
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error:set2DScissorCallback()');
         end
 
@@ -2763,23 +3121,42 @@ function setRoiToolbar(sVisible)
             delete(pRoiPtr);
             scissor2Dptr('set', []);
         end
-
+        
         roiSetAxeBorder(false);
 
         setCrossVisibility(true);
 
-        is2DScissor('set', false);
+        % set(t  , 'Enable', 'on');
+        % set(t2 , 'Enable', 'on');
+        % set(t3 , 'Enable', 'on');
+        % set(t5 , 'Enable', 'on');
+        % set(t6 , 'Enable', 'on');
+        % set(t8 , 'Enable', 'on');
+        % set(t11, 'Enable', 'on');
+        % set(t12, 'Enable', 'on');
+        % set(tFarthest, 'Enable', 'on');
+        % set(t2Dbrush, 'Enable', 'on');
 
-        set(t  , 'Enable', 'on');
-        set(t2 , 'Enable', 'on');
-        set(t3 , 'Enable', 'on');
-        set(t5 , 'Enable', 'on');
-        set(t6 , 'Enable', 'on');
-        set(t8 , 'Enable', 'on');
-        set(t11, 'Enable', 'on');
-        set(t12, 'Enable', 'on');
-        set(tFarthest, 'Enable', 'on');
-        set(t2Dbrush, 'Enable', 'on');
+        set(mMeasure  , 'HitTest', 'on');
+        set(mFreehand , 'HitTest', 'on');
+        set(mPolygon  , 'HitTest', 'on');
+        set(mCircle   , 'HitTest', 'on');
+        set(mEllipse  , 'HitTest', 'on');
+        set(mRectangle, 'HitTest', 'on');
+        set(mSphere   , 'HitTest', 'on');
+        set(mClickVoi , 'HitTest', 'on');    
+        set(m2DBrush  , 'HitTest', 'on');  
+
+        set(mMeasure  , 'CData', mMeasure.UserData.default);
+        set(mFreehand , 'CData', mFreehand.UserData.default);
+        set(mPolygon  , 'CData', mPolygon.UserData.default);
+        set(mCircle   , 'CData', mCircle.UserData.default);
+        set(mEllipse  , 'CData', mEllipse.UserData.default);
+        set(mRectangle, 'CData', mRectangle.UserData.default);
+        set(mSphere   , 'CData', mSphere.UserData.default);
+        set(mClickVoi , 'CData', mClickVoi.UserData.default);
+        set(m2DBrush  , 'CData', m2DBrush.UserData.default);
+        set(mFarthest , 'CData', mFarthest.UserData.default);
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
@@ -2802,8 +3179,8 @@ function setRoiToolbar(sVisible)
             return;
         end
 
-        % try
-        % 
+        try
+        %
         % set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         % drawnow;
 
@@ -2813,59 +3190,60 @@ function setRoiToolbar(sVisible)
 
             atRoiInput = roiTemplate('get', dSeriesOffset);
             atVoiInput = voiTemplate('get', dSeriesOffset);
-    
+
             dTagOffset1 = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {sTag1} ), 1);
             dTagOffset2 = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {sTag2} ), 1);
-    
-            if ~isempty(dTagOffset1)&&~isempty(dTagOffset2) 
-    
+
+            if ~isempty(dTagOffset1)&&~isempty(dTagOffset2)
+
                 if strcmpi(atRoiInput{dTagOffset2}.ObjectType, 'voi-roi')
-    
+
                     for vv=1:numel(atVoiInput)
-    
+
                         dVoiTagOffset = find(contains(atVoiInput{vv}.RoisTag, atRoiInput{dTagOffset2}.Tag), 1);
-    
+
                         if ~isempty(dVoiTagOffset)
-                            
+
                             dNbTags = numel(atVoiInput{vv}.RoisTag);
-    
+
                             adSliceNb = cell(2, dNbTags);
                             for rr=1:numel(atVoiInput{vv}.RoisTag)
-                                
+
                                 dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{vv}.RoisTag{rr} ), 1);
-    
+
                                 if ~isempty(dTagOffset)
-    
+
                                     adSliceNb{1, rr} = atRoiInput{dTagOffset}.SliceNb;
                                     adSliceNb{2, rr} = dTagOffset;
-     
+
                                 end
                             end
-    
+
                             numericValues = cell2mat(adSliceNb);
-    
+
                             [minValue, minOffset] = min(numericValues(1,:));
                             [~, maxOffset]        = max(numericValues(1,:));
-    
+
                             if atRoiInput{dTagOffset1}.SliceNb < minValue
                                 dTagOffset2 = numericValues(2,minOffset);
                             else
                                 dTagOffset2 = numericValues(2,maxOffset);
                             end
-    
+
                             break;
                         end
                     end
                 end
-                
-                interpolateBetweenROIs(atRoiInput{dTagOffset1}, atRoiInput{dTagOffset2}, dSeriesOffset, true); 
+
+                interpolateBetweenROIs(atRoiInput{dTagOffset1}, atRoiInput{dTagOffset2}, dSeriesOffset, true);
 
             end
         end
 
-        % catch
-        %     progressBar(1, 'Error:interpolateROIsByTag()');
-        % end
+        catch ME
+            logErrorToFile(ME);
+            progressBar(1, 'Error:interpolateROIsByTag()');
+        end
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;

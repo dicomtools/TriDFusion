@@ -27,12 +27,14 @@ function [bLesionOffset, asLesionList, asLesionShortName] = getLesionType(sLesio
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    asLesionList      = {'Unspecified', 'Bone', 'Soft Tissue', 'Lung', 'Liver', 'Parotid', 'Blood Pool', 'Lymph Nodes', 'Primary Disease', 'Cervical', 'Supraclavicular', 'Mediastinal', 'Paraspinal', 'Axillary', 'Abdominal'};  
-    asLesionShortName = {'UDF', 'BON', 'SOF', 'LUN', 'LIV', 'PAR', 'BPL', 'LNO','PRD', 'CER', 'SUP', 'MDI', 'PSL', 'AXI', 'ABD'};
+    asLesionList      = {'Unspecified', 'Bone', 'Soft Tissue', 'Lung', 'Liver', 'Parotid', 'Blood Pool', 'Lymph Nodes', 'Necrotic', 'Primary Disease', 'Cervical', 'Supraclavicular', 'Mediastinal', 'Paraspinal', 'Axillary', 'Abdominal'};  
+    asLesionShortName = {'UDF', 'BON', 'SOF', 'LUN', 'LIV', 'PAR', 'BPL', 'LNO', 'NCT', 'PRD', 'CER', 'SUP', 'MDI', 'PSL', 'AXI', 'ABD'};
     bLesionOffset = 1;
     
     for ll=1:numel(asLesionList)
+
         if strcmpi(sLesionType, asLesionList{ll})
+            
             bLesionOffset = ll;
             break;
         end

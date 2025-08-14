@@ -27,7 +27,7 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    tInput = inputTemplate('get');
+    atInput = inputTemplate('get');
     
     dSeriesOffset      = get(uiSeriesPtr('get'), 'Value');
     dFusedSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
@@ -38,7 +38,8 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
     atRefMetaData = dicomMetaData('get', [], dSeriesOffset);
     atDcmMetaData = dicomMetaData('get', [], dFusedSeriesOffset);
     if isempty(atDcmMetaData)
-        atDcmMetaData = atInput(dFusionOffset).atDicomInfo;
+
+        atDcmMetaData = atInput(dFusedSeriesOffset).atDicomInfo;
     end
 
     bRotationApplied = false;
@@ -76,14 +77,14 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
                 
                 bRotationApplied = true;
                 
-                tInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
-                if isempty(tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axe';
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{1}.dRotation = dRotation;                       
+                atInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
+                if isempty(atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axe';
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{1}.dRotation = dRotation;                       
                 else
-                    dNewMovementOffset = numel(tInput(dFusedSeriesOffset).tMovement.atSeq)+1;
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axe';
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.dRotation = dRotation;              
+                    dNewMovementOffset = numel(atInput(dFusedSeriesOffset).tMovement.atSeq)+1;
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axe';
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.dRotation = dRotation;              
                 end
                 
             end
@@ -122,14 +123,14 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
                 
                 bRotationApplied = true;
                 
-                tInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
-                if isempty(tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axes1';
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{1}.dRotation = dRotation;                       
+                atInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
+                if isempty(atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axes1';
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{1}.dRotation = dRotation;                       
                 else
-                    dNewMovementOffset = numel(tInput(dFusedSeriesOffset).tMovement.atSeq)+1;
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes1';
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.dRotation = dRotation;              
+                    dNewMovementOffset = numel(atInput(dFusedSeriesOffset).tMovement.atSeq)+1;
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes1';
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.dRotation = dRotation;              
                 end                
             end
         end
@@ -168,14 +169,14 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
                 
                 bRotationApplied = true;
                 
-                tInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;                
-                if isempty(tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axes2';
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{1}.dRotation = dRotation;                       
+                atInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;                
+                if isempty(atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axes2';
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{1}.dRotation = dRotation;                       
                 else
-                    dNewMovementOffset = numel(tInput(dFusedSeriesOffset).tMovement.atSeq)+1;
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes2';
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.dRotation = dRotation;              
+                    dNewMovementOffset = numel(atInput(dFusedSeriesOffset).tMovement.atSeq)+1;
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes2';
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.dRotation = dRotation;              
                 end                 
             end
         end
@@ -214,20 +215,20 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
                 
                 bRotationApplied = true;
                 
-                tInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
-                if isempty(tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axes3';
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{1}.dRotation = dRotation;                       
+                atInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
+                if isempty(atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axes3';
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{1}.dRotation = dRotation;                       
                 else
-                    dNewMovementOffset = numel(tInput(dFusedSeriesOffset).tMovement.atSeq)+1;
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes3';
-                    tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.dRotation = dRotation;              
+                    dNewMovementOffset = numel(atInput(dFusedSeriesOffset).tMovement.atSeq)+1;
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes3';
+                    atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.dRotation = dRotation;              
                 end                 
             end
          end
     end
     
-    inputTemplate('set', tInput);
+    inputTemplate('set', atInput);
 
     progressBar(1, 'Ready');
 

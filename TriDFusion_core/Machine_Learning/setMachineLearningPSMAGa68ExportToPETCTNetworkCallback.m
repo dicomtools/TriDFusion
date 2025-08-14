@@ -199,13 +199,13 @@ function setMachineLearningPSMAGa68ExportToPETCTNetworkCallback(hObject, ~)
         aPTImage = aPTImage(:,:,end:-1:1);
     end
     
-    dSUVconv = computeSUV(atPTMetaData, 'BW');
-
-    if dSUVconv == 0
-        dSUVconv = 1;
-    end
+    % dSUVconv = computeSUV(atPTMetaData, 'BW');
+    % 
+    % if dSUVconv == 0
+    %     dSUVconv = 1;
+    % end
     
-    nrrdWriter(sNrrdImagesName, squeeze(aPTImage*dSUVconv), pixelspacing, origin, 'raw'); % Write .nrrd images     
+    nrrdWriter(sNrrdImagesName, squeeze(aPTImage), pixelspacing, origin, 'raw'); % Write .nrrd images     
 
     atCTMetaData  = dicomMetaData('get', [], dCTSerieOffset);
     if isempty(atCTMetaData)
@@ -235,13 +235,13 @@ function setMachineLearningPSMAGa68ExportToPETCTNetworkCallback(hObject, ~)
     clear aResampledCTImage;
 
 
-    aInputBuffer = inputBuffer('get');
+    % aInputBuffer = inputBuffer('get');
 
     sNrrdMaskImagesName = sprintf('D%d_gt.nrrd', dNewEntryNumber);
 
-    writeRoisToNrrdMask(sDFolder, false, sNrrdMaskImagesName,aInputBuffer{dPTSerieOffset}, atInput(dPTSerieOffset).atDicomInfo, dicomBuffer('get',[],dPTSerieOffset), dicomMetaData('get',[],dPTSerieOffset), dPTSerieOffset, 3);
+    writeRoisToNrrdMask(sDFolder, false, sNrrdMaskImagesName, dicomBuffer('get',[],dPTSerieOffset), dicomMetaData('get',[],dPTSerieOffset), dicomBuffer('get',[],dPTSerieOffset), dicomMetaData('get',[],dPTSerieOffset), dPTSerieOffset, 3);
 
-    clear aInputBuffer;
+    % clear aInputBuffer;
 
     progressBar(1, sprintf('Export to %s completed', sDFolder));
 

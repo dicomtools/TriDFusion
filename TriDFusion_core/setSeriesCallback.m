@@ -32,7 +32,7 @@ function setSeriesCallback(~,~)
 
     if dSeriesOffset <= numel(tInput)
         
-  %      try
+        try
         isColorbarDefaultUnit('reset');
         isFusionColorbarDefaultUnit('reset');
 
@@ -45,7 +45,8 @@ function setSeriesCallback(~,~)
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
-        
+        % suvMenuUnitOption('set', true);
+
         % Restore ISOsurface default value. Those value will be use in
         % setIsoSurfaceCallback(~, ~). 
 
@@ -60,8 +61,9 @@ function setSeriesCallback(~,~)
             
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnFusionPtr('get'), 'FontWeight', 'normal');
-           
+            % set(btnFusionPtr('get'), 'FontWeight', 'normal');
+            set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));
+         
 %             delete(uiFusionSliderWindowPtr('get'));
 %             delete(uiFusionSliderLevelPtr('get'));
 
@@ -187,16 +189,18 @@ function setSeriesCallback(~,~)
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnZoomPtr('get'), 'FontWeight', 'normal');
+        % set(btnZoomPtr('get'), 'FontWeight', 'normal');
+        set(btnZoomPtr('get'), 'CData', resizeTopBarIcon('zoom_grey.png'));
         zoomTool('set', false);
-        zoom(fiMainWindowPtr('get'), 'off');           
+        zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');           
 
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
-        set(btnPanPtr('get'), 'FontWeight', 'normal');
+        % set(btnPanPtr('get'), 'FontWeight', 'normal');
+        set(btnPanPtr('get'), 'CData', resizeTopBarIcon('pan_grey.png'));
         panTool('set', false);
-        pan(fiMainWindowPtr('get'), 'off');     
+        panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');     
 
         set(rotate3DMenu('get'), 'Checked', 'off');         
         rotate3DTool('set', false);
@@ -250,21 +254,25 @@ function setSeriesCallback(~,~)
         switchTo3DMode('set', false);
         set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btn3DPtr('get'), 'FontWeight', 'normal');
-        
+        % set(btn3DPtr('get'), 'FontWeight', 'normal');
+        set(btn3DPtr('get'), 'CData', resizeTopBarIcon('3d_volume_grey.png'));
+      
         switchToIsoSurface('set', false);
         set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+        % set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+        set(btnIsoSurfacePtr('get'), 'CData', resizeTopBarIcon('3d_iso_grey.png'));
 
         switchToMIPMode('set', false);
         set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnMIPPtr('get'), 'FontWeight', 'normal');
+        % set(btnMIPPtr('get'), 'FontWeight', 'normal');
+        set(btnMIPPtr('get'), 'CData', resizeTopBarIcon('3d_mip_grey.png'));
 
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+        % set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+        set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));
 
         if isempty(dicomMetaData('get', [], dSeriesOffset))
             atMetaData = tInput(dSeriesOffset).atDicomInfo;
@@ -374,7 +382,8 @@ function setSeriesCallback(~,~)
             isVsplash('set', false);
             set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnVsplashPtr('get'), 'FontWeight', 'normal');
+            % set(btnVsplashPtr('get'), 'FontWeight', 'normal');
+            set(btnVsplashPtr('get'), 'CData', resizeTopBarIcon('splash_grey.png'));
 
             set(btnVsplashPtr('get')   , 'Enable', 'off');
             set(uiEditVsplahXPtr('get'), 'Enable', 'off');
@@ -399,6 +408,11 @@ function setSeriesCallback(~,~)
         
         refreshImages();
 
+        % drawnow;
+        % drawnow;
+        % 
+        % hideAllAxesToolbars(fiMainWindowPtr('get'));
+
         if bLinkMip == true
             link2DMip('set', true);
             set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
@@ -409,9 +423,10 @@ function setSeriesCallback(~,~)
             set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));              
         end
 
-%        catch
- %           progressBar(1, 'Error:setSeriesCallback()');
-  %      end
+        catch ME
+            logErrorToFile(ME);  
+            progressBar(1, 'Error:setSeriesCallback()');
+        end
         
         % Reactivate main tool bar 
         set(uiSeriesPtr('get'), 'Enable', 'on');                
@@ -429,6 +444,6 @@ function setSeriesCallback(~,~)
 %            set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
 %            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
 %        end         
-
     end
+
 end

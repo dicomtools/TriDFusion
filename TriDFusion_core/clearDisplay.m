@@ -27,7 +27,7 @@ function clearDisplay()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    arrayfun(@cla,findall(fiMainWindowPtr('get'),'type','axes'))
+    % arrayfun(@cla,findall(fiMainWindowPtr('get'),'type','axes'))
   
     ptrFusionColorbar = uiFusionColorbarPtr('get');
     if ~isempty(ptrFusionColorbar) 
@@ -84,8 +84,11 @@ function clearDisplay()
 %     end
 
     ptrColorbar = uiColorbarPtr('get');
-    if ~isempty(ptrColorbar)                
-        ptrColorbar.Position = [0 0 0 0];                
+    if ~isempty(ptrColorbar)  
+        if isvalid(ptrColorbar)
+            delete(ptrColorbar);
+        end        
+        % ptrColorbar.Position = [0 0 0 0];                
         clear ptrColorbar;
         uiColorbarPtr('set', []);
     end
@@ -170,6 +173,36 @@ function clearDisplay()
     if ~isempty(btnUiTraWindowFullScreen)                
         clear btnUiTraWindowFullScreen;
         btnUiTraWindowFullScreenPtr('set', []);
+    end
+
+    btnUiMipWindowFullScreen = btnUiMipWindowFullScreenPtr('get');
+    if ~isempty(btnUiMipWindowFullScreen)                
+        clear btnUiMipWindowFullScreen;
+        btnUiMipWindowFullScreenPtr('set', []);
+    end
+
+    chkUiCorWindowSelected = chkUiCorWindowSelectedPtr('get');
+    if ~isempty(chkUiCorWindowSelected)                
+        clear chkUiCorWindowSelected;
+        chkUiCorWindowSelectedPtr('set', []);
+    end
+
+    chkUiSagWindowSelected = chkUiSagWindowSelectedPtr('get');
+    if ~isempty(chkUiSagWindowSelected)                
+        clear chkUiSagWindowSelected;
+        chkUiSagWindowSelectedPtr('set', []);
+    end
+
+    chkUiTraWindowSelected = chkUiTraWindowSelectedPtr('get');
+    if ~isempty(chkUiTraWindowSelected)                
+        clear chkUiTraWindowSelected;
+        chkUiTraWindowSelectedPtr('set', []);
+    end
+
+    chkUiMipWindowSelected = chkUiMipWindowSelectedPtr('get');
+    if ~isempty(chkUiMipWindowSelected)                
+        clear chkUiMipWindowSelected;
+        chkUiMipWindowSelectedPtr('set', []);
     end
 
     ui3DPanel = ui3DPanelPtr('get');

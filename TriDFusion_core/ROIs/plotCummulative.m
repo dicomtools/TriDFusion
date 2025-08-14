@@ -29,16 +29,43 @@ function ptrPlotCummulative = plotCummulative(pAxe, imCData, aColor)
     
 %    my_bins = min(double(imCData),[],'all'):max(double(imCData),[],'all');
     
-    my_bins = min(double(imCData),[],'all'):max(double(imCData),[],'all');    
-    bin = unique(my_bins);
-    [N, ~] = histcounts(imCData,bin);
+    try
+
+    % minVal = min(double(imCData), [] , 'all');
+    % maxVal = max(double(imCData), [] , 'all');
+    minVal = min(double(imCData(:)));
+    maxVal = max(double(imCData(:)));    
+    numBins = 256;  % or any desired number of bins
+    binEdges = linspace(minVal, maxVal, numBins+1);
+    [N, ~] = histcounts(imCData, binEdges);
+    
+    % Compute the normalized distribution and its cumulative sum (in reverse)
     ndist = N / sum(N);
     cdist = cumsum(ndist, 'reverse');
+    
+    % Compute bin centers from binEdges
+    binCenters = (binEdges(1:end-1) + binEdges(2:end)) / 2;
+    
+    % Plot the cumulative distribution on the specified axes pAxe
     hold(pAxe, 'on');
-    lineSec = (bin(1:end-1)+bin(2:end));
-    ptrPlotCummulative = plot(pAxe, 0.5*lineSec, cdist);
+    ptrPlotCummulative = plot(pAxe, binCenters, cdist);
     hold(pAxe, 'off');
-    ptrPlotCummulative.Color  = aColor;
-    ptrPlotCummulative.LineWidth  = 1;
-   
+    ptrPlotCummulative.Color = aColor;
+    ptrPlotCummulative.LineWidth = 1;
+
+    % my_bins = min(double(imCData),[],'all'):max(double(imCData),[],'all');    
+    % bin = unique(my_bins);
+    % [N, ~] = histcounts(imCData,bin);
+    % ndist = N / sum(N);
+    % cdist = cumsum(ndist, 'reverse');
+    % hold(pAxe, 'on');
+    % lineSec = (bin(1:end-1)+bin(2:end));
+    % ptrPlotCummulative = plot(pAxe, 0.5*lineSec, cdist);
+    % hold(pAxe, 'off');
+    % ptrPlotCummulative.Color  = aColor;
+    % ptrPlotCummulative.LineWidth  = 1;
+    catch ME
+        logErrorToFile(ME);
+        ptrPlotCummulative = [];
+    end
 end

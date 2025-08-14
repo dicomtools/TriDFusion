@@ -177,23 +177,23 @@ function setMachineLearningPSMALu177ExportToSPECTNetworkCallback(hObject, ~)
         aNMImage = aNMImage(:,:,end:-1:1);
     end
 
-    dSUVconv = computeSUV(atNMMetaData, 'BW');
-    
-    if dSUVconv == 0
-        dSUVconv = 1;
-    end
+    % dSUVconv = computeSUV(atNMMetaData, 'BW');
+    % 
+    % if dSUVconv == 0
+    %     dSUVconv = 1;
+    % end
 
-    nrrdWriter(sNrrdImagesName, squeeze(aNMImage*dSUVconv), pixelspacing, origin, 'raw'); % Write .nrrd images 
+    nrrdWriter(sNrrdImagesName, squeeze(aNMImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
     
     clear aNMImage;
 
-    aInputBuffer = inputBuffer('get');
+    % aInputBuffer = inputBuffer('get');
 
     sNrrdMaskImagesName = sprintf('D%d_gt.nrrd', dNewEntryNumber);
 
-    writeRoisToNrrdMask(sDFolder, false, sNrrdMaskImagesName,aInputBuffer{dNMSerieOffset}, atInput(dNMSerieOffset).atDicomInfo, dicomBuffer('get',[],dNMSerieOffset), dicomMetaData('get',[],dNMSerieOffset), dNMSerieOffset, 3);
+    writeRoisToNrrdMask(sDFolder, false, sNrrdMaskImagesName, dicomBuffer('get',[],dNMSerieOffset), dicomMetaData('get',[],dNMSerieOffset), dicomBuffer('get',[],dNMSerieOffset), dicomMetaData('get',[],dNMSerieOffset), dNMSerieOffset, 3);
 
-    clear aInputBuffer;
+    % clear aInputBuffer;
     
     progressBar(1, sprintf('Export to %s completed', sDFolder));
 

@@ -31,6 +31,8 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
     % Modality validation
 
+    % [dCTSerieOffset, dNMSerieOffset] = findDicomMatchingSeries(atInput, 'ct', 'nm');
+
     dCTSerieOffset = [];
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
@@ -170,7 +172,7 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
     % Convert dicom to .nii
 
-    progressBar(1/10, 'DICOM to NRRD conversion, please wait.');
+    progressBar(1/10, 'DICOM to NRRD conversion, please wait...');
 
     origin = atNMMetaData{end}.ImagePositionPatient;
 
@@ -264,12 +266,19 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
         if ispc % Windows
 
+            if tPSMALu177SPECTCTFullAI.options.fastSegmentation == true
+
+                sFastSegmentation = '--disable_tta -step_size 0.5';
+            else
+                sFastSegmentation = '';
+            end
+
             if tPSMALu177SPECTCTFullAI.options.CELossTrainer == true
 
-                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 113 -c 3d_fullres --save_probabilities -tr nnUNetTrainerDiceCELoss_noSmooth', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -p nnUNetPlans -f 0 1 2 3 4 -i %s -o %s -d 113 -c 3d_fullres %s --save_probabilities -tr nnUNetTrainerDiceCELoss_noSmooth', sPredictScript, sNrrdTmpDir, sSegmentationFolderName, sFastSegmentation);
             else
 
-                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 111 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -p nnUNetPlans -f 0 1 2 3 4 -i %s -o %s -d 111 -c 3d_fullres %s --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName, sFastSegmentation);
 
             end
 
@@ -304,41 +313,42 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
                     rmdir(char(sSegmentationFolderName), 's');
                 end
 
-                progressBar(5/10, 'Resampling data series, please wait...');
-
-                [aResampledPTImage, atResampledPTMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);
-
-                dicomMetaData('set', atResampledPTMetaData, dNMSerieOffset);
-                dicomBuffer  ('set', aResampledPTImage, dNMSerieOffset);
-
-                progressBar(6/10, 'Resampling MIP, please wait...');
-
-                refMip = mipBuffer('get', [], dCTSerieOffset);
-                aMip   = mipBuffer('get', [], dNMSerieOffset);
-
-                aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
-
-                mipBuffer('set', aMip, dNMSerieOffset);
-
-                setQuantification(dNMSerieOffset);
-
-                progressBar(7/10, 'Resampling contours, please wait.');
-
-
-                atRoi = roiTemplate('get', dNMSerieOffset);
-
-                if ~isempty(atRoi)
-
-                    atResampledRoi = resampleROIs(aNMImage, atNMMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
-
-                    roiTemplate('set', dNMSerieOffset, atResampledRoi);
-                end
-
-                progressBar(8/10, 'Resampling axes, please wait...');
-
-                resampleAxes(aResampledPTImage, atResampledPTMetaData);
-
-                setImagesAspectRatio();
+               %  progressBar(5/10, 'Resampling data series, please wait...');
+               %
+               %  [aResampledPTImage, atResampledPTMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);
+               %
+               %  dicomMetaData('set', atResampledPTMetaData, dNMSerieOffset);
+               %  dicomBuffer  ('set', aResampledPTImage, dNMSerieOffset);
+               %
+               %  progressBar(6/10, 'Resampling MIP, please wait...');
+               %
+               %  refMip = mipBuffer('get', [], dCTSerieOffset);
+               %  aMip   = mipBuffer('get', [], dNMSerieOffset);
+               %
+               %  aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
+               %
+               %  mipBuffer('set', aMip, dNMSerieOffset);
+               %
+               %  setQuantification(dNMSerieOffset);
+               %
+               %  progressBar(7/10, 'Resampling contours, please wait.');
+               %
+               %  atRoi = roiTemplate('get', dNMSerieOffset);
+               %  atVoi = voiTemplate('get', dNMSerieOffset);
+               %
+               %  if ~isempty(atRoi)
+               %
+               %      [atResampledRoi, atResampledVoi] = resampleROIs(aNMImage, atNMMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true, atVoi, dNMSerieOffset);
+               %
+               %      roiTemplate('set', dNMSerieOffset, atResampledRoi);
+               %      voiTemplate('set', dNMSerieOffset, atResampledVoi);
+               % end
+               %
+               %  progressBar(8/10, 'Resampling axes, please wait...');
+               %
+               %  resampleAxes(aResampledPTImage, atResampledPTMetaData);
+               %
+               %  setImagesAspectRatio();
 
             end
 
@@ -366,7 +376,8 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set fusion
 %     if ~isempty(aCTImage)
@@ -416,7 +427,8 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dNMSerieOffset, true);
         progressBar( 1 , 'Error: setMachineLearningPSMALu177SPECTCTFullAI()' );
     end

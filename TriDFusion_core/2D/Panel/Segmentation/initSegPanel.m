@@ -48,7 +48,7 @@ function initSegPanel()
                   'String','Reset',...
                   'Position',[15 580 100 25],...
                   'FontWeight', 'bold',...
-                  'BackgroundColor', [0.2 0.039 0.027], ...
+                  'BackgroundColor', [0.3255, 0.1137, 0.1137], ...
                   'ForegroundColor', [0.94 0.94 0.94], ...
                   'Callback', @resetSegmentationCallback...
                   );
@@ -833,7 +833,8 @@ function initSegPanel()
             imAxial.CData    = aAxial;
         end
 
-        catch
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1, 'Error:editImageThreshold()');
         end
 
@@ -921,7 +922,8 @@ function initSegPanel()
        
         modifiedMatrixValueMenuOption('set', true);
 
-        catch
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1, 'Error:proceedImageSegCallback()');
         end
 
@@ -1005,7 +1007,8 @@ function initSegPanel()
         
         progressBar(1, 'Ready');
 
-        catch
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1, 'Error:resetSegmentationCallback()');
         end
         
@@ -1172,7 +1175,8 @@ function initSegPanel()
             imAxial.CData    = aBuffer(:,:,iAxial);
         end
 
-        catch
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1, 'Error:edgeDetectionPreview()');
         end
 
@@ -1235,7 +1239,8 @@ function initSegPanel()
 
         set(hObject, 'Enable', 'on');
 
-        catch
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1, 'Error:proceedEdgeDetectionCallback()');
         end
 

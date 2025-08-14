@@ -38,25 +38,25 @@ function setCorWindowPosition(uiCorWindow)
             dXoffset = uiSegMainPanel.Position(3);
             dYoffset = addOnWidth('get')+30+15;
             dXsize   = getMainWindowSize('xsize')-(uiSegMainPanel.Position(3)/2);
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                  
+            dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                  
         else
             if isVsplash('get') == true    
 
                 dXoffset = uiSegMainPanel.Position(3);
                 dYoffset = addOnWidth('get')+30+15;
                 dXsize   = (getMainWindowSize('xsize')/4)-(uiSegMainPanel.Position(3)/2);
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;             
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;             
             else
                 if isPanelFullScreen(btnUiCorWindowFullScreenPtr('get')) 
                     dXoffset = uiSegMainPanel.Position(3);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = getMainWindowSize('xsize')-uiSegMainPanel.Position(3);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                     
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                     
                 else
                     dXoffset = uiSegMainPanel.Position(3);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiSegMainPanel.Position(3)/2);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                               
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                               
                 end
             end
         end
@@ -67,26 +67,26 @@ function setCorWindowPosition(uiCorWindow)
             dXoffset = uiKernelMainPanel.Position(3);
             dYoffset = addOnWidth('get')+30+15;
             dXsize   = getMainWindowSize('xsize')-(uiKernelMainPanel.Position(3)/2);
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                    
+            dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                    
         else
             if isVsplash('get') == true    
 
                 dXoffset = uiKernelMainPanel.Position(3);
                 dYoffset = addOnWidth('get')+30+15;
                 dXsize   = (getMainWindowSize('xsize')/4)-(uiKernelMainPanel.Position(3)/2);
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15; 
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15; 
                      
             else
                 if isPanelFullScreen(btnUiCorWindowFullScreenPtr('get')) 
                     dXoffset = uiKernelMainPanel.Position(3);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = getMainWindowSize('xsize')-uiKernelMainPanel.Position(3);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                        
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                        
                 else
                     dXoffset = uiKernelMainPanel.Position(3);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiKernelMainPanel.Position(3)/2);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                  
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                  
                 end
             end
         end
@@ -97,25 +97,25 @@ function setCorWindowPosition(uiCorWindow)
             dXoffset = uiRoiMainPanel.Position(3);
             dYoffset = addOnWidth('get')+30+15;
             dXsize   = getMainWindowSize('xsize')-(uiRoiMainPanel.Position(3)/2);
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                     
+            dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                     
         else
             if isVsplash('get') == true
 
                 dXoffset = uiRoiMainPanel.Position(3);
                 dYoffset = addOnWidth('get')+30+15;
                 dXsize   = (getMainWindowSize('xsize')/4)-(uiRoiMainPanel.Position(3)/2);
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                  
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                  
             else
                 if isPanelFullScreen(btnUiCorWindowFullScreenPtr('get')) 
                     dXoffset = uiRoiMainPanel.Position(3);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = getMainWindowSize('xsize')-uiRoiMainPanel.Position(3);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                      
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                      
                 else 
                     dXoffset = uiRoiMainPanel.Position(3);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiRoiMainPanel.Position(3)/2);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;   
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;   
                 end
             end
         end            
@@ -126,25 +126,25 @@ function setCorWindowPosition(uiCorWindow)
             dXoffset = 0;
             dYoffset = addOnWidth('get')+30+15;
             dXsize   = getMainWindowSize('xsize');
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                    
+            dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                    
         else
             if isVsplash('get') == true
 
                 dXoffset = 0;
                 dYoffset = addOnWidth('get')+30+15;
                 dXsize   = getMainWindowSize('xsize')/4;
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                       
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                       
             else  
                 if isPanelFullScreen(btnUiCorWindowFullScreenPtr('get')) 
                     dXoffset = 0;
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = getMainWindowSize('xsize');
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                     
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                     
                 else
                     dXoffset = 0;
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = getMainWindowSize('xsize')/5;
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;              
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;              
                 end
             end
         end
@@ -160,10 +160,24 @@ function setCorWindowPosition(uiCorWindow)
 
     txt1 = axesText('get', 'axes1');
     if ~isempty(txt1)
+
         if isvalid(txt1.Parent)
+
+            if isVsplash('get') == true
+
+                if strcmpi(vSplahView('get'), 'all')
+                    
+                    dExtraYOffset = 0;   
+                else                
+                    dExtraYOffset = -20; 
+                end
+            else
+                dExtraYOffset = 0;                                
+            end
+
             set(txt1.Parent, ...
                 'Position', [5 ...
-                             dYsize-15 ...
+                             dYsize-15-20+dExtraYOffset ...
                              70 ...
                              30 ...
                              ]...
@@ -179,7 +193,7 @@ function setCorWindowPosition(uiCorWindow)
            isPanelFullScreen(btnUiCorWindowFullScreenPtr('get'))  
             set(btnUiCorWindowFullScreen, ...
                 'Position', [dXsize-20 ...
-                             30 ...
+                             34 ...
                              20 ...
                              20] ...
                );            
@@ -192,5 +206,28 @@ function setCorWindowPosition(uiCorWindow)
                );
         end
     end 
-   
+
+    chkUiCorWindowSelected = chkUiCorWindowSelectedPtr('get');
+
+    if ~isempty(chkUiCorWindowSelected) && ...
+       ~isempty(btnUiCorWindowFullScreen)     
+
+        if isFusion('get') == true && ...
+           isPanelFullScreen(btnUiCorWindowFullScreenPtr('get'))  
+            set(chkUiCorWindowSelected, ...
+                'Position', [dXsize-40 ...
+                             34 ...
+                             20 ...
+                             20] ...
+               );            
+        else
+            set(chkUiCorWindowSelected, ...
+                'Position', [dXsize-40 ...
+                             10 ...
+                             20 ...
+                             20] ...
+               );
+        end
+    end
+
 end

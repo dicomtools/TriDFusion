@@ -12,15 +12,22 @@ function [M,Rot] = getTransformMatrix(info1, sliceThikness1, info2, sliceThiknes
 % Coded by Alper Yaman, Feb 2009
 % Updated by Alper Yaman, Jan 2019
 
-    [Mdti,Rdti] = TransformMatrix(info1, sliceThikness1);
-    [Mtf,Rtf]   = TransformMatrix(info2, sliceThikness2);
+    [Mdti,Rdti] = TransformMatrix(info1, sliceThikness1, true);
+    [Mtf,Rtf]   = TransformMatrix(info2, sliceThikness2, true);
     % First we transform into patient coordinates by multiplying by Mdti, and
     % then we convert again into image coordinates of the second volume by
     % multiplying by inv(Mtf)
-    M =  inv(Mtf) * Mdti;
-    Rot = inv(Rtf) * Rdti;
-    M = M';
-    
+
+    % M =  inv(Mtf) * Mdti;
+    % Rot = inv(Rtf) * Rdti;
+    % M = M';
+RelM = Mtf \ Mdti;
+RelR = Rtf \ Rdti;
+
+% --- if you need row-vector form, transpose both ---
+M   = RelM';
+Rot = RelR';
+
 %    M   = Mdti' /Mtf';
 %    M   = Mdti' /Mtf';
 %    Rot = Rdti' /Rtf';

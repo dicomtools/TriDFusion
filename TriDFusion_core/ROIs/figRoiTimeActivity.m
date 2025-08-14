@@ -48,8 +48,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
     FIG_MPLOT_Y = ySize*0.75;
     FIG_MPLOT_X = FIG_MPLOT_Y;
 
-    % if viewerUIFigure('get') == true
-    if 0
+    if viewerUIFigure('get') == true
+
         figRoiTimeActivity = ...
             uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_MPLOT_X/2) ...
                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_MPLOT_Y/2) ...
@@ -77,6 +77,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                    );
     end
 
+    setObjectIcon(figRoiTimeActivity);
+
     setTimeActivityFigureName();
 
     mTimeActivityFile = uimenu(figRoiTimeActivity,'Label','File');
@@ -94,7 +96,6 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
     uimenu(mTimeActivityOptions,'Label', 'Max'  , 'Callback',@figRoiSetTimeActivityAggregate);
     uimenu(mTimeActivityOptions,'Label', 'Peak' , 'Callback',@figRoiSetTimeActivityAggregate);
 
-
     aFigurePosition = get(figRoiTimeActivity, 'Position');
 
     axeTimeActivity = ...
@@ -107,8 +108,9 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'on'...
              );
-    axeTimeActivity.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeTimeActivity.Toolbar.Visible = 'off';
+    axeTimeActivity.Interactions = [];
+    % axeTimeActivity.Toolbar.Visible = 'off';
+    deleteAxesToolbar(axeTimeActivity);
     disableDefaultInteractivity(axeTimeActivity);
 
     axeTimeActivity.Title.String = sType;
@@ -165,7 +167,7 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 %     addlistener(uiRoiListPanelSlider, 'Value', 'PreSet', @uiRoiListPanelSliderCallback);
     addlistener(uiRoiListPanelSlider, 'ContinuousValueChange', @uiRoiListPanelSliderCallback);
 
-    if numel(atVoiRoiTag) == 1
+    if isscalar(atVoiRoiTag)
         set(uiRoiListPanelSlider, 'Visible', 'off');
         set(uiRoiListPanel, 'Visible', 'off');
         set(uiRoiListMainPanel, 'Visible', 'off');
@@ -207,7 +209,7 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
         aFigurePosition  = get(figRoiTimeActivity, 'Position');
 
-        if numel(atVoiRoiTag) == 1
+        if isscalar(atVoiRoiTag)
             set(axeTimeActivity, ...
                 'Position', ...
                 [60 ...
@@ -679,7 +681,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                         bFoundTag = true;
                     end
 
-                    catch
+                    catch ME
+                        logErrorToFile(ME); 
                     end
                     break;
                 end
@@ -939,7 +942,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                             bFoundTag = true;
                         end
 
-                        catch
+                        catch ME
+                            logErrorToFile(ME); 
                         end
                         break;
 
@@ -953,7 +957,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
             pCursor.Enable = 'on';
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME); 
             progressBar(1, 'Error:figRoiHistogram()');
         end
 
@@ -976,22 +981,14 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
     function copyTimeActivityDisplayCallback(~, ~)
 
-        try
-
+        try       
             set(figRoiTimeActivity, 'Pointer', 'watch');
 
-%            rdr = get(hFig,'Renderer');
-            inv = get(figRoiTimeActivity,'InvertHardCopy');
+            copyFigureToClipboard(figRoiTimeActivity);
 
-%            set(hFig,'Renderer','Painters');
-            set(figRoiTimeActivity,'InvertHardCopy','Off');
-
-            drawnow;
-            hgexport(figRoiTimeActivity,'-clipboard');
-
-%            set(hFig,'Renderer',rdr);
-            set(figRoiTimeActivity,'InvertHardCopy',inv);
-        catch
+        catch ME
+            logErrorToFile(ME);  
+            progressBar(1, 'Error:copyTimeActivityDisplayCallback()');
         end
 
         set(figRoiTimeActivity, 'Pointer', 'default');
@@ -1061,11 +1058,26 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
         end
 
         atInputMetaData = atInputTemplate(dSeriesOffset).atDicomInfo;
+       
+        bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
 
+        transM = eye(3);
+
+        if bModifiedMatrix  == false && ... 
+           bMovementApplied == false && ...     
+           bSegmented       == false        % Can't use input buffer if movement have been applied
+   
+            if numel(aInputBuffer) ~= ...
+               numel(aDisplayBuffer)
+
+                [atRoiInput, atVoiInput, transM] = resampleROIs(aDisplayBuffer, atMetaData, aInputBuffer, atInputMetaData, atRoiInput, false, atVoiInput, dSeriesOffset);
+            end
+        end
         try
             matlab.io.internal.getExcelInstance;
             bExcelInstance = true;
         catch exception
+            logErrorToFile(exception);             
 %            warning(message('MATLAB:xlswrite:NoCOMServer'));
             bExcelInstance = false;
         end
@@ -1109,7 +1121,9 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
             try
                 saveHistLastUsedDir = [path '/'];
                 save(sMatFile, 'saveHistLastUsedDir');
-            catch
+                
+            catch ME
+                logErrorToFile(ME);             
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
 %                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                    if integrateToBrowser('get') == true
@@ -1289,8 +1303,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                                            bSUVUnit, ...
                                            bModifiedMatrix, ...
                                            bSegmented, ...
-                                           bDoseKernel, ...
-                                           bMovementApplied);
+                                           bMovementApplied, ...
+                                           transM);
 
                             if ~isempty(tVoiComputed)
 
@@ -1413,7 +1427,7 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
                                 atRoiInput{ro}.MaxDistances = tMaxDistances;
 
-                                roiTemplate('set', dSeriesOffset, atRoiInput);
+                                % roiTemplate('set', dSeriesOffset, atRoiInput);
                            end
                         end
                     end
@@ -1448,8 +1462,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                                                    bSUVUnit, ...
                                                    bModifiedMatrix, ...
                                                    bSegmented, ...
-                                                   bDoseKernel, ...
-                                                   bMovementApplied);
+                                                   bMovementApplied, ...
+                                                   transM);
 
                                     if ~isempty(tVoiComputed)
 
@@ -1598,7 +1612,7 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
                                                 atRoiInput{bb}.MaxDistances = tMaxDistances;
 
-                                                roiTemplate('set', dSeriesOffset, atRoiInput);
+                                                % roiTemplate('set', dSeriesOffset, atRoiInput);
                                             end
                                         end
 
@@ -1612,8 +1626,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                                                        bModifiedMatrix, ...
                                                        bSUVUnit, ...
                                                        bSegmented, ...
-                                                       bDoseKernel, ...
-                                                       bMovementApplied);
+                                                       bMovementApplied, ...
+                                                       transM);
 
                                         sRoiName = atRoiInput{bb}.Label;
 
@@ -1701,7 +1715,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                         sAcquisitionTime = gaAcquisitionDate{dd};
                     end
                     asCell{dLineOffset  ,dd+1} = (char(datetime(sAcquisitionTime, 'InputFormat', 'yyyyMMdd', 'Format', 'MMM-d-y')));
-                    catch
+                    catch ME
+                        logErrorToFile(ME);  
                     end
                 end
 
@@ -1716,7 +1731,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                         sAcquisitionTime = gaAcquisitionTime{tt};
                     end
                     asCell{dLineOffset  ,tt+1} =  (char(datetime(sAcquisitionTime, 'InputFormat', 'HHmmss', 'Format', 'HH:mm:ss')));
-                    catch
+                    catch ME
+                        logErrorToFile(ME);  
                     end
                 end
 
@@ -1777,7 +1793,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
             progressBar(1, sprintf('Write %s%s completed', path, file));
 
-           catch
+            catch ME
+               logErrorToFile(ME);  
                progressBar(1, 'Error: exportCurrentTimeActivityCallback()');
             end
 

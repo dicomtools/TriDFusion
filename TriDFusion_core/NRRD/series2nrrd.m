@@ -65,6 +65,19 @@ function series2nrrd(dSeriesOffset, sNrrdImagesName, dConvFactor)
 
     if size(aBuffer, 3) ~=1       
 
+        % if isfield(atMetaData{1}, 'PatientPosition') && strcmpi(atMetaData{1}.PatientPosition, 'FFS')
+        %     aBuffer = aBuffer(:,:,end:-1:1);
+        % elseif isfield(atMetaData{1}, 'PatientPosition') && strcmpi(atMetaData{1}.PatientPosition, 'FFP')
+        %     aBuffer = aBuffer(end:-1:1,:,:);
+        % else
+        % 
+        %     bFlip = getImagePosition(dSeriesOffset);
+        % 
+        %     if bFlip == true                   
+        %         aBuffer = aBuffer(:,:,end:-1:1);
+        %     end                         
+        % end
+
         aBuffer = aBuffer(:,:,end:-1:1);
     end
     

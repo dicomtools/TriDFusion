@@ -77,7 +77,8 @@ function importNIIMaskCallback(~, ~)
         try
             importNIILastUsedDir = sPath;
             save(sMatFile, 'importNIILastUsedDir');
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
 
         end        
@@ -89,14 +90,14 @@ function importNIIMaskCallback(~, ~)
             setVsplashCallback();
         end
 
-        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
-            
-            link2DMip('set', true);
-
-            set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
-            set(btnLinkMipPtr('get'), 'FontWeight', 'bold');            
-        end
+        % if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+        % 
+        %     link2DMip('set', true);
+        % 
+        %     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        %     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
+        %     set(btnLinkMipPtr('get'), 'FontWeight', 'bold');            
+        % end
 
         loadNIIMaskFile(sPath, sFileName); 
         

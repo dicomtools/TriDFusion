@@ -73,6 +73,8 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                    'Toolbar','none'...
                    );
     end
+    
+    setObjectIcon(figPETLiverDosimetryReport);
 
     if viewerUIFigure('get') == true
         set(figPETLiverDosimetryReport, 'Renderer', 'opengl'); 
@@ -94,8 +96,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'off'...
              );
-     axePETLiverDosimetryReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-     axePETLiverDosimetryReport.Toolbar.Visible = 'off';
+     axePETLiverDosimetryReport.Interactions = [];
+     % axePETLiverDosimetryReport.Toolbar.Visible = 'off';
+     deleteAxesToolbar(axePETLiverDosimetryReport);
      disableDefaultInteractivity(axePETLiverDosimetryReport);
 
      uiPETLiverDosimetryReport = ...
@@ -491,7 +494,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                  'Callback', @setVolumeHistogramCallback...
                  );
 
-        axeReport = ...
+    axeReport = ...
         axes(uiPETLiverDosimetryReport, ...
              'Units'   , 'pixels', ...
              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-55 60 440 300], ...
@@ -501,8 +504,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
              'ZColor'  , 'Black',...
              'Visible' , 'on'...
              );
-    axeReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeReport.Toolbar.Visible = 'off';
+    axeReport.Interactions = [];
+    % axeReport.Toolbar.Visible = 'off';
+    deleteAxesToolbar(axeReport);
     disableDefaultInteractivity(axeReport);
 
     axeReport.Title.String  = 'Dose Volume Histogram (UVH)';
@@ -668,45 +672,52 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                      'ZColor'  , 'Black',...
                      'Visible' , 'on'...
                      );
-                axeReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axeReport.Toolbar.Visible = 'off';
+                axeReport.Interactions = [];
+                % axeReport.Toolbar.Visible = 'off';
+                deleteAxesToolbar(axeReport);
                 disableDefaultInteractivity(axeReport);
 
                 try
 
                     ptrPlotCummulative = plotCummulative(axeReport, gtReport.Liver.voiData, 'black');
-                    axeReport.Title.String  = 'Liver - Dose Volume Histogram (DVH)';
-                    axeReport.XLabel.String = sprintf('Uptake (%s)', getPETLiverDosimetryReportUnitValue());
-                    axeReport.YLabel.String = 'Liver Volume Fraction';
+                    
+                    if ~isempty(ptrPlotCummulative)
+    
+                        axeReport.Title.String  = 'Liver - Dose Volume Histogram (DVH)';
+                        axeReport.XLabel.String = sprintf('Uptake (%s)', getPETLiverDosimetryReportUnitValue());
+                        axeReport.YLabel.String = 'Liver Volume Fraction';
+    
+                        cDataCursor = datacursormode(figPETLiverDosimetryReport);
+                        cDataCursor.UpdateFcn = @updateCursorCoordinates;
+                        set(cDataCursor, 'Enable', 'off');
+    
+    
+                        dTip = createDatatip(cDataCursor, ptrPlotCummulative);
+                        dTip.Position(2) = 0.90;
+    
+                        aXData = get(ptrPlotCummulative, 'XData');
+                        aYData = get(ptrPlotCummulative, 'YData');
+    
+                        [aYData,idx] = unique(aYData) ;
+                        aXData = aXData(idx) ;
+                        dD90 = interp1(aYData, aXData, .9);
+                        dD50 = interp1(aYData, aXData, .5);
+                        dD10 = interp1(aYData, aXData, .1);
+    
+                        text(axeReport, max(aXData)*0.8, max(aYData)*0.95, sprintf('90%%: %.0f', dD90));
+                        text(axeReport, max(aXData)*0.8, max(aYData)*0.87, sprintf('50%%: %.0f', dD50));
+                        text(axeReport, max(aXData)*0.8, max(aYData)*0.79, sprintf('10%%: %.0f', dD10));
+                    end
 
-                    cDataCursor = datacursormode(figPETLiverDosimetryReport);
-                    cDataCursor.UpdateFcn = @updateCursorCoordinates;
-                    set(cDataCursor, 'Enable', 'off');
-
-
-                    dTip = createDatatip(cDataCursor, ptrPlotCummulative);
-                    dTip.Position(2) = 0.90;
-
-                    aXData = get(ptrPlotCummulative, 'XData');
-                    aYData = get(ptrPlotCummulative, 'YData');
-
-                    [aYData,idx] = unique(aYData) ;
-                    aXData = aXData(idx) ;
-                    dD90 = interp1(aYData, aXData, .9);
-                    dD50 = interp1(aYData, aXData, .5);
-                    dD10 = interp1(aYData, aXData, .1);
-
-                    text(axeReport, max(aXData)*0.8, max(aYData)*0.95, sprintf('90%%: %.0f', dD90));
-                    text(axeReport, max(aXData)*0.8, max(aYData)*0.87, sprintf('50%%: %.0f', dD50));
-                    text(axeReport, max(aXData)*0.8, max(aYData)*0.79, sprintf('10%%: %.0f', dD10));
-
-                catch
+                catch ME
+                    logErrorToFile(ME);
                 end
             end
 
         end
 
         if isvalid(ui3DWindow)
+            
             display3DLiver();
         end
     end
@@ -748,8 +759,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
              'ZColor'  , 'Black',...
              'Visible' , 'on'...
              );
-        axeReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axeReport.Toolbar.Visible = 'off';
+        axeReport.Interactions = [];
+        % axeReport.Toolbar.Visible = 'off';
+        deleteAxesToolbar(axeReport);
         disableDefaultInteractivity(axeReport);
 
         try
@@ -793,7 +805,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                 text(axeReport, max(aXData)*0.8, max(aYData)*0.87, sprintf('50%%: %.0f', dD50));
                 text(axeReport, max(aXData)*0.8, max(aYData)*0.79, sprintf('10%%: %.0f', dD10));
             end
-        catch
+
+        catch ME
+            logErrorToFile(ME);
         end
     end
 
@@ -971,9 +985,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
          tReport = [];
 
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
+        bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
 
         sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
         tQuantification = quantificationTemplate('get');
@@ -989,18 +1003,18 @@ function generatePETLiverDosimetryReportCallback(~, ~)
            bMovementApplied == false        % Can't use input buffer if movement have been applied
 
             atDicomMeta = dicomMetaData('get');
-            atMetaData  = atInput(dOffset).atDicomInfo;
+            atMetaData  = atInput(dSeriesOffset).atDicomInfo;
             aImage      = inputBuffer('get');
 
 %            if     strcmpi(imageOrientation('get'), 'axial')
-%                aImage = permute(aImage{dOffset}, [1 2 3]);
+%                aImage = permute(aImage{dSeriesOffset}, [1 2 3]);
 %            elseif strcmpi(imageOrientation('get'), 'coronal')
-%                aImage = permute(aImage{dOffset}, [3 2 1]);
+%                aImage = permute(aImage{dSeriesOffset}, [3 2 1]);
 %            elseif strcmpi(imageOrientation('get'), 'sagittal')
-%                aImage = permute(aImage{dOffset}, [3 1 2]);
+%                aImage = permute(aImage{dSeriesOffset}, [3 1 2]);
 %            end
 
-            aImage = aImage{dOffset};
+            aImage = aImage{dSeriesOffset};
 
             if     strcmpi(imageOrientation('get'), 'axial')
 %                 aImage = aImage;
@@ -1012,30 +1026,30 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
             if size(aImage, 3) ==1
 
-                if atInput(dOffset).bFlipLeftRight == true
-                    aImage=aImage(:,end:-1:1);
+                if atInput(dSeriesOffset).bFlipLeftRight == true
+                    aImage = aImage(:,end:-1:1);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
-                    aImage=aImage(end:-1:1,:);
+                if atInput(dSeriesOffset).bFlipAntPost == true
+                    aImage = aImage(end:-1:1,:);
                 end
             else
-                if atInput(dOffset).bFlipLeftRight == true
-                    aImage=aImage(:,end:-1:1,:);
+                if atInput(dSeriesOffset).bFlipLeftRight == true
+                    aImage = aImage(:,end:-1:1,:);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
-                    aImage=aImage(end:-1:1,:,:);
+                if atInput(dSeriesOffset).bFlipAntPost == true
+                    aImage = aImage(end:-1:1,:,:);
                 end
 
-                if atInput(dOffset).bFlipHeadFeet == true
-                    aImage=aImage(:,:,end:-1:1);
+                if atInput(dSeriesOffset).bFlipHeadFeet == true
+                    aImage = aImage(:,:,end:-1:1);
                 end
             end
 
         else
-            atMetaData = dicomMetaData('get');
-            aImage     = dicomBuffer('get');
+            atMetaData = dicomMetaData('get', [], dSeriesOffset);
+            aImage     = dicomBuffer('get', [], dSeriesOffset);
         end
 
         % Set Voxel Size
@@ -1053,6 +1067,16 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         end
 
         dVoxVolume = xPixel * yPixel * zPixel;
+
+        aDicomImage = dicomBuffer('get', [], dSeriesOffset);
+    
+        if bModifiedMatrix == false && ...
+           bMovementApplied == false        % Can't use input buffer if movement have been applied
+    
+            if ~isequal(size(aImage), size(aDicomImage))
+                [atRoiInput, atVoiInput] = resampleROIs(aDicomImage, atDicomMeta, aImage, atMetaData, atRoiInput, false, atVoiInput, dSeriesOffset);
+            end
+        end
 
         % Count contour Type number
 
@@ -1197,15 +1221,15 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
 
-                if bModifiedMatrix  == false && ...
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end
-                end
+                % if bModifiedMatrix  == false && ...
+                %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                % 
+                %     if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
+                %         pTemp{1} = tRoi;
+                %         ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
+                %         tRoi = ptrRoiTemp{1};
+                %     end
+                % end
 
                 switch lower(tRoi.Axe)
                     case 'axe'
@@ -1304,15 +1328,15 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
                     tRoi = atRoiInput{find(aTagOffset, 1)};
 
-                    if bModifiedMatrix  == false && ...
-                       bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                        if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
-                            pTemp{1} = tRoi;
-                            ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
-                            tRoi = ptrRoiTemp{1};
-                        end
-                    end
+                    % if bModifiedMatrix  == false && ...
+                    %    bMovementApplied == false        % Can't use input buffer if movement have been applied
+                    % 
+                    %     if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
+                    %         pTemp{1} = tRoi;
+                    %         ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
+                    %         tRoi = ptrRoiTemp{1};
+                    %     end
+                    % end
 
                     switch lower(tRoi.Axe)
                         case 'axe'
@@ -1453,7 +1477,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             try
                 saveReportLastUsedDir = path;
                 save(sMatFile, 'saveReportLastUsedDir');
-            catch
+                
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
             end
 
@@ -1467,55 +1493,19 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                 sFileName = [sFileName, '.pdf'];
             end
 
-            if viewerUIFigure('get') == true
-
-                aRGBImage = frame2im(getframe(figPETLiverDosimetryReport));
-
-                axePdfReport = ...
-                   axes(figPETLiverDosimetryReport, ...
-                         'Units'   , 'pixels', ...
-                         'Position', [0 0 FIG_REPORT_X FIG_REPORT_Y], ...
-                         'Color'   , 'none',...
-                         'Visible' , 'off'...
-                         );
-                axePdfReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axePdfReport.Toolbar.Visible = 'off';
-                disableDefaultInteractivity(axePdfReport);
-
-                image(axePdfReport, aRGBImage);
-                axePdfReport.Visible = 'off';
-
-                exportgraphics(axePdfReport, sFileName);
-
-                delete(axePdfReport);
-            else
-                set(axePETLiverDosimetryReport,'LooseInset', get(axePETLiverDosimetryReport,'TightInset'));
-                unit = get(figPETLiverDosimetryReport,'Units');
-                set(figPETLiverDosimetryReport,'Units','inches');
-                pos = get(figPETLiverDosimetryReport,'Position');
-
-                set(figPETLiverDosimetryReport, ...
-                    'PaperPositionMode', 'auto',...
-                    'PaperUnits'       , 'inches',...
-                    'PaperPosition'    , [0,0,pos(3),pos(4)],...
-                    'PaperSize'        , [pos(3), pos(4)]);
-
-
-
-                print(figPETLiverDosimetryReport, sFileName, '-image', '-dpdf', '-r0');
-
-                set(figPETLiverDosimetryReport,'Units', unit);
-            end
+            exportContourReportToPdf(figPETLiverDosimetryReport, axePETLiverDosimetryReport, sFileName);
 
             progressBar( 1 , sprintf('Export %s completed.', sFileName));
 
             try
                 winopen(sFileName);
-            catch
+            catch ME
+                logErrorToFile(ME);
             end
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar( 1 , 'Error: exportCurrentPETLiverDosimetryReportToPdfCallback() cant export report' );
         end
 
@@ -1529,7 +1519,8 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
         atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
-        bMipPlayback = playback2DMipOnly('get');
+        % bMipPlayback = playback2DMipOnly('get');
+        sPlaybackPlane = default2DPlaybackPlane('get');
 
         dAxialSliceNumber = sliceNumber('get', 'axial');
 
@@ -1580,7 +1571,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             try
                 saveReportLastUsedDir = path;
                 save(sMatFile, 'saveReportLastUsedDir');
-            catch
+
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
             end
 
@@ -1594,7 +1587,14 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                 file = [file, '.avi'];
             end
 
-            playback2DMipOnly('set', false);
+            % playback2DMipOnly('set', false);
+
+            set(chkUiCorWindowSelectedPtr('get'), 'Value', false);
+            set(chkUiSagWindowSelectedPtr('get'), 'Value', false);
+            set(chkUiTraWindowSelectedPtr('get'), 'Value', true);
+            set(chkUiMipWindowSelectedPtr('get'), 'Value', false);
+
+            default2DPlaybackPlane('set', 'axial');
 
             sliceNumber('set', 'axial', size(dicomBuffer('get', [], dSeriesOffset), 3));
 
@@ -1602,15 +1602,34 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
             set(recordIconMenuObject('get'), 'State', 'on');
 
-            recordMultiFrame(recordIconMenuObject('get'), path, file, 'avi', axes3Ptr('get', [], dSeriesOffset));
+            recordMultiFrame(recordIconMenuObject('get'), path, file, 'avi');
 
         end
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar( 1 , 'Error: exportCurrentPETLiverDosimetryAxialSlicesToAviCallback() cant export report' );
         end
 
-        playback2DMipOnly('set', bMipPlayback);
+        % playback2DMipOnly('set', bMipPlayback);
+
+        set(chkUiCorWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiSagWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiTraWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiMipWindowSelectedPtr('get'), 'Value', false);
+
+        switch lower(sPlaybackPlane)
+            case 'coronal'
+                set(chkUiCorWindowSelectedPtr('get'), 'Value', true);
+            case 'sagittal'
+                set(chkUiSagWindowSelectedPtr('get'), 'Value', true);
+            case 'axial'
+                set(chkUiTraWindowSelectedPtr('get'), 'Value', true);
+            otherwise
+                set(chkUiMipWindowSelectedPtr('get'), 'Value', true);
+        end
+
+        default2DPlaybackPlane('set', sPlaybackPlane);
 
         multiFrameRecord('set', false);
 
@@ -1628,7 +1647,8 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        bMipPlayback = playback2DMipOnly('get');
+        % bMipPlayback = playback2DMipOnly('get');
+        sPlaybackPlane = default2DPlaybackPlane('get');
 
         dAxialSliceNumber = sliceNumber('get', 'axial');
 
@@ -1678,7 +1698,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             try
                 exportDicomLastUsedDir = sOutDir;
                 save(sMatFile, 'exportDicomLastUsedDir');
-            catch
+
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
             end
         end
@@ -1686,7 +1708,14 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         set(figPETLiverDosimetryReport, 'Pointer', 'watch');
         drawnow;
 
-        playback2DMipOnly('set', false);
+        % playback2DMipOnly('set', false);
+
+        set(chkUiCorWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiSagWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiTraWindowSelectedPtr('get'), 'Value', true);
+        set(chkUiMipWindowSelectedPtr('get'), 'Value', false);
+
+        default2DPlaybackPlane('set', 'axial');
 
         sliceNumber('set', 'axial', size(dicomBuffer('get', [], dSeriesOffset), 3));
 
@@ -1694,15 +1723,34 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
         set(recordIconMenuObject('get'), 'State', 'on');
 
-        recordMultiFrame(recordIconMenuObject('get'), sOutDir, [], 'dcm', axes3Ptr('get', [], dSeriesOffset));
+        recordMultiFrame(recordIconMenuObject('get'), sOutDir, [], 'dcm');
 
 %         objectToDicomJpg(sWriteDir, figPETLiverDosimetryReport, '3DF MFSC', get(uiSeriesPtr('get'), 'Value'))
 
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar( 1 , 'Error: exportCurrentPETLiverDosimetryAxialSlicesToDicomMovieCallback() cant export report' );
         end
 
-        playback2DMipOnly('set', bMipPlayback);
+        % playback2DMipOnly('set', bMipPlayback);
+
+        set(chkUiCorWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiSagWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiTraWindowSelectedPtr('get'), 'Value', false);
+        set(chkUiMipWindowSelectedPtr('get'), 'Value', false);
+
+        switch lower(sPlaybackPlane)
+            case 'coronal'
+                set(chkUiCorWindowSelectedPtr('get'), 'Value', true);
+            case 'sagittal'
+                set(chkUiSagWindowSelectedPtr('get'), 'Value', true);
+            case 'axial'
+                set(chkUiTraWindowSelectedPtr('get'), 'Value', true);
+            otherwise
+                set(chkUiMipWindowSelectedPtr('get'), 'Value', true);
+        end
+
+        default2DPlaybackPlane('set', sPlaybackPlane);
 
         multiFrameRecord('set', false);
 
@@ -1722,37 +1770,10 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             set(figPETLiverDosimetryReport, 'Pointer', 'watch');
             drawnow;
 
-            if viewerUIFigure('get') == true
+            copyFigureToClipboard(figPETLiverDosimetryReport);
 
-                aRGBImage = frame2im(getframe(figPETLiverDosimetryReport));
-
-                axePdfReport = ...
-                   axes(figPETLiverDosimetryReport, ...
-                         'Units'   , 'pixels', ...
-                         'Position', [0 0 FIG_REPORT_X FIG_REPORT_Y], ...
-                         'Color'   , 'none',...
-                         'Visible' , 'off'...
-                         );
-                axePdfReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axePdfReport.Toolbar.Visible = 'off';
-                disableDefaultInteractivity(axePdfReport);
-
-                image(axePdfReport, aRGBImage);
-                axePdfReport.Visible = 'off';
-
-                copygraphics(axePdfReport);
-
-                delete(axePdfReport);
-            else
-                inv = get(figPETLiverDosimetryReport,'InvertHardCopy');
-
-                set(figPETLiverDosimetryReport,'InvertHardCopy','Off');
-
-                hgexport(figPETLiverDosimetryReport,'-clipboard');
-
-                set(figPETLiverDosimetryReport,'InvertHardCopy',inv);
-            end
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar( 1 , 'Error: copyPETLiverDosimetryReportDisplayCallback() cant copy report' );
         end
 
@@ -1827,43 +1848,28 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
         ptrViewer3d = [];
 
-        if ~isMATLABReleaseOlderThan('R2022b')
+        bUseViewer3d = shouldUseViewer3d();
 
-            if viewerUIFigure('get') == true
+        if bUseViewer3d == true
 
-                [Mdti,~] = TransformMatrix(atCTMetaData{1}, computeSliceSpacing(atCTMetaData));
+            [Mdti,~] = TransformMatrix(atCTMetaData{1}, computeSliceSpacing(atCTMetaData), true);
 
-                % if volume3DZOffset('get') == false
+            % if volume3DZOffset('get') == false
 
-                    Mdti(1,4) = 0;
-                    Mdti(2,4) = 0;
-                    Mdti(3,4) = 0;
-                    Mdti(4,4) = 1;
-                % end
+                Mdti(1,4) = 0;
+                Mdti(2,4) = 0;
+                Mdti(3,4) = 0;
+                Mdti(4,4) = 1;
+            % end
 
-                tform = affinetform3d(Mdti);
+            tform = affinetform3d(Mdti);
 
-                ptrViewer3d = viewer3d('Parent'         , ui3DWindow, ...
-                                       'BackgroundColor', 'white', ...
-                                       'Lighting'       , 'off', ...
-                                       'GradientColor'  , [0.98 0.98 0.98], ...
-                                       'CameraZoom'     , 1.5000, ...
-                                       'Lighting'       ,'off');
+            ptrViewer3d = viewer3d('Parent'         , ui3DWindow, ...
+                                   'BackgroundColor', 'white', ...
+                                   'GradientColor'  , [0.98 0.98 0.98], ...
+                                   'CameraZoom'     , 1.5000, ...
+                                   'Lighting'       ,'off');
 
-                % sz = size(aBuffer);
-                % center = sz/2 + 0.5;
-                %
-                % numberOfFrames = 360;
-                % vec = linspace(0,2*pi,numberOfFrames)';
-                % dist = sqrt(sz(1)^2 + sz(2)^2 + sz(3)^2);
-                % myPosition = center + ([cos(vec) sin(vec) ones(size(vec))]*dist);
-                %
-                % aPosition = myPosition(250, :);
-                %
-                % aCameraPosition = myPosition(250, :);
-                % aCameraUpVector = [0 0 1];
-
-            end
         end
 
         if ~isempty(aCTBuffer)
@@ -1906,10 +1912,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
             if ~isempty(ptrViewer3d)
 
-
-                 % ptrViewer3d.CameraTarget   = aCameraTarget;
-                 % ptrViewer3d.CameraPosition = aCameraPosition;
-                 % ptrViewer3d.CameraUpVector = aCameraUpVector;
+                set3DView(ptrViewer3d, 1, 1);
             else
                 pObject.CameraPosition = aCameraPosition;
                 pObject.CameraUpVector = aCameraUpVector;

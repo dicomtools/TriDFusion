@@ -159,8 +159,38 @@ function resampleAxes(refImage, atRefMetaData)
                     set(axesMipFc, 'YLim', Rdcm.ZIntrinsicLimits);
                 end
             end
-         end       
+        end       
 
-    end 
+
+        aImageSize = size(refImage);
+
+        uiSliderCor = uiSliderCorPtr('get');
+
+        oldVal = get(uiSliderCor, 'Value');      
+        newVal = round(oldVal * aImageSize(1)) + 1;         
+        set(uiSliderCor, 'Min', 1, 'Max', aImageSize(1), ...
+                         'SliderStep', [1/aImageSize(1) 1/aImageSize(1)], ...
+                         'Value', newVal);
+
+        uiSliderSag = uiSliderSagPtr('get');
+
+        oldVal = get(uiSliderSag, 'Value');     
+        newVal = round(oldVal * aImageSize(2)) + 1;        
+        set(uiSliderSag, 'Min', 1, 'Max', aImageSize(2), ...
+                         'SliderStep', [1/aImageSize(2) 1/aImageSize(2)], ...
+                         'Value', newVal);   
+
+        uiSliderTra = uiSliderTraPtr('get');       
+
+        oldVal = get(uiSliderTra, 'Value');     
+        newVal = round(oldVal * aImageSize(3)) + 1;         
+        set(uiSliderTra, 'Min', 1, 'Max', aImageSize(3), ...
+                         'SliderStep', [1/aImageSize(3) 1/aImageSize(3)], ...
+                         'Value', newVal);
+
+    end
+
+
+
 end  
 

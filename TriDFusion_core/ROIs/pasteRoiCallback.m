@@ -51,7 +51,7 @@ function pasteRoiCallback(~, ~)
         return;
     end
 
-    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+    sTag = num2str(generateUniqueNumber(false));
     
     clickedPt = get(pAxe,'CurrentPoint');
     
@@ -170,7 +170,7 @@ function pasteRoiCallback(~, ~)
                                        'UserData'           , ptrRoi.UserData, ...
                                        'Visible'            , 'on' ...
                                        );
-                                   
+                                 
             pRoi.Waypoints(:) = ptrRoi.Waypoints(:);
 
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
@@ -408,7 +408,7 @@ function pasteRoiCallback(~, ~)
                                     
                                     sliceNumber('set', sPlane, dSliceNumber);                
 
-                                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                                    sTag = num2str(generateUniqueNumber(false));
 
                                     a = images.roi.Ellipse(pAxe, ...
                                                            'Center'             , pRoi.Center, ...

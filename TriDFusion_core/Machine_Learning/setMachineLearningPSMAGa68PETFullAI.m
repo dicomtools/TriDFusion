@@ -31,6 +31,8 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
 
     % Modality validation
 
+    % [dCTSerieOffset, dPTSerieOffset] = findDicomMatchingSeries(atInput, 'ct', 'pt');
+
     dCTSerieOffset = [];
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
@@ -93,11 +95,11 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
 
 %     % Apply ROI constraint
 %     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
-% 
+%
 %     bInvertMask = invertConstraint('get');
-% 
+%
 %     tRoiInput = roiTemplate('get', dPTSerieOffset);
-% 
+%
 %     aPTImageTemp = aPTImage;
 %     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
 %     aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
@@ -106,7 +108,7 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
 
 
     try
-% 
+%
 %     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
 %     drawnow;
 
@@ -115,9 +117,9 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
     if ~isempty(aCTImage)
 
         if isInterpolated('get') == false
-        
+
             isInterpolated('set', true);
-        
+
             setImageInterpolation(true);
         end
 
@@ -156,7 +158,7 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
             setSeriesCallback();
        end
     end
-    
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
@@ -170,7 +172,7 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
 
     % Convert dicom to .nii
 
-    progressBar(3/10, 'DICOM to NRRD conversion, please wait.');
+    progressBar(3/10, 'DICOM to NRRD conversion, please wait...');
 
     sNrrdImagesName = sprintf('%sCase01_0000.nrrd', sNrrdTmpDir);
 
@@ -216,13 +218,19 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
 
         if ispc % Windows
 
+            if tPSMAGa68PETFullAI.options.fastSegmentation == true
+
+                sFastSegmentation = '--disable_tta -step_size 0.5';
+            else
+                sFastSegmentation = '';
+            end
 
             if tPSMAGa68PETFullAI.options.CELossTrainer == true
 
-                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 116 -c 3d_fullres --save_probabilities -tr nnUNetTrainerDiceCELoss_noSmooth', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -p nnUNetPlans -f 0 1 2 3 4 -i %s -o %s -d 116 -c 3d_fullres %s --save_probabilities -tr nnUNetTrainerDiceCELoss_noSmooth', sPredictScript, sNrrdTmpDir, sSegmentationFolderName, sFastSegmentation);
 
             else
-                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 114 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -p nnUNetPlans -f 0 1 2 3 4 -i %s -o %s -d 114 -c 3d_fullres %s --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName, sFastSegmentation);
             end
 
             [bStatus, sCmdout] = system(sCommandLine);
@@ -247,7 +255,7 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
                 progressBar(6/10, 'Segmenting prediction mask, please wait.');
 
                 maskAddVoiByTypeToSeries(aPTImage, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 2);
-                
+
 %                 clear aPTImageTemp;
 
                 if exist(char(sSegmentationFolderName), 'dir')
@@ -256,43 +264,43 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
                 end
 
 %                 if ~isempty(aCTImage)
-% 
+%
 %                     progressBar(5/10, 'Resampling data series, please wait...');
-% 
+%
 %                     [aResampledNMImage, atResampledNMMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
-% 
+%
 %                     dicomMetaData('set', atResampledNMMetaData, dPTSerieOffset);
 %                     dicomBuffer  ('set', aResampledNMImage, dPTSerieOffset);
-% 
+%
 %                     progressBar(6/10, 'Resampling MIP, please wait...');
-% 
+%
 %                     refMip = mipBuffer('get', [], dCTSerieOffset);
 %                     aMip   = mipBuffer('get', [], dPTSerieOffset);
-% 
+%
 %                     aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-% 
+%
 %                     mipBuffer('set', aMip, dPTSerieOffset);
-% 
+%
 %                     setQuantification(dPTSerieOffset);
-% 
+%
 %                     progressBar(7/10, 'Resampling contours, please wait.');
-% 
-% 
+%
+%
 %                     atRoi = roiTemplate('get', dPTSerieOffset);
-% 
+%
 %                     if ~isempty(atRoi)
-% 
+%
 %                         atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledNMImage, atResampledNMMetaData, atRoi, true);
-% 
+%
 %                         roiTemplate('set', dPTSerieOffset, atResampledRoi);
 %                     end
-% 
+%
 %                     progressBar(8/10, 'Resampling axes, please wait...');
-% 
+%
 %                     resampleAxes(aResampledNMImage, atResampledNMMetaData);
-% 
+%
 %                     setImagesAspectRatio();
-% 
+%
 %                 end
 
 
@@ -322,7 +330,8 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set fusion
     if ~isempty(aCTImage)
@@ -332,6 +341,8 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
         if isFusion('get') == false
 
             set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+            sliderAlphaValue('set', 0.65);
 
             setFusionCallback();
         end
@@ -355,8 +366,8 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
     end
 
     refreshImages();
-    
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
@@ -370,7 +381,8 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setMachineLearningPSMAGa68PETFullAI()' );
     end

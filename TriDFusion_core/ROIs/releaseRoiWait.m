@@ -36,9 +36,12 @@ function releaseRoiWait()
     if is2DBrush('get') == true
 
         pRoiToolbar = roiMenuObject('get');
-        for jj=1:numel(pRoiToolbar.Children)
-            set(pRoiToolbar.Children, 'Enable', 'on');
-            set(pRoiToolbar.Children, 'State', 'off');
+        for jj=1:numel(pRoiToolbar)
+            % set(pRoiToolbar.Children, 'Enable', 'on');
+            % set(pRoiToolbar.Children, 'State', 'off');
+
+            set(pRoiToolbar{jj}, 'HitTest', 'on');        
+            set(pRoiToolbar{jj}, 'CData', pRoiToolbar{jj}.UserData.default);          
         end
 
         is2DBrush('set', false);

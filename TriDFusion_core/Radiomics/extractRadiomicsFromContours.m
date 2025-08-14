@@ -1,5 +1,5 @@
-function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset)
-%function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset)
+function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset, sFileName, bShowDialog)
+%function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset, sFileName, bShowDialog)
 %Run PyRadiomics, from a mask created from all contours.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,6 +27,32 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    if exist('dContourOffset', 'var')
+
+        if isempty(dContourOffset)
+    
+            clear dContourOffset;
+        end 
+    end
+
+    if exist('sFileName', 'var')
+        
+        if isempty(sFileName)
+    
+            clear sFileName;
+        end 
+    end
+
+    if exist('bShowDialog', 'var')
+        
+        if isempty(bShowDialog)
+    
+            bShowDialog = true;
+        end 
+    else
+        bShowDialog = true;
+    end
+
     atInput = inputTemplate('get');
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
@@ -39,14 +65,18 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
     atVoiInput = voiTemplate('get', dSeriesOffset);
     if isempty(atVoiInput)
         progressBar(1, 'Error: No contours (voi) detected!');
-        errordlg('No contours (voi) detected!', 'Contours Validation');  
+        if bShowDialog == true
+            errordlg('No contours (voi) detected!', 'Contours Validation');  
+        end
         return;
     end
 
     atRoiInput = roiTemplate('get', dSeriesOffset);
     if isempty(atRoiInput)
         progressBar(1, 'Error: No contours (roi) detected!');
-        errordlg('No contours (roi) detected!', 'Contours Validation');  
+        if bShowDialog == true
+            errordlg('No contours (roi) detected!', 'Contours Validation');  
+        end
         return;
     end
 
@@ -61,9 +91,20 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
         if isempty(aImages)
             progressBar(1, 'Error: No images detected!');
-            errordlg('No images detected!', 'Image Validation');
+            if bShowDialog == true
+                errordlg('No images detected!', 'Image Validation');
+            end
             return;
         end
+    end
+
+    % Resample ROI to original image size
+
+    aDicomImage = dicomBuffer('get', [], dSeriesOffset);
+
+    if ~isequal(size(aImages), size(aDicomImage))
+
+        [atRoiInput, atVoiInput] = resampleROIs(aDicomImage, atDicomMeta, aImages, atMetaData, atRoiInput, false, atVoiInput, dSeriesOffset);
     end
 
     asPatientInfoHeader{1,1} = sprintf('Patient Name');
@@ -107,10 +148,18 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
             sCurrentDir = pwd;
         end
     end
-        
-    sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
-    [file, path] = uiputfile(filter, 'Save radiomics report', sprintf('%s/%s_%s_%s_%s_RADIOMICS_TriDFusion.xls' , ...
-        sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sDate) );
+    
+    if ~exist('sFileName', 'var')
+
+        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+
+        [file, path] = uiputfile(filter, 'Save radiomics report', sprintf('%s/%s_%s_%s_%s_RADIOMICS_TriDFusion.xls' , ...
+            sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sDate) );
+    else
+        [path, name, ext] = fileparts(sFileName);   
+        path = sprintf('%s/', path);
+        file = sprintf('%s%s', name, ext);
+    end
 
     if file ~= 0
 
@@ -118,9 +167,12 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
             matlab.io.internal.getExcelInstance;
             bExcelInstance = true;
         catch exception 
+            logErrorToFile(exception);
 %            warning(message('MATLAB:xlswrite:NoCOMServer'));
             bExcelInstance = false;
         end
+
+
 
         try 
     
@@ -130,7 +182,8 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
         try
             saveRadiomicsLastUsedDir = path;
             save(sMatFile, 'saveRadiomicsLastUsedDir');
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
         end 
 
@@ -155,13 +208,14 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
         origin = atMetaData{end}.ImagePositionPatient;
         
         pixelspacing=zeros(3,1);
-        pixelspacing(1)=atMetaData{1}.PixelSpacing(1);
-        pixelspacing(2)=atMetaData{1}.PixelSpacing(2);
+        pixelspacing(1) = atMetaData{1}.PixelSpacing(1);
+        pixelspacing(2) = atMetaData{1}.PixelSpacing(2);
         pixelspacing(3) = computeSliceSpacing(atMetaData);
  
         % If a contour offset is specified, will compute it
 
         if exist('dContourOffset', 'var') 
+         
             dVoiOffset = dContourOffset;
             dNbVois = dContourOffset;
         else % All contours
@@ -188,6 +242,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
             aParaspinalMask      = []; 
             aAxillaryMask        = [];
             aAbdominalMask       = [];
+            aNecroticMask        = [];
             aUnknowMask          = []; 
 
             for vv=1:numel(atVoiInput)
@@ -237,7 +292,10 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                         aAxillaryMask        = zeros(size(aImages));                        
 
                     case 'abdominal'
-                        aAbdominalMask       = zeros(size(aImages));                        
+                        aAbdominalMask       = zeros(size(aImages));
+
+                    case 'necrotic'
+                        aNecroticMask       = zeros(size(aImages));                  
 
                     otherwise
                         aUnknowMask         = zeros(size(aImages));
@@ -255,13 +313,13 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     
                 tRoi = atRoiInput{find(aTagOffset, 1)};
     
-                % Resample ROI to original image size
-    
-                if numel(aImages) ~= numel(dicomBuffer('get', [], dSeriesOffset))
-                    pTemp{1} = tRoi;
-                    ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImages, atMetaData, pTemp, false);
-                    tRoi = ptrRoiTemp{1};
-                end  
+                % % Resample ROI to original image size
+                % 
+                % if numel(aImages) ~= numel(dicomBuffer('get', [], dSeriesOffset))
+                %     pTemp{1} = tRoi;
+                %     ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImages, atMetaData, pTemp, false);
+                %     tRoi = ptrRoiTemp{1};
+                % end  
     
                 % Extrac ROI mask
     
@@ -737,6 +795,34 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                                     aAbdominalMask(:,:,tRoi.SliceNb) = aMaskSlice;              
                             end 
+
+                        case 'necrotic'
+
+                            switch lower(tRoi.Axe)                    
+                                case 'axe'
+                                    aMaskSlice   = aNecroticMask(:,:);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aNecroticMask(:,:) = aMaskSlice;
+                                    
+                                case 'axes1'
+                                    aMaskSlice = permute(aNecroticMask(tRoi.SliceNb,:,:), [3 2 1]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aNecroticMask(tRoi.SliceNb,:,:) = permute(aMaskSlice, [3 2 1]);
+                
+                                case 'axes2'
+                                    aMaskSlice   = permute(aNecroticMask(:,tRoi.SliceNb,:), [3 1 2]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                   
+                                    aNecroticMask(:,tRoi.SliceNb,:) = permute(aMaskSlice, [2 3 1]);
+                                  
+                                case 'axes3'
+                                    aMaskSlice   = aNecroticMask(:,:,tRoi.SliceNb);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+
+                                    aNecroticMask(:,:,tRoi.SliceNb) = aMaskSlice;              
+                            end                             
                             
                         otherwise
 
@@ -849,6 +935,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
             sNrrdParaspinalMaskName      = ''; 
             sNrrdAxillaryMaskName        = '';
             sNrrdAbdominalMaskName       = '';            
+            sNrrdNecroticMaskName        = '';            
             sNrrdUnknowMaskName          = '';
 
             % Unspecified mask 
@@ -1031,6 +1118,18 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                 clear aAbdominalMask;
             end 
 
+            % Necrotic
+
+            if ~isempty(aNecroticMask)
+
+                aNecroticMask = transformNrrdImage(aNecroticMask);
+
+                sNrrdNecroticMaskName = sprintf('%snecrotic_mask.nrrd' , sNrrdTmpDir);
+                nrrdWriter(sNrrdNecroticMaskName, squeeze(aNecroticMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
+
+                clear aNecroticMask;
+            end 
+
             % Unknow mask
 
             if ~isempty(aUnknowMask)
@@ -1074,7 +1173,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                 if bStatus 
                     progressBar( 1, 'Error: An error occur during radiomics entire volume extraction!');
-                    errordlg(sprintf('An error occur during radiomics entire volume extraction: %s', sCmdout), 'Extraction Error');  
+                    if bShowDialog == true
+                        errordlg(sprintf('An error occur during radiomics entire volume extraction: %s', sCmdout), 'Extraction Error');  
+                    end
                 end                
 
             end
@@ -1104,6 +1205,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                 sParaspinalResultFile      = ''; 
                 sAxillaryResultFile        = '';
                 sAbdominalResultFile       = '';                   
+                sNecroticResultFile        = '';                   
                 sUnknowResultFile          = '';
 
                 % Unspecified
@@ -1124,6 +1226,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                        ~isempty(sNrrdParaspinalMaskName)     || ...
                        ~isempty(sNrrdAxillaryMaskName)       || ...
                        ~isempty(sNrrdAbdominalMaskName)      || ...
+                       ~isempty(sNrrdNecroticMaskName)       || ...
                        ~isempty(sNrrdUnknowMaskName)
     
                         progressBar(bProgressBarOffset+1*bProgressBarTypeOffset, sprintf('Computing radiomics unspecified, it can take several minutes, please be patient.'));
@@ -1139,7 +1242,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
     
                         if bStatus 
                             progressBar( 1, 'Error: An error occur during radiomics unspecified extraction!');
-                            errordlg(sprintf('An error occur during radiomics unspecified extraction: %s', sCmdout), 'Extraction Error');  
+                            if bShowDialog == true
+                                errordlg(sprintf('An error occur during radiomics unspecified extraction: %s', sCmdout), 'Extraction Error');  
+                            end
                         end 
                     end
                 end
@@ -1161,7 +1266,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                     if bStatus 
                         progressBar( 1, 'Error: An error occur during radiomics bone extraction!');
-                        errordlg(sprintf('An error occur during radiomics bone extraction: %s', sCmdout), 'Extraction Error');  
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics bone extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end 
 
                 end
@@ -1183,7 +1290,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                     if bStatus 
                         progressBar( 1, 'Error: An error occur during radiomics soft tissue extraction!');
-                        errordlg(sprintf('An error occur during radiomics soft tissue extraction: %s', sCmdout), 'Extraction Error');  
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics soft tissue extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                     
                 end
 
@@ -1204,7 +1313,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                     if bStatus 
                         progressBar( 1, 'Error: An error occur during radiomics lung extraction!');
-                        errordlg(sprintf('An error occur during radiomics lung extraction: %s', sCmdout), 'Extraction Error');  
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics lung extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end
 
@@ -1225,7 +1336,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                     if bStatus 
                         progressBar( 1, 'Error: An error occur during radiomics liver extraction!');
-                        errordlg(sprintf('An error occur during radiomics liver extraction: %s', sCmdout), 'Extraction Error');  
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics liver extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end
 
@@ -1246,7 +1359,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                     if bStatus 
                         progressBar( 1, 'Error: An error occur during radiomics parotid extraction!');
-                        errordlg(sprintf('An error occur during radiomics parotid extraction: %s', sCmdout), 'Extraction Error');  
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics parotid extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end
 
@@ -1267,7 +1382,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                     if bStatus 
                         progressBar( 1, 'Error: An error occur during radiomics blood pool extraction!');
-                        errordlg(sprintf('An error occur during radiomics blood pool extraction: %s', sCmdout), 'Extraction Error');  
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics blood pool extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end    
 
@@ -1288,7 +1405,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                     if bStatus 
                         progressBar( 1, 'Error: An error occur during radiomics lymph nodes extraction!');
-                        errordlg(sprintf('An error occur during radiomics lymph nodes extraction: %s', sCmdout), 'Extraction Error');  
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics lymph nodes extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end  
 
@@ -1309,7 +1428,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                     if bStatus 
                         progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
-                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end  
 
@@ -1329,8 +1450,10 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     [bStatus, sCmdout] = system([sCommandLine ' -o ' sCervicalResultFile ' -p ' sParametersFile]);
 
                     if bStatus 
-                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
-                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                        progressBar( 1, 'Error: An error occur during radiomics cervical extraction!');
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics cervical extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end  
 
@@ -1350,8 +1473,10 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     [bStatus, sCmdout] = system([sCommandLine ' -o ' sSupraclavicularResultFile ' -p ' sParametersFile]);
 
                     if bStatus 
-                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
-                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                        progressBar( 1, 'Error: An error occur during radiomics supraclavicular extraction!');
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics supraclavicular extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end  
 
@@ -1371,8 +1496,10 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     [bStatus, sCmdout] = system([sCommandLine ' -o ' sMediastinalResultFile ' -p ' sParametersFile]);
 
                     if bStatus 
-                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
-                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                        progressBar( 1, 'Error: An error occur during radiomics mediastinal extraction!');
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics mediastinal extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end 
 
@@ -1392,8 +1519,10 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     [bStatus, sCmdout] = system([sCommandLine ' -o ' sParaspinalResultFile ' -p ' sParametersFile]);
 
                     if bStatus 
-                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
-                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                        progressBar( 1, 'Error: An error occur during radiomics paraspinal extraction!');
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics paraspinal extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end 
 
@@ -1413,8 +1542,10 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     [bStatus, sCmdout] = system([sCommandLine ' -o ' sAxillaryResultFile ' -p ' sParametersFile]);
 
                     if bStatus 
-                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
-                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                        progressBar( 1, 'Error: An error occur during radiomics axillary extraction!');
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics axillary extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end 
 
@@ -1434,10 +1565,35 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     [bStatus, sCmdout] = system([sCommandLine ' -o ' sAbdominalResultFile ' -p ' sParametersFile]);
 
                     if bStatus 
-                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
-                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                        progressBar( 1, 'Error: An error occur during radiomics abdominal extraction!');
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics abdominal extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                      
                 end  
+
+                % Necrotic
+
+                if ~isempty(sNrrdNecroticMaskName)
+
+                    progressBar(bProgressBarOffset+15*bProgressBarTypeOffset, sprintf('Computing radiomics necrotic, it can take several minutes, please be patient.'));
+    
+                    sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
+                    writeYamlFile(sParametersFile, tReadiomics, 1);
+    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdNecroticMaskName);    
+    
+                    sNecroticResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'NECROTIC_MASK');
+    
+                    [bStatus, sCmdout] = system([sCommandLine ' -o ' sNecroticResultFile ' -p ' sParametersFile]);
+
+                    if bStatus 
+                        progressBar( 1, 'Error: An error occur during radiomics necrotic extraction!');
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics necrotic extraction: %s', sCmdout), 'Extraction Error');  
+                        end
+                    end                      
+                end
 
                 % Unknow
 
@@ -1456,7 +1612,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                     if bStatus 
                         progressBar( 1, 'Error: An error occur during radiomics unknow extraction!');
-                        errordlg(sprintf('An error occur during radiomics unknow extraction: %s', sCmdout), 'Extraction Error');  
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics unknow extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     end                       
                 end                        
                
@@ -1482,7 +1640,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                 if bStatus 
                     progressBar( 1, 'Error: An error occur during radiomics extraction!');
                     if exist('dContourOffset', 'var') % All contours
-                        errordlg(sprintf('An error occur during radiomics extraction: %s', sCmdout), 'Extraction Error');  
+                        if bShowDialog == true
+                            errordlg(sprintf('An error occur during radiomics extraction: %s', sCmdout), 'Extraction Error');  
+                        end
                     else % All contours
                         if isempty(sAllContoursCmdout)
                             sAllContoursCmdout = sCmdout;
@@ -1495,7 +1655,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
             if ~exist('dContourOffset', 'var') % All contours
             
                 if ~isempty(sAllContoursCmdout) 
-                    errordlg(sprintf('An error occur during radiomics extraction: %s', sAllContoursCmdout), 'Extraction Error');  
+                    if bShowDialog == true
+                        errordlg(sprintf('An error occur during radiomics extraction: %s', sAllContoursCmdout), 'Extraction Error');  
+                    end
                 end
             end
 
@@ -2110,6 +2272,44 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     writetable(cCombineTable, sXlsFileName, 'Sheet', 'ABDOMINAL-LESIONS', 'WriteVariableNames', false);                      
                 end
 
+                % Necrotic
+
+                if ~isempty(sNecroticResultFile)
+
+                    current_table = readtable(sNecroticResultFile); 
+    
+                    current_table.(1) = [];
+        
+                    aCurrentTableSize = size(current_table);
+                    aPatientHeaderSize = size(asPatientInfoHeader);
+    
+                    cCurrenTable = table2cell(current_table);
+    
+                    if aCurrentTableSize(2) == 3
+                        cTempTable = cell(aCurrentTableSize(1), 4);
+                        for spl=1:aCurrentTableSize(1)
+                            cTempTable(spl,1:3) = cCurrenTable(spl,1:3);
+                            asSpLit = strsplit(cCurrenTable{spl,3},':');
+                            
+                            if numel(asSpLit) == 2
+                                cTempTable{spl,3}=asSpLit{1};
+                                cTempTable{spl,4}=asSpLit{2};
+                            end
+                        end
+                        cCurrenTable = cTempTable;
+                        aCurrentTableSize = size(cTempTable);
+                    end
+    
+                    cTempTable = cell(aPatientHeaderSize(1), aCurrentTableSize(2));
+    
+                    cTempTable(1:aPatientHeaderSize(1),1)=asPatientInfoHeader(1:aPatientHeaderSize(1),1);
+                    cTempTable(1:aPatientHeaderSize(1),2)=asPatientInfoHeader(1:aPatientHeaderSize(1),2);
+    
+                    cCombineTable = cell2table([cTempTable; cCurrenTable]);
+    
+                    writetable(cCombineTable, sXlsFileName, 'Sheet', 'NECROTIC-LESIONS', 'WriteVariableNames', false);                      
+                end
+
                 % Unknow lesions
 
                 if ~isempty(sUnknowResultFile)
@@ -2199,19 +2399,25 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
         elseif isunix % Linux is not yet supported
     
             progressBar( 1, 'Error: Radiomics under Linux is not yet supported');
-            errordlg('Radiomics under Linux is not yet supported', 'Machine Learning Validation');
+            if bShowDialog == true
+                errordlg('Radiomics under Linux is not yet supported', 'Machine Learning Validation');
+            end
     
         else % Mac is not yet supported
     
             progressBar( 1, 'Error: Radiomics under Mac is not yet supported');
-            errordlg('Radiomics under Mac is not yet supported', 'Radiomics Validation');
+            if bShowDialog == true
+                errordlg('Radiomics under Mac is not yet supported', 'Radiomics Validation');
+            end
         end 
 
-        catch 
+        catch ME
+            logErrorToFile(ME);
             progressBar( 1 , 'Error: extractRadiomicsFromContours()' );
         end
 
-        if bExcelInstance == true
+        if bExcelInstance == true && bShowDialog == true
+
             winopen(sXlsFileName);
         end
 

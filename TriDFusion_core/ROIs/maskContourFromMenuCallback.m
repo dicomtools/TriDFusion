@@ -27,213 +27,155 @@ function maskContourFromMenuCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    try
+
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-    imBuffer = dicomBuffer('get', [], dSeriesOffset);  
-    if isempty(imBuffer)        
-        return;
+    imBuffer      = dicomBuffer('get', [], dSeriesOffset);
+    if isempty(imBuffer)
+        return; 
     end
 
     sMaskType = get(hObject, 'Label');
-    sMaskTag  = get(hObject, 'UserData'); 
+    sMaskTag  = get(hObject, 'UserData');
 
     atRoiTemplate = roiTemplate('get', dSeriesOffset);
+    if ~iscell(atRoiTemplate)
+        atRoiTemplate = {}; 
+    end
+
     atVoiTemplate = voiTemplate('get', dSeriesOffset);
-
-    if isempty(atRoiTemplate)        
-        return;
+    if ~iscell(atVoiTemplate)
+        atVoiTemplate = {}; 
     end
 
-    imMask = false(size(imBuffer));
+    if isempty(atRoiTemplate)
+        return; 
+    end  
 
-    if ~isempty(atVoiTemplate)  
+    volSize   = size(imBuffer);         % [nx, ny, nz]
+    imMask    = false(volSize);
+    cropVal   = cropValue('get');
+    isInside  = startsWith(sMaskType,'Inside','IgnoreCase',true);
+    repeatAll = contains(sMaskType,'Every','IgnoreCase',true);
 
-        dVoiTagOffset = find(strcmp( cellfun( @(atVoiTemplate) atVoiTemplate.Tag, atVoiTemplate, 'uni', false ), {sMaskTag} ), 1);      
-    else
-        dVoiTagOffset = [];
-    end 
-   
-    if isempty(dVoiTagOffset) % tag is a voi
-
-        dRoiTagOffset = find(strcmp( cellfun( @(atRoiTemplate) atRoiTemplate.Tag, atRoiTemplate, 'uni', false ), {sMaskTag} ), 1);      
-    else
-        dRoiTagOffset = [];
+    % Find matching VOI index (if any)
+    dVoi = [];
+    if ~isempty(atVoiTemplate)
+        voiTags = cellfun(@(v)v.Tag, atVoiTemplate, 'UniformOutput', false);
+        dVoi    = find(strcmp(voiTags, sMaskTag), 1);
     end
-        
-    if ~isempty(dVoiTagOffset) % tag is a voi
 
-        dNbRoiTag = numel(atVoiTemplate{dVoiTagOffset}.RoisTag);
+    % Find matching ROI index (if no VOI) 
 
-        for tt=1:dNbRoiTag % Scan all tag
-            
-            dRoiTagOffset = find(strcmp( cellfun( @(atRoiTemplate) atRoiTemplate.Tag, atRoiTemplate, 'uni', false ), {[atVoiTemplate{dVoiTagOffset}.RoisTag{tt}]} ), 1);
-       
-            if ~isempty(dRoiTagOffset)
-                
-                sAxe = atRoiTemplate{dRoiTagOffset}.Axe;
-                dSliceNumber = atRoiTemplate{dRoiTagOffset}.SliceNb;
+    roiTags = cellfun(@(r)r.Tag, atRoiTemplate, 'UniformOutput', false);
+    dRoi    = find(strcmp(roiTags, sMaskTag), 1);
 
-                switch lower(sAxe)
-                    
-                    case 'axe'
-
-                    aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}.Object, imBuffer(:,:));
-
-                    imMask(:,:) = imMask(:,:) | aMask;
-
-                   case 'axes1'
-
-                    aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, permute(imBuffer(dSliceNumber,:,:), [3 2 1]));
-
-                    imMask(dSliceNumber,:,:) = imMask(dSliceNumber,:,:) | permute(aMask, [3 2 1]);
-                 
-                    case 'axes2'     
-
-                    aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, permute(imBuffer(:,dSliceNumber,:), [3 1 2]));
-
-                    imMask(:,dSliceNumber,:) = imMask(:,dSliceNumber,:) | permute(aMask, [2 3 1]);
-
-
-                    case 'axes3'
-
-                    aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, imBuffer(:,:,dSliceNumber));
-                        
-                    imMask(:,:,dSliceNumber) = imMask(:,:,dSliceNumber) | aMask;
-
-                end
+    % Build the full-volume mask 
+    if ~isempty(dVoi)
+        % OR together each ROI inside the VOI
+        roiList = atVoiTemplate{dVoi}.RoisTag;
+        for k = 1:numel(roiList)
+            % find ROI index by tag
+            idx = find(strcmp(roiTags, roiList{k}),1);
+            if isempty(idx)
+                continue; 
             end
+            imMask = imMask | buildMask(atRoiTemplate{idx}, imBuffer, volSize, repeatAll);
         end
-    
-    else % tag is a roi
-            
-        if ~isempty(dRoiTagOffset)
-                                  
-            sAxe = atRoiTemplate{dRoiTagOffset}.Axe;
-            dSliceNumber = atRoiTemplate{dRoiTagOffset}.SliceNb;
-    
-            switch lower(sAxe)
-                
-                case 'axe'
-    
-                aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}.Object, imBuffer(:,:));
-               
-                imMask(:,:) = aMask;
 
-                case 'axes1'
-    
-                aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, permute(imBuffer(dSliceNumber,:,:), [3 2 1]));
-    
-                aMask = permute(aMask, [2 3 1]);
+    elseif ~isempty(dRoi)
+        % single ROI
+        imMask = buildMask(atRoiTemplate{dRoi}, imBuffer, volSize, repeatAll);
 
-                if strcmpi(sMaskType, 'Inside Every Slice') || ...               
-                   strcmpi(sMaskType, 'Outside Every Slice')
-
-                    if strcmpi(sMaskType, 'Outside Every Slice')
-
-                        imMask = true(size(imBuffer));
-                    end
-
-                    dNbSlices = size(imMask, 1);
-                    
-                    for rr=1:dNbSlices
-
-                        imMask(rr,:,:) = aMask;
-                    end
-                else
-
-                    if strcmpi(sMaskType, 'Outside This Contour')
-                        
-                        imMask = true(size(imBuffer));
-                    end
-
-                    imMask(dSliceNumber,:,:) = aMask;
-                end
-
-                case 'axes2'     
-    
-                aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, permute(imBuffer(:,dSliceNumber,:), [3 1 2]));
-    
-                aMask = permute(aMask, [2 3 1]);
-   
-                if strcmpi(sMaskType, 'Inside Every Slice') || ...               
-                   strcmpi(sMaskType, 'Outside Every Slice')
-
-                    if strcmpi(sMaskType, 'Outside Every Slice')
-
-                        imMask = true(size(imBuffer));
-                    end
-
-                    dNbSlices = size(imMask, 2);
-                    
-                    for rr=1:dNbSlices
-
-                        imMask(:,rr,:) = aMask;
-                    end
-                else
-
-                    if strcmpi(sMaskType, 'Outside This Contour')
-                        
-                        imMask = true(size(imBuffer));
-                    end
-                        
-                    imMask(:,dSliceNumber,:) = aMask;
-                end
-
-                case 'axes3'
-    
-                aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, imBuffer(:,:,dSliceNumber));
-                    
-                imMask(:,:,dSliceNumber) = aMask;
-
-                if strcmpi(sMaskType, 'Inside Every Slice') || ...               
-                   strcmpi(sMaskType, 'Outside Every Slice')
-
-                    if strcmpi(sMaskType, 'Outside Every Slice')
-
-                        imMask = true(size(imBuffer));
-                    end
-
-                    dNbSlices = size(imMask, 3);
-
-                    for rr=1:dNbSlices
-
-                        imMask(:,:,rr) = aMask;
-                    end
-                else
-                    if strcmpi(sMaskType, 'Outside This Contour')
-
-                        imMask = true(size(imBuffer));
-                    end
-
-                    imMask(:,:,dSliceNumber) = aMask;
-                end
-
-            end
-        end
+    else
+        return;  % no match
     end
+
+    % Apply the mask if any voxel selected 
 
     if any(imMask(:))
 
-        if strcmpi(sMaskType, 'Inside This Contour') || ...
-           strcmpi(sMaskType, 'Inside Every Slice')                
+        if isInside
+            imBuffer(imMask) = cropVal;
+        else
+            imBuffer(~imMask) = cropVal;
+        end
 
-            imBuffer(imMask) = cropValue('get');
-  
-        else % Outside
-            imMask = ~imMask;
-            imBuffer(imMask) = cropValue('get');                                           
-        end                                                        
-        
         modifiedMatrixValueMenuOption('set', true);
 
-        dicomBuffer('set', imBuffer, dSeriesOffset); 
+        dicomBuffer('set', imBuffer, dSeriesOffset);
 
         setQuantification(dSeriesOffset);
 
-        refreshImages();           
-    end
+        refreshImages();
 
-    clear imMask;
-    clear imBuffer;                  
+        if size(imBuffer,3) ~= 1
+            
+            mipBuffer('set', computeMIP(gather(imBuffer)), dSeriesOffset);
+    
+            sliderMipCallback();
+        end
+
+    end
+    
+    clear imBuffer;
+
+    catch ME
+        logErrorToFile(ME);
+        progressBar(1, 'Error:maskContourFromMenuCallback()');
+    end
+  
 end
-   
+
+%------------------------------------------------------------------------
+function maskImage = buildMask(tpl, imBuf, volSize, repeatAll)
+% Returns one [X×Y×Z] logical mask for tpl (.SliceNb & .Axe),
+% repeated on every slice if repeatAll==true.
+
+    [nx,ny,nz] = size(imBuf);
+    ax         = lower(tpl.Axe);
+    sn         = tpl.SliceNb;
+    maskImage  = false(volSize);
+
+    switch ax
+        case 'axe'    % 2D plane 
+            m2d = roiTemplateToMask(tpl.Object, imBuf(:,:));
+            if repeatAll
+                maskImage = repmat(m2d, [1,1]);
+            else
+                maskImage(:,:) = m2d;
+            end
+
+        case 'axes1'  % Coronal
+            slice2d = permute(imBuf(sn,:,:), [3 2 1]);          % [X×Z]
+            m2d     = roiTemplateToMask(tpl, slice2d);
+            m3slice = permute(m2d, [3 2 1]);            % [X×1×Z]
+            if repeatAll
+                maskImage = repmat(m3slice, [nx 1 1]);
+            else
+                maskImage(sn,:,:) = m3slice;
+            end
+
+        case 'axes2'  % Sagittal
+            slice2d = permute(imBuf(:,sn,:), [3 1 2]);          % [X×Z]
+            m2d     = roiTemplateToMask(tpl, slice2d);
+            m3slice = permute(m2d, [2 3 1]);            % [X×1×Z]
+            if repeatAll
+                maskImage = repmat(m3slice, [1 ny 1]);
+            else
+                maskImage(:,sn,:) = m3slice;
+            end     
+
+        case 'axes3'  % Axial
+            m2d = roiTemplateToMask(tpl, imBuf(:,:,sn));
+            if repeatAll
+                maskImage = repmat(m2d, [1,1,nz]);
+            else
+                maskImage(:,:,sn) = m2d;
+            end
+
+        otherwise
+            % leave maskImage all false
+    end
+end

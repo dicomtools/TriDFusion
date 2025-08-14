@@ -27,6 +27,8 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.cIf not, see <http://www.gnu.org/licenses/>.
 
+    try
+
     USE_VERTICES = false;
 
 %    PIXEL_EDGE_RATIO = 3;
@@ -41,7 +43,8 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     if ~isempty(atInput(dSeriesOffset).asFilesList)
         
         sInputFile = atInput(dSeriesOffset).asFilesList{1};
-        if ~isempty(sInputFile)
+        if ~isempty(sInputFile) && exist(sInputFile, 'file')
+            
             tMetaData = dicominfo(string(sInputFile));
         else
             tMetaData = atInput(dSeriesOffset).atDicomInfo{1};
@@ -53,10 +56,12 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     % Set series label
     
     if exist('sOvewriteSeriesDescription', 'var')
+
         sSeriesDescription = sOvewriteSeriesDescription;
     else
 
         if isfield(tMetaData, 'SeriesDescription')
+
             sSeriesDescription = tMetaData.SeriesDescription;
         else
             sSeriesDescription = '';
@@ -68,6 +73,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         if bShowSeriesDescriptionDialog == true
     
             sSeriesDescription = getViewerSeriesDescriptionDialog(sSeriesDescription);
+            
             if isempty(sSeriesDescription)
                 return;
             end
@@ -95,16 +101,16 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 %    end
     
 %    bUseRoiTemplate = false;
-    try
         
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
     
     if modifiedImagesContourMatrix('get') == false
-        if numel(aInputBuffer) ~= numel(aDicomBuffer)  
-            
-            atRoiInput = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, atRoiInput, false); 
-            
+
+        if ~isequal(size(aInputBuffer), size(aDicomBuffer))
+               
+            [atRoiInput, atVoiInput] = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, atRoiInput, false, atVoiInput, dSeriesOffset);
+                    
             atDicomMeta  = atInputMeta;          
             aDicomBuffer = aInputBuffer;
             
@@ -194,8 +200,10 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     info.SeriesNumber = 1;
     info.StructureSetLabel = 'TRIDFUSION';
 
-    info.StructureSetDate = datestr(now, 'yyyymmdd');
-    info.StructureSetTime = datestr(now,'HHMMSS.FFF');
+    % info.StructureSetDate = datestr(now, 'yyyymmdd');
+    % info.StructureSetTime = datestr(now,'HHMMSS.FFF');
+    info.StructureSetDate = char(datetime('now', 'Format', 'yyyyMMdd'));
+    info.StructureSetTime = char(datetime('now', 'Format', 'HHmmss.SSS'));
 
     info.ReferencedFrameOfReferenceSequence = [];
     info.StructureSetROISequence = [];
@@ -280,7 +288,9 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                 xy = atRoiInput{tt}.Vertices-1;
                             else
                                 if strcmpi(atRoiInput{tt}.Type, 'images.roi.rectangle')
-                                    
+
+                                    aRoiPosition = atRoiInput{tt}.Position;
+                              
                                     dRotation = atRoiInput{tt}.RotationAngle;  % Rotation angle in degrees
 
                                     % Step 1: Apply rotation (if any)
@@ -321,7 +331,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                         R = [cos(theta), -sin(theta);
                                              sin(theta),  cos(theta)];
                                         
-                                        aCoords = atRoiInput{tt}.Position(:, 1:2); % Extract X, Y coordinates
+                                        aCoords = aRoiPosition(:, 1:2); % Extract X, Y coordinates
                                         
                                         aCenter = [xSize/2, ySize/2];     
                                 
@@ -329,12 +339,12 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                         
                                         aRotatedCoords = (R * aTranslatedCoords')'; % Apply the rotation matrix
                                         
-                                        atRoiInput{tt}.Position(:, 1:2) = aRotatedCoords + aCenter; % Translate points back to original position                                       
+                                        aRoiPosition(:, 1:2) = aRotatedCoords + aCenter; % Translate points back to original position                                       
                                     end
 
-                                    aCorner1 = [atRoiInput{tt}.Position(1), atRoiInput{tt}.Position(2)];  
-                                    dWidth   = atRoiInput{tt}.Position(3);
-                                    dHeight  = atRoiInput{tt}.Position(4);
+                                    aCorner1 = [aRoiPosition(1), aRoiPosition(2)];  
+                                    dWidth   = aRoiPosition(3);
+                                    dHeight  = aRoiPosition(4);
 
                                     % Generate the coordinates of the four corners
 
@@ -346,8 +356,9 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                     xy = [aCorner1; aCorner2; aCorner3; aCorner4];
                                                                      
                                 elseif strcmpi(atRoiInput{tt}.Type, 'images.roi.circle')
+                                    aRoiPosition = atRoiInput{tt}.Position;
 
-                                    aCenter = atRoiInput{tt}.Position;        % [x, y]
+                                    aCenter = aRoiPosition;        % [x, y]
                                     dRadius = atRoiInput{tt}.Radius;          % Radius of the circle
                                                                         
                                     theta = linspace(0, 2*pi, 360); % 360 points around the circle
@@ -357,8 +368,9 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                     xy = [xCircle; yCircle]';
 
                                 elseif strcmpi(atRoiInput{tt}.Type, 'images.roi.ellipse')  
+                                    aRoiPosition = atRoiInput{tt}.Position;
 
-                                    aCenter  = atRoiInput{tt}.Position;      % [x, y]
+                                    aCenter  = aRoiPosition;      % [x, y]
                                     semiAxes = atRoiInput{tt}.SemiAxes;      % [a, b]
                                     rotation = atRoiInput{tt}.RotationAngle; % Angle in degrees
                                                                         
@@ -405,7 +417,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             end
                                 
                             sliceThikness = computeSliceSpacing(atDicomMeta);       
-                            [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
+                            [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness, false);
 %                            out = pctransform(pointCloud(a3DOffset), affine3d(xfm'));
 
 %                            aX = out.Location(:,1);
@@ -416,19 +428,14 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             aX = outX(:);
                             aY = outY(:);
                             
-%                            aZ = out.Location(:,3);
                             aZ = zeros(dNBoundaries, 1);
 
-                            if numel(atDicomMeta) == 1
-%                                aZ(:) = a3DOffset(:,3);                                
+                            if isscalar(atDicomMeta)
+%                                                                
                                 aZ = outZ(:);                                
                             else
-%                                 if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
-%                                     aZ(:) = outZ(:);
-%                                 else
-%                         %            aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
-                                    aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.ImagePositionPatient(3);
-%                                end
+
+                                aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.ImagePositionPatient(3);
                             end
                             
 
@@ -436,29 +443,9 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
  %                           aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
  
                             aXYZ = zeros(dNBoundaries*3, 1);
-
-                            dXOffset=1;
-                            for xx=1:3:numel(aXYZ)
-                                aXYZ(xx)=aX(dXOffset);
-                                dXOffset = dXOffset+1;
-                            end
-
-                            dYOffset=1;
-                            for yy=2:3:numel(aXYZ)
-                                aXYZ(yy) = aY(dYOffset);
-                                dYOffset = dYOffset+1;
-                            end
-                            
-                            dZOffset=1;
-                            for zz=3:3:numel(aXYZ)
-                                aXYZ(zz) = aZ(dZOffset);
-                                dZOffset = dZOffset+1;                               
-                            end
-                            
-                            if numel(aXYZ)*64/8 > 65534
-                                dNBoundaries = 1;
-                                aXYZ = zeros(dNBoundaries*3, 1);
-                            end
+                            aXYZ(1:3:end) = aX(:);
+                            aXYZ(2:3:end) = aY(:);
+                            aXYZ(3:3:end) = aZ(:);
                             
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID    = atRoiInput{tt}.SOPClassUID;
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = atRoiInput{tt}.SOPInstanceUID;
@@ -468,17 +455,32 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourData = aXYZ; % TO DO [NumberOfContourPoints * xyz]                                   
 %                             end
                          else
-                            aBoundaries = zeros(size(atRoiInput{tt}.Position, 1),2);
+                            aRoiPosition = atRoiInput{tt}.Position;
 
-                            aBoundaries(:,1) = atRoiInput{tt}.Position(:,2);
-                            aBoundaries(:,2) = atRoiInput{tt}.Position(:,1);
+                            N = size(aRoiPosition,1);
+                            
+                            % compute max 3-D points that fit in 65 534 bytes
+                            bytesPerDouble  = 8;
+                            coordsPerPoint  = 3;    % x,y,z
+                            maxPts          = floor(65534/(bytesPerDouble*coordsPerPoint))/2;
+                            
+                            % if too many vertices, uniformly down-sample to maxPts
+                            if N > maxPts
+
+                                aRoiPosition = reducepoly(aRoiPosition);
+                            end
+
+                            aBoundaries = zeros(size(aRoiPosition, 1),2);
+
+                            aBoundaries(:,1) = aRoiPosition(:,2);
+                            aBoundaries(:,2) = aRoiPosition(:,1);
 
                             dNBoundaries = size(aBoundaries,1);
 
-                            a3DOffset = zeros(size(atRoiInput{tt}.Position, 1),3);
+                            a3DOffset = zeros(size(aRoiPosition, 1),3);
                 
-                            a3DOffset(:,1)=atRoiInput{tt}.Position(:,1)-1;
-                            a3DOffset(:,2)=atRoiInput{tt}.Position(:,2)-1;
+                            a3DOffset(:,1)=aRoiPosition(:,1)-1;
+                            a3DOffset(:,2)=aRoiPosition(:,2)-1;
                             if numel(atDicomMeta) ~= 1
                                 a3DOffset(:,3)=atRoiInput{tt}.SliceNb-1;
                             else
@@ -491,7 +493,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             end
                                 
                             sliceThikness = computeSliceSpacing(atDicomMeta);       
-                            [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
+                            [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness, false);
 %                            out = pctransform(pointCloud(a3DOffset), affine3d(xfm'));
 
 %                            aX = out.Location(:,1);
@@ -504,47 +506,19 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             
 %                            aZ = out.Location(:,3);
                             aZ = zeros(dNBoundaries, 1);
-                            if numel(atDicomMeta) == 1
-%                                aZ(:) = a3DOffset(:,3);                                
+                            if isscalar(atDicomMeta)
+
                                 aZ = outZ(:);                                
                             else
-%                                 if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
-%                                     aZ(:) = outZ(:);
-%                                 else
-%                         %            aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
-                                    aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.ImagePositionPatient(3);
-%                                end
+
+                                aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.ImagePositionPatient(3);
                             end
                             
-
- %                           aZ = zeros(dNBoundaries, 1);
- %                           aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
- 
                             aXYZ = zeros(dNBoundaries*3, 1);
+                            aXYZ(1:3:end) = aX(:);
+                            aXYZ(2:3:end) = aY(:);
+                            aXYZ(3:3:end) = aZ(:);
 
-                            dXOffset=1;
-                            for xx=1:3:numel(aXYZ)
-                                aXYZ(xx)=aX(dXOffset);
-                                dXOffset = dXOffset+1;
-                            end
-
-                            dYOffset=1;
-                            for yy=2:3:numel(aXYZ)
-                                aXYZ(yy) = aY(dYOffset);
-                                dYOffset = dYOffset+1;
-                            end
-                            
-                            dZOffset=1;
-                            for zz=3:3:numel(aXYZ)
-                                aXYZ(zz)=aZ(dZOffset);
-                                dZOffset = dZOffset+1;                               
-                            end
-                            
-                            if numel(aXYZ)*64/8 > 65534
-                                dNBoundaries = 1;
-                                aXYZ = zeros(dNBoundaries*3, 1);
-                            end
-                            
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID    = atRoiInput{tt}.SOPClassUID;
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = atRoiInput{tt}.SOPInstanceUID;
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';
@@ -590,7 +564,8 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
     progressBar( 1, sprintf('Export %s completed %s', sOutFile) );
 
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, sprintf('Error:writeRtStruct(), %s', sOutDir) );
     end
 

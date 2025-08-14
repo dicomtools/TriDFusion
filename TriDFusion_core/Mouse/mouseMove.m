@@ -281,5 +281,6 @@ function mouseMove(~, ~)
             end
         end
     end
-
+    
+    toolbarIconHover();
 end  

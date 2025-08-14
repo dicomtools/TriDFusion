@@ -60,7 +60,8 @@ function importNrrdCallback(~, ~)
         try
             importNrrdLastUsedDir = sPath;
             save(sMatFile, 'importNrrdLastUsedDir');
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
         end        
         
@@ -72,13 +73,14 @@ function importNrrdCallback(~, ~)
         end
 
         if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
-            
+
             link2DMip('set', true);
 
             set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
-            set(btnLinkMipPtr('get'), 'FontWeight', 'bold');            
-        end
+            % set(btnLinkMipPtr('get'), 'FontWeight', 'bold');            
+            set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_white.png'));
+      end
 
         loadNrrdFile(sPath, sFileName, true, []);    
 

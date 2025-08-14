@@ -32,11 +32,25 @@ function convert3DSeriesToPlanar(sPlane, sMethod, dFromSlice, dToSlice)
     aOriginalImage    = dicomBuffer  ('get', [], dSeriesOffset);
     aOriginalMetaData = dicomMetaData('get', [], dSeriesOffset);      
 
-
     dXPixel = aOriginalMetaData{1}.PixelSpacing(1);
     dYPixel = aOriginalMetaData{1}.PixelSpacing(2);
     dZPixel = computeSliceSpacing(aOriginalMetaData);
 
+    if isFusion('get') == true
+
+        isFusion('set', false);
+
+        set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor ('get'));
+        set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+
+        set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_grey.png'));
+    end
+
+     if isPlotContours('get') == true
+
+         isPlotContours('set', false);
+     end
+    
 
     if strcmpi(sPlane, 'coronal')     
         
@@ -173,5 +187,31 @@ function convert3DSeriesToPlanar(sPlane, sMethod, dFromSlice, dToSlice)
     initWindowLevel('set', true);
     
     dicomViewerCore();
-     
+
+    uiLogo = logoObject('get');
+  
+    colorMapOffset('set', 9);
+
+    if strcmpi(aOriginalMetaData{1}.Modality, 'ct') || ...
+       strcmpi(aOriginalMetaData{1}.Modality, 'mr')
+
+        invertColor     ('set', false   );
+        backgroundColor ('set', 'black' );
+        overlayColor    ('set', 'white' );
+        
+        setLogoColor(uiLogo, [0.8500 0.8500 0.8500]);
+    else
+        invertColor     ('set', true   );
+        backgroundColor ('set', 'white' );
+        overlayColor    ('set', 'black' );        
+
+        setLogoColor(uiLogo, [0.1500, 0.1500, 0.1500]);
+    end
+
+    set(uiOneWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));        
+    colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , getColorMap('one', colorMapOffset('get')));
+
+    ptrColorbar = uiColorbarPtr('get');
+           
+    setColorbarColormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
 end

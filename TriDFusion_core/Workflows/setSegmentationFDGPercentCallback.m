@@ -61,6 +61,9 @@ function setSegmentationFDGPercentCallback(hObject, ~)
                        'Toolbar','none'...               
                        );
         end
+
+        setObjectIcon(dlgFDGSegmentation);
+
         % Boundary percent of max
     
             uicontrol(dlgFDGSegmentation,...

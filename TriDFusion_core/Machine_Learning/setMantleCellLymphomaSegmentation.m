@@ -102,7 +102,7 @@ function setMantleCellLymphomaSegmentation(sSegmentatorScript, tMantleCellLympho
 
     aPTImageTemp = aPTImage;
     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    
+
     if any(aLogicalMask(:) ~= 0)
 
         aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
@@ -114,11 +114,11 @@ function setMantleCellLymphomaSegmentation(sSegmentatorScript, tMantleCellLympho
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-    
+
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
@@ -252,52 +252,52 @@ function setMantleCellLymphomaSegmentation(sSegmentatorScript, tMantleCellLympho
                 progressBar(9/11, 'Computing mask, please wait...');
 
 
-                sNiiFileName = sprintf('%s%s', sSegmentationFolderName, 'liver.nii.gz');  
-        
+                sNiiFileName = sprintf('%s%s', sSegmentationFolderName, 'liver.nii.gz');
+
                 if exist(sNiiFileName, 'file')
-        
+
                     nii = nii_tool('load', sNiiFileName);
                     aLiverMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                     aLiverMask = aLiverMask(:,:,end:-1:1);
 
                     clear nii;
-                
+
                     aBWMask = aResampledPTImage;
-    
+
                     aLiver = aResampledPTImage(aLiverMask==1);
 
                     dMin      = min(aResampledPTImage, [], 'all');
                     dLiverMax = max(aLiver, [], 'all');
-                        
+
                     clear aLiverMask;
 
                     dThreshold = dLiverMax * ((100-tMantleCellLymphoma.options.percentOfLiverMax)/100) * dSUVScale;
-    
+
                     if dThreshold > 0
-    
+
                         aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
-  
+
                         aBWMask = imbinarize(aBWMask);
-        
+
                         progressBar(10/11, 'Generating contours, please wait...');
-        
+
                         imMask = aResampledPTImage;
                         imMask(aBWMask == 0) = dMin;
-        
+
                         setSeriesCallback();
-           
+
                         dSmalestVoiValue = tMantleCellLymphoma.options.smalestVoiValue;
                         bPixelEdge = tMantleCellLymphoma.options.pixelEdge;
-        
+
                         sFormula = 'Lymph Nodes & Bone SUV, CT Bone Map';
-                        maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, dThreshold, false, 0, true, sFormula, BWCT, dSmalestVoiValue, [],[],[], dThreshold);                    
+                        maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, dThreshold, false, 0, true, sFormula, BWCT, dSmalestVoiValue, [],[],[], dThreshold);
 
                         clear imMask;
-                        
+
                     end
 
                     clear aBWMask;
-                
+
                 end
 
                 clear aResampledPTImage;
@@ -331,13 +331,16 @@ function setMantleCellLymphomaSegmentation(sSegmentatorScript, tMantleCellLympho
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set fusion
 
     if isFusion('get') == false
 
         set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+        sliderAlphaValue('set', 0.65);
 
         setFusionCallback();
     end
@@ -361,7 +364,7 @@ function setMantleCellLymphomaSegmentation(sSegmentatorScript, tMantleCellLympho
 
     refreshImages();
 
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
@@ -374,7 +377,8 @@ function setMantleCellLymphomaSegmentation(sSegmentatorScript, tMantleCellLympho
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setMantleCellLymphomaSegmentation()' );
     end

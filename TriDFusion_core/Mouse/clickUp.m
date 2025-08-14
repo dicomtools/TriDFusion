@@ -1,4 +1,4 @@
-function clickUp(~, ~)
+function clickUp(hObject, hTarget)
 %function clickUp(~, ~)
 %Set the status of the Viewer progress bar.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -61,6 +61,23 @@ function clickUp(~, ~)
 
        set(fiMainWindowPtr('get'), 'Pointer', 'default');            
        refreshImages();
+    end
+
+    if  strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom') % Patch in case 'shift' was pressed on another figure
+
+        if is2DBrush('get')            == false && ...
+           isMoveImageActivated('get') == false && ...
+           switchTo3DMode('get')       == false && ...
+           switchToIsoSurface('get')   == false && ...
+           switchToMIPMode('get')      == false
+
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+
+                setCrossVisibility(true);
+                
+                set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            end
+        end    
     end
 
     set(fiMainWindowPtr('get'), 'UserData', 'up');
@@ -134,6 +151,25 @@ function clickUp(~, ~)
                 if ~isempty(pRoiPtr)
 
                     pRoiPtr.Position = pRoiPtr.Parent.CurrentPoint(1, 1:2);
+
+                    % Set undo event
+    
+                    atRoiInput = roiTemplate('get', dSeriesOffset);
+                    atVoiInput = voiTemplate('get', dSeriesOffset);
+    
+                    atRoiInputBack = roiTemplateBackup('get', dSeriesOffset);
+                    atVoiInputBack = voiTemplateBackup('get', dSeriesOffset);
+    
+                    if ~isempty(atRoiInputBack) || ~isempty(atVoiInputBack)
+
+                        dUID = generateUniqueNumber(false);
+
+                        roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, atRoiInput, dUID);
+                        voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, atVoiInput, dUID);
+        
+                        enableUndoVoiRoiPanel();
+                    end
+
                 end
                 
                 if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
@@ -157,7 +193,17 @@ function clickUp(~, ~)
                     % adjWL(pFigure.CurrentPoint(1, 1:2));   
 
         % refreshImages();
-                    
+                % else
+                %     if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+                %         % 
+                %         % uiSliderSag = uiSliderSagPtr('get');
+                %         % uiSliderCor = uiSliderCorPtr('get');
+                %         % uiSliderTra = uiSliderTraPtr('get');
+                % 
+                %         % uiSliderSag.Callback = @sliderSagCallback;
+                %         % uiSliderCor.Callback = @sliderCorCallback;
+                %         % uiSliderTra.Callback = @sliderTraCallback;   
+                %     end
                 end
 
             end

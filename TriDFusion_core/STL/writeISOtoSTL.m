@@ -30,7 +30,7 @@ function writeISOtoSTL(sStlFileName)
     isoObj = isoObject('get');
     if ~isempty(isoObj)
 
-        try
+        % try
                       
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;  
@@ -49,7 +49,13 @@ function writeISOtoSTL(sStlFileName)
         dMax = max(im, [], 'all');
         dScale = abs(dMin)+abs(dMax);
 
-        dOffset = dScale*isoObj.Isovalue;
+        if isempty(viewer3dObject('get'))
+
+            dOffset = dScale*isoObj.Isovalue;
+        else
+            dOffset = dScale*isoObj.IsosurfaceValue;
+        end
+
         dIsoValue = dMin+dOffset;
 
         dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
@@ -74,13 +80,18 @@ function writeISOtoSTL(sStlFileName)
         cVals = fv.vertices(fv.faces(:,1),3); % Colour by Z height.
         cLims = [min(cVals) max(cVals)];      % Transform height values
 
+        if isempty(viewer3dObject('get'))
+
+            aIsoCol = isoObj.IsosurfaceColor;
+        else
+            aIsoCol = isoObj.Colormap;
+        end
+        
         nCols = 255;
-        %cMap = jet(nCols);        % onto an 8-bit colour map
-        aIsoCol = isoObj.IsosurfaceColor;
         cMap = zeros(nCols, 3);
-        cMap(:,1) = aIsoCol(1)*255;
-        cMap(:,2) = aIsoCol(2)*255;
-        cMap(:,3) = aIsoCol(3)*255;
+        cMap(:,1) = aIsoCol(1)*nCols;
+        cMap(:,2) = aIsoCol(2)*nCols;
+        cMap(:,3) = aIsoCol(3)*nCols;
 
         fColsDbl = interp1(linspace(cLims(1), cLims(2), nCols), cMap, cVals);
         fCols8bit = fColsDbl*255; % Pass cols in 8bit (0-255) RGB triplets
@@ -89,9 +100,9 @@ function writeISOtoSTL(sStlFileName)
 
         progressBar(1, sprintf('Write %s completed', sStlFileName));
         
-        catch
-            progressBar(1, 'Error:writeISOtoSTL()');                
-        end
+        % catch
+        %     progressBar(1, 'Error:writeISOtoSTL()');                
+        % end
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow; 

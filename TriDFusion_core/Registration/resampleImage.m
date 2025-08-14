@@ -58,7 +58,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             if isfield(atRefMetaData{1}, 'DetectorInformationSequence')
                 Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);            
 
-                [Mdti,~] = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness);
+                [Mdti,~] = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness, true);
                 Mtf = Mdti;
                 Mtf(1,1) = atRefMetaData{1}.PixelSpacing(2);
                 Mtf(2,2) = atRefMetaData{1}.PixelSpacing(1);        
@@ -189,12 +189,40 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
         
     else
 
-        Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-        Rref = imref3d(dimsRef, atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+        % Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+        % Rref = imref3d(dimsRef, atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
 
+        % DICOM volume spatial reference
+        dcmMeta   = atDcmMetaData{1};
+        origin    = dcmMeta.ImagePositionPatient;     % [x0, y0, z0]
+        spacing   = dcmMeta.PixelSpacing;             % [rowSpacing; colSpacing]
+        % dimsDcm = [nRows, nCols, nSlices]
+        Rdcm = imref3d( dimsDcm, ...
+            ... % XWorldLimits along columns uses col‐spacing = spacing(2)
+            [ origin(1), origin(1) + (dimsDcm(2)-1) * spacing(2) ], ...
+            ... % YWorldLimits along rows uses row‐spacing = spacing(1)
+            [ origin(2), origin(2) + (dimsDcm(1)-1) * spacing(1) ], ...
+            ... % ZWorldLimits from first‐ to last‐slice center
+            [ origin(3), origin(3) + (dimsDcm(3)-1) * dcmSliceThickness ] );
+        
+        % Reference volume spatial reference
+        refMeta    = atRefMetaData{1};
+        originRef  = refMeta.ImagePositionPatient;    % [x0, y0, z0]
+        spacingRef = refMeta.PixelSpacing;            % [rowSpacing; colSpacing]
+        % dimsRef = [nRows, nCols, nSlices]
+        Rref = imref3d( dimsRef, ...
+            ... % XWorldLimits along columns
+            [ originRef(1), originRef(1) + (dimsRef(2)-1) * spacingRef(2) ], ...
+            ... % YWorldLimits along rows
+            [ originRef(2), originRef(2) + (dimsRef(1)-1) * spacingRef(1) ], ...
+            ... % ZWorldLimits from first‐ to last‐slice center
+            [ originRef(3), originRef(3) + (dimsRef(3)-1) * refSliceThickness ] );
+                        
         if (round(Rdcm.ImageExtentInWorldX) ~= round(Rref.ImageExtentInWorldX)) && ...
            (round(Rdcm.ImageExtentInWorldY) ~= round(Rref.ImageExtentInWorldY))
+
             if dRefOutputView == true
+
                 dRefOutputView = 2;
             end
         end
@@ -232,109 +260,131 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
 
     %    else
 
-           if dRefOutputView == 2 
-               [resampImage, ~] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef)); 
-           else       
-               [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
-           end
+        if dRefOutputView == 2 
 
-            dimsRsp = size(resampImage);
-
-            if dRefOutputView == true
-                
-                if dimsRsp(1)~=dimsRef(1) || ...
-                   dimsRsp(2)~=dimsRef(2) || ...     
-                   dimsRsp(3)~=dimsRef(3)
-
-                    resampImage=imresize3(resampImage, [dimsRef(1) dimsRef(2) dimsRef(3)],'Method', 'Nearest');
-                    dimsRsp = size(resampImage);
-                end
-            end
-
-    %        dimsRsp = size(resampImage);         
-    %        xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
-    %        yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
-
-    %        resampImage = imtranslate(resampImage,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(resampImage, [], 'all') );         
-
-    %        [resampImage, Rrsmp] = imwarp(dcmImage, Rdcm, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
-    %    end
-
-
-        if numel(atDcmMetaData) ~= 1
-            if dimsRsp(3) < numel(atDcmMetaData)
-                atDcmMetaData = atDcmMetaData(1:numel(atRefMetaData)); % Remove some slices
-            else
-                for cc=1:dimsRsp(3) - numel(atDcmMetaData)
-                    atDcmMetaData{end+1} = atDcmMetaData{end}; %Add missing slice
-                end            
-            end                
+           [resampImage, RB] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef)); 
+        else       
+           [resampImage, RB] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
         end
 
-        if dRefOutputView == 2
-            for jj=1:numel(atDcmMetaData)
-                if numel(atRefMetaData) == numel(atDcmMetaData)
-                    atDcmMetaData{jj}.ImagePositionPatient    = atRefMetaData{jj}.ImagePositionPatient;
-                    atDcmMetaData{jj}.ImageOrientationPatient = atRefMetaData{jj}.ImageOrientationPatient;
-                    atDcmMetaData{jj}.PixelSpacing            = atRefMetaData{jj}.PixelSpacing;  
-                    atDcmMetaData{jj}.Rows                    = atRefMetaData{jj}.Rows;  
-                    atDcmMetaData{jj}.Columns                 = atRefMetaData{jj}.Columns;  
-                    atDcmMetaData{jj}.SpacingBetweenSlices    = atRefMetaData{jj}.SpacingBetweenSlices;  
-                    atDcmMetaData{jj}.SliceThickness          = atRefMetaData{jj}.SliceThickness;      
-                    atDcmMetaData{jj}.SliceLocation           = atRefMetaData{jj}.SliceLocation;      
-                else
-                    atDcmMetaData{jj}.ImagePositionPatient    = atRefMetaData{1}.ImagePositionPatient;
-                    atDcmMetaData{jj}.ImageOrientationPatient = atRefMetaData{1}.ImageOrientationPatient;
-                    atDcmMetaData{jj}.PixelSpacing            = atRefMetaData{1}.PixelSpacing;  
-                    atDcmMetaData{jj}.Rows                    = atRefMetaData{1}.Rows;  
-                    atDcmMetaData{jj}.Columns                 = atRefMetaData{1}.Columns;  
-                    atDcmMetaData{jj}.SpacingBetweenSlices    = atRefMetaData{1}.SpacingBetweenSlices;  
-                    atDcmMetaData{jj}.SliceThickness          = atRefMetaData{1}.SliceThickness;      
-                    atDcmMetaData{jj}.SliceLocation           = atRefMetaData{1}.SliceLocation;                    
-                end
-            end            
-        else
-            if dRefOutputView == false % Keep source z
-                computedSliceThikness = dcmSliceThickness;
+        dimsRsp = size(resampImage);
+
+        if dRefOutputView == true
+            
+            if dimsRsp(1)~=dimsRef(1) || ...
+               dimsRsp(2)~=dimsRef(2) || ...     
+               dimsRsp(3)~=dimsRef(3)
+
+                resampImage = imresize3(resampImage, [dimsRef(1) dimsRef(2) dimsRef(3)],'Method', 'Nearest');
+                dimsRsp = size(resampImage);
+            end
+        end
+
+        if numel(atDcmMetaData) ~= 1
+
+            if dimsRsp(3) < numel(atDcmMetaData)
+                
+                atDcmMetaData = atDcmMetaData(1:dimsRsp(3)); % Remove excess slices
             else
-                computedSliceThikness = (dimsRef(3) * refSliceThickness) / dimsRsp(3); 
+                for cc = 1:(dimsRsp(3) - numel(atDcmMetaData))
+                    atDcmMetaData{end+1} = atDcmMetaData{end}; % Add missing slice
+                end
             end
-        %    computedSliceThikness = Rrsmp.PixelExtentInWorldZ; 
-    
-            for jj=1:numel(atDcmMetaData)
-    
-                atDcmMetaData{jj}.InstanceNumber  = jj;               
-                atDcmMetaData{jj}.NumberOfSlices  = dimsRsp(3);                
-    
-        %        atDcmMetaData{jj}.PixelSpacing(1) = atRefMetaData{1}.PixelSpacing(1);
-        %        atDcmMetaData{jj}.PixelSpacing(2) = atRefMetaData{1}.PixelSpacing(2);
-                atDcmMetaData{jj}.PixelSpacing(1) = dimsDcm(1)/dimsRsp(1)*atDcmMetaData{jj}.PixelSpacing(1);
-                atDcmMetaData{jj}.PixelSpacing(2) = dimsDcm(2)/dimsRsp(2)*atDcmMetaData{jj}.PixelSpacing(2);
-                atDcmMetaData{jj}.SliceThickness  = atRefMetaData{1}.SliceThickness;
-                atDcmMetaData{jj}.SpacingBetweenSlices  = computedSliceThikness;
-    
-                atDcmMetaData{jj}.Rows    = dimsRsp(1);
-                atDcmMetaData{jj}.Columns = dimsRsp(2);
-                atDcmMetaData{jj}.NumberOfSlices = numel(atDcmMetaData);
-    
-                atDcmMetaData{jj}.ImagePositionPatient(1) = -(atDcmMetaData{jj}.PixelSpacing(1)*dimsRsp(1)/2);               
-                atDcmMetaData{jj}.ImagePositionPatient(2) = -(atDcmMetaData{jj}.PixelSpacing(2)*dimsRsp(2)/2);               
-        %        atDcmMetaData{jj}.ImagePositionPatient(3) = atRefMetaData{1}.ImagePositionPatient(3);               
-    
-                if bUpdateDescription == true 
-                    atDcmMetaData{jj}.SeriesDescription  = sprintf('RSP %s', atDcmMetaData{1}.SeriesDescription);
-                end           
+        end
+                
+        % Update metadata entries based on spatial reference
+        for jj = 1:numel(atDcmMetaData)
+
+            if numel(atRefMetaData) == numel(atDcmMetaData)
+                refMeta = atRefMetaData{jj};
+            else
+                refMeta = atRefMetaData{1};
             end
+
+            % atDcmMetaData{jj}.ImageOrientationPatient = ref.ImageOrientationPatient;
+            atDcmMetaData{jj}.PixelSpacing           = refMeta.PixelSpacing;
+            atDcmMetaData{jj}.Rows                   = dimsRef(1);
+            atDcmMetaData{jj}.Columns                = dimsRef(2);
+            atDcmMetaData{jj}.SpacingBetweenSlices   = RB.PixelExtentInWorldZ;
+            atDcmMetaData{jj}.SliceThickness         = RB.PixelExtentInWorldZ;
+            atDcmMetaData{jj}.InstanceNumber         = jj;
+            atDcmMetaData{jj}.NumberOfSlices         = dimsRef(3);
+
+            % % Compute X/Y origin differently for the OutputView case
+            if dRefOutputView == 2
+
+                shiftX = (Rdcm.PixelExtentInWorldX - Rref.PixelExtentInWorldX) / 2;
+                shiftY = (Rdcm.PixelExtentInWorldY - Rref.PixelExtentInWorldY) / 2;
+                
+                % Apply to the reference ImagePositionPatient:
+                origIPP = refMeta.ImagePositionPatient;
+                x0      = origIPP(1) - shiftX;
+                y0      = origIPP(2) - shiftY;
+
+            else
+
+                % Center original volume in-plane using half-pixel world-offsets
+                % Reference origin and spacing
+                origIPP     = atRefMetaData{1}.ImagePositionPatient;  % [x; y; z]
+                origSpacing = atRefMetaData{1}.PixelSpacing;          % [row; col]
             
     
-            for cc=1:numel(atDcmMetaData)-1
-                if atDcmMetaData{1}.ImagePositionPatient(3) < atDcmMetaData{2}.ImagePositionPatient(3)
-                    atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) + computedSliceThikness;               
-                    atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation + computedSliceThikness; 
-                else
-                    atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) - computedSliceThikness;               
-                    atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation - computedSliceThikness;             
-                end
+                % Compute world-coordinate of the reference grid’s center:
+                centerX = origIPP(1) + ((dimsRef(2)-1) * origSpacing(2)) / 2;  % along cols
+                centerY = origIPP(2) + ((dimsRef(1)-1) * origSpacing(1)) / 2;  % along rows
+            
+                % Get the **actual** spacing of your resampled image:
+                newSpacing = atDcmMetaData{jj}.PixelSpacing;  % [row; col]
+            
+                % Compute half-extent of the resampled grid in world-units:
+                halfX = ((dimsRsp(2)-1) * newSpacing(2)) / 2;  % along cols
+                halfY = ((dimsRsp(1)-1) * newSpacing(1)) / 2;  % along rows
+            
+                % Subtract half-extent and then add half a pixel (in mm) to land on the center
+                x0 = centerX - halfX + newSpacing(2)/2;
+                y0 = centerY - halfY + newSpacing(1)/2;
+            end
+
+            atDcmMetaData{jj}.ImagePositionPatient(1) = x0;
+            atDcmMetaData{jj}.ImagePositionPatient(2) = y0;
+
+            if bUpdateDescription
+                
+                atDcmMetaData{jj}.SeriesDescription  = sprintf('RSP %s', atDcmMetaData{jj}.SeriesDescription);
+            end
+        end
+    
+        computedSliceThickness = refSliceThickness;
+
+         % Align first-slice Z per DICOM when using OutputView
+        if dRefOutputView == 2 && dimsRsp(3) ~= dimsDcm(3)
+
+            % Compute slice-normal vector
+            iop     = atRefMetaData{1}.ImageOrientationPatient;
+            rowOri  = iop(1:3);
+            colOri  = iop(4:6);
+            normOri = cross(rowOri, colOri);
+
+            % Determine Z discrepancy
+            refZ    = atRefMetaData{1}.ImagePositionPatient(3);
+            origZ   = atDcmMetaData{1}.ImagePositionPatient(3);
+            deltaZ  = refZ - origZ;
+
+            % Adjust if discrepancy aligns with acquisition direction
+            if deltaZ * normOri(3) < 0
+                atDcmMetaData{1}.ImagePositionPatient(3) = origZ - deltaZ;
+                atDcmMetaData{1}.SliceLocation           = atDcmMetaData{1}.SliceLocation - deltaZ;
+            end
+        end
+
+        % Update slice positions along Z
+        for cc = 1:(numel(atDcmMetaData) - 1)
+            if atDcmMetaData{1}.ImagePositionPatient(3) < atDcmMetaData{2}.ImagePositionPatient(3)
+                atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) + computedSliceThickness;
+                atDcmMetaData{cc+1}.SliceLocation           = atDcmMetaData{cc}.SliceLocation + computedSliceThickness;
+            else
+                atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) - computedSliceThickness;
+                atDcmMetaData{cc+1}.SliceLocation           = atDcmMetaData{cc}.SliceLocation - computedSliceThickness;
             end
         end
     end

@@ -1093,9 +1093,11 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
     progressBar(1, 'Ready');
 
 
-    catch 
+    catch ME   
+        logErrorToFile(ME);
         progressBar( 1 , 'Error: computeVoxelDosimetry()' );
-        errordlg('An error occur during the computation', 'Dosimetry Error');
+        f = errordlg('An error occur during the computation', 'Dosimetry Error');
+        setObjectIcon(f); 
     end
     
     clear aImage;

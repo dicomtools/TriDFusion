@@ -187,7 +187,8 @@ function lungSegmentationPreview(dThreshold, dRadius)
 
     progressBar(1, 'Ready');
     
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, 'Error:lungSegmentationPreview()');           
     end
 

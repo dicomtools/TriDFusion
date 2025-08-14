@@ -40,9 +40,41 @@ function setPlotContoursCallback(~, ~)
 
             isPlotContours('set', false);
 
-            linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefcPtr('get',[],  get(uiFusedSeriesPtr('get'), 'Value'))],'off');
+            % linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefcPtr('get',[],  get(uiFusedSeriesPtr('get'), 'Value'))],'off');
 
             imAxeFcPtr('reset');
+
+            % Link all fusion axes
+
+            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+
+            axe = axePtr  ('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            axefusion = [];
+            for rr=1:dNbFusedSeries
+
+                if ~isempty(axefPtr('get', [], rr))
+
+                    axefusion{end+1} = axefPtr('get', [], rr);
+                end
+            end
+
+            if ~isempty(axefusion)
+
+                linkaxes([axe axefusion{:}], 'xy');
+            end
+
+            % All fusion images visible
+
+            for rr=1:dNbFusedSeries
+
+                imAxeF = imAxeFPtr ('get', [], rr);
+
+                if ~isempty(imAxeF)
+
+                    set(imAxeF , 'visible', 'on');
+                end
+            end
 
         else
             isPlotContours('set', true);
@@ -59,17 +91,19 @@ function setPlotContoursCallback(~, ~)
                         'Position', [0 0 1 1], ...
                         'Visible' , 'off', ...
                         'Ydir'    ,'reverse', ...
-                        'Tag'     , 'axeFc', ...   
+                        'Box'     , 'off', ...
+                        'Tag'     , 'axeFc', ...
                         'XLim'    , [0 inf], ...
                         'YLim'    , [0 inf], ...
                         'CLim'    , [0 inf] ...
                         );
                 axeFc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axeFc.Toolbar = [];               
+                deleteAxesToolbar(axeFc);
+                % axeFc.Toolbar = [];
 
                 set(axeFc, 'HitTest', 'off');  % Disable hit testing for axes
-                set(axeFc, 'XLimMode', 'manual', 'YLimMode', 'manual');  
-                set(axeFc, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+                set(axeFc, 'XLimMode', 'manual', 'YLimMode', 'manual');
+                set(axeFc, 'XMinorTick', 'off', 'YMinorTick', 'off');
 
                 grid(axeFc, 'off');
 
@@ -85,7 +119,7 @@ function setPlotContoursCallback(~, ~)
                     'XLim'    , aXLim, ...
                     'YLim'    , aYLim, ...
                     'CLim'    , [0 inf] ...
-                    );                
+                    );
             end
 
             linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'off');
@@ -116,6 +150,8 @@ function setPlotContoursCallback(~, ~)
                 [~,imAxeFc] = contour(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), imf(:,:), 'ShowText', sShowTextEnable, 'LineWidth', plotContoursLineWidth('get'), 'Visible', 'off');
             end
 
+            disableAxesToolbar(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+
             imAxeFcPtr('set', imAxeFc, get(uiFusedSeriesPtr('get'), 'Value'));
 
             set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
@@ -129,14 +165,14 @@ function setPlotContoursCallback(~, ~)
                 );
 
             set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
-            set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-            set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+            set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');
+            set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off');
 
             grid(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'off');
-                
+
             axis(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'tight');
 
-            linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+            % linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
 
             set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
                 'XLim'    , aXLim, ...
@@ -145,6 +181,41 @@ function setPlotContoursCallback(~, ~)
                 );
 
             uistack(axefcPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'bottom');
+
+            % Link all fusion axes, including the contour axe
+
+            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+
+            axe   = axePtr  ('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axefc = axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+            axefusion = [];
+            for rr=1:dNbFusedSeries
+
+                if ~isempty(axefPtr('get', [], rr))
+
+                    axefusion{end+1} = axefPtr('get', [], rr);
+                end
+            end
+
+            if ~isempty(axefusion)
+
+                linkaxes([axe axefusion{:} axefc], 'xy');
+            end
+
+            % All fusion images not visible
+
+            for rr=1:dNbFusedSeries
+
+                imAxeF  = imAxeFPtr ('get', [], rr);
+
+                if ~isempty(imAxeF)
+
+                    set(imAxeF , 'visible', 'off');
+                end
+            end
+
+            % deleteAxesToolbar(axefc);
 
             colormap( axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')) );
 
@@ -175,18 +246,117 @@ function setPlotContoursCallback(~, ~)
 
             isPlotContours('set', false);
 
-            linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'off');
-            linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'off');
-            linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'off');
-            if link2DMip('get') == true || isFusion('get') == false
-                linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'off');
-            end
+            % linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'off');
+            % linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'off');
+            % linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'off');
+            % if link2DMip('get') == true || isFusion('get') == false
+            %     linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'off');
+            % end
 
             imCoronalFcPtr ('reset');
             imSagittalFcPtr('reset');
             imAxialFcPtr   ('reset');
+
+            % Link all fusion axes, including the contour axe
+
+            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+
+            axes1 = axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            axes1fusion = [];
+            for rr=1:dNbFusedSeries
+
+                if ~isempty(axes1fPtr('get', [], rr))
+
+                    axes1fusion{end+1} = axes1fPtr('get', [], rr);
+                end
+            end
+
+            if ~isempty(axes1fusion)
+
+                linkaxes([axes1 axes1fusion{:}], 'xy');
+            end
+
+            axes2 = axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            axes2fusion = [];
+            for rr=1:dNbFusedSeries
+
+                if ~isempty(axes2fPtr('get', [], rr))
+
+                    axes2fusion{end+1} = axes2fPtr('get', [], rr);
+                end
+            end
+
+            if ~isempty(axes2fusion)
+
+                linkaxes([axes2 axes2fusion{:}], 'xy');
+            end
+
+            axes3 = axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            axes3fusion = [];
+            for rr=1:dNbFusedSeries
+
+                if ~isempty(axes3fPtr('get', [], rr))
+
+                    axes3fusion{end+1} = axes3fPtr('get', [], rr);
+                end
+            end
+
+            if ~isempty(axes3fusion)
+
+                linkaxes([axes3 axes3fusion{:}], 'xy');
+            end
+
+            % All fusion images visible
+
+            for rr=1:dNbFusedSeries
+
+                imCoronalF  = imCoronalFPtr ('get', [], rr);
+                imSagittalF = imSagittalFPtr('get', [], rr);
+                imAxialF    = imAxialFPtr   ('get', [], rr);
+
+                if ~isempty(imCoronalF) && ...
+                   ~isempty(imSagittalF) && ...
+                   ~isempty(imAxialF)
+
+                    set(imCoronalF , 'visible', 'on');
+                    set(imSagittalF, 'visible', 'on');
+                    set(imAxialF   , 'visible', 'on');
+                end
+            end
+
             if link2DMip('get') == true || isFusion('get') == false
+
                 imMipFcPtr('reset');
+
+                axesMip   = axesMipPtr  ('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+                axesMipfusion = [];
+                for rr=1:dNbFusedSeries
+
+                    if ~isempty(axesMipfPtr('get', [], rr))
+                        axesMipfusion{end+1} = axesMipfPtr('get', [], rr);
+                    end
+
+                end
+
+                if ~isempty(axesMipfusion)
+
+                    linkaxes([axesMip axesMipfusion{:}], 'xy');
+                end
+
+                for rr=1:dNbFusedSeries
+
+                    imMipF = imMipFPtr('get', [], rr);
+
+                    if ~isempty(imMipF)
+
+                        set(imMipF , 'visible', 'on');
+                    end
+                end
+
             end
 
         else
@@ -206,18 +376,20 @@ function setPlotContoursCallback(~, ~)
                         'Position', [0 0 1 1], ...
                         'Visible' , 'off', ...
                         'Ydir'    ,'reverse', ...
-                        'Tag'     , 'axes1fc', ...   
+                        'Tag'     , 'axes1fc', ...
+                        'Box'     , 'off', ...
                         'XLim'    , [0 inf], ...
                         'YLim'    , [0 inf], ...
                         'CLim'    , [0 inf] ...
                         );
                 axes1fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes1fc.Toolbar = [];    
+                % axes1fc.Toolbar = [];
                 disableDefaultInteractivity(axes1fc);
+                deleteAxesToolbar(axes1fc);
 
                 set(axes1fc, 'HitTest', 'off');  % Disable hit testing for axes
-                set(axes1fc, 'XLimMode', 'manual', 'YLimMode', 'manual');  
-                set(axes1fc, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+                set(axes1fc, 'XLimMode', 'manual', 'YLimMode', 'manual');
+                set(axes1fc, 'XMinorTick', 'off', 'YMinorTick', 'off');
 
                 grid(axes1fc, 'off');
 
@@ -225,6 +397,7 @@ function setPlotContoursCallback(~, ~)
                 axes1fcPtr('set', axes1fc, get(uiFusedSeriesPtr('get'), 'Value'));
 
                 linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+                linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
 
 %                 uistack(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
 %                 uistack(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'up');
@@ -233,7 +406,7 @@ function setPlotContoursCallback(~, ~)
                     'XLim'    , aAxes1XLim, ...
                     'YLim'    , aAxes1YLim, ...
                     'CLim'    , [0 inf] ...
-                    );               
+                    );
             end
 
             aAxes2XLim = get(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
@@ -248,18 +421,20 @@ function setPlotContoursCallback(~, ~)
                         'Position', [0 0 1 1], ...
                         'Visible' , 'off', ...
                         'Ydir'    ,'reverse', ...
-                        'Tag'     , 'axes2fc', ...   
+                        'Tag'     , 'axes2fc', ...
+                        'Box'     , 'off', ...
                         'XLim'    , [0 inf], ...
                         'YLim'    , [0 inf], ...
                         'CLim'    , [0 inf] ...
                         );
                 axes2fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes2fc.Toolbar = [];   
+                % axes2fc.Toolbar = [];
                 disableDefaultInteractivity(axes2fc);
+                deleteAxesToolbar(axes2fc);
 
                 set(axes2fc, 'HitTest', 'off');  % Disable hit testing for axes
-                set(axes2fc, 'XLimMode', 'manual', 'YLimMode', 'manual');  
-                set(axes2fc, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+                set(axes2fc, 'XLimMode', 'manual', 'YLimMode', 'manual');
+                set(axes2fc, 'XMinorTick', 'off', 'YMinorTick', 'off');
 
                 grid(axes2fc, 'off');
 
@@ -267,6 +442,7 @@ function setPlotContoursCallback(~, ~)
                 axes2fcPtr('set', axes2fc, get(uiFusedSeriesPtr('get'), 'Value'));
 
                 linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+                linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
 
 %                 uistack(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
 %                 uistack(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'up');
@@ -290,18 +466,20 @@ function setPlotContoursCallback(~, ~)
                         'Position', [0 0 1 1], ...
                         'Visible' , 'off', ...
                         'Ydir'    ,'reverse', ...
-                        'Tag'     , 'axes3fc', ...   
+                        'Tag'     , 'axes3fc', ...
+                        'Box'     , 'off', ...
                         'XLim'    , [0 inf], ...
                         'YLim'    , [0 inf], ...
                         'CLim'    , [0 inf] ...
                         );
                 axes3fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes3fc.Toolbar = [];   
+                % axes3fc.Toolbar = [];
                 disableDefaultInteractivity(axes3fc);
+                deleteAxesToolbar(axes3fc);
 
                 set(axes3fc, 'HitTest', 'off');  % Disable hit testing for axes
-                set(axes3fc, 'XLimMode', 'manual', 'YLimMode', 'manual');  
-                set(axes3fc, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+                set(axes3fc, 'XLimMode', 'manual', 'YLimMode', 'manual');
+                set(axes3fc, 'XMinorTick', 'off', 'YMinorTick', 'off');
 
                 grid(axes3fc, 'off');
 
@@ -309,7 +487,8 @@ function setPlotContoursCallback(~, ~)
                 axes3fcPtr('set', axes3fc, get(uiFusedSeriesPtr('get'), 'Value'));
 
                 linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
-% 
+                linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+
 %                 uistack(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
 %                 uistack(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'up');
 
@@ -317,7 +496,7 @@ function setPlotContoursCallback(~, ~)
                     'XLim'    , aAxes3XLim, ...
                     'YLim'    , aAxes3YLim, ...
                     'CLim'    , [0 inf] ...
-                    );                
+                    );
             end
 
             if link2DMip('get') == true && isVsplash('get') == false
@@ -333,26 +512,29 @@ function setPlotContoursCallback(~, ~)
                             'Position', [0 0 1 1], ...
                             'Visible' , 'off', ...
                             'Ydir'    ,'reverse', ...
-                            'Tag'     , 'axesMipfc', ...   
+                            'Tag'     , 'axesMipfc', ...
+                            'Box'     , 'off', ...
                             'XLim'    , [0 inf], ...
                             'YLim'    , [0 inf], ...
                             'CLim'    , [0 inf] ...
                             );
                     axesMipfc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                    axesMipfc.Toolbar = []; 
+                    % axesMipfc.Toolbar = [];
                     disableDefaultInteractivity(axesMipfc);
+                    deleteAxesToolbar(axesMipfc);
 
                     set(axesMipfc, 'HitTest', 'off');  % Disable hit testing for axes
-                    set(axesMipfc, 'XLimMode', 'manual', 'YLimMode', 'manual');  
-                    set(axesMipfc, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
-    
+                    set(axesMipfc, 'XLimMode', 'manual', 'YLimMode', 'manual');
+                    set(axesMipfc, 'XMinorTick', 'off', 'YMinorTick', 'off');
+
                     grid(axesMipfc, 'off');
 
                     axis(axesMipfc, 'tight');
                     axesMipfcPtr('set', axesMipfc, get(uiFusedSeriesPtr('get'), 'Value'));
 
                     linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
-% 
+                    linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+
 %                     uistack(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
 %                     uistack(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'up');
 
@@ -360,10 +542,10 @@ function setPlotContoursCallback(~, ~)
                         'XLim'    , aAxesMipXLim, ...
                         'YLim'    , aAxesMipYLim, ...
                         'CLim'    , [0 inf] ...
-                       );                 
+                       );
                 end
-            end            
-                
+            end
+
             iCoronal  = sliceNumber('get', 'coronal' );
             iSagittal = sliceNumber('get', 'sagittal');
             iAxial    = sliceNumber('get', 'axial'   );
@@ -373,8 +555,9 @@ function setPlotContoursCallback(~, ~)
             linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'off');
             linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'off');
             linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'off');
-            
+
             if link2DMip('get') == true || isFusion('get') == false
+
                 linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'off');
             end
 
@@ -403,7 +586,7 @@ function setPlotContoursCallback(~, ~)
                         setQuantification(get(uiFusedSeriesPtr('get'), 'Value'));
                         tQuantification = quantificationTemplate('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
                     end
-                    
+
                     imf = imf*tQuantification.tSUV.dScale;
                     imMf = imMf*tQuantification.tSUV.dScale;
                 end
@@ -457,12 +640,18 @@ function setPlotContoursCallback(~, ~)
                     [~,imMipFc] = contour(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), permute(imMf(iMipAngle,:,:), [3 2 1]), 'ShowText', sMipShowTextEnable, 'LineWidth', plotContoursLineWidth('get'), 'Visible', 'off');
                 end
             end
+            
+            disableAxesToolbar(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+            disableAxesToolbar(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
             imCoronalFcPtr ('set', imCoronalFc , get(uiFusedSeriesPtr('get'), 'Value') );
             imSagittalFcPtr('set', imSagittalFc, get(uiFusedSeriesPtr('get'), 'Value') );
             imAxialFcPtr   ('set', imAxialFc   , get(uiFusedSeriesPtr('get'), 'Value') );
-            
+
             if link2DMip('get') == true && isVsplash('get') == false
+
+                disableAxesToolbar(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+
                 imMipFcPtr('set', imMipFc, get(uiFusedSeriesPtr('get'), 'Value') );
             end
 
@@ -479,12 +668,12 @@ function setPlotContoursCallback(~, ~)
             disableDefaultInteractivity(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
             set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
-            set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-            set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+            set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');
+            set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off');
 
             grid(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'off');
 
-            linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+            % linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
 
             set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
                 'XLim'    , aAxes1XLim, ...
@@ -494,6 +683,25 @@ function setPlotContoursCallback(~, ~)
 
             uistack(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
 
+            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+
+            axes1   = axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axes1fc = axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+            axes1fusion = [];
+            for rr=1:dNbFusedSeries
+
+                if ~isempty(axes1fPtr('get', [], rr))
+
+                    axes1fusion{end+1} = axes1fPtr('get', [], rr);
+                end
+            end
+
+            if ~isempty(axes1fusion)
+
+                linkaxes([axes1 axes1fusion{:} axes1fc], 'xy');
+            end
+          
             set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
                 'Units'   , 'normalized', ...
                 'Position', [0 0 1 1], ...
@@ -507,12 +715,12 @@ function setPlotContoursCallback(~, ~)
             disableDefaultInteractivity(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
             set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
-            set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-            set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+            set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');
+            set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off');
 
             grid(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'off');
 
-            linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+            % linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
 
             set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
                 'XLim'    , aAxes2XLim, ...
@@ -521,6 +729,23 @@ function setPlotContoursCallback(~, ~)
                 );
 
             uistack(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
+
+            axes2   = axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axes2fc = axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+            axes2fusion = [];
+            for rr=1:dNbFusedSeries
+
+                if ~isempty(axes2fPtr('get', [], rr))
+
+                    axes2fusion{end+1} = axes2fPtr('get', [], rr);
+                end
+            end
+
+            if ~isempty(axes2fusion)
+
+                linkaxes([axes2 axes2fusion{:} axes2fc], 'xy');
+            end
 
             set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
                 'Units'   , 'normalized', ...
@@ -535,12 +760,12 @@ function setPlotContoursCallback(~, ~)
             disableDefaultInteractivity(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
             set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
-            set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-            set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+            set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');
+            set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off');
 
             grid(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'off');
 
-            linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+            % linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
 
             set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
                 'XLim'    , aAxes3XLim, ...
@@ -549,6 +774,44 @@ function setPlotContoursCallback(~, ~)
                 );
 
             uistack(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
+
+            axes3   = axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axes3fc = axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+            axes3fusion = [];
+            for rr=1:dNbFusedSeries
+
+                if ~isempty(axes3fPtr('get', [], rr))
+
+                    axes3fusion{end+1} = axes3fPtr('get', [], rr);
+                end
+
+            end
+
+            if ~isempty(axes3fusion)
+
+                linkaxes([axes3 axes3fusion{:} axes3fc], 'xy');
+
+                % for jj=1:numel(axes3fusion)
+                %     set(axes3fusion{jj}, 'Visible', 'off');
+                % end
+            end
+
+            for rr=1:dNbFusedSeries
+
+                imCoronalF  = imCoronalFPtr ('get', [], rr);
+                imSagittalF = imSagittalFPtr('get', [], rr);
+                imAxialF    = imAxialFPtr   ('get', [], rr);
+
+                if ~isempty(imCoronalF) && ...
+                   ~isempty(imSagittalF) && ...
+                   ~isempty(imAxialF)
+
+                    set(imCoronalF , 'visible', 'off');
+                    set(imSagittalF, 'visible', 'off');
+                    set(imAxialF   , 'visible', 'off');
+                end
+            end
 
             if link2DMip('get') == true && isVsplash('get') == false
 
@@ -564,14 +827,14 @@ function setPlotContoursCallback(~, ~)
                 disableDefaultInteractivity(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
                 set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
-                set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-                set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
-    
+                set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');
+                set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off');
+
                 grid(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'off');
 
                 axis(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'tight');
 
-                linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+                % linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
                 set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off');
 
                 set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
@@ -582,12 +845,38 @@ function setPlotContoursCallback(~, ~)
 
                 uistack(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
 
+                axesMip   = axesMipPtr  ('get', [], get(uiSeriesPtr('get'), 'Value'));
+                axesMipfc = axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+                axesMipfusion = [];
+                for rr=1:dNbFusedSeries
+
+                    if ~isempty(axesMipfPtr('get', [], rr))
+                        axesMipfusion{end+1} = axesMipfPtr('get', [], rr);
+                    end
+
+                end
+
+                if ~isempty(axesMipfusion)
+
+                    linkaxes([axesMip axesMipfusion{:} axesMipfc], 'xy');
+                end
+
+                for rr=1:dNbFusedSeries
+
+                    imMipF = imMipFPtr('get', [], rr);
+
+                    if ~isempty(imMipF)
+
+                        set(imMipF , 'visible', 'off');
+                    end
+                end
             end
 
             colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
             colormap(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
             colormap(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
-            
+
             if link2DMip('get') == true && isVsplash('get') == false
                 colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
             end
@@ -597,21 +886,21 @@ function setPlotContoursCallback(~, ~)
                 xf = fusionAspectRatioValue('get', 'x');
                 yf = fusionAspectRatioValue('get', 'y');
                 zf = fusionAspectRatioValue('get', 'z');
-               
+
                 daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                 daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
                 daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
 
-                if isVsplash('get') == false && link2DMip('get') == true                                   
+                if isVsplash('get') == false && link2DMip('get') == true
                     daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                 end
-                
+
 %               if strcmp(imageOrientation('get'), 'axial')
 
 %                    daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , [zf xf yf]);
 %                    daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , [zf yf xf]);
 %                    daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , [xf yf zf]);
-                    
+
 %                    if link2DMip('get') == true && isVsplash('get') == false
 %                        daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
 %                    end
@@ -621,7 +910,7 @@ function setPlotContoursCallback(~, ~)
 %                    daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
 %                    daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf zf xf]);
 %                    daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
-                    
+
 %                    if link2DMip('get') == true && isVsplash('get') == false
 %                        daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf zf xf]);
 %                    end
@@ -631,7 +920,7 @@ function setPlotContoursCallback(~, ~)
 %                    daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf xf zf]);
 %                    daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf zf yf]);
 %                    daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
-                    
+
 %                    if link2DMip('get') == true && isVsplash('get') == false
 %                        daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf zf yf]);
 %                    end
@@ -644,7 +933,7 @@ function setPlotContoursCallback(~, ~)
                 daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
                 daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                 daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
-                
+
                 if isVsplash('get') == false
                     daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                 end
@@ -652,7 +941,7 @@ function setPlotContoursCallback(~, ~)
                 axis(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
                 axis(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
                 axis(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
-                
+
                 if isVsplash('get') == false
                     axis(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
                 end
@@ -662,34 +951,35 @@ function setPlotContoursCallback(~, ~)
             set(imCoronalFc , 'Visible', 'on');
             set(imSagittalFc, 'Visible', 'on');
             set(imAxialFc   , 'Visible', 'on');
-            
+
             if link2DMip('get') == true && isVsplash('get') == false
                 set(imMipFc, 'Visible', 'on');
             end
-            
+
             % Need to clear some space for the colorbar
-            
+
             if isVsplash('get') == true && ...
                ~strcmpi(vSplahView('get'), 'all')
 
                 if strcmpi(vSplahView('get'), 'coronal')
-                    set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Position', [0 0 0.9000 1]);                        
+                    set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Position', [0 0 0.9000 1]);
                 elseif strcmpi(vSplahView('get'), 'sagittal')
-                    set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Position', [0 0 0.9000 1]);                        
+                    set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Position', [0 0 0.9000 1]);
                 else
-                    set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Position', [0 0 0.9000 1]);                        
+                    set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Position', [0 0 0.9000 1]);
                 end
             else
                 set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Position', [0 0 0.9000 1]);
-            end            
-            
+            end
+
         end
     end
 
-     catch
-         progressBar(1, 'Error:setPlotContoursCallback()');        
+    catch ME
+         logErrorToFile(ME);
+         progressBar(1, 'Error:setPlotContoursCallback()');
      end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow;    
+    drawnow;
 end

@@ -50,166 +50,179 @@ function maskAddVoiByTypeToSeries(aImage, aMask, atMetaData, dSeriesOffset, dSma
         dSmallestValueNbVoxels = round(dSmallestValue/(dVoxelSize/1000)); % In ml
     end
  
-    aBWImage = imbinarize(aImage);
-
-    aBWImage(aMask==0) = 0;
-
-    CC = bwconncomp(aBWImage, 26);
-    dNbElements = numel(CC.PixelIdxList);
-
-    for bb=1:dNbElements  % Nb VOI
-
-        if mod(bb,10)==1 || bb == 1 || bb == dNbElements
-
-            progressBar( bb/dNbElements-0.0001, sprintf('Computing contour %d/%d, please wait.', bb, dNbElements) );
-        end   
-
-        BW = zeros(size(aBWImage));
-
-        BW(CC.PixelIdxList{bb}) = aBWImage(CC.PixelIdxList{bb});
-
-        asTag = cell(5000, 1);
-        dTagOffset =1;
-
-        bBreak = false;
-
-        xmin=0.5;
-        xmax=1;
-        aColor=xmin+rand(1,3)*(xmax-xmin);
+    % Get unique labels in aMask (excluding 0 if you don't want to process background)
+    unique_values = unique(aMask);
+    unique_values(unique_values == 0) = [];  % remove background if needed
     
-        aPixelsList = find(BW);
+    if ~isempty(unique_values)
 
-        if dSmallestValue > 0
-
-            if numel(aPixelsList) < dSmallestValueNbVoxels
-                continue;
-            end
-        end
-
-        [~,~,adSlices] = ind2sub(size(BW), aPixelsList);
-        adSlices = unique(adSlices);                
+        % Loop over each label
+        for label = unique_values'
+            % Create a binary mask for the current label
+            aBWImage = (aMask == label);
+    
+            % aBWImage = imbinarize(aImage);
         
-        dNbComputedSlices = numel(adSlices);
-
-
-        if bClassifySegmentation == true
-             sLesionType = getMaskLessionType(aMask(CC.PixelIdxList{bb}), bType);
-%             sLesionType = 'Unspecified';
-        else
-            sLesionType = 'Unspecified';
-        end
-
-        for aa=1:dNbComputedSlices % Find ROI
-
-            if cancelCreateVoiRoiPanel('get') == true
-                break;
-            end
-
-            dCurrentSlice = adSlices(aa);
-
-            aAxial = BW(:, :, dCurrentSlice);
-
-            if bPixelEdge == true
-                aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-            end
-            
-            [maskAxial, ~, dNbSlicesElements] = bwboundaries(aAxial, 8, 'noholes');                    
-                             
-            for jj=1:dNbSlicesElements
-
-                if cancelCreateVoiRoiPanel('get') == true
-                    break;
-                end
-
-                if bPixelEdge == true
-                    maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;
-                    maskAxial{jj} = reducepoly(maskAxial{jj});
+            aBWImage(aMask==0) = 0;
+        
+            CC = bwconncomp(aBWImage, 26);
+            dNbElements = numel(CC.PixelIdxList);
+        
+            for bb=1:dNbElements  % Nb VOI
+        
+                if mod(bb,10)==1 || bb == 1 || bb == dNbElements
+        
+                    progressBar( bb/dNbElements-0.0001, sprintf('Computing contour %d/%d, please wait.', bb, dNbElements) );
                 end   
+        
+                BW = zeros(size(aBWImage));
+        
+                BW(CC.PixelIdxList{bb}) = aBWImage(CC.PixelIdxList{bb});
+        
+                asTag = cell(5000, 1);
+                dTagOffset =1;
+        
+                bBreak = false;
+        
+                % xmin=0.5;
+                % xmax=1;
+                % aColor=xmin+rand(1,3)*(xmax-xmin);
+                aColor = generateUniqueColor(false);
 
-                curentMask = maskAxial(jj);
-    
-                sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-
-                aPosition = flip(curentMask{1}, 2);
-
-                if bSmoothMask == true
+                aPixelsList = find(BW);
+        
+                if dSmallestValue > 0
+        
+                    if numel(aPixelsList) < dSmallestValueNbVoxels
+                        continue;
+                    end
+                end
+        
+                [~,~,adSlices] = ind2sub(size(BW), aPixelsList);
+                adSlices = unique(adSlices);                
+                
+                dNbComputedSlices = numel(adSlices);       
+        
+                if bClassifySegmentation == true
+                     sLesionType = getMaskLessionType(aMask(CC.PixelIdxList{bb}), bType);
+        %             sLesionType = 'Unspecified';
+                else
+                    sLesionType = 'Unspecified';
+                end
+        
+                for aa=1:dNbComputedSlices % Find ROI
+        
+                    if cancelCreateVoiRoiPanel('get') == true
+                        break;
+                    end
+        
+                    dCurrentSlice = adSlices(aa);
+        
+                    aAxial = BW(:, :, dCurrentSlice);
+        
+                    if bPixelEdge == true
+                        % aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                        aAxial = repelem(aAxial, PIXEL_EDGE_RATIO, PIXEL_EDGE_RATIO); % fastest way             
+                    end
+                    
+                    [maskAxial, ~, dNbSlicesElements] = bwboundaries(aAxial, 8, 'noholes');                    
+                                     
+                    for jj=1:dNbSlicesElements
+        
+                        if cancelCreateVoiRoiPanel('get') == true
+                            break;
+                        end
+        
+                        if bPixelEdge == true
+                            maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;
+                            maskAxial{jj} = reducepoly(maskAxial{jj});
+                        end   
+        
+                        curentMask = maskAxial(jj);
             
-                    aPosition = smoothRoi(aPosition, size(aImage));
+                        sTag = num2str(generateUniqueNumber(false));
+        
+                        aPosition = flip(curentMask{1}, 2);
+        
+                        if bSmoothMask == true
+                    
+                            aPosition = smoothRoi(aPosition, size(aImage));
+                        end
+        
+                        sliceNumber('set', 'axial', dCurrentSlice);
+                        
+                        roiPtr = images.roi.Freehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'), 'Visible', 'off');
+        
+                        if ~isempty(roiPtr.Waypoints(:))
+        
+                            roiPtr.Waypoints(:) = false;   
+                        end
+        
+                        addRoi(roiPtr, get(uiSeriesPtr('get'), 'Value'), sLesionType);
+        
+                        addRoiMenu(roiPtr);
+                        
+                        % addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
+                        % addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
+        
+                        % roiDefaultMenu(roiPtr);
+                        % 
+                        % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                        % uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
+                        % 
+                        % constraintMenu(roiPtr);
+                        % 
+                        % cropMenu(roiPtr);
+                        % 
+                        % voiDefaultMenu(roiPtr);
+                        % 
+                        % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                                               
+                        asTag{dTagOffset} = sTag;
+                        dTagOffset = dTagOffset+1;
+                        
+                        if dTagOffset > numel(asTag)
+                            bBreak = true;
+                            break;
+                        end
+        
+                        % if viewRoiPanel('get') == true
+                        %     drawnow limitrate;
+                        % end
+                    end
+        
+                    if bBreak == true
+                        break;
+                    end
+        
                 end
-
-                sliceNumber('set', 'axial', dCurrentSlice);
-                
-                roiPtr = images.roi.Freehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'), 'Visible', 'off');
-
-                if ~isempty(roiPtr.Waypoints(:))
-
-                    roiPtr.Waypoints(:) = false;   
-                end
-
-                addRoi(roiPtr, get(uiSeriesPtr('get'), 'Value'), sLesionType);
-
-                addRoiMenu(roiPtr);
-                
-                % addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
-                % addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
-
-                % roiDefaultMenu(roiPtr);
-                % 
-                % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-                % uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
-                % 
-                % constraintMenu(roiPtr);
-                % 
-                % cropMenu(roiPtr);
-                % 
-                % voiDefaultMenu(roiPtr);
-                % 
-                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
-                                       
-                asTag{dTagOffset} = sTag;
-                dTagOffset = dTagOffset+1;
-                
-                if dTagOffset > numel(asTag)
-                    bBreak = true;
-                    break;
-                end
-
-                % if viewRoiPanel('get') == true
-                %     drawnow limitrate;
-                % end
+        
+                asTag = asTag(~cellfun(@isempty, asTag));
+        
+                if ~isempty(asTag)
+        
+                    if exist('sVOIName', 'var')
+                        sLabel = sprintf('%s %d', sVOIName, bb);
+                    else
+                        sLabel = sprintf('VOI%d', bb);
+                    end
+        
+                    createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
+                end  
+        
+                clear BW;
             end
-
-            if bBreak == true
-                break;
-            end
-
         end
 
-        asTag = asTag(~cellfun(@isempty, asTag));
-
-        if ~isempty(asTag)
-
-            if exist('sVOIName', 'var')
-                sLabel = sprintf('%s %d', sVOIName, bb);
-            else
-                sLabel = sprintf('VOI%d', bb);
-            end
-
-            createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
-        end  
-
-        clear BW;
-    end
-
-    clear aBWImage;
-
-    setVoiRoiSegPopup();
+        clear aBWImage;
     
-    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
-
-        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+        setVoiRoiSegPopup();
+        
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+    
+            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+        end        
     end
-
 end
 
 function  sLesionType = getMaskLessionType(aMask, bType)

@@ -68,7 +68,10 @@ function [tMaterial, sMatFile] = xlsxToMaterialMat(sFileName)
         end
 
         save(sMatFile, 'tMaterial');
-    catch
+        
+    catch ME   
+        logErrorToFile(ME);
+
         tMaterial = [];
         sMatFile = '';        
     end

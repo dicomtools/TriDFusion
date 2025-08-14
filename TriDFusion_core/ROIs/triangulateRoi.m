@@ -103,9 +103,9 @@ function triangulateRoi(sRoiTag)
                     if ( (midX <= iSagittalSize) &&...
                          (midY <= iAxialSize) )
 
-                        set(uiSliderSagPtr('get'), 'Value', midX / iSagittalSize);
-                        set(uiSliderTraPtr('get'), 'Value', 1 - (midY / iAxialSize));
-                        set(uiSliderCorPtr('get'), 'Value', dSliceNb / iCoronalSize);
+                        set(uiSliderSagPtr('get'), 'Value', midX);
+                        set(uiSliderTraPtr('get'), 'Value', iAxialSize - midY + 1);
+                        set(uiSliderCorPtr('get'), 'Value', dSliceNb);
 
                         sliceNumber('set', 'sagittal', midX);
                         sliceNumber('set', 'axial'   , midY);
@@ -134,9 +134,9 @@ function triangulateRoi(sRoiTag)
                     if ( (midX <= iCoronalSize) &&...
                          (midY <= iAxialSize) )
 
-                        set(uiSliderCorPtr('get'), 'Value', midX / iCoronalSize);
-                        set(uiSliderTraPtr('get'), 'Value', 1 - (midY / iAxialSize));
-                        set(uiSliderSagPtr('get'), 'Value', dSliceNb / iSagittalSize);
+                        set(uiSliderCorPtr('get'), 'Value', midX);
+                        set(uiSliderTraPtr('get'), 'Value', iAxialSize - midY + 1);
+                        set(uiSliderSagPtr('get'), 'Value', dSliceNb);
 
                         sliceNumber('set', 'coronal' , midX);
                         sliceNumber('set', 'axial'   , midY);
@@ -166,9 +166,9 @@ function triangulateRoi(sRoiTag)
                     if ( (midX <= iSagittalSize) && ...
                          (midY <= iCoronalSize) )
 
-                        set(uiSliderSagPtr('get'), 'Value', midX / iSagittalSize);
-                        set(uiSliderCorPtr('get'), 'Value', midY / iCoronalSize);
-                        set(uiSliderTraPtr('get'), 'Value', 1 - (dSliceNb / iAxialSize));
+                        set(uiSliderSagPtr('get'), 'Value', midX);
+                        set(uiSliderCorPtr('get'), 'Value', midY);
+                        set(uiSliderTraPtr('get'), 'Value', iAxialSize - dSliceNb + 1);
 
                         sliceNumber('set', 'sagittal', midX);
                         sliceNumber('set', 'coronal' , midY);

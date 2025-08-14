@@ -1,5 +1,5 @@
-function atRoi = roiTemplate(sAction, dOffset, tValue)
-%function atRoi = roiTemplate(sAction, dOffset, tValue)
+function atRoi = roiTemplate(sAction, dSeriesOffset, tValue)
+%function atRoi = roiTemplate(sAction, dSeriesOffset, tValue)
 %Get\Set ROI Template.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -33,10 +33,10 @@ function atRoi = roiTemplate(sAction, dOffset, tValue)
     persistent patRoi;           
 
     if strcmpi('set', sAction)
-        patRoi{dOffset} = tValue; 
+        patRoi{dSeriesOffset} = tValue; 
     elseif strcmpi('reset', sAction)    
-        if exist('dOffset', 'var') % Clear one series
-            patRoi{dOffset} = [];
+        if exist('dSeriesOffset', 'var') % Clear one series
+            patRoi{dSeriesOffset} = [];
         else    
             
             for aa=1:numel(patRoi)
@@ -44,10 +44,10 @@ function atRoi = roiTemplate(sAction, dOffset, tValue)
             end
         end
     else
-        if numel(patRoi) < dOffset
+        if numel(patRoi) < dSeriesOffset
             atRoi = '';
         else
-            atRoi = patRoi{dOffset};
+            atRoi = patRoi{dSeriesOffset};
         end      
     end
 end  

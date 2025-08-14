@@ -38,13 +38,18 @@ function setRoiPanelCtUiValues()
     tInput = inputTemplate('get');    
 
     for tt=1:numel(tInput)
-        if strcmpi (tInput(tt).atDicomInfo{1}.Modality, 'ct')
-            if ~isempty(tInput(tt).tQuant)
-                dNbCt = dNbCt+1;
-                tRoiPanelCT{dNbCt}.sSeriesDescription = asSeriesDescription{tt};
-                tRoiPanelCT{dNbCt}.dMin = tInput(tt).tQuant.tCount.dMin;
-                tRoiPanelCT{dNbCt}.dMax = tInput(tt).tQuant.tCount.dMax;
-                tRoiPanelCT{dNbCt}.dSeriesNumber = tt;
+
+        if ~isempty(tInput(tt).atDicomInfo)
+
+            if strcmpi (tInput(tt).atDicomInfo{1}.Modality, 'ct')
+                
+                if ~isempty(tInput(tt).tQuant)
+                    dNbCt = dNbCt+1;
+                    tRoiPanelCT{dNbCt}.sSeriesDescription = asSeriesDescription{tt};
+                    tRoiPanelCT{dNbCt}.dMin = tInput(tt).tQuant.tCount.dMin;
+                    tRoiPanelCT{dNbCt}.dMax = tInput(tt).tQuant.tCount.dMax;
+                    tRoiPanelCT{dNbCt}.dSeriesNumber = tt;
+                end
             end
         end
 

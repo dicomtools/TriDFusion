@@ -69,7 +69,9 @@ function setMachineLearningFDGBrownFatSUVCallback(hObject, ~)
                            );    
             end
 
-         % Exclude organs from AI analysis
+            setObjectIcon(dlgFDGBrownFatSUVSegmentation);
+           
+            % Exclude organs from AI analysis
     
             uicontrol(dlgFDGBrownFatSUVSegmentation,...
                       'style'   , 'text',...

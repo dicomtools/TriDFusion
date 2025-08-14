@@ -38,26 +38,26 @@ function setSagWindowPosition(uiSagWindow)
             dXoffset = uiSegMainPanel.Position(3);
             dYoffset = addOnWidth('get')+30+15;
             dXsize   = getMainWindowSize('xsize')-(uiSegMainPanel.Position(3)/2);
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                   
+            dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                   
         else    
             if isVsplash('get') == true
 
                 dXoffset = (uiSegMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/4);
                 dYoffset = addOnWidth('get')+30+15;
                 dXsize   = (getMainWindowSize('xsize')/4)-(uiSegMainPanel.Position(3)/2);
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                   
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                   
             else 
                 if isPanelFullScreen(btnUiSagWindowFullScreenPtr('get')) 
 
                     dXoffset = uiSegMainPanel.Position(3);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = getMainWindowSize('xsize')-uiSegMainPanel.Position(3);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;  
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;  
                 else
                     dXoffset = (uiSegMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/5);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiSegMainPanel.Position(3)/2);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;  
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;  
                 end
             end
         end
@@ -68,26 +68,26 @@ function setSagWindowPosition(uiSagWindow)
             dXoffset = uiKernelMainPanel.Position(3);
             dYoffset = addOnWidth('get')+30+15;
             dXsize   = getMainWindowSize('xsize')-(uiKernelMainPanel.Position(3)/2);
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                   
+            dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                   
         else
             if isVsplash('get') == true
 
                 dXoffset = (uiKernelMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/4);
                 dYoffset = addOnWidth('get')+30+15;
                 dXsize   = (getMainWindowSize('xsize')/4)-(uiKernelMainPanel.Position(3)/2);
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                                    
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                                    
             else     
                 if isPanelFullScreen(btnUiSagWindowFullScreenPtr('get')) 
 
                     dXoffset = uiKernelMainPanel.Position(3);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = getMainWindowSize('xsize')-uiKernelMainPanel.Position(3);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                  
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                  
                 else
                     dXoffset = (uiKernelMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/5);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiKernelMainPanel.Position(3)/2);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                               
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                               
                 end
             end
        end
@@ -98,26 +98,26 @@ function setSagWindowPosition(uiSagWindow)
             dXoffset = uiRoiMainPanel.Position(3);
             dYoffset = addOnWidth('get')+30+15;
             dXsize   = getMainWindowSize('xsize')-(uiRoiMainPanel.Position(3)/2);
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                            
+            dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                            
         else
             if isVsplash('get') == true
 
                 dXoffset = (uiRoiMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/4);
                 dYoffset = addOnWidth('get')+30+15;
                 dXsize   = (getMainWindowSize('xsize')/4)-(uiRoiMainPanel.Position(3)/2);
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                                    
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                                    
             else
                 if isPanelFullScreen(btnUiSagWindowFullScreenPtr('get')) 
 
                     dXoffset = uiRoiMainPanel.Position(3);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = getMainWindowSize('xsize')-uiRoiMainPanel.Position(3);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;     
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;     
                 else
                     dXoffset = (uiRoiMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/5);
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiRoiMainPanel.Position(3)/2);
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                          
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                          
                 end
             end
         end           
@@ -128,26 +128,26 @@ function setSagWindowPosition(uiSagWindow)
             dXoffset = 0;
             dYoffset = addOnWidth('get')+30+15;
             dXsize   = getMainWindowSize('xsize');
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;  
+            dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;  
         else
             if isVsplash('get') == true
 
                 dXoffset = getMainWindowSize('xsize')/4;
                 dYoffset = addOnWidth('get')+30+15;
                 dXsize   = getMainWindowSize('xsize')/4;
-                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                    
+                dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                    
             else   
                 if isPanelFullScreen(btnUiSagWindowFullScreenPtr('get')) 
 
                     dXoffset = 0;
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = getMainWindowSize('xsize');
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                    
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                    
                 else
                     dXoffset = getMainWindowSize('xsize')/5;
                     dYoffset = addOnWidth('get')+30+15;
                     dXsize   = getMainWindowSize('xsize')/5;
-                    dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;                 
+                    dYsize   = getMainWindowSize('ysize')-viewerToolbarHeight('get')-viewerTopBarHeight('get')-addOnWidth('get')-30-15;                 
                 end
             end
         end
@@ -163,10 +163,24 @@ function setSagWindowPosition(uiSagWindow)
 
     txt2 = axesText('get', 'axes2');
     if ~isempty(txt2)
+
         if isvalid(txt2.Parent)
+
+            if isVsplash('get') == true
+
+                if strcmpi(vSplahView('get'), 'all')
+                    
+                    dExtraYOffset = 0;   
+                else
+                    dExtraYOffset = -20;   
+                end
+            else
+                dExtraYOffset = 0;                                
+            end
+
             set(txt2.Parent, ...
                 'Position', [5 ...
-                             dYsize-15 ...
+                             dYsize-15-20+dExtraYOffset ...
                              70 ...
                              30]...
                 );  
@@ -182,7 +196,7 @@ function setSagWindowPosition(uiSagWindow)
 
            set(btnUiSagWindowFullScreen, ...
                 'Position', [dXsize-20 ...
-                             30 ...
+                             34 ...
                              20 ...
                              20] ...
                );   
@@ -195,5 +209,28 @@ function setSagWindowPosition(uiSagWindow)
                );
         end
     end 
-   
+
+    chkUiSagWindowSelected = chkUiSagWindowSelectedPtr('get');
+
+    if ~isempty(chkUiSagWindowSelected) && ...
+       ~isempty(btnUiSagWindowFullScreen)
+
+        if isFusion('get') == true && ...
+           isPanelFullScreen(btnUiSagWindowFullScreenPtr('get'))  
+
+           set(chkUiSagWindowSelected, ...
+                'Position', [dXsize-40 ...
+                             34 ...
+                             20 ...
+                             20] ...
+               );   
+        else
+            set(chkUiSagWindowSelected, ...
+                'Position', [dXsize-40 ...
+                             10 ...
+                             20 ...
+                             20] ...
+               );
+        end
+    end    
 end

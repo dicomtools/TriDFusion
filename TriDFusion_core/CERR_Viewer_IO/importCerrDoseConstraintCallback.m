@@ -53,7 +53,8 @@ function importCerrDoseConstraintCallback(~, ~)
         try
             importCERRLastUsedDir = sPathName;
             save(sMatFile, 'importCERRLastUsedDir');
-        catch
+        catch ME   
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
 %            h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                if integrateToBrowser('get') == true
@@ -79,9 +80,11 @@ function importCerrDoseConstraintCallback(~, ~)
             planC = loadPlanC(cerrFileName, viewerTempDirectory('get'));
             planC = updatePlanFields(planC);
             planC = quality_assure_planC(cerrFileName,planC);
-        catch
-            progressBar(1, 'Error: loadCerrDoseConstraint() Cant Load CERR PlanC!');
-%            return;
+            
+        catch ME   
+            logErrorToFile(ME);
+            progressBar(1, 'Error: importCerrDoseConstraintCallback() Cant Load CERR PlanC!');
+            return;
         end
         
         structNamC = {'Lung_IPSI','Lung_CNTR','PTV'};

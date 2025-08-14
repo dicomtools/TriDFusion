@@ -65,7 +65,8 @@ function exportCurrentLungLiverReportToDicomCallback(~, ~)
         try
             exportDicomLastUsedDir = sOutDir;
             save(sMatFile, 'exportDicomLastUsedDir');
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
         end   
     end    
@@ -75,7 +76,8 @@ function exportCurrentLungLiverReportToDicomCallback(~, ~)
 
     objectToDicomJpg(sWriteDir, fig3DLungShuntReport, '3DF Lung Shunt', get(uiSeriesPtr('get'), 'Value'))
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         progressBar( 1 , 'Error: exportCurrentReportToDicomCallback() cant export report' );
     end
 

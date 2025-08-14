@@ -82,8 +82,9 @@ function showRGBColormapImage(bShowImage)
                 'Position', [0 0 1 0.5], ...
                 'Visible' , 'off'...
                );
-        axeRGBImage.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axeRGBImage.Toolbar.Visible = 'off';
+        axeRGBImage.Interactions = [];
+        % axeRGBImage.Toolbar.Visible = 'off';
+        deleteAxesToolbar(axeRGBImage);
         disableDefaultInteractivity(axeRGBImage);
 
         axeRGBImagePtr('set', axeRGBImage);
@@ -101,8 +102,10 @@ function showRGBColormapImage(bShowImage)
 
         daspect(axeRGBImage, [1 1 1]);
 
-        set(axeRGBImage, 'Visible', 'off');
-        axeRGBImage.Toolbar.Visible = 'off';
+        % set(axeRGBImage, 'Visible', 'off');
+        % axeRGBImage.Toolbar.Visible = 'off';
+        
+        disableAxesToolbar(axeRGBImage);
         disableDefaultInteractivity(axeRGBImage);
     else
         if size(dicomBuffer('get'), 3) ~= 1 && ...

@@ -29,8 +29,27 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
     gtxtRoiList = [];
 
-    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-    atMetaData = dicomMetaData('get', [],  get(uiSeriesPtr('get'), 'Value'));
+    atInput = inputTemplate('get');
+
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    atRoiInput     = roiTemplate('get', dSeriesOffset);
+    atVoiInput     = voiTemplate('get', dSeriesOffset);
+    atMetaData     = dicomMetaData('get', [], dSeriesOffset);
+    aDisplayBuffer = dicomBuffer('get', [], dSeriesOffset);
+    
+    bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
+
+    if bModifiedMatrix  == false && ... 
+       bSegmented       == false && ...
+       bMovementApplied == false % Can't use input buffer if movement have been applied
+
+        if numel(aInputBuffer) ~= ...
+           numel(aDisplayBuffer)
+
+            [atRoiInput, atVoiInput] = resampleROIs(aDisplayBuffer, atMetaData, aInputBuffer, atInputMetaData, atRoiInput, false, atVoiInput, dSeriesOffset);
+        end
+    end
 
     tQuant = quantificationTemplate('get');
     if isfield(tQuant, 'tSUV')
@@ -46,8 +65,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
     FIG_MPLOT_Y = ySize*0.75;
     FIG_MPLOT_X = FIG_MPLOT_Y;
 
-    % if viewerUIFigure('get') == true
-    if 0
+    if viewerUIFigure('get') == true
         figRoiMultiplePlot = ...
             uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_MPLOT_X/2) ...
                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_MPLOT_Y/2) ...
@@ -75,6 +93,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                    );
     end
 
+    setObjectIcon(figRoiMultiplePlot);
+
     setMultiplePlotFigureName();
 
     mMultiplePlotFile = uimenu(figRoiMultiplePlot,'Label','File');
@@ -97,8 +117,9 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'on'...
              );
-    axeMultiplePlot.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeMultiplePlot.Toolbar.Visible = 'off';
+    axeMultiplePlot.Interactions = [];
+    % axeMultiplePlot.Toolbar.Visible = 'off';
+    deleteAxesToolbar(axeMultiplePlot);
     disableDefaultInteractivity(axeMultiplePlot);
 
     axeMultiplePlot.Title.String = sType;
@@ -170,6 +191,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
     aAxePosition = get(axeMultiplePlot, 'Position');
 
+
     uiRoiListMainPanel = ...
         uipanel(figRoiMultiplePlot,...
                 'Title'   , 'VOI/ROI List', ...
@@ -186,13 +208,20 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
     aRoiListMainPosition = get(uiRoiListMainPanel, 'Position');
 
+    if viewerUIFigure('get') == true || ...
+       ~isMATLABReleaseOlderThan('R2025a')  
+        ySize = aAxePosition(4)-15;
+    else
+        ySize = 5000;
+    end
+
     uiRoiListPanel = ...
         uipanel(uiRoiListMainPanel,...
                 'Units'   , 'pixels',...
                 'position', [0 ...
                              0 ...
                              aRoiListMainPosition(3) ...
-                             5000 ...
+                             ySize ...
                             ],...
                 'BackgroundColor', viewerBackgroundColor('get'), ...
                 'ForegroundColor', viewerForegroundColor('get'), ...
@@ -201,14 +230,24 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
     aRoiListPosition = get(uiRoiListPanel, 'Position');
 
+    if viewerUIFigure('get') == true || ...
+       ~isMATLABReleaseOlderThan('R2025a')  
+
+       xPositon = aRoiListPosition(3)-20;
+       ySize = aRoiListMainPosition(4);
+    else
+       xPositon = aRoiListPosition(3)-20;
+       ySize = aRoiListMainPosition(4)-15;       
+    end
+
     uiRoiListPanelSlider = ...
         uicontrol('Style'   , 'Slider', ...
                   'Parent'  , uiRoiListMainPanel,...
                   'Units'   , 'pixels',...
-                  'position', [aRoiListPosition(3)-20 ...
+                  'position', [xPositon ...
                                0 ...
                                20 ...
-                               aRoiListMainPosition(4)-15 ...
+                               ySize ...
                                ],...
                   'Value', 0, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -249,11 +288,17 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
         aRoiListMainPosition = get(uiRoiListMainPanel, 'Position');
 
+        if uiRoiListPanelSlider.Value == 0 
+            ySize = aAxePosition(4)-15;
+        else
+            ySize = 5000;
+        end
+
         set(uiRoiListPanel, ...
             'position', [0 ...
                          0 ...
                          aRoiListMainPosition(3) ...
-                         5000 ...
+                         ySize ...
                         ]...
             );
 
@@ -273,6 +318,15 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
         aPosition = get(uiRoiListPanel, 'Position');
 
+        if viewerUIFigure('get') == true || ...
+           ~isMATLABReleaseOlderThan('R2025a') && ...
+           uiRoiListPanelSlider.Value == 0 
+
+            ySize = aAxePosition(4)-15;
+        else
+            ySize = 5000;
+        end
+
         dPanelYSize  = aPosition(4);
         dPanelOffset = val * dPanelYSize;
 
@@ -280,7 +334,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             'Position', [aPosition(1) ...
                          0-dPanelOffset ...
                          aPosition(3) ...
-                         aPosition(4) ...
+                         ySize ...
                          ] ...
             );
     end
@@ -362,9 +416,9 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
         set(figRoiMultiplePlot, 'Pointer', 'watch');
         drawnow;
 
-        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+        % atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        % atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        % atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
         tQuant = quantificationTemplate('get');
         if isfield(tQuant, 'tSUV')
@@ -387,8 +441,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                     try
 
                     imCData = computeHistogram(aInputBuffer, ...
-                                               atInputMetaData, ...
-                                               dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                               aDisplayBuffer, ...
                                                atMetaData, ...
                                                atVoiInput{bb}, ...
                                                atRoiInput, ...
@@ -396,7 +449,6 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                bSUVUnit, ...
                                                bModifiedMatrix, ...
                                                bSegmented, ...
-                                               bDoseKernel, ...
                                                bMovementApplied);
 
                     set(axeMultiplePlot, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
@@ -458,19 +510,22 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                     dOffset = dOffset+1;
                     bFoundTag = true;
 
-                    catch
+                    catch ME 
+                        logErrorToFile(ME); 
                     end
                     break;
                 end
             end
 
             if bFoundTag == false
+
                 for bb=1:numel(atRoiInput)
+
                     if strcmp(atVoiRoiTag{aa}.Tag, atRoiInput{bb}.Tag)
+
                         try
                         imCData = computeHistogram(aInputBuffer, ...
-                                                   atInputMetaData, ...
-                                                   dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                                   aDisplayBuffer, ...
                                                    atMetaData, ...
                                                    atRoiInput{bb}, ...
                                                    atRoiInput, ...
@@ -478,7 +533,6 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                    bSUVUnit, ...
                                                    bModifiedMatrix, ...
                                                    bSegmented, ...
-                                                   bDoseKernel, ...
                                                    bMovementApplied);
 
                         set(axeMultiplePlot, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
@@ -540,7 +594,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                         dOffset = dOffset+1;
                         bFoundTag = true;
 
-                        catch
+                        catch ME 
+                            logErrorToFile(ME); 
                         end
                         break;
 
@@ -554,7 +609,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             pCursor.Enable = 'on';
         end
 
-        catch
+        catch ME 
+            logErrorToFile(ME); 
             progressBar(1, 'Error:figRoiHistogram()');
         end
 
@@ -577,30 +633,24 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
     function copyMultiplePlotDisplayCallback(~, ~)
 
-        try
-
+        try      
             set(figRoiMultiplePlot, 'Pointer', 'watch');
-
-%            rdr = get(hFig,'Renderer');
-            inv = get(figRoiMultiplePlot,'InvertHardCopy');
-
-%            set(hFig,'Renderer','Painters');
-            set(figRoiMultiplePlot,'InvertHardCopy','Off');
-
             drawnow;
-            hgexport(figRoiMultiplePlot,'-clipboard');
 
-%            set(hFig,'Renderer',rdr);
-            set(figRoiMultiplePlot,'InvertHardCopy',inv);
-        catch
+            copyFigureToClipboard(figRoiMultiplePlot);
+       
+        catch ME
+            logErrorToFile(ME); 
+            progressBar(1, 'Error:copyMultiplePlotDisplayCallback()');
         end
 
         set(figRoiMultiplePlot, 'Pointer', 'default');
+        drawnow;
     end
 
     function exportCurrentMultiplePlotCallback(~, ~)
 
-        tInput = inputTemplate('get');
+        atInput = inputTemplate('get');
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
@@ -638,33 +688,49 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
         if size(aInputBuffer, 3) ==1
 
-            if tInput(dSeriesOffset).bFlipLeftRight == true
+            if atInput(dSeriesOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1);
             end
 
-            if tInput(dSeriesOffset).bFlipAntPost == true
+            if atInput(dSeriesOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:);
             end
         else
-            if tInput(dSeriesOffset).bFlipLeftRight == true
+            if atInput(dSeriesOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1,:);
             end
 
-            if tInput(dSeriesOffset).bFlipAntPost == true
+            if atInput(dSeriesOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:,:);
             end
 
-            if tInput(dSeriesOffset).bFlipHeadFeet == true
+            if atInput(dSeriesOffset).bFlipHeadFeet == true
                 aInputBuffer=aInputBuffer(:,:,end:-1:1);
             end
         end
 
-        atInputMetaData = tInput(dSeriesOffset).atDicomInfo;
+        atInputMetaData = atInput(dSeriesOffset).atDicomInfo;
+
+        bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
+
+        transM = eye(3);
+
+        if bModifiedMatrix  == false && ... 
+           bMovementApplied == false && ...     
+           bSegmented       == false        % Can't use input buffer if movement have been applied
+   
+            if numel(aInputBuffer) ~= ...
+               numel(aDisplayBuffer)
+
+                [atRoiInput, atVoiInput, transM] = resampleROIs(aDisplayBuffer, atMetaData, aInputBuffer, atInputMetaData, atRoiInput, false, atVoiInput, dSeriesOffset);
+            end
+        end
 
         try
             matlab.io.internal.getExcelInstance;
             bExcelInstance = true;
         catch exception
+            logErrorToFile(exception);             
 %            warning(message('MATLAB:xlswrite:NoCOMServer'));
             bExcelInstance = false;
         end
@@ -708,7 +774,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             try
                 saveHistLastUsedDir = [path '/'];
                 save(sMatFile, 'saveHistLastUsedDir');
-            catch
+            catch ME
+                logErrorToFile(ME); 
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
 %                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                    if integrateToBrowser('get') == true
@@ -858,7 +925,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
                 dLineOffset = dLineOffset+1;
 
-                bMovementApplied = tInput(dSeriesOffset).tMovement.bMovementApplied;
+                bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
 
                 for rt=1:numel(atVoiRoiTag)
 
@@ -887,8 +954,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                            bSUVUnit, ...
                                            bModifiedMatrix, ...
                                            bSegmented, ...
-                                           bDoseKernel, ...
-                                           bMovementApplied);
+                                           bMovementApplied, ...
+                                           transM);
 
                             if ~isempty(tVoiComputed)
 
@@ -993,7 +1060,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                     end
                 end
 
-                bMovementApplied = tInput(dSeriesOffset).tMovement.bMovementApplied;
+                bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
 
                 dLineOffset = dLineOffset+1;
 
@@ -1011,7 +1078,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
                                 atRoiInput{ro}.MaxDistances = tMaxDistances;
 
-                                roiTemplate('set', dSeriesOffset, atRoiInput);
+                                % roiTemplate('set', dSeriesOffset, atRoiInput);
                            end
                         end
                     end
@@ -1046,8 +1113,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                    bSUVUnit, ...
                                                    bModifiedMatrix, ...
                                                    bSegmented, ...
-                                                   bDoseKernel, ...
-                                                   bMovementApplied);
+                                                   bMovementApplied, ...
+                                                   transM);
 
                                     if ~isempty(tVoiComputed)
 
@@ -1191,7 +1258,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
                                                 atRoiInput{bb}.MaxDistances = tMaxDistances;
 
-                                                roiTemplate('set', dSeriesOffset, atRoiInput);
+                                                % roiTemplate('set', dSeriesOffset, atRoiInput);
                                            end
                                        end
 
@@ -1205,8 +1272,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                        bModifiedMatrix, ...
                                                        bSUVUnit, ...
                                                        bSegmented, ...
-                                                       bDoseKernel, ...
-                                                       bMovementApplied);
+                                                       bMovementApplied, ...
+                                                       transM);
 
                                         sRoiName = atRoiInput{bb}.Label;
 
@@ -1351,8 +1418,9 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
             progressBar(1, sprintf('Write %s%s completed', path, file));
 
-           catch
-               progressBar(1, 'Error: exportCurrentMultiplePlotCallback()');
+            catch ME
+                logErrorToFile(ME); 
+                progressBar(1, 'Error: exportCurrentMultiplePlotCallback()');
             end
 
             clear aDisplayBuffer;

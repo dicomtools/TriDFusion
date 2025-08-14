@@ -43,7 +43,7 @@ function setImageInterpolation(bEnable)
                     set(imAxePtr('get', [] , dSeriesOffset),  'Interpolation', 'nearest');
 
                     axe = axePtr('get', [], dSeriesOffset);
-                    axe.Toolbar.Visible = 'off';                 
+                    % axe.Toolbar.Visible = 'off';                 
 
                     if isFusion('get') == true
 
@@ -63,7 +63,7 @@ function setImageInterpolation(bEnable)
 
                             if ~isempty(axef)
 
-                                axef.Toolbar.Visible = 'off';                 
+                                % axef.Toolbar.Visible = 'off';                 
                             end
                             
                         end
@@ -87,20 +87,20 @@ function setImageInterpolation(bEnable)
                     set(imSagittalPtr('get', [] , dSeriesOffset),  'Interpolation', 'nearest');
                     set(imAxialPtr   ('get', [] , dSeriesOffset),  'Interpolation', 'nearest');
 
-                    axes1 = axes1Ptr('get', [], dSeriesOffset);
-                    axes2 = axes2Ptr('get', [], dSeriesOffset);
-                    axes3 = axes3Ptr('get', [], dSeriesOffset);
+                    % axes1 = axes1Ptr('get', [], dSeriesOffset);
+                    % axes2 = axes2Ptr('get', [], dSeriesOffset);
+                    % axes3 = axes3Ptr('get', [], dSeriesOffset);
 
-                    axes1.Toolbar.Visible = 'off';                 
-                    axes2.Toolbar.Visible = 'off';                 
-                    axes3.Toolbar.Visible = 'off';                 
+                    % axes1.Toolbar.Visible = 'off';                 
+                    % axes2.Toolbar.Visible = 'off';                 
+                    % axes3.Toolbar.Visible = 'off';                 
 
                     if link2DMip('get') == true && isVsplash('get') == false
 
                         set(imMipPtr('get', [], dSeriesOffset),  'Interpolation', 'nearest');
 
-                        axesMip = axesMipPtr('get', [], dSeriesOffset);
-                        axesMip.Toolbar.Visible = 'off';                 
+                        % axesMip = axesMipPtr('get', [], dSeriesOffset);
+                        % axesMip.Toolbar.Visible = 'off';                 
                     end
 
                     if isFusion('get') == true
@@ -130,16 +130,16 @@ function setImageInterpolation(bEnable)
                                 set(imAxialF   ,  'Interpolation', 'nearest');
                             end
 
-                            axes1f = axes1fPtr('get', [], rr);
-                            axes2f = axes2fPtr('get', [], rr);
-                            axes3f = axes3fPtr('get', [], rr);
-
-                            if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
-
-                                axes1f.Toolbar.Visible = 'off';                 
-                                axes2f.Toolbar.Visible = 'off';                 
-                                axes3f.Toolbar.Visible = 'off';                                      
-                            end
+                            % axes1f = axes1fPtr('get', [], rr);
+                            % axes2f = axes2fPtr('get', [], rr);
+                            % axes3f = axes3fPtr('get', [], rr);
+                            
+                            % if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
+                            % 
+                            %     axes1f.Toolbar.Visible = 'off';                 
+                            %     axes2f.Toolbar.Visible = 'off';                 
+                            %     axes3f.Toolbar.Visible = 'off';                                      
+                            % end
 
                             if link2DMip('get') == true && isVsplash('get') == false
 
@@ -148,10 +148,10 @@ function setImageInterpolation(bEnable)
                                     set(imMipF,  'Interpolation', 'nearest');
                                 end
 
-                                axesMipf = axesMipfPtr('get', [], rr);
-                                if ~isempty(axesMipf)
-                                    axesMipf.Toolbar.Visible = 'off';                                      
-                                end
+                                % axesMipf = axesMipfPtr('get', [], rr);
+                                % if ~isempty(axesMipf)
+                                %     axesMipf.Toolbar.Visible = 'off';                                      
+                                % end
                     
                             end
 
@@ -180,8 +180,8 @@ function setImageInterpolation(bEnable)
 
                     set(imAxePtr('get', [] , dSeriesOffset),  'Interpolation', 'bilinear');
 
-                    axe = axePtr('get', [], dSeriesOffset);
-                    axe.Toolbar.Visible = 'off';    
+                    % axe = axePtr('get', [], dSeriesOffset);
+                    % axe.Toolbar.Visible = 'off';    
 
                     if isFusion('get') == true
 
@@ -201,11 +201,11 @@ function setImageInterpolation(bEnable)
                                 set(imAxef,  'Interpolation', 'bilinear');
                             end
 
-                            axef = axefPtr('get', [], rr);
-
-                            if ~isempty(axef)
-                                axef.Toolbar.Visible = 'off';                 
-                            end
+                            % axef = axefPtr('get', [], rr);
+                            % 
+                            % if ~isempty(axef)
+                            %     axef.Toolbar.Visible = 'off';                 
+                            % end
                         end
                     end
                end
@@ -226,20 +226,25 @@ function setImageInterpolation(bEnable)
                     set(imSagittalPtr('get', [] , dSeriesOffset),  'Interpolation', 'bilinear');
                     set(imAxialPtr   ('get', [] , dSeriesOffset),  'Interpolation', 'bilinear');
 
-                    axes1 = axes1Ptr('get', [], dSeriesOffset);
-                    axes2 = axes2Ptr('get', [], dSeriesOffset);
-                    axes3 = axes3Ptr('get', [], dSeriesOffset);
 
-                    axes1.Toolbar.Visible = 'off';                 
-                    axes2.Toolbar.Visible = 'off';                 
-                    axes3.Toolbar.Visible = 'off'; 
+                    % axes1 = axes1Ptr('get', [], dSeriesOffset);
+                    % axes2 = axes2Ptr('get', [], dSeriesOffset);
+                    % axes3 = axes3Ptr('get', [], dSeriesOffset);
+                    % 
+                    % shading( axes1 , 'interp' );
+                    % shading( axes2 , 'interp' );
+                    % shading( axes3 , 'interp' );
+
+                    % axes1.Toolbar.Visible = 'off';                 
+                    % axes2.Toolbar.Visible = 'off';                 
+                    % axes3.Toolbar.Visible = 'off'; 
 
                     if link2DMip('get') == true && isVsplash('get') == false
 
                         set(imMipPtr('get', [], dSeriesOffset),  'Interpolation', 'bilinear');
 
-                        axesMip = axesMipPtr('get', [], dSeriesOffset);
-                        axesMip.Toolbar.Visible = 'off';                             
+                        % axesMip = axesMipPtr('get', [], dSeriesOffset);
+                        % axesMip.Toolbar.Visible = 'off';                             
                     end
 
                     if isFusion('get') == true
@@ -283,10 +288,10 @@ function setImageInterpolation(bEnable)
                                     set(imMipF,  'Interpolation', 'bilinear');
                                 end
 
-                                axesMipf = axesMipfPtr('get', [], rr);
-                                if ~isempty(axesMipf)
-                                    axesMipf.Toolbar.Visible = 'off';                                      
-                                end                                    
+                                % axesMipf = axesMipfPtr('get', [], rr);
+                                % if ~isempty(axesMipf)
+                                %     axesMipf.Toolbar.Visible = 'off';                                      
+                                % end                                    
                             end
                         end
                     end

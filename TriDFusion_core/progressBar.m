@@ -31,6 +31,14 @@ function progressBar(lProgress, sStatus, sColor)
         sColor = viewerProgressBarLineColor('get');
     end
 
+    % Check if the progress window handle is empty or not valid
+
+    hProgressWindow = uiProgressWindowPtr('get');
+
+    if isempty(hProgressWindow) || ~ishandle(hProgressWindow)
+        return;  % Or you could use "continue" if within a loop
+    end
+
     set(uiProgressWindowPtr('get'), 'title'   , sStatus);
 
     if lProgress == 1
@@ -48,8 +56,6 @@ function progressBar(lProgress, sStatus, sColor)
     set(uiBarPtr('get'), 'Position', x);
 
    drawnow limitrate;
-  % refreshdata;
-  % refreshdata(uiBarPtr('get'));
-  % refreshdata(uiProgressWindowPtr('get'));
+
 
 end

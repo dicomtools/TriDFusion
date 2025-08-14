@@ -66,7 +66,9 @@ function setMantleCellLymphomaSegmentationCallack(hObject, ~)
                            'Name', 'Mantle Cell Lymphoma Segmentation',...
                            'Toolbar','none'...               
                            );    
-            end
+             end
+
+            setObjectIcon(dlgMachineLearningMantleCellLymphoma);
 
             % Exclude organs from AI analysis
     

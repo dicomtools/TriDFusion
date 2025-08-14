@@ -1,4 +1,4 @@
-function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi) 
+function B = interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi) 
 %function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
 %Insert interpolated ROIs between two regions.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -26,6 +26,7 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+    B = [];
 
     if isempty(tRoi1)||isempty(tRoi2)
         return;
@@ -232,12 +233,12 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
         clear aInterpolatedMask;
 
         bEditRoisLabel = false;
-
+        
         for dBoundaryOffset = 1: n
 
             aPosition = [B{dBoundaryOffset}(:, 2), B{dBoundaryOffset}(:, 1)];
 
-            sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+            sRoiTag = num2str(generateUniqueNumber(false));
 
             asTag{dTagOffset} = sRoiTag;
             dTagOffset = dTagOffset+1;

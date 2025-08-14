@@ -33,6 +33,8 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
         return;
     end
 
+    bUseViewer3d = shouldUseViewer3d();
+    
     % 'VolumeRendering', 'Isosurface', 'MaximumIntensityProjection'
     pObject = [];
 
@@ -45,19 +47,22 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
          mipObj = mipObject('get');
          
          try % Clear object
-             if ~isvalid(volObj)
-                 volObj = [];
-             end
-
-             if ~isvalid(isoObj)
-                 isoObj = [];
-             end
-
-             if ~isvalid(mipObj)
-                 mipObj = [];
-             end
-         catch
+             
+            if exist('volObj', 'var') && isa(volObj, 'handle') && ~isvalid(volObj)
+                volObj = [];
+            end
+        
+            if exist('isoObj', 'var') && isa(isoObj, 'handle') && ~isvalid(isoObj)
+                isoObj = [];
+            end
+        
+            if exist('mipObj', 'var') && isa(mipObj, 'handle') && ~isvalid(mipObj)
+                mipObj = [];
+            end
+         catch ME   
+            logErrorToFile(ME);
          end
+
          
          im = squeeze(im(:,:,end:-1:1));
 
@@ -272,35 +277,49 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
 
             viewer3dObject('set', []);
 
-            if ~isMATLABReleaseOlderThan('R2022b')
+            if bUseViewer3d == true
 
-                if viewerUIFigure('get') == true
+                set(uiOneWindowPtr('get'), 'AutoResizeChildren', 'on');
 
-                    set(uiOneWindowPtr('get'), 'AutoResizeChildren', 'on');
+                ptrViewer3d = viewer3d('Parent', uiWindow, ...
+                                       'BackgroundColor', surfaceColor('one', background3DOffset('get')), ...
+                                       'GradientColor', [0.98 0.98 0.98], ...
+                                       'CameraZoom', 1.5000, ...
+                                       'ScaleBar', 'on', ...
+                                       'RenderingQuality', 'high', ...
+                                       'Lighting','off'); 
 
-                    ptrViewer3d = viewer3d('Parent', uiWindow, ...
-                                           'BackgroundColor', surfaceColor('one', background3DOffset('get')), ...
-                                           'Lighting', 'off', ...
-                                           'GradientColor', [0.98 0.98 0.98], ...
-                                           'CameraZoom', 1.5000, ...
-                                           'ScaleBar', 'on', ...
-                                           'RenderingQuality', 'high', ...
-                                           'Lighting','off'); 
-
-                    if volLighting('get') == true
-                        set(ptrViewer3d, 'Lighting', 'on');
-                    else
-                        set(ptrViewer3d, 'Lighting', 'off');
-                    end
-       
-                    if background3DGradient('get') == true
-                        set(ptrViewer3d, 'BackgroundGradient', 'on');
-                    else
-                        set(ptrViewer3d, 'BackgroundGradient', 'off');
-                    end
-                    
-                    viewer3dObject('set', ptrViewer3d);
+                if volLighting('get') == true
+                    set(ptrViewer3d, 'Lighting', 'on');
+                else
+                    set(ptrViewer3d, 'Lighting', 'off');
                 end
+   
+                if background3DGradient('get') == true
+                    set(ptrViewer3d, 'BackgroundGradient', 'on');
+                else
+                    set(ptrViewer3d, 'BackgroundGradient', 'off');
+                end
+              
+                uiOneWindow = uiOneWindowPtr('get');
+                if ~isempty(uiOneWindow)
+
+                    uiOneWindowPosition = get(uiOneWindow, 'Position');
+
+                    xOffset = uiOneWindowPosition(1);
+                    yOffset = 0;
+                    xSize   = uiOneWindowPosition(3);
+                    ySize   = uiOneWindowPosition(4);
+        
+                    if view3DPanel('get') == true
+                        xOffset = xOffset-680;
+                    end
+        
+                    set(ptrViewer3d, 'Position', [xOffset yOffset xSize ySize]);  
+                end
+
+                viewer3dObject('set', ptrViewer3d);
+
             end
         end  
 
@@ -321,7 +340,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
            else
                 if ~isempty(viewer3dObject('get'))
 
-                    [Mdti,~] = TransformMatrix(atMetaData{1}, computeSliceSpacing(atMetaData));
+                    [Mdti,~] = TransformMatrix(atMetaData{1}, computeSliceSpacing(atMetaData), true);
                     
                     if volume3DZOffset('get') == false
                         Mdti(1,4) = 0;
@@ -394,8 +413,15 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
                                       'Transformation', tform);
                 end
 
-                if isempty(isoObj)&&isempty(mipObj)&&multiFrame3DZoom('get')==0
+                if isempty(isoObj) && isempty(mipObj) && ~isempty(viewer3dObject('get'))  
+
+                    set3DView(viewer3dObject('get'), 1, 1);
+                end
+
+                if isempty(isoObj) && isempty(mipObj) && multiFrame3DZoom('get')==0
+
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
+                    
                 end
      %           volObject('set',  pObject);
 
@@ -443,7 +469,13 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
                                       'Transformation' , tform);
                 end
 
-                if isempty(volObj)&&isempty(mipObj)&&multiFrame3DZoom('get')==0
+                if isempty(volObj) && isempty(mipObj) && ~isempty(viewer3dObject('get'))  
+                    
+                    set3DView(viewer3dObject('get'), 1, 1);
+                end
+
+                if isempty(volObj) && isempty(mipObj) && multiFrame3DZoom('get')==0
+
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
                 end                        
  %               isoObject('set', pObject);
@@ -484,7 +516,13 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
 
                  % set(pObject, 'ScaleFactors', aScaleFactors);
 
-                if isempty(volObj)&&isempty(isoObj)&&multiFrame3DZoom('get')==0
+                if isempty(volObj) && isempty(isoObj) && ~isempty(viewer3dObject('get'))  
+                    
+                    set3DView(viewer3dObject('get'), 1, 1);
+                end
+
+                if isempty(volObj) && isempty(isoObj) && multiFrame3DZoom('get')==0
+
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
                 end                         
 %                mipObject('set', pObject);    

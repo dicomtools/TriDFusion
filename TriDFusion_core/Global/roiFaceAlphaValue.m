@@ -1,5 +1,5 @@
-function dMinValue = roiFaceAlphaValue(sAction, dValue)
-%function dMinValue = roiFaceAlphaValue(sAction, dValue)
+function dAlphaValue = roiFaceAlphaValue(sAction, dValue)
+%function dAlphaValue = roiFaceAlphaValue(sAction, dValue)
 %Get/Set Roi/Voi Segmentation Min Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,11 +27,11 @@ function dMinValue = roiFaceAlphaValue(sAction, dValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent pdMinValue; 
+    persistent pdAlphaValue; 
 
     if strcmpi('set', sAction)
-        pdMinValue = dValue;            
+        pdAlphaValue = dValue;            
     end
     
-    dMinValue = pdMinValue;
+    dAlphaValue = pdAlphaValue;
 end

@@ -62,6 +62,8 @@ function createTumorAblationZoneCallback(hObject, ~)
                        );
         end
 
+        setObjectIcon(dlgLiverAblationZone);
+
         % Joint Type
 
             uicontrol(dlgLiverAblationZone,...

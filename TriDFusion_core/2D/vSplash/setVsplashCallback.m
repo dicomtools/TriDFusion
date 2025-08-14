@@ -61,31 +61,39 @@ function setVsplashCallback(~, ~)
         dFusionColorMapOffset = fusionColorMapOffset('get');
     end
 
+
+    
+    try
+
     % Deactivate main tool bar 
     set(uiSeriesPtr('get'), 'Enable', 'off');                        
     mainToolBarEnable('off');   
-    
-%    try
-        
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+
     releaseRoiWait();
 
     set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
     set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-    set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+    % set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+    set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));
 
     set(zoomMenu('get'), 'Checked', 'off');
     set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnZoomPtr('get'), 'FontWeight', 'normal');
+    % set(btnZoomPtr('get'), 'FontWeight', 'normal');
+    set(btnZoomPtr('get'), 'CData', resizeTopBarIcon('zoom_grey.png'));
     zoomTool('set', false);
-    zoom(fiMainWindowPtr('get'), 'off');           
+    zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');           
 
     set(panMenu('get'), 'Checked', 'off');
     set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
-    set(btnPanPtr('get'), 'FontWeight', 'normal');
+    % set(btnPanPtr('get'), 'FontWeight', 'normal');
+    set(btnPanPtr('get'), 'CData', resizeTopBarIcon('pan_grey.png'));
     panTool('set', false);
-    pan(fiMainWindowPtr('get'), 'off');     
+    panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');     
 
     set(rotate3DMenu('get'), 'Checked', 'off');         
     rotate3DTool('set', false);
@@ -95,8 +103,8 @@ function setVsplashCallback(~, ~)
     dataCursorTool('set', false);              
     datacursormode(fiMainWindowPtr('get'), 'off'); 
     
-    iCoronalSize  = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1);
-    iSagittalSize = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2);
+    % iCoronalSize  = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1);
+    % iSagittalSize = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2);
     iAxialSize    = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3);
 
     iCoronal  = sliceNumber('get', 'coronal');
@@ -126,7 +134,8 @@ function setVsplashCallback(~, ~)
 
         set(btnVsplashPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnVsplashPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        set(btnVsplashPtr('get'), 'FontWeight', 'bold');
+        % set(btnVsplashPtr('get'), 'FontWeight', 'bold');
+        set(btnVsplashPtr('get'), 'CData', resizeTopBarIcon('splash_white.png'));
         
         if isPlotContours('get') == true % Deactivate plot contour
             setPlotContoursCallback();            
@@ -151,12 +160,14 @@ function setVsplashCallback(~, ~)
 
         set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
-        set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
+        % set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
+        set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_white.png'));
 
         set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnVsplashPtr('get'), 'FontWeight', 'normal');
-        
+        % set(btnVsplashPtr('get'), 'FontWeight', 'normal');
+        set(btnVsplashPtr('get'), 'CData', resizeTopBarIcon('splash_grey.png'));
+       
 %        isPlotContours('set', false);
 
         clearDisplay();
@@ -186,7 +197,8 @@ function setVsplashCallback(~, ~)
 
     ptrColorbar = uiColorbarPtr('get');
     if ~isempty(ptrColorbar)
-        set(ptrColorbar, 'Color',  dOverlayColor);
+
+        set(ptrColorbar.Parent, 'YColor',  dOverlayColor);
     end
 
     if isFusion('get')
@@ -200,14 +212,14 @@ function setVsplashCallback(~, ~)
         ptrFusionColorbar = uiFusionColorbarPtr('get');
         if ~isempty(ptrFusionColorbar)
 
-            set(ptrFusionColorbar   , 'Color', dOverlayColor);
+            set(ptrFusionColorbar.Parent   , 'Color', dOverlayColor);
         end        
     end
 
     set(fiMainWindowPtr('get'), 'Color', dBackgroundColor);
 
     ptrColorbar = uiColorbarPtr('get');
-    colormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
+    setColorbarColormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
 
     colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
     colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
@@ -221,7 +233,7 @@ function setVsplashCallback(~, ~)
     if isFusion('get') == true
 
         ptrFusionColorbar = uiFusionColorbarPtr('get');
-        colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
+        setColorbarColormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
 
         colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
         colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
@@ -271,12 +283,29 @@ function setVsplashCallback(~, ~)
             set(btnUiSagWindowFullScreen, 'BackgroundColor', get(uiSagWindowPtr('get'), 'BackgroundColor'));
             set(btnUiMipWindowFullScreen, 'BackgroundColor', get(uiMipWindowPtr('get'), 'BackgroundColor'));
         end
+
+        chkUiCorWindowSelected = chkUiCorWindowSelectedPtr('get');
+        chkUiSagWindowSelected = chkUiSagWindowSelectedPtr('get');
+        chkUiTraWindowSelected = chkUiTraWindowSelectedPtr('get');
+        chkUiMipWindowSelected = chkUiMipWindowSelectedPtr('get');
+
+        if ~isempty(chkUiCorWindowSelected)&& ...
+           ~isempty(chkUiSagWindowSelected)&& ...
+           ~isempty(chkUiTraWindowSelected)&& ...
+           ~isempty(chkUiMipWindowSelected)
+
+            set(chkUiCorWindowSelected, 'BackgroundColor', get(uiCorWindowPtr('get'), 'BackgroundColor'));
+            set(chkUiSagWindowSelected, 'BackgroundColor', get(uiSagWindowPtr('get'), 'BackgroundColor'));
+            set(chkUiTraWindowSelected, 'BackgroundColor', get(uiTraWindowPtr('get'), 'BackgroundColor'));
+            set(chkUiMipWindowSelected, 'BackgroundColor', get(uiMipWindowPtr('get'), 'BackgroundColor'));
+        end
+
     end
     
     % Restore intensity
 
-   windowLevel('set', 'max', dWindowLevelMax);
-   windowLevel('set', 'min', dWindowLevelMin);
+    windowLevel('set', 'max', dWindowLevelMax);
+    windowLevel('set', 'min', dWindowLevelMin);
 
     % Compute colorbar line y offset
 
@@ -338,25 +367,28 @@ function setVsplashCallback(~, ~)
 
     % restore slider position
 
-    set(uiSliderCorPtr('get'), 'Value', iCoronal / iCoronalSize);
+    set(uiSliderCorPtr('get'), 'Value', iCoronal);
     sliceNumber('set', 'coronal', iCoronal);
 
-    set(uiSliderSagPtr('get'), 'Value', iSagittal / iSagittalSize);
+    set(uiSliderSagPtr('get'), 'Value', iSagittal);
     sliceNumber('set', 'sagittal', iSagittal);
 
-    set(uiSliderTraPtr('get'), 'Value', 1 - (iAxial / iAxialSize));
+    set(uiSliderTraPtr('get'), 'Value', iAxialSize - iAxial+1);
     sliceNumber('set', 'axial', iAxial);
 
     refreshImages();
     
-%    catch
-%        progressBar(1, 'Error:setVsplashCallback()');                        
-%    end
-    
+    catch ME   
+       logErrorToFile(ME);
+       progressBar(1, 'Error:setVsplashCallback()');                        
+    end
+        
     % Reactivate main tool bar 
     set(uiSeriesPtr('get'), 'Enable', 'on');                        
     mainToolBarEnable('on');   
-    
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow;  
 %    if isVsplash('get') == false
         
 %        atMetaData = dicomMetaData('get');

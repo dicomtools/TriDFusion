@@ -1,5 +1,5 @@
-function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex, sSeriesDescription)
-%function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex,sSeriesDescription)
+function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bIndex, sSeriesDescription)
+%function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bIndex,sSeriesDescription)
 %Export ROIs To DICOM mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -28,7 +28,7 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
 % along with TriDFusion.cIf not, see <http://www.gnu.org/licenses/>.
 
     atInput = inputTemplate('get');
-    if dOffset > numel(atInput)
+    if dSeriesOffset > numel(atInput)
         return;
     end
 
@@ -50,14 +50,15 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
 %         atDicomMeta{sd}.SeriesDescription = sSeriesDescription;
 %     end
 
-    tRoiInput = roiTemplate('get', dOffset);
-    tVoiInput = voiTemplate('get', dOffset);
+    atRoiInput = roiTemplate('get', dSeriesOffset);
+    atVoiInput = voiTemplate('get', dSeriesOffset);
 
     bUseRoiTemplate = false;
 
-    if numel(aInputBuffer) ~= numel(aDicomBuffer)
+    if ~isequal(size(aInputBuffer), size(aDicomBuffer))
 
-        tRoiInput = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, tRoiInput, false);
+        % atRoiInput = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, atRoiInput, false);
+        [atRoiInput, atVoiInput] = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, atRoiInput, false, atVoiInput, dSeriesOffset);
 
         atDicomMeta  = atInputMeta;
         aDicomBuffer = aInputBuffer;
@@ -70,29 +71,29 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
     aMaskBuffer = zeros(aBufferSize);
  %   aMaskBuffer(aMaskBuffer==0) = min(double(aDicomBuffer),[], 'all');
 
-    nbContours = numel(tVoiInput);
+    nbContours = numel(atVoiInput);
     for cc=1:nbContours
 
         if mod(cc,5)==1 || cc == 1 || cc == nbContours
             progressBar( cc / nbContours - 0.000001, sprintf('Processing contour %d/%d, please wait', cc, nbContours) );
         end
 
-        nbRois = numel(tVoiInput{cc}.RoisTag);
+        nbRois = numel(atVoiInput{cc}.RoisTag);
         for rr=1:nbRois
 
-            for tt=1:numel(tRoiInput)
-                if strcmpi(tVoiInput{cc}.RoisTag{rr}, tRoiInput{tt}.Tag)
+            for tt=1:numel(atRoiInput)
+                if strcmpi(atVoiInput{cc}.RoisTag{rr}, atRoiInput{tt}.Tag)
 
-                    dSliceNb = tRoiInput{tt}.SliceNb;
+                    dSliceNb = atRoiInput{tt}.SliceNb;
 
-                    if strcmpi(tRoiInput{tt}.Axe, 'Axe')
+                    if strcmpi(atRoiInput{tt}.Axe, 'Axe')
 
                         aSlice = aDicomBuffer(:,:);
 
                         if bUseRoiTemplate == true
-                            roiMask = roiTemplateToMask(tRoiInput{tt}, aSlice);
+                            roiMask = roiTemplateToMask(atRoiInput{tt}, aSlice);
                         else
-                            roiMask = createMask(tRoiInput{tt}.Object, aSlice);
+                            roiMask = createMask(atRoiInput{tt}.Object, aSlice);
                         end
 
                         if bIndex == true
@@ -111,14 +112,14 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
                         end
                     end
 
-                    if strcmpi(tRoiInput{tt}.Axe, 'Axes1')
+                    if strcmpi(atRoiInput{tt}.Axe, 'Axes1')
 
                         aSlice =  permute(aDicomBuffer(dSliceNb,:,:), [3 2 1]);
 
                         if bUseRoiTemplate == true
-                            roiMask = roiTemplateToMask(tRoiInput{tt}, aSlice);
+                            roiMask = roiTemplateToMask(atRoiInput{tt}, aSlice);
                         else
-                            roiMask = createMask(tRoiInput{tt}.Object, aSlice);
+                            roiMask = createMask(atRoiInput{tt}.Object, aSlice);
                         end
 
                         if bIndex == true
@@ -138,14 +139,14 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
                         aMaskBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
                     end
 
-                    if strcmpi(tRoiInput{tt}.Axe, 'Axes2')
+                    if strcmpi(atRoiInput{tt}.Axe, 'Axes2')
 
                         aSlice = permute(aDicomBuffer(:,dSliceNb,:), [3 1 2]);
 
                         if bUseRoiTemplate == true
-                            roiMask = roiTemplateToMask(tRoiInput{tt}, aSlice);
+                            roiMask = roiTemplateToMask(atRoiInput{tt}, aSlice);
                         else
-                            roiMask = createMask(tRoiInput{tt}.Object, aSlice);
+                            roiMask = createMask(atRoiInput{tt}.Object, aSlice);
                         end
 
                         if bIndex == true
@@ -165,14 +166,14 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
                         aMaskBuffer(:,dSliceNb,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
                     end
 
-                    if strcmpi(tRoiInput{tt}.Axe, 'Axes3')
+                    if strcmpi(atRoiInput{tt}.Axe, 'Axes3')
 
                         aSlice = aDicomBuffer(:,:,dSliceNb);
 
                         if bUseRoiTemplate == true
-                            roiMask = roiTemplateToMask(tRoiInput{tt}, aSlice);
+                            roiMask = roiTemplateToMask(atRoiInput{tt}, aSlice);
                         else
-                            roiMask = createMask(tRoiInput{tt}.Object, aSlice);
+                            roiMask = createMask(atRoiInput{tt}.Object, aSlice);
                         end
 
                         if bIndex == true
@@ -224,8 +225,8 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
 %     bInputIsDicom = false;
 %
 %      try
-%         if exist(char(atInput(dOffset).asFilesList{1}), 'file') % Input series is dicom
-%             if isdicom(char(atInput(dOffset).asFilesList{1}))
+%         if exist(char(atInput(dSeriesOffset).asFilesList{1}), 'file') % Input series is dicom
+%             if isdicom(char(atInput(dSeriesOffset).asFilesList{1}))
 %                 bInputIsDicom = true;
 %             end
 %         end
@@ -233,9 +234,9 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
 %     end
 %
 %     if bInputIsDicom == true % Input series is dicom
-%         writeDICOM(aMaskBuffer, atDicomMeta, sWriteDir, dOffset, false);
+%         writeDICOM(aMaskBuffer, atDicomMeta, sWriteDir, dSeriesOffset, false);
 %     else % Input series is another format
-%         writeOtherFormatToDICOM(aMaskBuffer, atDicomMeta, sWriteDir, dOffset, false);
+%         writeOtherFormatToDICOM(aMaskBuffer, atDicomMeta, sWriteDir, dSeriesOffset, false);
 %     end
 
 
@@ -295,7 +296,7 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
 %             atDicomMeta{ww}.RescaleSlope = 1;
 %         end
 %
-%         writeDICOM(aMaskBuffer, atDicomMeta, sWriteDir, dOffset, false);
+%         writeDICOM(aMaskBuffer, atDicomMeta, sWriteDir, dSeriesOffset, false);
 %     else % Input series is another format
 % atDcmDicomMeta{1}.FrameIncrementPointer  = 'FrameTime';
 
@@ -335,7 +336,8 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
     writeOtherFormatToDICOM(aMaskBuffer, atDcmDicomMeta, sWriteDir, false);
 %     end
 
-    catch
+    catch ME   
+        logErrorToFile(ME);
         progressBar(1, 'Error:writeRoisToDicomMask()');
     end
 

@@ -34,5 +34,6 @@ function mRoi = roiMenuObject(sAction, mValue)
     if strcmp('set', sAction)
         pmRoi = mValue;            
     end
+    
     mRoi = pmRoi;              
 end

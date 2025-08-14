@@ -196,7 +196,9 @@ function init3DuicontrolPanel()
      bGradiantEnable = false;
      if ~isMATLABReleaseOlderThan('R2022b')
 
-        if viewerUIFigure('get') == true
+        if viewerUIFigure('get') == true || ...
+           ~isMATLABReleaseOlderThan('R2025a')
+
             bGradiantEnable = true;
         end
      end
@@ -359,7 +361,9 @@ function init3DuicontrolPanel()
     bVolColormapEnable = true;
     if ~isMATLABReleaseOlderThan('R2022b')
 
-        if viewerUIFigure('get') == true
+        if viewerUIFigure('get') == true || ...
+           ~isMATLABReleaseOlderThan('R2025a')
+
             bVolColormapEnable = false;
         end
     end
@@ -810,11 +814,18 @@ function init3DuicontrolPanel()
 %                  'position', [25 575 200 20]...
 %                  );
 
+    if addVoiIsoMask('get') == true
+
+        sCreateMask = 'Generate Contours';
+    else
+        sCreateMask = 'Create Mask';
+    end
+
     uiCreateIsoMask = ...
         uicontrol(ui3DPanelPtr('get'),...
                   'Position', [180 570 140 25],...
                   'FontWeight',  'bold',...
-                  'String'  , 'Create Mask',...
+                  'String'  , sCreateMask,...
                   'Enable'  , 'off', ...
                   'BackgroundColor', [0.6300 0.6300 0.4000], ...
                   'ForegroundColor', [0.1 0.1 0.1], ...
@@ -889,7 +900,9 @@ function init3DuicontrolPanel()
     bMipColormapEnable = true;
     if ~isMATLABReleaseOlderThan('R2022b')
 
-        if viewerUIFigure('get') == true
+        if viewerUIFigure('get') == true || ...
+           ~isMATLABReleaseOlderThan('R2025a')
+
             bMipColormapEnable = false;
         end
     end
@@ -1862,7 +1875,6 @@ function init3DuicontrolPanel()
 
         if ~isempty(atVoiInput)
 
-
             if viewerUIFigure('get') == true
 
                 dlgVoiListEnable = ...
@@ -2049,6 +2061,30 @@ function init3DuicontrolPanel()
 
                         set(voiObj{1}, 'OverlayAlphamap', aOverlayAlphamap);
 
+                        if ~isMATLABReleaseOlderThan('R2025a')
+
+                            % MATLB 2025a doesn't support label overlay
+
+                            aLabelAlphaMap = get(voiObj{1}, 'OverlayAlphamap');
+                            aLabelBuffer   = get(voiObj{1}, 'OverlayData');
+
+                             % Set the transparency
+
+                            aAlphaData = zeros(size(aLabelBuffer));
+
+                            for i = 1:length(aLabelAlphaMap)
+
+                                % For each label in aLabelBuffer, set the corresponding alpha value from aLabelAlphaMap
+
+                                aAlphaData(aLabelBuffer == (i - 1)) = aLabelAlphaMap(i);
+                            end
+
+                            voiObj{1}.AlphaData = squeeze(aAlphaData);
+
+                            clear aLabelAlphaMap;
+                            clear aLabelBuffer;
+                       end
+
                     else
                         if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
 
@@ -2090,7 +2126,8 @@ function init3DuicontrolPanel()
                 end
             end
 
-            catch
+            catch ME
+                logErrorToFile(ME);
                 progressBar(1, 'Error: chkVoiListCallback()');
             end
 
@@ -2122,6 +2159,29 @@ function init3DuicontrolPanel()
 
                         set(voiObj{1}, 'OverlayAlphamap', aOverlayAlphamap);
 
+                        if ~isMATLABReleaseOlderThan('R2025a')
+
+                            % MATLB 2025a doesn't support label overlay
+
+                            aLabelAlphaMap = get(voiObj{1}, 'OverlayAlphamap');
+                            aLabelBuffer   = get(voiObj{1}, 'OverlayData');
+
+                             % Set the transparency
+
+                            aAlphaData = zeros(size(aLabelBuffer));
+
+                            for i = 1:length(aLabelAlphaMap)
+
+                                % For each label in aLabelBuffer, set the corresponding alpha value from aLabelAlphaMap
+
+                                aAlphaData(aLabelBuffer == (i - 1)) = aLabelAlphaMap(i);
+                            end
+
+                            voiObj{1}.AlphaData = squeeze(aAlphaData);
+
+                            clear aLabelAlphaMap;
+                            clear aLabelBuffer;
+                       end
                     else
                         if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
 
@@ -2308,13 +2368,41 @@ function init3DuicontrolPanel()
                             end
                         end
                     end
+
+                   if ~isMATLABReleaseOlderThan('R2025a')
+
+                        % MATLB 2025a doesn't support label overlay
+
+                        aLabelAlphaMap = get(voiObj{1}, 'OverlayAlphamap');
+                        aLabelBuffer   = get(voiObj{1}, 'OverlayData');
+
+                         % Set the transparency
+
+                        aAlphaData = zeros(size(aLabelBuffer));
+
+                        for i = 1:length(aLabelAlphaMap)
+
+                            % For each label in aLabelBuffer, set the corresponding alpha value from aLabelAlphaMap
+
+                            aAlphaData(aLabelBuffer == (i - 1)) = aLabelAlphaMap(i);
+                        end
+
+                        voiObj{1}.AlphaData = squeeze(aAlphaData);
+
+                        clear aLabelAlphaMap;
+                        clear aLabelBuffer;
+                   end
+
                 end
+
+                voi3DTransparencyList('set', aVoiTransparencyList);
 
                 slider3DVoiTransparencyValue('set', dAllVoiTransparencyValue);
 
             end
         end
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1, 'Error: uiSliderAllVoiTransparencyCallback()');
 
         end
@@ -2620,6 +2708,7 @@ function init3DuicontrolPanel()
 %                set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
 %                set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'Inactive');
 %            end
+            set(ui3DCreateIsoMaskPtr('get'), 'String', 'Generate Contours');
 
         else
             set(chkPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'off');
@@ -2633,6 +2722,7 @@ function init3DuicontrolPanel()
             set(uiEditSmalestIsoMaskPtr    ('get'), 'Enable', 'off');
 %            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');
 %            set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
+            set(ui3DCreateIsoMaskPtr('get'), 'String', 'Create Mask');
         end
 
     end
@@ -2912,7 +3002,7 @@ function init3DuicontrolPanel()
         isoObj = isoObject('get');
         if ~isempty(isoObj)
 
-%             try
+            try
 
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
@@ -3015,10 +3105,15 @@ function init3DuicontrolPanel()
                         progressBar(0.6, sprintf('Resampling ROIs, please wait'));
 
                         atRoi = roiTemplate('get', dSeriesOffset);
+                        atVoi = voiTemplate('get', dSeriesOffset);
 
-                        atResampledRoi = resampleROIs(im, atMetaData, aResampledBuffer, atResampledMetaData, atRoi, true);
+                        if ~isempty(atRoi)
+                            % atResampledRoi = resampleROIs(im, atMetaData, aResampledBuffer, atResampledMetaData, atRoi, true);
+                            [atResampledRoi, atResampledVoi] = resampleROIs(im, atMetaData, aResampledBuffer, atResampledMetaData, atRoi, true, atVoi, dSeriesOffset);
 
-                        roiTemplate('set', dSeriesOffset, atResampledRoi);
+                            roiTemplate('set', dSeriesOffset, atResampledRoi);
+                            voiTemplate('set', dSeriesOffset, atResampledVoi);
+                        end
 
                         progressBar(0.99999, sprintf('Resampling MIP, please wait'));
 
@@ -3026,7 +3121,7 @@ function init3DuicontrolPanel()
                         dicomBuffer('set', aResampledBuffer);
 
                         refMip = mipBuffer('get', [], dCTSeriesNumber);
-                          aMip = mipBuffer('get', [], dSeriesOffset);
+                        aMip   = mipBuffer('get', [], dSeriesOffset);
 
                         if size(im, 3) ~= size(refImage, 3)
                             aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', false);
@@ -3617,10 +3712,15 @@ function init3DuicontrolPanel()
                             progressBar(0.6, sprintf('Resampling ROIs, please wait'));
 
                             atRoi = roiTemplate('get', dSeriesOffset);
+                            atVoi = roiTemplate('get', dSeriesOffset);
 
-                            atResampledRoi = resampleROIs(im, atMetaData, aResampledBuffer, atResampledMetaData, atRoi, true);
+                            if ~isempty(atRoi)
+                                % atResampledRoi = resampleROIs(im, atMetaData, aResampledBuffer, atResampledMetaData, atRoi, true);
+                                [atResampledRoi, atResampledVoi] = resampleROIs(im, atMetaData, aResampledBuffer, atResampledMetaData, atRoi, true, atVoi, dSeriesOffset);
 
-                            roiTemplate('set', dSeriesOffset, atResampledRoi);
+                                roiTemplate('set', dSeriesOffset, atResampledRoi);
+                                voiTemplate('set', dSeriesOffset, atResampledVoi);
+                            end
 
                             progressBar(0.99999, sprintf('Resampling MIP, please wait'));
 
@@ -3628,7 +3728,7 @@ function init3DuicontrolPanel()
                             dicomBuffer('set', aResampledBuffer);
 
                             refMip = mipBuffer('get', [], dCTSeriesNumber);
-                            aMip = mipBuffer('get', [], dSeriesOffset);
+                            aMip   = mipBuffer('get', [], dSeriesOffset);
 
                             if size(im, 3) ~= size(refImage, 3)
                                 aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', false);
@@ -3655,13 +3755,16 @@ function init3DuicontrolPanel()
 
                     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
                     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-                    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+                    % set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+                    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
                     % Set fusion
 
                     if isFusion('get') == false
 
                         set(uiFusedSeriesPtr('get'), 'Value', dCTSeriesNumber);
+                        
+                        sliderAlphaValue('set', 0.65);
 
                         setFusionCallback();
                     end
@@ -3691,9 +3794,10 @@ function init3DuicontrolPanel()
 
             end
 
-%             catch
-%                 progressBar(1, 'Error: createIsoMaskCallback()');
-%             end
+            catch ME
+                logErrorToFile(ME);
+                progressBar(1, 'Error: createIsoMaskCallback()');
+            end
 
             clear BW;
             clear BWCT;

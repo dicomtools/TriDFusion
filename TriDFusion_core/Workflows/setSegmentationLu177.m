@@ -31,6 +31,12 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
     gdNormalLiverMean = [];
     gdNormalLiverSTD = [];
 
+    gdLymphNodesSUVThresholdValue = [];
+    gdBoneSUVThresholdValue  = [];
+
+    gbLymphNodesSegmentation = [];
+    gbBoneSegmentation = [];
+
     atInput = inputTemplate('get');
 
     % Modality validation
@@ -98,6 +104,8 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
 
     atRoiInput = roiTemplate('get', dNMSerieOffset);
 
+    bResetSeries = true;
+
     if ~isempty(atRoiInput)
 
         aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );
@@ -135,28 +143,39 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
 
                 waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));
 
-                Lu177NormalLiverMeanSDDialog();
+                Lu177ThresholdValuesDialog();
 
                 if gbProceedWithSegmentation == false
                     return;
                 end
+
+                bResetSeries = false;
             else
-                gdNormalLiverMean = Lu177NormalLiverMeanValue('get');
-                gdNormalLiverSTD  = Lu177NormalLiverSDValue('get');
+                gbLymphNodesSegmentation = true;
+                gbBoneSegmentation = true;
+
+                gdLymphNodesSUVThresholdValue = Lu177LymphNodesSUVThresholdValue('get');
+                gdBoneSUVThresholdValue       = Lu177BoneSUVThresholdValue('get');
             end
         end
     else
         if bUseDefault == false
-            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));
 
-            Lu177NormalLiverMeanSDDialog();
+            waitfor(msgbox('Warning: Normal Liver ROI not found. Draw an ROI on the normal liver, right-click on the ROI, and select the predefined label ''Normal Liver,'' or manually input the Lymph Nodes and Bone SUV Threshold into the following dialog.', 'Warning'));
+
+            Lu177ThresholdValuesDialog();
 
             if gbProceedWithSegmentation == false
                 return;
             end
+
+            bResetSeries = false;
         else
-            gdNormalLiverMean = Lu177NormalLiverMeanValue('get');
-            gdNormalLiverSTD  = Lu177NormalLiverSDValue('get');
+            gbLymphNodesSegmentation = true;
+            gbBoneSegmentation = true;
+
+            gdLymphNodesSUVThresholdValue = Lu177LymphNodesSUVThresholdValue('get');
+            gdBoneSUVThresholdValue       = Lu177BoneSUVThresholdValue('get');
         end
     end
 
@@ -172,7 +191,10 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
     aLogicalMask = roiConstraintToMask(aNMImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
     aNMImageTemp(aLogicalMask==0) = 0;  % Set constraint
 
-    resetSeries(dNMSerieOffset, true);
+    if bResetSeries == true
+
+        resetSeries(dNMSerieOffset, true);
+    end
 
     try
 
@@ -225,15 +247,20 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
     dMin = min(aBWMask, [], 'all');
 
 %    dThreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
-    dThreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
 
-    if dThreshold < 2.5
-        dThreshold = 2.5;
+    if isempty(gbLymphNodesSegmentation) && ...
+       isempty(gbBoneSegmentation)
+
+        dThreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
+
+        if dThreshold < 2.5
+            dThreshold = 2.5;
+        end
+
+        aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
+
+        aBWMask = imbinarize(aBWMask);
     end
-
-    aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
-
-    aBWMask = imbinarize(aBWMask);
 
     progressBar(8/10, 'Computing CT map, please wait...');
 
@@ -299,8 +326,42 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
     setSeriesCallback();
 
 %     sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
-    sFormula = '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 2.5, CT Bone Map';
-    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD, 'TUMOR');
+    if isempty(gbLymphNodesSegmentation) && ...
+       isempty(gbBoneSegmentation)
+
+        sFormula = '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Lymph Nodes & Bone SUV 2.5, CT Bone Map';
+        maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD, 'TUMOR');
+    else
+        if gbLymphNodesSegmentation== true && ... % Lymph Nodes and Bone
+           gbBoneSegmentation == true
+
+            aBWMask(aBWMask*dSUVScale<gdLymphNodesSUVThresholdValue)=dMin;
+            aBWMask = imbinarize(aBWMask);
+
+            sFormula = 'Lymph Nodes & Bone SUV, CT Bone Map';
+            maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, gdLymphNodesSUVThresholdValue, false, 0, false, sFormula, BWCT, dSmalestVoiValue, [],[],[], gbBoneSegmentation);
+        else
+            if gbLymphNodesSegmentation== true % Lymph Nodes
+
+                aBWMask(aBWMask*dSUVScale<gdLymphNodesSUVThresholdValue)=dMin;
+
+                aBWMask(BWCT==1) = dMin;
+                aBWMask = imbinarize(aBWMask);
+
+                sFormula = 'Lymph Nodes';
+                maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, gdLymphNodesSUVThresholdValue, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
+            else % Bone
+                aBWMask(aBWMask*dSUVScale<gdBoneSUVThresholdValue)=dMin;
+
+                aBWMask(BWCT==0) = dMin;
+                aBWMask = imbinarize(aBWMask);
+
+                sFormula = 'Bone';
+                maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, gdBoneSUVThresholdValue, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
+            end
+
+        end
+    end
 
     clear aResampledNMImage;
     clear aBWMask;
@@ -334,13 +395,16 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set fusion
 
     if isFusion('get') == false
 
         set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+        sliderAlphaValue('set', 0.65);
 
         setFusionCallback();
     end
@@ -379,7 +443,8 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dNMSerieOffset, true);
         progressBar( 1 , 'Error: setSegmentationLu177()' );
     end
@@ -387,26 +452,26 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
 
-    function Lu177NormalLiverMeanSDDialog()
+    function Lu177ThresholdValuesDialog()
 
         DLG_Lu177_MEAN_SD_X = 380;
-        DLG_Lu177_MEAN_SD_Y = 150;
+        DLG_Lu177_MEAN_SD_Y = 215;
 
         if viewerUIFigure('get') == true
 
-            dlgLu177meanSD = ...
+            dlgLu177SUVThreshold = ...
                 uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_Lu177_MEAN_SD_X/2) ...
-                                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_Lu177_MEAN_SD_Y/2) ...
-                                    DLG_Lu177_MEAN_SD_X ...
-                                    DLG_Lu177_MEAN_SD_Y ...
-                                    ],...
+                                      (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_Lu177_MEAN_SD_Y/2) ...
+                                      DLG_Lu177_MEAN_SD_X ...
+                                      DLG_Lu177_MEAN_SD_Y ...
+                                     ],...
                        'Resize', 'off', ...
                        'Color', viewerBackgroundColor('get'),...
                        'WindowStyle', 'modal', ...
-                       'Name' , 'Lu177 Segmentation Mean and SD'...
+                       'Name' , 'Lu177 Segmentation Threshold'...
                        );
         else
-            dlgLu177meanSD = ...
+            dlgLu177SUVThreshold = ...
                 dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_Lu177_MEAN_SD_X/2) ...
                                     (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_Lu177_MEAN_SD_Y/2) ...
                                     DLG_Lu177_MEAN_SD_X ...
@@ -417,114 +482,220 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
                        'NumberTitle','off',...
                        'MenuBar', 'none',...
                        'Color', viewerBackgroundColor('get'), ...
-                       'Name', 'Lu177 Segmentation Mean and SD',...
+                       'Name', 'Lu177 Segmentation Threshold',...
                        'Toolbar','none'...
                        );
         end
 
-        % Normal Liver Mean
+        setObjectIcon(dlgLu177SUVThreshold);
 
-            uicontrol(dlgLu177meanSD,...
+        % Lymph Nodes Segmentation
+
+        chkLymphNodesSegmentation = ...
+            uicontrol(dlgLu177SUVThreshold,...
+                      'style'   , 'checkbox',...
+                      'enable'  , 'on',...
+                      'value'   , Lu177LymphNodesSegmentation('get'),...
+                      'position', [20 165 20 20],...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...
+                      'Callback', @chkLymphNodesSegmentationCallback...
+                      );
+
+            uicontrol(dlgLu177SUVThreshold,...
                       'style'   , 'text',...
-                      'Enable'  , 'On',...
-                      'string'  , 'Normal Liver Mean',...
+                      'Enable'  , 'Inactive',...
+                      'string'  , 'Lymph Nodes Segmentation',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
-                      'position', [20 90 250 20]...
+                      'ButtonDownFcn'  , @chkLymphNodesSegmentationCallback, ...
+                      'position', [40 165 250 20]...
                       );
 
-        edtLu177NormalLiverMeanValue = ...
-            uicontrol(dlgLu177meanSD, ...
+       if get(chkLymphNodesSegmentation, 'Value') == true
+           sLymphNodesEnable = 'on';
+       else
+           sLymphNodesEnable = 'off';
+       end
+
+            uicontrol(dlgLu177SUVThreshold,...
+                      'style'   , 'text',...
+                      'Enable'  , 'On',...
+                      'string'  , 'Lymph Nodes SUV Threshold Value',...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...
+                      'position', [40 140 245 20]...
+                      );
+
+        edtLu177LymphNodesSUVThresholdValue = ...
+            uicontrol(dlgLu177SUVThreshold, ...
                       'Style'   , 'Edit', ...
-                      'Position', [285 90 75 20], ...
-                      'String'  , num2str(Lu177NormalLiverMeanValue('get')), ...
-                      'Enable'  , 'on', ...
+                      'Position', [285 140 75 20], ...
+                      'String'  , num2str(Lu177LymphNodesSUVThresholdValue('get')), ...
+                      'Enable'  , sLymphNodesEnable, ...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
-                      'CallBack', @edtLu177NormalLiverMeanValueCallback ...
+                      'CallBack', @edtLu177LymphNodesSUVThresholdValueCallback ...
                       );
 
-        % Normal Liver Standard Deviation
+        % Bone Segmentation
 
-            uicontrol(dlgLu177meanSD,...
+        chkBoneSegmentation = ...
+            uicontrol(dlgLu177SUVThreshold,...
+                      'style'   , 'checkbox',...
+                      'enable'  , 'on',...
+                      'value'   , Lu177BoneSegmentation('get'),...
+                      'position', [20 90 20 20],...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...
+                      'Callback', @chkBoneSegmentationCallback...
+                      );
+
+            uicontrol(dlgLu177SUVThreshold,...
                       'style'   , 'text',...
-                      'Enable'  , 'On',...
-                      'string'  , 'Normal Liver Standard Deviation',...
+                      'Enable'  , 'Inactive',...
+                      'string'  , 'Bone Segmentation',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
-                      'position', [20 65 250 20]...
+                      'ButtonDownFcn'  , @chkBoneSegmentationCallback, ...
+                      'position', [40 90 250 20]...
                       );
 
-        edtLu177NormalLiverSDValue = ...
-            uicontrol(dlgLu177meanSD, ...
+       if get(chkBoneSegmentation, 'Value') == true
+           sBoneEnable = 'on';
+       else
+           sBoneEnable = 'off';
+       end
+
+            uicontrol(dlgLu177SUVThreshold,...
+                      'style'   , 'text',...
+                      'Enable'  , 'On',...
+                      'string'  , 'Bone SUV Threshold Value',...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...
+                      'position', [40 65 245 20]...
+                      );
+
+        edtLu177BoneSUVThresholdValue = ...
+            uicontrol(dlgLu177SUVThreshold, ...
                       'Style'   , 'Edit', ...
                       'Position', [285 65 75 20], ...
-                      'String'  , num2str(Lu177NormalLiverSDValue('get')), ...
-                      'Enable'  , 'on', ...
+                      'String'  , num2str(Lu177BoneSUVThresholdValue('get')), ...
+                      'Enable'  , sBoneEnable, ...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
-                      'CallBack', @edtLu177NormalLiverSDValueCallback ...
+                      'CallBack', @edtLu177BoneSUVThresholdValueCallback ...
                       );
 
          % Cancel or Proceed
 
-         uicontrol(dlgLu177meanSD,...
+         uicontrol(dlgLu177SUVThreshold,...
                    'String','Cancel',...
                    'Position',[285 7 75 25],...
                    'BackgroundColor', viewerBackgroundColor('get'), ...
                    'ForegroundColor', viewerForegroundColor('get'), ...
-                   'Callback', @cancelLu177meanSDCallback...
+                   'Callback', @cancelLu177SUVThreshold...
                    );
 
-         uicontrol(dlgLu177meanSD,...
+         uicontrol(dlgLu177SUVThreshold,...
                   'String','Continue',...
                   'Position',[200 7 75 25],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @proceedLu177meanSDCallback...
+                  'Callback', @proceedLu177SUVThreshold...
                   );
 
-        waitfor(dlgLu177meanSD);
+        waitfor(dlgLu177SUVThreshold);
 
-        function edtLu177NormalLiverMeanValueCallback(~, ~)
+        function chkLymphNodesSegmentationCallback(hObject, ~)
 
-            dMeanValue = str2double(get(edtLu177NormalLiverMeanValue, 'Value'));
+            bObjectValue = get(chkLymphNodesSegmentation, 'Value');
 
-            if dMeanValue < 0
-                dMeanValue = 0.1;
-                set(edtLu177NormalLiverMeanValue, 'Value', num2str(dMeanValue));
+            if strcmpi(get(hObject, 'Style'), 'text')
+
+                set(chkLymphNodesSegmentation, 'Value', ~bObjectValue);
             end
 
-            Lu177NormalLiverMeanValue('set', dMeanValue);
-        end
+            bObjectValue = get(chkLymphNodesSegmentation, 'Value');
 
-        function edtLu177NormalLiverSDValueCallback(~, ~)
+            if bObjectValue == true
 
-            dSDValue = str2double(get(edtLu177NormalLiverSDValue, 'Value'));
-
-            if dSDValue < 0
-                dSDValue = 0.1;
-                set(edtLu177NormalLiverSDValue, 'Value', num2str(dSDValue));
+                set(edtLu177LymphNodesSUVThresholdValue, 'Enable', 'On');
+            else
+                set(edtLu177LymphNodesSUVThresholdValue, 'Enable', 'Off');
             end
 
-            Lu177NormalLiverSDValue('set', dSDValue);
+            Lu177LymphNodesSegmentation('set', bObjectValue);
         end
 
-        function proceedLu177meanSDCallback(~, ~)
+        function edtLu177LymphNodesSUVThresholdValueCallback(~, ~)
 
-            gdNormalLiverMean = str2double(get(edtLu177NormalLiverMeanValue, 'String'));
-            gdNormalLiverSTD  = str2double(get(edtLu177NormalLiverSDValue, 'String'));
+            dSUVValue = str2double(get(edtLu177LymphNodesSUVThresholdValue, 'Value'));
 
-            delete(dlgLu177meanSD);
+            if dSUVValue < 0
+
+                set(edtLu177LymphNodesSUVThresholdValue, 'Value', num2str(1));
+            end
+
+            Lu177LymphNodesSUVThresholdValue('set', dSUVValue);
+        end
+
+        function chkBoneSegmentationCallback(hObject, ~)
+
+            bObjectValue = get(chkBoneSegmentation, 'Value');
+
+            if strcmpi(get(hObject, 'Style'), 'text')
+
+                set(chkBoneSegmentation, 'Value', ~bObjectValue);
+            end
+
+            bObjectValue = get(chkBoneSegmentation, 'Value');
+
+            if bObjectValue == true
+
+                set(edtLu177BoneSUVThresholdValue, 'Enable', 'On');
+            else
+                set(edtLu177BoneSUVThresholdValue, 'Enable', 'Off');
+            end
+
+            Lu177BoneSegmentation('set', bObjectValue);
+
+        end
+
+        function edtLu177BoneSUVThresholdValueCallback(~, ~)
+
+            dSUVValue = str2double(get(edtLu177BoneSUVThresholdValue, 'Value'));
+
+            if dSUVValue < 0
+
+                set(edtLu177BoneSUVThresholdValue, 'Value', num2str(1));
+            end
+
+            Lu177BoneSUVThresholdValue('set', dSUVValue);
+        end
+
+        function proceedLu177SUVThreshold(~, ~)
+
+            gbLymphNodesSegmentation = get(chkLymphNodesSegmentation, 'Value');
+            gbBoneSegmentation       = get(chkBoneSegmentation, 'Value');
+
+            gdLymphNodesSUVThresholdValue = str2double(get(edtLu177LymphNodesSUVThresholdValue, 'String'));
+            gdBoneSUVThresholdValue       = str2double(get(edtLu177BoneSUVThresholdValue, 'String'));
+
+            delete(dlgLu177SUVThreshold);
+
             gbProceedWithSegmentation = true;
         end
 
-        function cancelLu177meanSDCallback(~, ~)
+        function cancelLu177SUVThreshold(~, ~)
 
-            delete(dlgLu177meanSD);
+            delete(dlgLu177SUVThreshold);
             gbProceedWithSegmentation = false;
         end
+
     end
 end

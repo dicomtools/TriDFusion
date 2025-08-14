@@ -60,7 +60,8 @@ function writeBrownFatRTStruct(sNetwork)
         try
             exportDicomLastUsedDir = sOutDir;
             save(sMatFile, 'exportDicomLastUsedDir');
-        catch
+        catch ME
+            logErrorToFile(ME);
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
     %        h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
     %        if integrateToBrowser('get') == true

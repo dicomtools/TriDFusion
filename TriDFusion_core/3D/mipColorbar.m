@@ -43,8 +43,9 @@ function uimipColorbar = mipColorbar(uiWindow, aColorMap)
              'Units'   , 'pixels',...
              'position', [xOffset 40 250 100]...
             ); 
-    uimipColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    uimipColorbar.Toolbar = [];
+    uimipColorbar.Interactions = [];
+    deleteAxesToolbar(uimipColorbar);
+    % uimipColorbar.Toolbar = [];
 
     x = 1:size(aColorMap,1);
 

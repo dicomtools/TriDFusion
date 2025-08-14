@@ -38,7 +38,7 @@ function setFusionColorbarIntensityMinScaleValue(dYOffset, dRatio, bDefaultUnit,
     end
 
     set(lineFusionColorbarIntensityMinPtr('get'), 'YData', [dYOffset dYOffset]);
-    set(textFusionColorbarIntensityMinPtr('get'), 'Position', [0 dYOffset 0]);
+    set(textFusionColorbarIntensityMinPtr('get'), 'Position', [0.1 dYOffset 0]);
 
 %     dYOffset = dYOffset+0.01; % Compensate for line width
 

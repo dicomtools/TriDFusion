@@ -27,9 +27,23 @@ function setPETCTBrownFatFusionCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    setModalitiesFusion('pt', 0, 5, 0, 5, 'ct', 50, 500, 50, 500, false, true); % Hot Iron Enhanced 
+    setModalitiesFusion('pt', 0, 5, 0, 5, 'ct', 50, 500, 50, 500, 65, false, true); % Hot Iron Enhanced
+
+    % Hot iron enhanced
 
     colorMapOffset('set', 20);
 
     refreshColorMap();
+
+    % Remove ROI face alpha
+
+%    roiFaceAlphaValue('set', 0);
+
+%    uiSliderRoisFaceAlphaRoiPanel = uiSliderRoisFaceAlphaRoiPanelObject('get');
+
+%    set(uiSliderRoisFaceAlphaRoiPanel, 'Value', 0);
+
+%    callbackFunction = get(uiSliderRoisFaceAlphaRoiPanel, 'CallBack');
+
+%    callbackFunction(uiSliderRoisFaceAlphaRoiPanel);
 end

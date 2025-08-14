@@ -32,7 +32,7 @@ function setFigureDefaults(fiWindow)
 
     % Disable graphics smoothing
     set(fiWindow, 'GraphicsSmoothing', 'off');
-    
+
     % Set renderer to opengl for 3D volshow
     set(fiWindow, 'Renderer', 'opengl'); 
     

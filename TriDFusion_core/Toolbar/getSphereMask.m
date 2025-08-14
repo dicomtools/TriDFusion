@@ -26,22 +26,54 @@ function aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, z
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+    % 
+    % % Generate the meshgrid 
+    % 
+    % [px, py, pz] = meshgrid(1:size(aDicomBuffer,2), 1:size(aDicomBuffer,1), 1:size(aDicomBuffer,3));
+    % 
+    % px = px * xPixel; % Scale by x pixel size
+    % py = py * yPixel; % Scale by y pixel size
+    % pz = pz * zPixel; % Scale by z pixel size
+    % 
+    % % Define the center of the sphere 
+    % 
+    % xc = xPixelOffset * xPixel; 
+    % yc = yPixelOffset * yPixel; 
+    % zc = zPixelOffset * zPixel;
+    % 
+    % % Create the sphere mask
+    % 
+    % aSphereMask = (px - xc).^2 + (py - yc).^2 + (pz - zc).^2 <= (dRadius)^2;
+    % Volume dimensions
+    % Volume dimensions
+ % Volume dimensions
+    % Volume dimensions
+    [H, W, D] = size(aDicomBuffer);
+    aSphereMask = false(H, W, D);
 
-    % Generate the meshgrid 
+    % Convert voxel radius to physical radius (mm)
+    radius_mm = dRadius * xPixel;
+    radius2 = radius_mm^2;
 
-    [px, py, pz] = meshgrid(1:size(aDicomBuffer,2), 1:size(aDicomBuffer,1), 1:size(aDicomBuffer,3));
-    
-    px = px * xPixel; % Scale by x pixel size
-    py = py * yPixel; % Scale by y pixel size
-    pz = pz * zPixel; % Scale by z pixel size
-    
-    % Define the center of the sphere 
+    % Physical coordinates of voxel centers (mm)
+    [X, Y] = meshgrid(((1:W) - 0.5) * xPixel, ((1:H) - 0.5) * yPixel);
+    xc = (xPixelOffset - 0.5) * xPixel;
+    yc = (yPixelOffset - 0.5) * yPixel;
 
-    xc = xPixelOffset * xPixel; 
-    yc = yPixelOffset * yPixel; 
-    zc = zPixelOffset * zPixel;
-    
-    % Create the sphere mask
-    
-    aSphereMask = (px - xc).^2 + (py - yc).^2 + (pz - zc).^2 <= (dRadius)^2;
+    % Slice center positions (mm)
+    z_centers = ((1:D) - 0.5) * zPixel;
+    zc = (zPixelOffset - 0.5) * zPixel;
+
+    % Loop over slices
+    for k = 1:D
+        % squared distance along Z between slice center and sphere center
+        dz2 = (z_centers(k) - zc)^2;
+        if dz2 > radius2
+            continue;
+        end
+        % squared in-plane radius for this slice
+        r_xy2 = radius2 - dz2;
+        % build mask for this slice
+        aSphereMask(:,:,k) = ((X - xc).^2 + (Y - yc).^2 <= r_xy2);
+    end
 end

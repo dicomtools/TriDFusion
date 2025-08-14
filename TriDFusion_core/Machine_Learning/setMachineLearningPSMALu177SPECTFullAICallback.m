@@ -36,7 +36,7 @@ function setMachineLearningPSMALu177SPECTFullAICallback(hObject, ~)
         if exist('hObject', 'var')
 
             DLG_PSMA_LU177_SPECT_PERCENT_X = 380;
-            DLG_PSMA_LU177_SPECT_PERCENT_Y = 215;
+            DLG_PSMA_LU177_SPECT_PERCENT_Y = 240;
 
             if viewerUIFigure('get') == true
         
@@ -67,6 +67,32 @@ function setMachineLearningPSMALu177SPECTFullAICallback(hObject, ~)
                            'Toolbar','none'...               
                            );    
             end
+
+            setObjectIcon(dlgPSMALu177SPECTFullAISegmentation);
+
+            % Fast Segmentation
+        
+                uicontrol(dlgPSMALu177SPECTFullAISegmentation,...
+                          'style'   , 'text',...
+                          'Enable'  , 'Inactive',...
+                          'string'  , 'Fast Segmentation',...
+                          'horizontalalignment', 'left',...
+                          'BackgroundColor', viewerBackgroundColor('get'), ...
+                          'ForegroundColor', viewerForegroundColor('get'), ...                   
+                          'ButtonDownFcn'  , @chkPSMALu177SPECTFullAIFastSegmentationCallback, ...
+                          'position', [40 190 250 20]...
+                          );
+        
+            chkPSMALu177SPECTFullAIFastSegmentation = ...
+                uicontrol(dlgPSMALu177SPECTFullAISegmentation,...
+                          'style'   , 'checkbox',...
+                          'enable'  , 'on',...
+                          'value'   , machineLearningPSMALu177FastSegmentation('get'),...
+                          'position', [20 190 20 20],...
+                          'BackgroundColor', viewerBackgroundColor('get'), ...
+                          'ForegroundColor', viewerForegroundColor('get'), ...                   
+                          'Callback', @chkPSMALu177SPECTFullAIFastSegmentationCallback...
+                          );
 
             % Trainer with Dice and CE Loss
         
@@ -212,10 +238,25 @@ function setMachineLearningPSMALu177SPECTFullAICallback(hObject, ~)
             tPSMALu177SPECTFullAI.options.smoothMask           = machineLearningPSMALu177SmoothMask('get');
             tPSMALu177SPECTFullAI.options.smallestVoiValue     = machineLearningPSMALu177SmallestVoiValue('get');
             tPSMALu177SPECTFullAI.options.pixelEdge            = pixelEdge('get');
+            tPSMALu177SPECTFullAI.options.fastSegmentation     = machineLearningPSMALu177FastSegmentation('get');
     
             setMachineLearningPSMALu177SPECTFullAI(sPredictScript, tPSMALu177SPECTFullAI); 
             
         end
+    end
+
+    function chkPSMALu177SPECTFullAIFastSegmentationCallback(hObject, ~)
+
+        bObjectValue = get(chkPSMALu177SPECTFullAIFastSegmentation, 'Value');
+
+        if strcmpi(get(hObject, 'Style'), 'text')
+
+            set(chkPSMALu177SPECTFullAIFastSegmentation, 'Value', ~bObjectValue);
+        end
+
+        bObjectValue = get(chkPSMALu177SPECTFullAIFastSegmentation, 'Value');
+
+        machineLearningPSMALu177FastSegmentation('set', bObjectValue);        
     end
 
     function chkPSMALu177SPECTFullAICELossCallback(hObject, ~)
@@ -302,11 +343,12 @@ function setMachineLearningPSMALu177SPECTFullAICallback(hObject, ~)
 
         % Options
 
-        tPSMALu177SPECTFullAI.options.CELossTrainer        =            get(chkPSMALu177SPECTFullAICELoss, 'Value');
-        tPSMALu177SPECTFullAI.options.classifySegmentation =            get(chkPSMALu177SPECTFullAIClassifySegmentation, 'Value');
-        tPSMALu177SPECTFullAI.options.smoothMask           =            get(chkPSMALu177SPECTFullAISmoothMask, 'Value');
+        tPSMALu177SPECTFullAI.options.CELossTrainer        = get(chkPSMALu177SPECTFullAICELoss, 'Value');
+        tPSMALu177SPECTFullAI.options.classifySegmentation = get(chkPSMALu177SPECTFullAIClassifySegmentation, 'Value');
+        tPSMALu177SPECTFullAI.options.smoothMask           = get(chkPSMALu177SPECTFullAISmoothMask, 'Value');
         tPSMALu177SPECTFullAI.options.smallestVoiValue     = str2double(get(edtPSMALu177SPECTFullAISmallestVoiValue , 'String'));
-        tPSMALu177SPECTFullAI.options.pixelEdge            =            get(chkPSMALu177SPECTFullAIPixelEdge, 'Value');
+        tPSMALu177SPECTFullAI.options.pixelEdge            = get(chkPSMALu177SPECTFullAIPixelEdge, 'Value');
+        tPSMALu177SPECTFullAI.options.fastSegmentation     = get(chkPSMALu177SPECTFullAIFastSegmentation, 'Value');
 
         delete(dlgPSMALu177SPECTFullAISegmentation);
 

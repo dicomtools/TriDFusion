@@ -203,7 +203,7 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
 
             curentMask = adArm;
     
-            sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+            sTag = num2str(generateUniqueNumber(false));
         
             aPosition = flip(curentMask, 2);
         
@@ -297,7 +297,7 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
             sLabel = 'Source';
         end   
     
-        sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+        sTag = num2str(generateUniqueNumber(false));
     
         aPosition = flip(curentMask, 2);
     
@@ -400,7 +400,8 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
             try
                 saveRoiLastUsedDir = [path '/'];
                 save(sMatFile, 'saveRoiLastUsedDir');
-            catch
+            catch ME
+                logErrorToFile(ME); 
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
 %                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                    if integrateToBrowser('get') == true
@@ -574,8 +575,10 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
             try
                 saveRoiLastUsedDir = path;
                 save(sMatFile, 'saveRoiLastUsedDir');
-            catch
-                    progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
+                
+            catch ME
+                logErrorToFile(ME); 
+                progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
 %                        h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                        if integrateToBrowser('get') == true
 %                            sLogo = './TriDFusion/logo.png';

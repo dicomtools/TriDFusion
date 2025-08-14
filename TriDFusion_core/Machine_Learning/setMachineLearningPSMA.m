@@ -182,11 +182,11 @@ function setMachineLearningPSMA(sSegmentatorScript, tPSMA, bUseDefault)
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-    
+
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
@@ -390,13 +390,16 @@ function setMachineLearningPSMA(sSegmentatorScript, tPSMA, bUseDefault)
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set fusion
 
     if isFusion('get') == false
 
         set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+        sliderAlphaValue('set', 0.65);
 
         setFusionCallback();
     end
@@ -420,7 +423,7 @@ function setMachineLearningPSMA(sSegmentatorScript, tPSMA, bUseDefault)
 
     refreshImages();
 
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
@@ -433,7 +436,8 @@ function setMachineLearningPSMA(sSegmentatorScript, tPSMA, bUseDefault)
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setSegmentationPSMA()' );
     end
@@ -475,6 +479,8 @@ function setMachineLearningPSMA(sSegmentatorScript, tPSMA, bUseDefault)
                        'Toolbar','none'...
                        );
         end
+
+        setObjectIcon(dlgPSMAmeanSD);
 
         % Normal Liver Mean
 

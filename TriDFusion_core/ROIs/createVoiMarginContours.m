@@ -144,7 +144,7 @@ function createVoiMarginContours(dMarginSize, sJointType, atVoiInput)
 
                         aMarginPosition = computeMarginUsingPolybuffer(ptrRoi.Position, dMarginSize/xPixelSize, sJointType);
 
-                        sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                        sTag = num2str(generateUniqueNumber(false));
 
                         sRoiLabel = ptrRoi.Label;
 

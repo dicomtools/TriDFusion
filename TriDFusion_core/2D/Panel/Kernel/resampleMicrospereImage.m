@@ -135,12 +135,16 @@ function [aResampledImage, atResampledMetaData] = resampleMicrospereImage(aImage
     uiSeries = uiSeriesPtr('get');
     dSeriesOffset = get(uiSeries, 'Value');
 
-    atRoi = roiTemplate('get', dSeriesOffset);
+    atRoiInput = roiTemplate('get', dSeriesOffset);
+    atVoiInput = voiTemplate('get', dSeriesOffset);
 
-    if ~isempty(atRoi)
-        atResampledRoi = resampleROIs(aImage, atMetaData, aResampledImage, atResampledMetaData, atRoi, false);
+    if ~isempty(atRoiInput)
+        
+        [atRoiInput, atVoiInput] = resampleROIs(aImage, atMetaData, aResampledImage, atResampledMetaData, atRoiInput, false, atVoiInput, dSeriesOffset);
 
-        roiTemplate('set', dSeriesOffset, atResampledRoi);
+
+        roiTemplate('set', dSeriesOffset, atRoiInput);
+        voiTemplate('set', dSeriesOffset, atVoiInput);
     end
     
     progressBar(1, 'Ready');

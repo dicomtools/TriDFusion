@@ -1034,6 +1034,7 @@ for i = 1:numel(ext)
                         a = regexp(a, '(.*?)\s*=\s*(.*?);', 'tokens', 'once');
                         ss.(a{1}) = a{2};
                     catch me
+                        logErrorToFile(me);
                         fprintf(2, '%s\n', me.message);
                         fprintf(2, 'Unrecognized text: %s\n', a);
                     end

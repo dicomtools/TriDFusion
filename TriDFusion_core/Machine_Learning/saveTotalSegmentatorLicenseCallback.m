@@ -60,6 +60,8 @@ function saveTotalSegmentatorLicenseCallback(~, ~)
                    );
     end
 
+    setObjectIcon(dlgLicense);
+
     axeLicense = ...
         axes(dlgLicense, ...
              'Units'   , 'pixels', ...
@@ -70,8 +72,9 @@ function saveTotalSegmentatorLicenseCallback(~, ~)
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'off'...
              );
-    axeLicense.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeLicense.Toolbar.Visible = 'off';
+    axeLicense.Interactions = [];
+    % axeLicense.Toolbar.Visible = 'off';
+    deleteAxesToolbar(axeLicense);
     disableDefaultInteractivity(axeLicense);
 
          uicontrol(dlgLicense,...
@@ -181,12 +184,15 @@ function saveTotalSegmentatorLicenseCallback(~, ~)
 
         if bStatus
             progressBar( 1, 'Error: An error occur during license saving!');
-            errordlg(sprintf('An error occur during license saving: %s', sCmdout), 'Segmentation Error');
+            f = errordlg(sprintf('An error occur during license saving: %s', sCmdout), 'Segmentation Error');
+            setObjectIcon(f);                          
         else
-            msgbox(sCmdout);
+            f = msgbox(sCmdout);
+            setObjectIcon(f);                          
         end 
 
-        catch
+        catch ME
+            logErrorToFile(ME);  
             progressBar( 1 , 'Error: saveLicenseCallback()' );            
         end
 

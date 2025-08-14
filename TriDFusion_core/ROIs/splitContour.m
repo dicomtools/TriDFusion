@@ -32,17 +32,23 @@ function splitContour(pAxe, pRoiLinePtr)
     atRoiInput = roiTemplate('get', dSeriesOffset);  
     atVoiInput = voiTemplate('get', dSeriesOffset);  
 
+    atRoiInputBack = roiTemplate('get', dSeriesOffset);  
+    atVoiInputBack = voiTemplate('get', dSeriesOffset); 
+
     switch pAxe
 
         case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))   
             sAxe = 'Axe';
             dSliceNb = 1;
+
         case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) 
             sAxe = 'Axes1';
             dSliceNb = sliceNumber('get', 'coronal' ); 
+
         case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) 
             sAxe = 'Axes2';
             dSliceNb = sliceNumber('get', 'sagittal' ); 
+
         case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) 
             sAxe = 'Axes3';
             dSliceNb = sliceNumber('get', 'axial' ); 
@@ -93,9 +99,10 @@ function splitContour(pAxe, pRoiLinePtr)
             dVoiOffset = [];
             asRoiTags = [];
 
-            xmin=0.5;
-            xmax=1;
-            aColor=xmin+rand(1,3)*(xmax-xmin);
+            % xmin=0.5;
+            % xmax=1;
+            % aColor=xmin+rand(1,3)*(xmax-xmin);
+            aColor = generateUniqueColor(false);
 
             for vo=1:numel(atVoiInput)    
 
@@ -109,7 +116,12 @@ function splitContour(pAxe, pRoiLinePtr)
 
             if ~isempty(dVoiOffset)
 
-                for vo=1:numel(atVoiInput{dVoiOffset}.RoisTag)
+                dUID = generateUniqueNumber(false);
+                % dUID2 = generateUniqueNumber(false);
+
+                dNbRois = numel(atVoiInput{dVoiOffset}.RoisTag);
+
+                for vo=1:dNbRois
 
                     atRoiInput = roiTemplate('get', dSeriesOffset);
 
@@ -198,9 +210,13 @@ function splitContour(pAxe, pRoiLinePtr)
             
                             if isvalid(atRoiInput{dRoiOffset}.Object)
                                 atRoiInput{dRoiOffset}.Object.Position = aRoi1Pos;
-                                atRoiInput{dRoiOffset}.Object.Waypoints(:) = false;
-            
-                                atRoiInput{dRoiOffset}.Waypoints = atRoiInput{dRoiOffset}.Object.Waypoints;
+
+                                if ~isempty(atRoiInput{dRoiOffset}.Object.Waypoints(:))
+    
+                                    atRoiInput{dRoiOffset}.Object.Waypoints(:) = false;
+                
+                                    atRoiInput{dRoiOffset}.Waypoints = atRoiInput{dRoiOffset}.Object.Waypoints;
+                                end
                             end
             
                             if roiHasMaxDistances(atRoiInput{dRoiOffset}) == true
@@ -221,8 +237,16 @@ function splitContour(pAxe, pRoiLinePtr)
             
                             %DL tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoiInput{dRoiOffset}, false, false);         
                             %DL atRoiInput{dRoiOffset}.MaxDistances = tMaxDistances;    
-            
+
+                            atRoiInputBack = roiTemplate('get', dSeriesOffset);
+
                             roiTemplate('set', dSeriesOffset, atRoiInput);
+
+                            roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, roiTemplate('get', dSeriesOffset), dUID, 2);
+
+                            % voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, voiTemplate('get', dSeriesOffset), dUID);
+
+                            % atVoiInputBack = voiTemplate('get', dSeriesOffset);
 
                             % Add ROI 2
 
@@ -241,7 +265,7 @@ function splitContour(pAxe, pRoiLinePtr)
                                     sliceNumber('set', 'axial', atRoiInput{dRoiOffset}.SliceNb);
                             end
                             
-                            sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                            sTag = num2str(generateUniqueNumber(false));
 
                             roiPtr = images.roi.Freehand(pAxe, ...
                                          'Position'           , aRoi2Pos, ...
@@ -264,11 +288,18 @@ function splitContour(pAxe, pRoiLinePtr)
                                 
                                 roiPtr.Waypoints(:) = false;
                             end
+
+                            atRoiInputBack = roiTemplate('get', dSeriesOffset);
                                                        
                             addRoi(roiPtr, dSeriesOffset, atRoiInput{dRoiOffset}.LesionType);
 
                             addRoiMenu(roiPtr);
-                
+
+                            roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, roiTemplate('get', dSeriesOffset), dUID, 1);
+
+                            % roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, roiTemplate('get', dSeriesOffset), dUID2, 1);
+                            % voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, voiTemplate('get', dSeriesOffset), dUID);
+
                             % addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
                             % addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
 
@@ -304,12 +335,17 @@ function splitContour(pAxe, pRoiLinePtr)
                                 atRoiInput{dRoiOffset}.Color = aColor;
 
                                 if isvalid(atRoiInput{dRoiOffset}.Object)
+                                    
                                     atRoiInput{dRoiOffset}.Object.Color = aColor;
                 
                                     atRoiInput{dRoiOffset}.Waypoints = atRoiInput{dRoiOffset}.Object.Waypoints;
                                 end
+                                
+                                atRoiInputBack = roiTemplate('get', dSeriesOffset);
 
                                 roiTemplate('set', dSeriesOffset, atRoiInput);
+
+                                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, roiTemplate('get', dSeriesOffset), dUID, 1);
 
                                 asRoiTags{numel(asRoiTags)+1} = atRoiInput{dRoiOffset}.Tag;
 
@@ -341,6 +377,8 @@ function splitContour(pAxe, pRoiLinePtr)
 
                         atVoiInput{dVoiOffset}.RoisTag(cellfun(@isempty, atVoiInput{dVoiOffset}.RoisTag)) = [];
                         voiTemplate('set', dSeriesOffset, atVoiInput);
+
+                        % voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, voiTemplate('get', dSeriesOffset), dUID1);                        
                     end
 
                     createVoiFromRois(dSeriesOffset, asRoiTags, [], aColor, atVoiInput{dVoiOffset}.LesionType);
@@ -361,6 +399,8 @@ function splitContour(pAxe, pRoiLinePtr)
                     otherwise
                         return;
                 end
+
+                voiTemplateEvent('add', dSeriesOffset, atVoiInputBack, voiTemplate('get', dSeriesOffset), dUID);
 
                 setVoiRoiSegPopup();
 
@@ -481,6 +521,11 @@ function splitContour(pAxe, pRoiLinePtr)
 
                 roiTemplate('set', dSeriesOffset, atRoiInput);
 
+                dUID = generateUniqueNumber(false);
+                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, roiTemplate('get', dSeriesOffset), dUID, 2);
+
+                atRoiInputBack = roiTemplate('get', dSeriesOffset);
+
 %                 roiPtr = images.roi.Freehand(pAxe, ...
 %                              'Position'           , aRoi1Pos, ...
 %                              'Deletable'          , atRoiInput{dClosestRoiIndex}.Deletable, ...
@@ -491,7 +536,7 @@ function splitContour(pAxe, pRoiLinePtr)
 %                              'Label'              , atRoiInput{dClosestRoiIndex}.Label, ...
 %                              'LabelVisible'       , atRoiInput{dClosestRoiIndex}.LabelVisible, ...
 %                              'FaceSelectable'     , atRoiInput{dClosestRoiIndex}.FaceSelectable, ...
-%                              'Tag'                , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
+%                              'Tag'                , num2str(generateUniqueNumber(false)), ...
 %                              'StripeColor'        , atRoiInput{dClosestRoiIndex}.StripeColor, ...
 %                              'InteractionsAllowed', atRoiInput{dClosestRoiIndex}.InteractionsAllowed, ...                                                      
 %                              'UserData'           , atRoiInput{dClosestRoiIndex}.UserData, ...   
@@ -519,9 +564,10 @@ function splitContour(pAxe, pRoiLinePtr)
 
                 % Add ROI 2
 
-                xmin=0.5;
-                xmax=1;
-                aColor=xmin+rand(1,3)*(xmax-xmin);
+                % xmin=0.5;
+                % xmax=1;
+                % aColor=xmin+rand(1,3)*(xmax-xmin);
+                aColor = generateUniqueColor(false);
 
                 roiPtr = images.roi.Freehand(pAxe, ...
                              'Position'           , aRoi2Pos, ...
@@ -533,7 +579,7 @@ function splitContour(pAxe, pRoiLinePtr)
                              'Label'              , atRoiInput{dClosestRoiIndex}.Label, ...
                              'LabelVisible'       , atRoiInput{dClosestRoiIndex}.LabelVisible, ...
                              'FaceSelectable'     , atRoiInput{dClosestRoiIndex}.FaceSelectable, ...
-                             'Tag'                , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
+                             'Tag'                , num2str(generateUniqueNumber(false)), ...
                              'StripeColor'        , atRoiInput{dClosestRoiIndex}.StripeColor, ...
                              'InteractionsAllowed', atRoiInput{dClosestRoiIndex}.InteractionsAllowed, ...                                                      
                              'UserData'           , atRoiInput{dClosestRoiIndex}.UserData, ...   
@@ -549,7 +595,10 @@ function splitContour(pAxe, pRoiLinePtr)
                 addRoi(roiPtr, dSeriesOffset, atRoiInput{dClosestRoiIndex}.LesionType);
 
                 addRoiMenu(roiPtr);
-    
+
+                dUID = generateUniqueNumber(false);
+                roiTemplateEvent('add', dSeriesOffset, atRoiInputBack, roiTemplate('get', dSeriesOffset), dUID, 1);
+
                 % addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
                 % addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
 
@@ -615,6 +664,7 @@ function splitContour(pAxe, pRoiLinePtr)
 %     
 %                     roiTemplate('set', dSeriesOffset, atRoiInput);
 %                 end
+
                 refreshImages();
 
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1

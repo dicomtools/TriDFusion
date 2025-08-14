@@ -38,6 +38,10 @@ function setColorbarLabel()
 
     bSetLabel = false;
 
+    ptrColorbar = uiColorbarPtr('get');
+
+    ptrColorbar.Parent.YLabel.String = ''; 
+
     if tInput(dSeriesOffset).bDoseKernel == true
 
         sLabel = sprintf('Dose');
@@ -57,10 +61,7 @@ function setColorbarLabel()
     end    
        
     if bSetLabel == true
-        
-        ptrColorbar = uiColorbarPtr('get');
-    
-        ptrColorbar.Label.String = sLabel;         
-        uiColorbarPtr('set', ptrColorbar);
+            
+        ptrColorbar.Parent.YLabel.String = sLabel;         
     end
 end

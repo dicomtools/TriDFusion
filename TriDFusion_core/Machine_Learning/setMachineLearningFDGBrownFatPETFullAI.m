@@ -87,11 +87,11 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
 
 %     % Apply ROI constraint
 %     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
-% 
+%
 %     bInvertMask = invertConstraint('get');
-% 
+%
 %     tRoiInput = roiTemplate('get', dPTSerieOffset);
-% 
+%
 %     aPTImageTemp = aPTImage;
 %     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
 %     aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
@@ -107,11 +107,11 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
     % Resample series
 
     if ~isempty(aCTImage)
-        
+
         if isInterpolated('get') == false
-        
+
             isInterpolated('set', true);
-        
+
             setImageInterpolation(true);
         end
 
@@ -164,7 +164,7 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
 
     % Convert dicom to .nii
 
-    progressBar(3/10, 'DICOM to NRRD conversion, please wait.');
+    progressBar(3/10, 'DICOM to NRRD conversion, please wait...');
 
     sNrrdImagesName = sprintf('%sCase01_0000.nrrd', sNrrdTmpDir);
 
@@ -296,41 +296,41 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
                 end
 
                 if ~isempty(aCTImage)
-% 
+%
 %                     progressBar(5/10, 'Resampling data series, please wait...');
-% 
+%
 %                     [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
-% 
+%
 %                     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
 %                     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
-% 
+%
 %                     progressBar(6/10, 'Resampling MIP, please wait...');
-% 
+%
 %                     refMip = mipBuffer('get', [], dCTSerieOffset);
 %                     aMip   = mipBuffer('get', [], dPTSerieOffset);
-% 
+%
 %                     aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-% 
+%
 %                     mipBuffer('set', aMip, dPTSerieOffset);
-% 
+%
 %                     setQuantification(dPTSerieOffset);
-% 
+%
 %                     progressBar(7/10, 'Resampling contours, please wait.');
-% 
-% 
+%
+%
 %                     atRoi = roiTemplate('get', dPTSerieOffset);
-% 
+%
 %                     if ~isempty(atRoi)
-% 
+%
 %                         atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
-% 
+%
 %                         roiTemplate('set', dPTSerieOffset, atResampledRoi);
 %                    end
-% 
+%
 %                     progressBar(8/10, 'Resampling axes, please wait...');
-% 
+%
 %                     resampleAxes(aResampledPTImage, atResampledPTMetaData);
-% 
+%
 %                     setImagesAspectRatio();
 
                     if bCELossTrainer == false && ...
@@ -451,7 +451,8 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    %  set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    set(btnLinkMipPtr('get'), 'CData', resizeTopBarIcon('link_mip_grey.png'));
 
     % Set intensity
 
@@ -459,14 +460,14 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
 
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
-        
+
         dSeriesMin = 0/dSUVScale;
         dSeriesMax = 5/dSUVScale;
     else
         dSeriesMin = min(aPTImage, [], 'all');
         dSeriesMax = max(aPTImage, [], 'all');
     end
-    
+
     windowLevel('set', 'max', dSeriesMax);
     windowLevel('set', 'min', dSeriesMin);
 
@@ -481,6 +482,8 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
         if isFusion('get') == false
 
             set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+
+            sliderAlphaValue('set', 0.65);
 
             setFusionCallback();
         end
@@ -500,13 +503,13 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
     % Activate ROI Panel
 
     if viewRoiPanel('get') == false
-        
+
         setViewRoiPanel();
     end
 
 %     refreshImages();
-%     
-%     plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+%
+%     plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
@@ -520,9 +523,10 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
 
     progressBar(1, 'Ready');
 
-    catch
+    catch ME
+        logErrorToFile(ME);
         resetSeries(dPTSerieOffset, true);
-        progressBar( 1 , 'Error: setMachineLearningFDGBrownFatFullAI()' );
+        progressBar( 1 , 'Error: setMachineLearningFDGBrownFatPETFullAI()' );
     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');

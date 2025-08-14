@@ -34,6 +34,10 @@ function catchKeyPress(~,evnt)
         return;
     end
 
+    % if strcmpi(evnt.Key,'f1') % Activate the interpolaion
+    %     setMachineLearningFDGBATExportToNetworkCallback();
+    % end
+
     if strcmpi(evnt.Key,'x') % Activate the interpolaion
 
         if isMoveImageActivated('get') == true || ...
@@ -89,11 +93,11 @@ function catchKeyPress(~,evnt)
 
         if ~isempty(atRoiMenu)
 
-            for ii=1:numel(atRoiMenu.Children)
+            for ii=1:numel(atRoiMenu)
 
-                toggleTool = atRoiMenu.Children(ii);
+                toggleTool = atRoiMenu{ii};
                 
-                clickedCallback = func2str(toggleTool.ClickedCallback);
+                clickedCallback = func2str(toggleTool.ButtonDownFcn);
                 % if isempty(toggleTool.OnCallback)
                 %     onCallback = '';
                 % else
@@ -104,7 +108,7 @@ function catchKeyPress(~,evnt)
 
                     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-                    callbackFunction = get(toggleTool, 'ClickedCallback');  
+                    callbackFunction = get(toggleTool, 'ButtonDownFcn');  
 
                     % set(toggleTool, 'State', 'on');
 
@@ -141,22 +145,36 @@ function catchKeyPress(~,evnt)
         if isMoveImageActivated('get') == false && ...
            switchTo3DMode('get')       == false && ...
            switchToIsoSurface('get')   == false && ...
-           switchToMIPMode('get')      == false
+           switchToMIPMode('get')      == false && ...
+           is2DBrush('get')            == false
+        
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
-                % atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-                % 
-                % if ~isempty(atRoiInput)
-                % 
-                %     for rr=1:numel(atRoiInput)
-                %         set(atRoiInput{rr}.Object, 'InteractionsAllowed', 'none');
-                %     end                         
-                % end 
+                % fig = get(groot, 'CurrentFigure');
+                % if fig == fiMainWindowPtr('get')
 
-                set(fiMainWindowPtr('get'), 'Pointer', 'bottom');
-    
-                setCrossVisibility(false);            
+                    pAxe = getAxeFromMousePosition(dSeriesOffset);
+        
+                    % Define an array of relevant axes
+                    axesList = [axes1Ptr('get', [], dSeriesOffset), ...
+                                axes2Ptr('get', [], dSeriesOffset), ...
+                                axes3Ptr('get', [], dSeriesOffset)];
+                    
+                    % Check if pAxe matches any in the list
+                    bChangePointer = any(pAxe == axesList);
+
+                    if bChangePointer == true
+                        
+                        if ~strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom')
+
+                            set(fiMainWindowPtr('get'), 'Pointer', 'bottom');
+                
+                            setCrossVisibility(false);  
+                        end
+                    end
+                % end
             end
         end
     end
@@ -179,23 +197,16 @@ function catchKeyPress(~,evnt)
 
         if ~isempty(atRoiMenu)
 
-            for ii=1:numel(atRoiMenu.Children)
+            for ii=1:numel(atRoiMenu)
 
-                toggleTool = atRoiMenu.Children(ii);
+                toggleTool = atRoiMenu{ii};
                 
-                clickedCallback = func2str(toggleTool.ClickedCallback);
+                clickedCallback = func2str(toggleTool.ButtonDownFcn);
 
                 if contains(clickedCallback, 'drawfreehandCallback') 
 
-                    if strcmpi(get(toggleTool, 'State'), 'on')
-                        
-                        set(toggleTool, 'State', 'off');
-                    else
 
-                        set(toggleTool, 'State', 'on');
-                    end
-
-                    callbackFunction = get(toggleTool, 'ClickedCallback');  
+                    callbackFunction = get(toggleTool, 'ButtonDownFcn');  
 
                     callbackFunction();
                     
@@ -221,23 +232,15 @@ function catchKeyPress(~,evnt)
 
         if ~isempty(atRoiMenu)
 
-            for ii=1:numel(atRoiMenu.Children)
+            for ii=1:numel(atRoiMenu)
 
-                toggleTool = atRoiMenu.Children(ii);
+                toggleTool = atRoiMenu{ii};
                 
-                clickedCallback = func2str(toggleTool.ClickedCallback);
+                clickedCallback = func2str(toggleTool.ButtonDownFcn);
 
                 if contains(clickedCallback, 'drawpolygonCallback') 
 
-                    if strcmpi(get(toggleTool, 'State'), 'on')
-                        
-                        set(toggleTool, 'State', 'off');
-                    else
-
-                        set(toggleTool, 'State', 'on');
-                    end
-
-                    callbackFunction = get(toggleTool, 'ClickedCallback');  
+                    callbackFunction = get(toggleTool, 'ButtonDownFcn');  
 
                     callbackFunction();
                 end
@@ -270,32 +273,18 @@ function catchKeyPress(~,evnt)
     
             if ~isempty(atRoiMenu)
     
-                for ii=1:numel(atRoiMenu.Children)
+                for ii=1:numel(atRoiMenu)
     
-                    toggleTool = atRoiMenu.Children(ii);
+                    toggleTool = atRoiMenu{ii};
                     
-                    clickedCallback = func2str(toggleTool.ClickedCallback);
+                    clickedCallback = func2str(toggleTool.ButtonDownFcn);
     
                     if contains(clickedCallback, 'drawClickVoiCallback') 
     
-                        callbackFunction = get(toggleTool, 'ClickedCallback');  
-    
-                        % windowButton('set', 'down');
-    
-                        % pAxe = gca(fiMainWindowPtr('get'));
-                        if strcmpi(get(toggleTool, 'State'), 'on')
-    
-                            set(toggleTool, 'State', 'off');
-                        else
-    
-                            set(toggleTool, 'State', 'on');
-                        end
+                        callbackFunction = get(toggleTool, 'ButtonDownFcn');  
     
                         callbackFunction();
-                        
-                        % set(toggleTool, 'State', 'off');
-    
-                        % windowButton('set', 'up');
+
                     end
     
                 end
@@ -321,26 +310,17 @@ function catchKeyPress(~,evnt)
 
         if ~isempty(atRoiMenu)
 
-            for ii=1:numel(atRoiMenu.Children)
+            for ii=1:numel(atRoiMenu)
 
-                toggleTool = atRoiMenu.Children(ii);
+                toggleTool = atRoiMenu{ii};
                 
-                clickedCallback = func2str(toggleTool.ClickedCallback);
+                clickedCallback = func2str(toggleTool.ButtonDownFcn);
 
                 if contains(clickedCallback, 'drawlineCallback') 
 
-                    callbackFunction = get(toggleTool, 'ClickedCallback');  
-
-                    if strcmpi(get(toggleTool, 'State'), 'on')
-
-                        set(toggleTool, 'State', 'off');
-                    else
-
-                        set(toggleTool, 'State', 'on');
-                    end
+                    callbackFunction = get(toggleTool, 'ButtonDownFcn');  
 
                     callbackFunction();
-
                 end
 
             end
@@ -365,26 +345,17 @@ function catchKeyPress(~,evnt)
 
         if ~isempty(atRoiMenu)
 
-            for ii=1:numel(atRoiMenu.Children)
+            for ii=1:numel(atRoiMenu)
 
-                toggleTool = atRoiMenu.Children(ii);
+                toggleTool = atRoiMenu{ii};
                 
-                clickedCallback = func2str(toggleTool.ClickedCallback);
+                clickedCallback = func2str(toggleTool.ButtonDownFcn);
 
                 if contains(clickedCallback, 'drawsphereCallback') 
 
-                    callbackFunction = get(toggleTool, 'ClickedCallback');  
-
-                    if strcmpi(get(toggleTool, 'State'), 'on')
-
-                        set(toggleTool, 'State', 'off');
-                    else
-
-                        set(toggleTool, 'State', 'on');
-                    end
+                    callbackFunction = get(toggleTool, 'ButtonDownFcn');  
 
                     callbackFunction();
-
                 end
 
             end
@@ -392,43 +363,52 @@ function catchKeyPress(~,evnt)
     end
 
     if strcmpi(evnt.Key,'k')
-        
-        % dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        if isMoveImageActivated('get') == true || ...
-           switchTo3DMode('get')       == true || ...
-           switchToIsoSurface('get')   == true || ...
-           switchToMIPMode('get')      == true || ...
-           is2DBrush('get')            == true
+        if switchTo3DMode('get')     == true || ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    
+
             return;
-        end       
-        
-        atRoiMenu = roiMenuObject('get');
+        end 
 
-        if ~isempty(atRoiMenu)
+        % dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        if ismember('alt', get(fiMainWindowPtr('get'),'CurrentModifier')) % View Kernel Panel
 
-            for ii=1:numel(atRoiMenu.Children)
+            setViewKernelPanel();
+        else
 
-                toggleTool = atRoiMenu.Children(ii);
-                
-                clickedCallback = func2str(toggleTool.ClickedCallback);
-
-                if contains(clickedCallback, 'set2DScissorCallback') 
-
-                    callbackFunction = get(toggleTool, 'ClickedCallback');  
-
-                    if strcmpi(get(toggleTool, 'State'), 'on')
-
-                        set(toggleTool, 'State', 'off');
-                    else
-
-                        set(toggleTool, 'State', 'on');
+            if isMoveImageActivated('get') == true || ...
+               is2DBrush('get')            == true
+                return;
+            end       
+            
+            atRoiMenu = roiMenuObject('get');
+    
+            if ~isempty(atRoiMenu)
+    
+                for ii=1:numel(atRoiMenu.Children)
+    
+                    toggleTool = atRoiMenu.Children(ii);
+                    
+                    clickedCallback = func2str(toggleTool.ClickedCallback);
+    
+                    if contains(clickedCallback, 'set2DScissorCallback') 
+    
+                        callbackFunction = get(toggleTool, 'ClickedCallback');  
+    
+                        if strcmpi(get(toggleTool, 'State'), 'on')
+    
+                            set(toggleTool, 'State', 'off');
+                        else
+    
+                            set(toggleTool, 'State', 'on');
+                        end
+    
+                        callbackFunction();
+    
                     end
-
-                    callbackFunction();
-
+    
                 end
-
             end
         end
     end
@@ -469,7 +449,11 @@ function catchKeyPress(~,evnt)
 
             return;
         end
-        
+
+        if isVsplash('get') == true        
+            return;
+        end
+
         if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
 
             uiPrevVoiRoiPanel = uiPrevVoiRoiPanelObject('get');
@@ -495,7 +479,11 @@ function catchKeyPress(~,evnt)
 
             return;
         end
-        
+
+        if isVsplash('get') == true        
+            return;
+        end
+
         if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
 
             uiDelVoiRoiPanel = uiDelVoiRoiPanelObject('get');
@@ -520,6 +508,10 @@ function catchKeyPress(~,evnt)
             return;
         end
         
+        if isVsplash('get') == true        
+            return;
+        end
+
         if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
 
             uiNextVoiRoiPanel = uiNextVoiRoiPanelObject('get');
@@ -922,7 +914,7 @@ function catchKeyPress(~,evnt)
 
                         % sliceNumber('set', 'coronal', dCurrentSlice);
                         
-                        set(uiSliderCorPtr('get'), 'Value', dCurrentSlice / dLastSlice);
+                        set(uiSliderCorPtr('get'), 'Value', dCurrentSlice);
             
                         sliderCorCallback();
                                   
@@ -944,7 +936,7 @@ function catchKeyPress(~,evnt)
 
                         % sliceNumber('set', 'sagittal', iSliceNumber);    
 
-                        set(uiSliderSagPtr('get'), 'Value', dCurrentSlice / dLastSlice);
+                        set(uiSliderSagPtr('get'), 'Value', dCurrentSlice);
 
                         sliderSagCallback();
                     
@@ -962,7 +954,7 @@ function catchKeyPress(~,evnt)
 
                         % sliceNumber('set', 'axial', dCurrentSlice);    
 
-                        set(uiSliderTraPtr('get'), 'Value', 1 - (dCurrentSlice / dLastSlice));       
+                        set(uiSliderTraPtr('get'), 'Value', dLastSlice - dCurrentSlice + 1);       
                         
                         sliderTraCallback();
                 end
@@ -1011,7 +1003,7 @@ function catchKeyPress(~,evnt)
             
                         % sliceNumber('set', 'coronal', dCurrentSlice);
                         
-                        set(uiSliderCorPtr('get'), 'Value', dCurrentSlice / dLastSlice);
+                        set(uiSliderCorPtr('get'), 'Value', dCurrentSlice);
             
                         sliderCorCallback();
                         
@@ -1030,7 +1022,7 @@ function catchKeyPress(~,evnt)
                           
                         % sliceNumber('set', 'sagittal', dCurrentSlice);
                         
-                        set(uiSliderSagPtr('get'), 'Value', dCurrentSlice / dLastSlice);
+                        set(uiSliderSagPtr('get'), 'Value', dCurrentSlice);
             
                         sliderSagCallback();
                         
@@ -1049,8 +1041,8 @@ function catchKeyPress(~,evnt)
                 
                         % sliceNumber('set', 'axial', dCurrentSlice);
             
-                        set(uiSliderTraPtr('get'), 'Value', 1 - (dCurrentSlice / dLastSlice));       
-            
+                        set(uiSliderTraPtr('get'), 'Value', dLastSlice - dCurrentSlice + 1);       
+         
                         sliderTraCallback();                     
                 end
                 
@@ -1091,7 +1083,7 @@ function catchKeyPress(~,evnt)
                 if iMipAngleValue == 1
                     dMipSliderValue = 0;
                 else
-                    dMipSliderValue = iMipAngleValue/32;
+                    dMipSliderValue = iMipAngleValue;
                 end
     
                 set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
@@ -1130,7 +1122,7 @@ function catchKeyPress(~,evnt)
                 if iMipAngleValue == 1
                     dMipSliderValue = 0;
                 else
-                    dMipSliderValue = iMipAngleValue/32;
+                    dMipSliderValue = iMipAngleValue;
                 end
     
                 set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
@@ -1253,10 +1245,11 @@ function catchKeyPress(~,evnt)
     
             set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnZoomPtr('get'), 'FontWeight', 'normal');
-            
+            % set(btnZoomPtr('get'), 'FontWeight', 'normal');
+            set(btnZoomPtr('get'), 'CData', resizeTopBarIcon('zoom_grey.png'));
+           
             zoomTool('set', false);
-            zoom(fiMainWindowPtr('get'), 'off');           
+            zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');           
         end  
 
         multiFrameZoom('set', 'in',  1);
@@ -1268,17 +1261,19 @@ function catchKeyPress(~,evnt)
     
             set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnPanPtr('get'), 'FontWeight', 'normal');
-    
+            % set(btnPanPtr('get'), 'FontWeight', 'normal');
+            set(btnPanPtr('get'), 'CData', resizeTopBarIcon('pan_grey.png'));
+   
             panTool('set', false);
-            pan(fiMainWindowPtr('get'), 'off'); 
+            panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off'); 
     
         end
 
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
-        
+        % set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+        set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));
+      
         if isMoveImageActivated('get') == true
 
             set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
@@ -1449,13 +1444,15 @@ function catchKeyPress(~,evnt)
 
        if switchTo3DMode('get')     == true || ...
           switchToIsoSurface('get') == true || ...
-          switchToMIPMode('get')    == true || ...
-          isVsplash('get')          == true        
+          switchToMIPMode('get')    == true 
 
-            return;
        end
 
         if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Copy contour
+
+            if isVsplash('get') == true        
+                return;
+            end
 
             atRoiInput = roiTemplate('get', dSeriesOffset);
 
@@ -1480,6 +1477,10 @@ function catchKeyPress(~,evnt)
 
         elseif ismember('shift', get(fiMainWindowPtr('get'),'CurrentModifier')) % Cross size
 
+            if isVsplash('get') == true        
+                return;
+            end
+
             if crossSize('get') > 30
 
                 crossSize('set', 0);
@@ -1487,7 +1488,14 @@ function catchKeyPress(~,evnt)
                 crossSize('set', crossSize('get')+10);
             end
             % redrawCross('all');
+        elseif ismember('alt', get(fiMainWindowPtr('get'),'CurrentModifier')) % View Contours Panel
+
+           setViewRoiPanel();
         else
+            if isVsplash('get') == true        
+                return;
+            end
+
             if crossActivate('get')
 
                 crossActivate('set', false);
@@ -1676,7 +1684,7 @@ function catchKeyPress(~,evnt)
                             
                             ptrFusionColorbar = uiFusionColorbarPtr('get');
                             
-                            ptrFusionColorbar.Label.String = asSeriesString{dFusionSeriesOffset};         
+                            ptrFusionColorbar.Parent.YLabel.String = asSeriesString{dFusionSeriesOffset};         
                             uiFusionColorbarPtr('set', ptrFusionColorbar);
                         end
                     end
@@ -1723,7 +1731,7 @@ function catchKeyPress(~,evnt)
             
                                 ptrColorbar = uiColorbarPtr('get');
             
-                                ptrColorbar.Label.String = asSeriesString{dSeriesOffset};         
+                                ptrColorbar.Parent.YLabel.String = asSeriesString{dSeriesOffset};         
                                 uiColorbarPtr('set', ptrColorbar);
                             end
                         end
@@ -1953,7 +1961,7 @@ function catchKeyPress(~,evnt)
                             
                             ptrFusionColorbar = uiFusionColorbarPtr('get');
                             
-                            ptrFusionColorbar.Label.String = asSeriesString{dFusionSeriesOffset};         
+                            ptrFusionColorbar.Parent.YLabel.String = asSeriesString{dFusionSeriesOffset};         
                             uiFusionColorbarPtr('set', ptrFusionColorbar);
                         end
                     end
@@ -1998,7 +2006,7 @@ function catchKeyPress(~,evnt)
             
                                 ptrColorbar = uiColorbarPtr('get');
             
-                                ptrColorbar.Label.String = asSeriesString{dSeriesOffset};         
+                                ptrColorbar.Parent.YLabel.String = asSeriesString{dSeriesOffset};         
                                 uiColorbarPtr('set', ptrColorbar);
                             end
                         end
@@ -2102,16 +2110,19 @@ function catchKeyPress(~,evnt)
             return;
         end
         
+        if ismember('alt', get(fiMainWindowPtr('get'),'CurrentModifier')) % View Image Panel
 
-        if isInterpolated('get') == true
-
-            isInterpolated('set', false);
+            setViewSegPanel();
         else
-            isInterpolated('set', true);
+            if isInterpolated('get') == true
+    
+                isInterpolated('set', false);
+            else
+                isInterpolated('set', true);
+            end
+    
+            setImageInterpolation(isInterpolated('get'));
         end
-
-        setImageInterpolation(isInterpolated('get'));
-
     end
 
     if strcmpi(evnt.Key,'u') % Invert Color
@@ -2135,15 +2146,21 @@ function catchKeyPress(~,evnt)
                 
                 set(uiOneWindowPtr('get'), 'BackgroundColor', 'black');
 
+                % ptrColorbar = uiColorbarPtr('get');
+                % setColorbarColormap(ptrColorbar, flipud(ptrColorbar.CData) );
+
                 ptrColorbar = uiColorbarPtr('get');
-                colormap(ptrColorbar, flipud(colormap(ptrColorbar)) );
+                setColorbarColormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
 
                 colormap(axePtr('get', [], dSeriesOffset), flipud(colormap(axePtr('get', [], dSeriesOffset))));
                
                 if isFusion('get') == true 
+                    % 
+                    % ptrFusionColorbar = uiFusionColorbarPtr('get');
+                    % setColorbarColormap(ptrFusionColorbar, flipud(ptrFusionColorbar.CData) );
 
                     ptrFusionColorbar = uiFusionColorbarPtr('get');
-                    colormap(ptrFusionColorbar, flipud(colormap(ptrFusionColorbar)) );
+                    setColorbarColormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
 
                     dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                     for rr=1:dNbFusedSeries   
@@ -2176,8 +2193,10 @@ function catchKeyPress(~,evnt)
                         set(uiMipWindowPtr('get'), 'BackgroundColor', 'black');
                     end
 
+                    % ptrColorbar = uiColorbarPtr('get');
+                    % setColorbarColormap(ptrColorbar, flipud(ptrColorbar.CData));
                     ptrColorbar = uiColorbarPtr('get');
-                    colormap(ptrColorbar, flipud(colormap(ptrColorbar)) );
+                    setColorbarColormap(ptrColorbar, flipud(getColorMap('one', colorMapOffset('get'))));
 
                     cmap1 = flipud(colormap(axes1Ptr('get', [], dSeriesOffset)));
                     cmap2 = flipud(colormap(axes2Ptr('get', [], dSeriesOffset)));
@@ -2194,8 +2213,11 @@ function catchKeyPress(~,evnt)
 
                     if isFusion('get') == true                            
 
+                        % ptrFusionColorbar = uiFusionColorbarPtr('get');
+                        % setColorbarColormap(ptrFusionColorbar, flipud(ptrFusionColorbar.CData) );
+
                         ptrFusionColorbar = uiFusionColorbarPtr('get');
-                        colormap(ptrFusionColorbar, flipud(colormap(ptrFusionColorbar)) );
+                        setColorbarColormap(ptrFusionColorbar, flipud(getColorMap('one', fusionColorMapOffset('get'))));
 
                         dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                         for rr=1:dNbFusedSeries
@@ -2246,7 +2268,8 @@ function catchKeyPress(~,evnt)
                 end
             end
             
-            set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]); 
+            % set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]); 
+            setLogoColor(uiLogo, [0.8500 0.8500 0.8500]);
 
             set(fiMainWindowPtr('get'), 'Color', 'black');
        
@@ -2256,9 +2279,16 @@ function catchKeyPress(~,evnt)
 %             set(uiFusionSliderLevelPtr('get') , 'BackgroundColor',  'black');
 %             set(uiFusionSliderWindowPtr('get'), 'BackgroundColor',  'black');     
 
-            set(uiAlphaSliderPtr('get')   , 'BackgroundColor',  'black');                   
-            set(uiColorbarPtr('get')      , 'Color',  'white');                   
-            set(uiFusionColorbarPtr('get'), 'Color',  'white');                   
+%             uiAlphaSlider.Panel.BackgroundColor = [0 0 0];                  
+            set(uiColorbarPtr('get').Parent      , 'YColor',  'white');  
+
+            uiAlphaSlider = uiAlphaSliderPtr('get');
+            set(uiAlphaSlider, 'BackgroundColor',  [0 0 0]);
+
+            if isFusion('get') == true
+                
+                set(uiFusionColorbarPtr('get').Parent, 'YColor',  'white');                   
+            end
 
             backgroundColor('set', 'black');
             if strcmp(getColorMap('one', colorMapOffset('get')), 'white')
@@ -2275,14 +2305,14 @@ function catchKeyPress(~,evnt)
                 set(uiOneWindowPtr('get'), 'BackgroundColor', 'white');
 
                 ptrColorbar = uiColorbarPtr('get');
-                colormap(ptrColorbar, flipud(colormap(axesColorbarPtr('get', [], dSeriesOffset))));   
+                setColorbarColormap(ptrColorbar, flipud(colormap(axesColorbarPtr('get', [], dSeriesOffset))));   
 
                 colormap(axePtr('get' , [], dSeriesOffset), flipud(colormap(axePtr('get', [], dSeriesOffset))));
                 
                 if isFusion('get') == true 
 
                     ptrFusionColorbar = uiFusionColorbarPtr('get');
-                    colormap(ptrFusionColorbar, flipud(colormap(ptrFusionColorbar)) );
+                    setColorbarColormap(ptrFusionColorbar, flipud(ptrFusionColorbar.CData) );
                     
                     dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                     for rr=1:dNbFusedSeries    
@@ -2312,7 +2342,7 @@ function catchKeyPress(~,evnt)
                 end 
 
                 ptrColorbar = uiColorbarPtr('get');
-                colormap(ptrColorbar, flipud(colormap(ptrColorbar)) );
+                setColorbarColormap(ptrColorbar, flipud(ptrColorbar.CData) );
 
                 cmap1 = flipud(colormap(axes1Ptr('get', [], dSeriesOffset)));
                 cmap2 = flipud(colormap(axes2Ptr('get', [], dSeriesOffset)));
@@ -2330,7 +2360,7 @@ function catchKeyPress(~,evnt)
                 if isFusion('get') == true 
                     
                     ptrFusionColorbar = uiFusionColorbarPtr('get');
-                    colormap(ptrFusionColorbar, flipud(colormap(ptrFusionColorbar)) );
+                    setColorbarColormap(ptrFusionColorbar, flipud(ptrFusionColorbar.CData) );
 
                     dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                     for rr=1:dNbFusedSeries
@@ -2381,7 +2411,8 @@ function catchKeyPress(~,evnt)
 
             end
             
-            set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]); 
+            % set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]); 
+            setLogoColor(uiLogo, [0.1500 0.1500 0.1500]);
 
             set(fiMainWindowPtr('get'), 'Color', 'white');
 % 
@@ -2390,10 +2421,14 @@ function catchKeyPress(~,evnt)
 % 
 %             set(uiFusionSliderLevelPtr('get') , 'BackgroundColor',  'white');
 %             set(uiFusionSliderWindowPtr('get'), 'BackgroundColor',  'white');
+            uiAlphaSlider = uiAlphaSliderPtr('get');
+%             uiAlphaSlider.Panel.BackgroundColor = [1 1 1];
+            set(uiColorbarPtr('get').Parent      , 'YColor',  'black'); 
+            set(uiAlphaSlider, 'BackgroundColor',  [1 1 1]);
 
-            set(uiAlphaSliderPtr('get')   , 'BackgroundColor',  'white'); 
-            set(uiColorbarPtr('get')      , 'Color',  'black');                   
-            set(uiFusionColorbarPtr('get'), 'Color',  'black');  
+            if isFusion('get') == true
+                set(uiFusionColorbarPtr('get').Parent, 'YColor',  'black');  
+            end
 
             backgroundColor('set', 'white');
             if strcmpi(getColorMap('one', colorMapOffset('get')), 'black')
@@ -2434,6 +2469,23 @@ function catchKeyPress(~,evnt)
                 set(btnUiSagWindowFullScreen, 'BackgroundColor', get(uiSagWindowPtr('get'), 'BackgroundColor'));
                 set(btnUiMipWindowFullScreen, 'BackgroundColor', get(uiMipWindowPtr('get'), 'BackgroundColor'));
             end
+
+            chkUiCorWindowSelected = chkUiCorWindowSelectedPtr('get');
+            chkUiSagWindowSelected = chkUiSagWindowSelectedPtr('get');
+            chkUiTraWindowSelected = chkUiTraWindowSelectedPtr('get');
+            chkUiMipWindowSelected = chkUiMipWindowSelectedPtr('get');
+    
+            if ~isempty(chkUiCorWindowSelected)&& ...
+               ~isempty(chkUiSagWindowSelected)&& ...
+               ~isempty(chkUiTraWindowSelected)&& ...
+               ~isempty(chkUiMipWindowSelected)
+    
+                set(chkUiCorWindowSelected, 'BackgroundColor', get(uiCorWindowPtr('get'), 'BackgroundColor'));
+                set(chkUiSagWindowSelected, 'BackgroundColor', get(uiSagWindowPtr('get'), 'BackgroundColor'));
+                set(chkUiTraWindowSelected, 'BackgroundColor', get(uiTraWindowPtr('get'), 'BackgroundColor'));
+                set(chkUiMipWindowSelected, 'BackgroundColor', get(uiMipWindowPtr('get'), 'BackgroundColor'));
+            end
+
         end
 
 %                bInitSegPanel = false;                
@@ -2763,7 +2815,7 @@ function catchKeyPress(~,evnt)
         refreshImages();
     end   
 
-    if strcmpi(evnt.Key,'a')   
+    if strcmpi(evnt.Key,'w')  % Anterior \ Posterior 
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
@@ -2849,7 +2901,40 @@ function catchKeyPress(~,evnt)
 
     if strcmpi(evnt.Key,'z')
 
-        setZoomCallback();
+
+       if switchTo3DMode('get')     == true || ...
+          switchToIsoSurface('get') == true || ...
+          switchToMIPMode('get')    == true 
+
+       end
+
+       if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Copy contour
+
+            if isVsplash('get') == true        
+                return;
+            end
+
+            % dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+            % 
+            % if ~isempty(roiTemplate('get',dSeriesOffset)) || ...
+            %    ~isempty(voiTemplate('get',dSeriesOffset))
+    
+                uiUndoVoiRoiPanel = uiUndoVoiRoiPanelObject('get');
+    
+                if ~isempty(uiUndoVoiRoiPanel)
+                    
+                    if strcmpi(get(uiUndoVoiRoiPanel, 'Enable'), 'on')
+
+                        callbackFunction = get(uiUndoVoiRoiPanel, 'Callback');  
+                        
+                        callbackFunction(uiUndoVoiRoiPanel);
+                    end
+                end
+            % end 
+
+        else
+            setZoomCallback();
+        end
     end
 
     if strcmpi(evnt.Key,'n')
@@ -2857,47 +2942,47 @@ function catchKeyPress(~,evnt)
         setPanCallback();
     end                
 
-    if strcmpi(evnt.Key,'1')
+    if strcmpi(evnt.Key,'f1')
         [dMax, dMin] = computeWindowLevel(1200, -500);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'2')
+    if strcmpi(evnt.Key,'f2')
         [dMax, dMin] = computeWindowLevel(500, 50);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'3')
+    if strcmpi(evnt.Key,'f3')
         [dMax, dMin] = computeWindowLevel(500, 200);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'4')
+    if strcmpi(evnt.Key,'f4')
         [dMax, dMin] = computeWindowLevel(240, 40);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'5')
+    if strcmpi(evnt.Key,'f5')
         [dMax, dMin] = computeWindowLevel(80, 40);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'6')
+    if strcmpi(evnt.Key,'f6')
         [dMax, dMin] = computeWindowLevel(350, 90);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'7')
+    if strcmpi(evnt.Key,'f7')
         [dMax, dMin] = computeWindowLevel(2000, -600);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'8')
+    if strcmpi(evnt.Key,'f8')
         [dMax, dMin] = computeWindowLevel(350, 50);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'9')
+    if strcmpi(evnt.Key,'f9')
 
          if  pdToggle == 0
 

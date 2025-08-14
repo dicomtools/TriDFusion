@@ -38,7 +38,7 @@ function setFusionColorbarIntensityMaxScaleValue(dYOffset, dRatio, bDefaultUnit,
     end
 
     set(lineFusionColorbarIntensityMaxPtr('get'), 'YData', [dYOffset dYOffset]);
-    set(textFusionColorbarIntensityMaxPtr('get'), 'Position', [0 dYOffset 0]);
+    set(textFusionColorbarIntensityMaxPtr('get'), 'Position', [0.1 dYOffset 0]);
 
  %   dYOffset = dYOffset-0.01; % Compensate for line width
 

@@ -28,6 +28,7 @@ function triangulateCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if isempty(dicomBuffer('get'))
+
         return;
     end
     
@@ -38,35 +39,40 @@ function triangulateCallback(~, ~)
        switchToIsoSurface('get') == false && ...  
        switchToMIPMode('get')    == false
 
-        % Restore the original colorbar limits after zooming or panning     
-
-        set(axeColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
-
-        % Restore the original fusion colorbar limits after zooming or panning    
-
-        if isFusion('get') == true
-            set(axeFusionColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
-        end
+        % % Restore the original colorbar limits after zooming or panning     
+        % 
+        % set(axeColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
+        % 
+        % % Restore the original fusion colorbar limits after zooming or panning    
+        % 
+        % if isFusion('get') == true
+        %     set(axeFusionColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
+        % end
 
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+
+        set(btnTriangulatePtr('get'), 'CData', resizeTopBarIcon('triangulate_white.png'));           
             
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'Enable', 'on');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnZoomPtr('get'), 'FontWeight', 'normal');
+
+        set(btnZoomPtr('get'), 'CData', resizeTopBarIcon('zoom_grey.png'));           
+
         zoomTool('set', false);
-        zoom(fiMainWindowPtr('get'), 'off');           
+        zoomMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');           
 
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'Enable', 'on');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
-        set(btnPanPtr('get'), 'FontWeight', 'normal');
+        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));    
+
+        set(btnPanPtr('get'), 'CData', resizeTopBarIcon('pan_grey.png'));           
+
         panTool('set', false);
-        pan(fiMainWindowPtr('get'),'off');     
+        panMode(fiMainWindowPtr('get'), get(uiSeriesPtr('get'), 'Value'), 'off');           
 
         set(rotate3DMenu('get'), 'Checked', 'off');
    %     set(btnRegisterPtr('get'), 'Enable', 'on');            
@@ -80,6 +86,7 @@ function triangulateCallback(~, ~)
         datacursormode(fiMainWindowPtr('get'), 'off');       
         
         if isMoveImageActivated('get') == true
+            
             set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
         end   
     end

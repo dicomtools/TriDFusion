@@ -51,7 +51,7 @@ function createVoiFromRois(dSeriesOffset, asTag, sVoiName, sColor, sLesionType)
     dRoiNb = 0;
     dNbTags = numel(asTag);
      
-    sVoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+    sVoiTag = num2str(generateUniqueNumber(false));
     atVoi{dVoiOffset}.Tag        = sVoiTag;
     atVoi{dVoiOffset}.ObjectType = 'voi';
     atVoi{dVoiOffset}.Color      = sColor;
