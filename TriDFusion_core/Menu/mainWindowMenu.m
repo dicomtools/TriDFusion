@@ -57,8 +57,8 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Export Contours to .nii mask...'   ,'Callback', @writeRoisToNiiMaskCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export Contours to .nrrd mask...'  ,'Callback', @writeRoisToNrrdMaskCallback);
     uimenu(mFile,'Label', 'Export Contours to DICOM mask...'  ,'Callback', @writeRoisToDicomMaskCallback);
-    uimenu(mFile,'Label', 'Export Contours to DICOM RT-structure...','Callback', @writeRTStructCallback);
     uimenu(mFile,'Label', 'Export Annotations to DICOM...'    ,'Callback', @writePlotEditCallback);
+    uimenu(mFile,'Label', 'Export Contours to DICOM RT-structure...','Callback', @writeRTStructCallback);
     uimenu(mFile,'Label', 'Export 3D ISO model to .stl...'    ,'Callback', @exportISOtoSTLCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export 3D rendering to slices...'  ,'Callback', @export3DToSlicesCallback);
     
@@ -198,7 +198,8 @@ function mainWindowMenu()
 
     % HAI Pump
     mHAIPump = uimenu(mWorkflows,'Label','HAI Liver Pump');
-    uimenu(mHAIPump, 'Label','Create Liver Tumor Zoning', 'Callback', @createLiverTumorZoningCallback);
+    uimenu(mHAIPump, 'Label','Normal Liver Step Ratio Analysist' , 'Callback', @normalLiverLobedRatioCallback);
+    uimenu(mHAIPump, 'Label','Normal Liver Normalization Analysist', 'Callback', @createLiverTumorZoningCallback);
 
     % Liver Ablation
 

@@ -103,7 +103,8 @@ function setSourceCallback(~, ~)
 
                 progressBar((1/1)-0.00001, 'Parsing folder, please wait');
 
-                sTmpDir = sprintf('%stemp_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+            %    sTmpDir = sprintf('%stemp_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+                sTmpDir = sprintf('%s/', tempname(viewerTempDirectory('get')));
                 mkdir(sTmpDir);
 
                 if ispc
@@ -420,13 +421,13 @@ function setSourceCallback(~, ~)
                 set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
                 % set(btn3DPtr('get'), 'FontWeight', 'normal');
                 set(btn3DPtr('get'), 'CData', resizeTopBarIcon('3d_volume_grey.png'));
-              
+
                 switchToIsoSurface('set', false);
                 set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
                 set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
                 % set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
                 set(btnIsoSurfacePtr('get'), 'CData', resizeTopBarIcon('3d_iso_grey.png'));
-        
+
                 switchToMIPMode('set', false);
                 set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
                 set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));

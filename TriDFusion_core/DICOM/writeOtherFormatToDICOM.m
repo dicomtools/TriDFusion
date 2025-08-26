@@ -32,11 +32,46 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, bRescale)
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;  
   
-    sTmpDir = sprintf('%stemp_dicom_%s//', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss-MS'));
-    if exist(char(sTmpDir), 'dir')
-        rmdir(char(sTmpDir), 's');
+    % sTmpDir = sprintf('%stemp_dicom_%s//', ...
+    %     viewerTempDirectory('get'), ...
+    %     datetime('now','Format','MMMM-d-y-hhmmss-MS'));
+    sTmpDir = sprintf('%s//', tempname(viewerTempDirectory('get')));
+  
+    % --- Remove old folder if it exists ---
+    if exist(sTmpDir, 'dir')
+        rmdir(sTmpDir, 's');
+    
+        % Wait until it's really gone
+        maxRetries = 20;
+        delaySec   = 0.25;
+        for attempt = 1:maxRetries
+            if ~exist(sTmpDir, 'dir')
+                break;
+            end
+            pause(delaySec);
+        end
+    
+        if exist(sTmpDir, 'dir')
+            progressBar(1, sprintf('Error: Failed to remove directory %s', sTmpDir));
+        end
     end
-    mkdir(char(sTmpDir));  
+    
+    % Create new folder
+    mkdir(sTmpDir);
+    
+    % Wait until it's really created
+    maxRetries = 20;
+    delaySec   = 0.25;
+    for attempt = 1:maxRetries
+        if exist(sTmpDir, 'dir')
+            break;
+        end
+        pause(delaySec);
+    end
+    
+    if ~exist(sTmpDir, 'dir')
+        progressBar(1, sprintf('Error: Failed to create directory %s', sTmpDir));
+    end
 
     aBufferSize = size(aBuffer);
 
@@ -287,24 +322,78 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, bRescale)
 
     end
     
-    f = java.io.File(char(sTmpDir)); % Copy from temp folder to output dir
-    dinfo = f.listFiles();                   
-    for K = 1 : 1 : numel(dinfo)
-        
-        if ~(dinfo(K).isDirectory)
-            
-            sSrcFile  = fullfile(char(sTmpDir), char(dinfo(K).getName()));
-            sDstFile  = fullfile(char(sWriteDir), char(dinfo(K).getName()));
-            
-            if ~strcmpi(sSrcFile, sDstFile) % File doesn't exist
+    % f = java.io.File(char(sTmpDir)); % Copy from temp folder to output dir
+    % dinfo = f.listFiles();                   
+    % for K = 1 : 1 : numel(dinfo)
+    % 
+    %     if ~(dinfo(K).isDirectory)
+    % 
+    %         sSrcFile  = fullfile(char(sTmpDir), char(dinfo(K).getName()));
+    %         sDstFile  = fullfile(char(sWriteDir), char(dinfo(K).getName()));
+    % 
+    %         if ~strcmpi(sSrcFile, sDstFile) % File doesn't exist
+    % 
+    %             copyfile(sSrcFile, sWriteDir);
+    %         end
+    % 
+    %     end
+    % end 
+    % rmdir(char(sTmpDir), 's');    
 
-                copyfile(sSrcFile, sWriteDir);
-            end
-
-        end
-    end 
-    rmdir(char(sTmpDir), 's');    
+    f = java.io.File(char(sTmpDir));  % Java File handle for temp folder
+    dinfo = f.listFiles();            % Java array of java.io.File objects
     
+    for K = 1:numel(dinfo)
+    
+        if ~dinfo(K).isDirectory()    % <-- must call as a method
+            name     = char(dinfo(K).getName());
+            sSrcFile = fullfile(char(sTmpDir), name);
+            sDstFile = fullfile(char(sWriteDir), name);
+    
+            if ~strcmpi(sSrcFile, sDstFile)
+    
+                % --- retry copy ---
+                maxRetries = 5;
+                delaySec   = 1;
+                success    = false;
+    
+                for attempt = 1:maxRetries
+                    try
+                        copyfile(sSrcFile, sWriteDir);
+                        if exist(sDstFile,'file')
+                            success = true;
+                            break;
+                        end
+                    catch ME2
+                        logErrorToFile(ME2);
+                        progressBar(1, sprintf('Error: Copy attempt %d failed: %s\n', attempt, ME2.message));
+                    end
+                    pause(delaySec);
+                end
+    
+                if ~success
+                    progressBar(1, sprintf('Error: Failed to copy %s after %d attempts.', sSrcFile, maxRetries));
+                end
+            end
+        end
+    end
+    
+    % --- retry rmdir ---
+    maxRetries = 5;
+    delaySec   = 1;
+    for attempt = 1:maxRetries
+        try
+            rmdir(char(sTmpDir), 's');
+            if ~exist(sTmpDir,'dir')
+                break;
+            end
+        catch ME3
+            logErrorToFile(ME3);
+            progressBar(0, sprintf('Error: mkdir attempt %d failed: %s\n', attempt, ME3.message));
+            pause(delaySec);
+        end
+    end
+
     progressBar(1, sprintf('Export %d files completed %s', ww, char(sWriteDir)));
     
     catch ME   

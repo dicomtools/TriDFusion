@@ -74,8 +74,8 @@ function createVoiFromRois(dSeriesOffset, asTag, sVoiName, sColor, sLesionType)
 
             if isfield(atRoi{dRoiTagOffset}, 'Object')
                 
-                if ~isstruct(atRoi{dRoiTagOffset}.Object)
-    
+                if ~isstruct(atRoi{dRoiTagOffset}.Object) 
+                 
                     atRoi{dRoiTagOffset}.Object.Label = sLabel;
                     atRoi{dRoiTagOffset}.Object.UserData = 'voi-roi';
                 end

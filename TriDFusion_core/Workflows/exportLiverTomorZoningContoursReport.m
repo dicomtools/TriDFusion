@@ -172,13 +172,13 @@ function exportLiverTomorZoningContoursReport(bSUVUnit, sFileName)
 
             dNbVois = numel(atVoiInput);
 
-            % Compute Normalization sphere mean
+            % Compute Normalization NormalLiver mean
 
-            dNormalizationSphereMean = [];
+            dNormalizationNormalLiverMean = [];
 
             for aa=1:dNbVois
 
-                if ~contains(lower(atVoiInput{aa}.Label), 'sphere')
+                if ~contains(lower(atVoiInput{aa}.Label), 'normal liver')
                     continue;
                 end
 
@@ -200,7 +200,7 @@ function exportLiverTomorZoningContoursReport(bSUVUnit, sFileName)
 
                     if ~isempty(tVoiComputed)
 
-                        dNormalizationSphereMean = tVoiComputed.mean;
+                        dNormalizationNormalLiverMean = tVoiComputed.mean;
                     end
                 end
             end
@@ -214,7 +214,7 @@ function exportLiverTomorZoningContoursReport(bSUVUnit, sFileName)
                         continue;
                     end
 
-                    if contains(lower(atVoiInput{aa}.Label), 'sphere')
+                    if contains(lower(atVoiInput{aa}.Label), 'normal liver')
                         continue;
                     end
 
@@ -253,10 +253,10 @@ function exportLiverTomorZoningContoursReport(bSUVUnit, sFileName)
                                 
                             asCell{dLineOffset,12} = [tVoiComputed.removedVolume];
                             
-                            if ~isempty(dNormalizationSphereMean)
+                            if ~isempty(dNormalizationNormalLiverMean)
 
-                                dRatio = tVoiComputed.mean / dNormalizationSphereMean;
-                                asCell{dLineOffset,13} = [dRatio];
+                                dRatio = tVoiComputed.mean / dNormalizationNormalLiverMean;
+                                asCell{dLineOffset,13} = dRatio;
                                 
                                 for tt=14:21
                                     asCell{dLineOffset,tt}  = (' ');
@@ -313,9 +313,9 @@ function exportLiverTomorZoningContoursReport(bSUVUnit, sFileName)
                             asCell{dLineOffset,10} = [tVoiComputed.peak];
                             asCell{dLineOffset,11} = [tVoiComputed.volume];
                              
-                            if ~isempty(dNormalizationSphereMean)
+                            if ~isempty(dNormalizationNormalLiverMean)
 
-                                dRatio = tVoiComputed.mean / dNormalizationSphereMean;
+                                dRatio = tVoiComputed.mean / dNormalizationNormalLiverMean;
                                 asCell{dLineOffset,13} = [dRatio];
                                 
                                 for tt=14:21
@@ -332,11 +332,11 @@ function exportLiverTomorZoningContoursReport(bSUVUnit, sFileName)
                     end
                 end
 
-                % Sphere  
+                % NormalLiver  
                 
                 for aa=1:dNbVois
 
-                    if ~contains(lower(atVoiInput{aa}.Label), 'sphere')
+                    if ~contains(lower(atVoiInput{aa}.Label), 'normal liver')
                         continue;
                     end
 
@@ -372,9 +372,9 @@ function exportLiverTomorZoningContoursReport(bSUVUnit, sFileName)
                             asCell{dLineOffset,10} = [tVoiComputed.peak];
                             asCell{dLineOffset,11} = [tVoiComputed.volume];
                             
-                            if ~isempty(dNormalizationSphereMean)
+                            if ~isempty(dNormalizationNormalLiverMean)
 
-                                dRatio = tVoiComputed.mean / dNormalizationSphereMean;
+                                dRatio = tVoiComputed.mean / dNormalizationNormalLiverMean;
                                 asCell{dLineOffset,13} = [dRatio];
                                 
                                 for tt=14:21

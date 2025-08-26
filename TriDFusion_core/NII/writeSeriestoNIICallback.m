@@ -145,11 +145,41 @@ function writeSeriestoNIICallback(~, ~)
 %         atDcmDicomMeta{1}.RescaleSlope = atMetaData{1}.RescaleSlope;
 %     end
 
-    sTmpDir = sprintf('%stemp_dicom_%s//', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss-MS'));
-    if exist(char(sTmpDir), 'dir')
-        rmdir(char(sTmpDir), 's');
+    % sTmpDir = sprintf('%stemp_dicom_%s//', ...
+    %     viewerTempDirectory('get'), ...
+    %     datetime('now','Format','MMMM-d-y-hhmmss-MS'))
+    
+    sTmpDir = sprintf('%s//', tempname(viewerTempDirectory('get')));
+
+    % Remove old temp dir if it exists
+    if exist(sTmpDir, 'dir')
+        rmdir(sTmpDir, 's');
     end
-    mkdir(char(sTmpDir));
+    
+    % Create directory (with retry check)
+    maxRetries = 10;
+    delaySec   = 0.5;
+    success    = false;
+    
+    for attempt = 1:maxRetries
+        try
+            mkdir(sTmpDir);
+        catch ME2
+            logErrorToFile(ME2);
+            progressBar(0, sprintf('Error: mkdir attempt %d failed: %s\n', attempt, ME2.message));
+        end
+    
+        if exist(sTmpDir, 'dir')
+            success = true;
+            break;
+        end
+    
+        pause(delaySec);
+    end
+    
+    if ~success
+        progressBar(0, sprintf('Error: Failed to create directory %s after %d attempts.', sTmpDir, maxRetries));
+    end
 
 %     if size(aBuffer, 3) ==1
 %         aBuffer = aBuffer(end:-1:1,:);
@@ -158,6 +188,7 @@ function writeSeriestoNIICallback(~, ~)
 %         aBuffer = aBuffer(end:-1:1,:,:);
 %     end
 
+    
     writeOtherFormatToDICOM(aBuffer, atDcmDicomMeta, sTmpDir, false);
 
     clear aBuffer;

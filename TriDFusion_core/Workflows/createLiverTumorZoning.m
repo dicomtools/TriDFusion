@@ -36,9 +36,21 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
 
     dNMSerieOffset = [];
     for tt=1:numel(atInput)
+
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')
-            dNMSerieOffset = tt;
-            break;
+
+            atNmVoiInput = voiTemplate('get', tt);
+            if isempty(atNmVoiInput)
+                continue;
+            end
+
+            asLabels = lower(cellfun(@(s) s.Label, atNmVoiInput, 'UniformOutput', false));          
+
+            if any(contains(asLabels, 'normal liver'))
+
+                dNMSerieOffset = tt;
+                break;
+            end
         end
     end
 
@@ -58,7 +70,7 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
                any(contains(asLabels, 'lesion'))
 
                 dCTSerieOffset = tt;
-            elseif any(contains(asLabels, 'lesion'))
+            elseif all(contains(asLabels, 'lesion'))
 
                 dPvCTSerieOffset = tt;
             end
@@ -67,9 +79,9 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
 
     if isempty(dNMSerieOffset) || isempty(dCTSerieOffset) || isempty(dPvCTSerieOffset)
 
-        progressBar(1, 'Error: Liver tumor zoning requires both a NM/CT and a contrast-enhanced CT image!');
+        progressBar(1, 'Error: Liver normalization requires both a NM/CT and a contrast-enhanced CT image!');
         if bDisplayError == true
-            errordlg('Error: Liver tumor zoning requires both a NM/CT and a contrast-enhanced CT image!', 'Modality Validation');
+            errordlg('Error: Liver normalization requires both a NM/CT and a contrast-enhanced CT image!', 'Modality Validation');
         end
         return;
     end
@@ -78,16 +90,16 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
 % if 1
     if exist('G:/Documents', 'dir')
 
-        sRootDirectory = 'G:/Documents/HAI_Pump';
+        sRootDirectory = 'G:/Documents/HAI_Pump_Normalized';
     else
         sUserFolder = getenv('USERPROFILE'); % Gets "C:\Users\Username"
         sOneDrivePath = fullfile(sUserFolder, 'OneDrive - Memorial Sloan Kettering Cancer Center', 'Documents');
 
         if exist(sOneDrivePath, 'dir')
 
-            sRootDirectory = sprintf('%s/HAI_Pump', sOneDrivePath);
+            sRootDirectory = sprintf('%s/HAI_Pump_Normalized', sOneDrivePath);
         else
-            sRootDirectory = 'C:/Temp/HAI_Pump';
+            sRootDirectory = 'C:/Temp/HAI_Pump_Normalized';
         end
     end
 % else
@@ -99,11 +111,11 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
         mkdir(sRootDirectory);
     end
 
-    sNMDirectory = sprintf('%s/NM_Statistics', sRootDirectory);
-    if ~exist(sNMDirectory, 'dir')
-
-        mkdir(sNMDirectory);
-    end
+    % sNMDirectory = sprintf('%s/NM_Statistics', sRootDirectory);
+    % if ~exist(sNMDirectory, 'dir')
+    % 
+    %     mkdir(sNMDirectory);
+    % end
 
     atNMMetaData = dicomMetaData('get', [], dNMSerieOffset);
     if isempty(atNMMetaData)
@@ -115,7 +127,7 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
     sAccession         = cleanString(atNMMetaData{1}.AccessionNumber, '_');
     sSeriesDescription = cleanString(atNMMetaData{1}.SeriesDescription, '_');
 
-    sNMDirectory = sprintf('%s/%s', sNMDirectory, sPatientName);
+    sNMDirectory = sprintf('%s/%s', sRootDirectory, sPatientName);
     if ~exist(sNMDirectory, 'dir')
 
         mkdir(sNMDirectory);
@@ -152,66 +164,40 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
 
     atNMVoiInput = voiTemplate('get', dNMSerieOffset);    
     atCTVoiInput = voiTemplate('get', dCTSerieOffset);
-
-    atNMRoiInput = roiTemplate('get', dNMSerieOffset);    
-    % atCTRoiInput = roiTemplate('get', dCTSerieOffset);    
-
+  
     if isempty(atNMVoiInput) || isempty(atCTVoiInput)
 
-        progressBar(1, 'Error: Liver Tumor Zoning require contours on both NM and CT image!');
+        progressBar(1, 'Error: Liver Tumor normalization require contours on both NM and CT image!');
         if bDisplayError == true
-            errordlg('Error: Liver Tumor Zoning require contours on both NM and CT image!', 'Modality Validation');
+            errordlg('Error: Liver Tumor normalization require contours on both NM and CT image!', 'Modality Validation');
         end
         return;
     end
-    
-    % Validate Contours Label
 
-    for i=1:2
+     % Procesing the NM series
+     
+    if get(uiSeriesPtr('get'), 'Value') ~= dCTSerieOffset
+        set(uiSeriesPtr('get'), 'Value', dCTSerieOffset);
 
-        % Extract all labels and convert to lowercase
-
-        if i==1
-            asLabels = lower(cellfun(@(s) s.Label, atNMVoiInput, 'UniformOutput', false));            
-            sModality = 'NM';
-        else
-            asLabels = lower(cellfun(@(s) s.Label, atCTVoiInput, 'UniformOutput', false));          
-            sModality = 'CT';
-        end
-        
-        % Set the flags by checking if any labels contain the respective substring
-        bLiver         = any(contains(asLabels, 'liver-liv'));
-        bLiverSegments = any(contains(asLabels, 'liver segment'));
-        bLesions       = any(contains(asLabels, 'lesion'));
-    
-        if ~bLiver || ~bLiverSegments || ~bLesions 
-
-            progressBar(1, sprintf('Error: Liver, liver segments, or liver lesions not detected on %s image!', sModality));
-            if bDisplayError == true
-                errordlg(sprintf('Error: Liver, liver segments, or liver lesions not detected on %s image!', sModality), 'Segmentation Validation');
-            end
-            return;        
-        end
-
-        if strcmpi(sModality, 'NM')
-
-            bSphere = find(contains(asLabels, 'sphere'), 1);
-
-            if ~bSphere 
-    
-                progressBar(1, sprintf('Error: No sphere detected in the %s image. Please draw a sphere before running the workflow!', sModality));
-                if bDisplayError == true
-                    errordlg(sprintf('Error: No sphere detected in the %s image. Please draw a sphere before running the workflow!', sModality), 'Sphere Validation');
-                end
-                return;        
-            else
-                copyRoiVoiToSerie(dNMSerieOffset, dCTSerieOffset, atNMVoiInput{bSphere}, false);
-            end
-        end
-
+        setSeriesCallback();
     end
 
-    % Procesing the NM series
+    % Contours validation
+
+    atCTVoiInput = voiTemplate('get', dCTSerieOffset);
+
+    % Copy liver and liver segments to NM
+
+    asLabels = lower(cellfun(@(s) s.Label, atCTVoiInput, 'UniformOutput', false));          
+
+    for vv=1:numel(asLabels)
+        if any(contains(asLabels, 'liver segment')) || ...
+           any(contains(asLabels, 'liver-liv')) || ...
+           any(contains(asLabels, 'lesion')) 
+ 
+            copyRoiVoiToSerie(dCTSerieOffset, dNMSerieOffset, atCTVoiInput{vv}, false);
+        end
+    end
 
     if get(uiSeriesPtr('get'), 'Value') ~= dNMSerieOffset
         set(uiSeriesPtr('get'), 'Value', dNMSerieOffset);
@@ -219,6 +205,31 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
         setSeriesCallback();
     end
 
+    atNMRoiInput = roiTemplate('get', dNMSerieOffset);    
+    atNMVoiInput = voiTemplate('get', dNMSerieOffset);    
+
+    % Extract all labels and convert to lowercase
+
+    asLabels = lower(cellfun(@(s) s.Label, atNMVoiInput, 'UniformOutput', false));
+   
+    % Validate Contours Label
+
+    bLiver         = any(contains(asLabels, 'liver-liv'));
+    bLiverSegments = any(contains(asLabels, 'liver segment'));
+    bNormalLiver   = any(contains(asLabels, 'normal liver'));
+    bLiverLesions  = any(contains(asLabels, 'lesion'));
+
+    if ~bLiver || ~bLiverSegments || ~bNormalLiver || ~bLiverLesions
+
+        progressBar(1, sprintf('Error: No lesions, normal liver, liver segments or liver contours detected. Please draw a normal liver on the NM and segment the CT liver and segments before running the workflow!'));
+        if bDisplayError == true
+            errordlg(sprintf('Error: No lesions, normal liver, liver segments, or liver contours detected. Please draw a normal liver on the NM and segment the CT liver and segments before running the workflow!'));
+        end
+        return;        
+    end
+
+    % copyRoiVoiToSerie(dNMSerieOffset, dCTSerieOffset, atNMVoiInput{bNormalLiver}, false);           
+  
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
@@ -239,10 +250,12 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
     asNMLabels = lower(cellfun(@(s) s.Label, atNMVoiInput, 'UniformOutput', false));           
 
     % Left/Right Liver lobes
+    dLiverOffset    = find(contains(asLabels, 'liver-liv'), 1);
     adLiverSegments = find(contains(asNMLabels, 'liver segment'));
    
     dNbSegments = numel(adLiverSegments);
 
+    a3DLiverLogicalMask = voiTemplateToMask(atNMVoiInput{dLiverOffset}, atNMRoiInput, aNMImage);
     a3DLeftLiverLogicalMask  = false(size(aNMImage));
     a3DRightLiverLogicalMask = false(size(aNMImage));
 
@@ -255,9 +268,9 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
            contains(atNMVoiInput{adLiverSegments(jj)}.Label, 'Liver Segment 3') || ... 
            contains(atNMVoiInput{adLiverSegments(jj)}.Label, 'Liver Segment 4')  
 
-            a3DLeftLiverLogicalMask = a3DLeftLiverLogicalMask|aSegmentMask;
+            a3DLeftLiverLogicalMask = a3DLeftLiverLogicalMask|aSegmentMask&a3DLiverLogicalMask;
         else % Right Lobe 
-            a3DRightLiverLogicalMask = a3DRightLiverLogicalMask|aSegmentMask;
+            a3DRightLiverLogicalMask = a3DRightLiverLogicalMask|aSegmentMask&a3DLiverLogicalMask;
 
         end
     end
@@ -265,46 +278,62 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
     maskToVoi(a3DLeftLiverLogicalMask , 'Liver Left Lobe' , 'Liver', [0.93, 0.69, 0.13], 'Axial', dNMSerieOffset, true);
     maskToVoi(a3DRightLiverLogicalMask, 'Liver Right Lobe', 'Liver', [0.72, 0.72, 0.15], 'Axial', dNMSerieOffset, true);
 
-    atNMVoiInput = voiTemplate('get', dNMSerieOffset);    
-    atNMRoiInput = roiTemplate('get', dNMSerieOffset);    
-
-    sNMWriteRtStructDir = outputDir('get');
-
-    if ~exist(sNMWriteRtStructDir, 'dir')
-
-        sNMWriteRtStructDir = sprintf('%s/RT_%s_%s_%s/',sNMDirectory, sPatientName, sAccession, sSeriesDescription);
-
-        if ~exist(sNMWriteRtStructDir, 'dir')
-
-            mkdir(sNMWriteRtStructDir);
-        end
+    for jj=1:dNbSegments
+        aSegmentMask = voiTemplateToMask(atNMVoiInput{adLiverSegments(jj)}, atNMRoiInput, aNMImage) & a3DLiverLogicalMask;
+        maskToVoi(aSegmentMask , sprintf('%s', atNMVoiInput{adLiverSegments(jj)}.Label) , 'Liver', atNMVoiInput{adLiverSegments(jj)}.Color, 'Axial', dNMSerieOffset, true);
+        deleteContourObject(atNMVoiInput{adLiverSegments(jj)}.Tag, dNMSerieOffset);
     end
+
+    % sNMWriteRtStructDir = outputDir('get');
+    % 
+    % if ~exist(sNMWriteRtStructDir, 'dir')
+    % 
+    %     sNMWriteRtStructDir = sprintf('%s/RT_%s_%s_%s/',sNMDirectory, sPatientName, sAccession, sSeriesDescription);
+    % 
+    %     if ~exist(sNMWriteRtStructDir, 'dir')
+    % 
+    %         mkdir(sNMWriteRtStructDir);
+    %     end
+    % end
 
     % Export NM rt-structure
 
-    aInputBuffer = inputBuffer('get');
-    sOvewriteSeriesDescription = sprintf('RT-%s', atNMMetaData{1}.SeriesDescription);
-    writeRtStruct(sNMWriteRtStructDir, false, aInputBuffer{dNMSerieOffset}, atInput(dNMSerieOffset).atDicomInfo, aNMImage, atNMMetaData, dNMSerieOffset, false, sOvewriteSeriesDescription);
-    clear aInputBuffer;    
+    % aInputBuffer = inputBuffer('get');
+    % sOvewriteSeriesDescription = sprintf('RT-%s', atNMMetaData{1}.SeriesDescription);
+    % writeRtStruct(sNMWriteRtStructDir, false, aInputBuffer{dNMSerieOffset}, atInput(dNMSerieOffset).atDicomInfo, aNMImage, atNMMetaData, dNMSerieOffset, false, sOvewriteSeriesDescription);
+    % clear aInputBuffer;    
 
     % Apply margin on Liver lesions
 
-    adLiverLesions = find(contains(asNMLabels, 'lesion'));
-
-    dNbLesions = numel(adLiverLesions);
-
     a3DLesionsLogicalMask = false(size(aNMImage));
 
+    atNMVoiInput = voiTemplate('get', dNMSerieOffset);    
+    atNMRoiInput = roiTemplate('get', dNMSerieOffset);    
+
+    asNMLabels = lower(cellfun(@(s) s.Label, atNMVoiInput, 'UniformOutput', false));           
+    adLiverLesions  = find(contains(asNMLabels, 'lesion'));
+    dNbLesions  = numel(adLiverLesions);
+
     for jj=1:dNbLesions
-
-        aLesionMask = voiTemplateToMask(atNMVoiInput{adLiverLesions(jj)}, atNMRoiInput, aNMImage);
-        aLesionMask = applyMarginToMask(aLesionMask, xVoxelSize, yVoxelSize, zVoxelSize, dMarginSize, dMarginSize, dMarginSize);
-        a3DLesionsLogicalMask = a3DLesionsLogicalMask | aLesionMask;
-
-        maskToVoi(aLesionMask , sprintf('%s (with %dmm margin)', atNMVoiInput{adLiverLesions(jj)}.Label, dMarginSize), 'Liver', atNMVoiInput{adLiverLesions(jj)}.Color, 'Axial', dNMSerieOffset, true);
-        % deleteContourObject(atNMVoiInput{adLiverLesions(jj)}.Tag, dNMSerieOffset);
+        aLesionMask = voiTemplateToMask(atNMVoiInput{adLiverLesions(jj)}, atNMRoiInput, aNMImage) & a3DLiverLogicalMask;
+        maskToVoi(aLesionMask , sprintf('%s', atNMVoiInput{adLiverLesions(jj)}.Label) , 'Liver', atNMVoiInput{adLiverLesions(jj)}.Color, 'Axial', dNMSerieOffset, true);
+        deleteContourObject(atNMVoiInput{adLiverLesions(jj)}.Tag, dNMSerieOffset);
     end
-    
+
+    atNMVoiInput = voiTemplate('get', dNMSerieOffset);    
+    atNMRoiInput = roiTemplate('get', dNMSerieOffset);    
+
+    asNMLabels = lower(cellfun(@(s) s.Label, atNMVoiInput, 'UniformOutput', false));           
+    adLiverLesions  = find(contains(asNMLabels, 'lesion'));
+    dNbLesions  = numel(adLiverLesions);
+
+    for jj=1:dNbLesions
+        aLesionMask = voiTemplateToMask(atNMVoiInput{adLiverLesions(jj)}, atNMRoiInput, aNMImage);
+        aLesionMask = applyMarginToMask(aLesionMask, xVoxelSize, yVoxelSize, zVoxelSize, dMarginSize, dMarginSize, dMarginSize) & a3DLiverLogicalMask;
+        maskToVoi(aLesionMask , sprintf('%s (with %dmm margin)', atNMVoiInput{adLiverLesions(jj)}.Label, dMarginSize), 'Liver', atNMVoiInput{adLiverLesions(jj)}.Color, 'Axial', dNMSerieOffset, true);
+        a3DLesionsLogicalMask = a3DLesionsLogicalMask | aLesionMask;
+    end
+
     atNMVoiInput = voiTemplate('get', dNMSerieOffset);    
     atNMRoiInput = roiTemplate('get', dNMSerieOffset); 
 
@@ -355,7 +384,7 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
     dicomBuffer('set', aNMImage, dNMSerieOffset);
     mipBuffer('set', computeMIP(aNMImage), dNMSerieOffset);
 
-    sContoursFileName = sprintf('TriDFusion_NM_CONTOURS_%s_%s_%s.csv', sPatientName, sAccession, sSeriesDescription);
+    sContoursFileName = sprintf('TriDFusion_NM_STATISTICS_%s_%s_%s.csv', sPatientName, sAccession, sSeriesDescription);
     exportLiverTomorZoningContoursReport(false, sprintf('%s/%s', sNMDirectory, sContoursFileName));
 
     % Export NM Radiomics To Excel
@@ -383,201 +412,209 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
     clear a3DLesionsLogicalMask;
     clear aNMImage;
 
-    % Procesing the CT series
-
-    if get(uiSeriesPtr('get'), 'Value') ~= dCTSerieOffset
-
-        set(uiSeriesPtr('get'), 'Value', dCTSerieOffset);
-
-        setSeriesCallback();
-    end
-
-    atCTVoiInput = voiTemplate('get', dCTSerieOffset);
-    atCTRoiInput = roiTemplate('get', dCTSerieOffset);
-
-    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;
-
-    aCTImage = dicomBuffer('get', [], dCTSerieOffset);
-    if isempty(aCTImage)
-
-        aInputBuffer = inputBuffer('get');
-        aCTImage = aInputBuffer{dCTSerieOffset};
-        clear aInputBuffer;
-    end
-
-    atCTMetaData = dicomMetaData('get', [], dCTSerieOffset);
-    if isempty(atCTMetaData)
-
-        atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
-    end
-
-    dCTImageMin = min(aCTImage, [], 'all');
-
-    xVoxelSize = atCTMetaData{1}.PixelSpacing(1);
-    yVoxelSize = atCTMetaData{1}.PixelSpacing(2);
-    zVoxelSize = computeSliceSpacing(atCTMetaData);
-
-
-    asCTLabels = lower(cellfun(@(s) s.Label, atCTVoiInput, 'UniformOutput', false));           
-
-    % Left/Right Liver lobes
-    adLiverSegments = find(contains(asCTLabels, 'liver segment'));
-   
-    dNbSegments = numel(adLiverSegments);
-
-    a3DLeftLiverLogicalMask  = false(size(aCTImage));
-    a3DRightLiverLogicalMask = false(size(aCTImage));
-
-    for jj=1:dNbSegments
-
-        aSegmentMask = voiTemplateToMask(atCTVoiInput{adLiverSegments(jj)}, atCTRoiInput, aCTImage);
-
-        % Left Lobe 
-        if contains(atCTVoiInput{adLiverSegments(jj)}.Label, 'Liver Segment 2') || ... 
-           contains(atCTVoiInput{adLiverSegments(jj)}.Label, 'Liver Segment 3') || ... 
-           contains(atCTVoiInput{adLiverSegments(jj)}.Label, 'Liver Segment 4')  
-
-            a3DLeftLiverLogicalMask = a3DLeftLiverLogicalMask|aSegmentMask;
-        else % Right Lobe 
-            a3DRightLiverLogicalMask = a3DRightLiverLogicalMask|aSegmentMask;
-
-        end
-    end
-
-    maskToVoi(a3DLeftLiverLogicalMask , 'Liver Left Lobe' , 'Liver', [0.93, 0.69, 0.13], 'Axial', dCTSerieOffset, true);
-    maskToVoi(a3DRightLiverLogicalMask, 'Liver Right Lobe', 'Liver', [0.72, 0.72, 0.15], 'Axial', dCTSerieOffset, true);
-
-    atCTVoiInput = voiTemplate('get', dCTSerieOffset);
-    atCTRoiInput = roiTemplate('get', dCTSerieOffset);
-
-    asCTLabels = lower(cellfun(@(s) s.Label, atCTVoiInput, 'UniformOutput', false));           
-
-    % Apply margin on Liver lesions
-
-    adLiverLesions = find(contains(asCTLabels, 'lesion'));
-
-    dNbLesions = numel(adLiverLesions);
-
-    a3DLesionsLogicalMask = false(size(aCTImage));
-
-    for jj=1:dNbLesions
-
-        aLesionMask = voiTemplateToMask(atCTVoiInput{adLiverLesions(jj)}, atCTRoiInput, aCTImage);
-        aLesionMask = applyMarginToMask(aLesionMask, xVoxelSize, yVoxelSize, zVoxelSize, dMarginSize, dMarginSize, dMarginSize);
-
-        a3DLesionsLogicalMask = a3DLesionsLogicalMask | aLesionMask;
-
-        maskToVoi(aLesionMask , sprintf('%s (with %dmm margin)', atCTVoiInput{adLiverLesions(jj)}.Label, dMarginSize), 'Liver', atCTVoiInput{adLiverLesions(jj)}.Color, 'Axial', dCTSerieOffset, true);
-
-        %deleteContourObject(atCTVoiInput{adLiverLesions(jj)}.Tag, dCTSerieOffset);
-    end
-
-    atCTVoiInput = voiTemplate('get', dCTSerieOffset);
-    atCTRoiInput = roiTemplate('get', dCTSerieOffset);
-
-    asCTLabels = lower(cellfun(@(s) s.Label, atCTVoiInput, 'UniformOutput', false));           
-
-    aCTImage(a3DLesionsLogicalMask) = dCTImageMin;
-
+    % % Procesing the CT series
+    % 
+    % if get(uiSeriesPtr('get'), 'Value') ~= dCTSerieOffset
+    % 
+    %     set(uiSeriesPtr('get'), 'Value', dCTSerieOffset);
+    % 
+    %     setSeriesCallback();
+    % end
+    % 
+    % atCTVoiInput = voiTemplate('get', dCTSerieOffset);
+    % atCTRoiInput = roiTemplate('get', dCTSerieOffset);
+    % 
+    % set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    % drawnow;
+    % 
+    % aCTImage = dicomBuffer('get', [], dCTSerieOffset);
+    % if isempty(aCTImage)
+    % 
+    %     aInputBuffer = inputBuffer('get');
+    %     aCTImage = aInputBuffer{dCTSerieOffset};
+    %     clear aInputBuffer;
+    % end
+    % 
+    % atCTMetaData = dicomMetaData('get', [], dCTSerieOffset);
+    % if isempty(atCTMetaData)
+    % 
+    %     atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
+    % end
+    % 
+    % dCTImageMin = min(aCTImage, [], 'all');
+    % 
+    % xVoxelSize = atCTMetaData{1}.PixelSpacing(1);
+    % yVoxelSize = atCTMetaData{1}.PixelSpacing(2);
+    % zVoxelSize = computeSliceSpacing(atCTMetaData);
+    % 
+    % 
+    % asCTLabels = lower(cellfun(@(s) s.Label, atCTVoiInput, 'UniformOutput', false));           
+    % 
+    % % Left/Right Liver lobes
+    % adLiverSegments = find(contains(asCTLabels, 'liver segment'));
+    % dLiverOffset = find(contains(asNMLabels, 'liver-liv'),1);
+    % 
+    % dNbSegments = numel(adLiverSegments);
+    % 
+    % a3DLiverLogicalMask = voiTemplateToMask(atCTVoiInput{dLiverOffset}, atCTRoiInput, aCTImage);
+    % a3DLeftLiverLogicalMask  = false(size(aCTImage));
+    % a3DRightLiverLogicalMask = false(size(aCTImage));
+    % 
+    % for jj=1:dNbSegments
+    % 
+    %     aSegmentMask = voiTemplateToMask(atCTVoiInput{adLiverSegments(jj)}, atCTRoiInput, aCTImage);
+    % 
+    %     % Left Lobe 
+    %     if contains(atCTVoiInput{adLiverSegments(jj)}.Label, 'Liver Segment 2') || ... 
+    %        contains(atCTVoiInput{adLiverSegments(jj)}.Label, 'Liver Segment 3') || ... 
+    %        contains(atCTVoiInput{adLiverSegments(jj)}.Label, 'Liver Segment 4')  
+    % 
+    %         a3DLeftLiverLogicalMask = a3DLeftLiverLogicalMask|aSegmentMask&a3DLiverLogicalMask;
+    %     else % Right Lobe 
+    %         a3DRightLiverLogicalMask = a3DRightLiverLogicalMask|aSegmentMask&a3DLiverLogicalMask;
+    % 
+    %     end
+    % end
+    % 
+    % maskToVoi(a3DLeftLiverLogicalMask , 'Liver Left Lobe (Liver constraint)' , 'Liver', [0.93, 0.69, 0.13], 'Axial', dCTSerieOffset, true);
+    % maskToVoi(a3DRightLiverLogicalMask, 'Liver Right Lobe (Liver constraint)', 'Liver', [0.72, 0.72, 0.15], 'Axial', dCTSerieOffset, true);
+    % 
+    % for jj=1:dNbSegments
+    %     aSegmentMask = voiTemplateToMask(atCTVoiInput{adLiverSegments(jj)}, atCTRoiInput, aCTImage) & a3DLiverLogicalMask;
+    %     maskToVoi(aSegmentMask , sprintf('%s (Liver constraint)', atCTVoiInput{adLiverSegments(jj)}.Label) , 'Liver', atCTVoiInput{adLiverSegments(jj)}.Color, 'Axial', dCTSerieOffset, true);
+    %     deleteContourObject(atCTVoiInput{adLiverSegments(jj)}.Tag, dCTSerieOffset);
+    % end
+    % 
+    % atCTVoiInput = voiTemplate('get', dCTSerieOffset);
+    % atCTRoiInput = roiTemplate('get', dCTSerieOffset);
+    % 
+    % asCTLabels = lower(cellfun(@(s) s.Label, atCTVoiInput, 'UniformOutput', false));           
+    % 
+    % % Apply margin on Liver lesions
+    % 
+    % adLiverLesions = find(contains(asCTLabels, 'lesion'));
+    % 
+    % dNbLesions = numel(adLiverLesions);
+    % 
+    % a3DLesionsLogicalMask = false(size(aCTImage));
+    % 
+    % for jj=1:dNbLesions
+    %     aLesionMask = voiTemplateToMask(atNMVoiInput{adLiverLesions(jj)}, atCTRoiInput, aCTImage) & a3DLiverLogicalMask;
+    %     maskToVoi(aLesionMask , sprintf('%s', atCTVoiInput{adLiverLesions(jj)}.Label) , 'Liver', atCTVoiInput{adLiverLesions(jj)}.Color, 'Axial', dCTSerieOffset, true);
+    %     deleteContourObject(atCTVoiInput{adLiverLesions(jj)}.Tag, dCTSerieOffset);
+    % end
+    % 
+    % for jj=1:dNbLesions
+    %     aLesionMask = voiTemplateToMask(atCTVoiInput{adLiverLesions(jj)}, atCTRoiInput, aCTImage);
+    %     aLesionMask = applyMarginToMask(aLesionMask, xVoxelSize, yVoxelSize, zVoxelSize, dMarginSize, dMarginSize, dMarginSize) & a3DLiverLogicalMask;
+    %     maskToVoi(aLesionMask , sprintf('%s (with %dmm margin)(Liver constraint)', atCTVoiInput{adLiverLesions(jj)}.Label, dMarginSize), 'Liver', atCTVoiInput{adLiverLesions(jj)}.Color, 'Axial', dNMSerieOffset, true);
+    % end
+    % 
+    % atCTVoiInput = voiTemplate('get', dCTSerieOffset);
+    % atCTRoiInput = roiTemplate('get', dCTSerieOffset);
+    % 
+    % asCTLabels = lower(cellfun(@(s) s.Label, atCTVoiInput, 'UniformOutput', false));           
+    % 
+    % aCTImage(a3DLesionsLogicalMask) = dCTImageMin;
+    % 
+    % % clear a3DLesionsLogicalMask;
+    % 
+    % % Create the Liver mask
+    % 
+    % dLiverOffset = find(contains(asCTLabels, 'liver-liv'),1);
+    % aLiverMask = voiTemplateToMask(atCTVoiInput{dLiverOffset}, atCTRoiInput, aCTImage);
+    % 
+    % aCTImage(~aLiverMask) = dCTImageMin;
+    % 
+    % % deleteContourObject(atCTVoiInput{dLiverOffset}.Tag, dCTSerieOffset);
+    % 
+    % clear aLiverMask;
+    % 
+    % dicomBuffer('set', aCTImage, dCTSerieOffset);
+    % mipBuffer('set', computeMIP(aCTImage), dCTSerieOffset);
+    % 
+    % % Export DICOM
+    % 
+    % % sCTDirectory = sprintf('%s/CT_Statistics', sRootDirectory);
+    % % if ~exist(sCTDirectory, 'dir')
+    % % 
+    % %     mkdir(sCTDirectory);
+    % % end
+    % 
+    % sCTDirectory = sprintf('%s/%s', sRootDirectory, sPatientName); 
+    % if ~exist(sCTDirectory, 'dir')
+    % 
+    %     mkdir(sCTDirectory);
+    % end
+    % 
+    % sCTDirectory = sprintf('%s/%s', sCTDirectory, sAccession); 
+    % if ~exist(sCTDirectory, 'dir')
+    % 
+    %     mkdir(sCTDirectory);
+    % end
+    % 
+    % sCTDirectory = sprintf('%s/%s', sCTDirectory, sSeriesDescription); 
+    % if ~exist(sCTDirectory, 'dir')
+    % 
+    %     mkdir(sCTDirectory);
+    % end
+    % 
+    % sCTWriteDICOMDir = outputDir('get');
+    % 
+    % if isempty(sCTWriteDICOMDir)
+    % 
+    %     sCTWriteDICOMDir = sprintf('%s/DCM_%s_%s_%s',sCTDirectory, sPatientName, sAccession, sSeriesDescription);
+    % 
+    %     if ~exist(sCTWriteDICOMDir, 'dir')
+    % 
+    %         mkdir(sCTWriteDICOMDir);
+    %     end
+    % end
+    % 
+    % for tt=1:numel(atCTMetaData)
+    % 
+    %     atCTMetaData{tt}.SeriesDescription = sprintf('%s - Transformed Image',atCTMetaData{tt}.SeriesDescription);
+    % end
+    % 
+    % writeDICOM(aCTImage, atCTMetaData, sCTWriteDICOMDir, dCTSerieOffset, true);
+    % 
+    % % Export CT Statistics To Excel
+    % 
+    % cropValue('set', -5000);
+    % 
+    % aCTImage(a3DLesionsLogicalMask) = cropValue('get');
+    % dicomBuffer('set', aCTImage, dCTSerieOffset);
+    % mipBuffer('set', computeMIP(aCTImage), dCTSerieOffset);
+    % 
+    % sContoursFileName = sprintf('TriDFusion_CT_CONTOURS_%s_%s_%s.csv', sPatientName, sAccession, sSeriesDescription);
+    % exportLiverTomorZoningContoursReport(false, sprintf('%s/%s', sCTDirectory, sContoursFileName));
+    % 
+    % % Export CT Radiomics To Excel
+    % 
+    % cropValue('set', dCTImageMin);
+    % 
+    % aCTImage(a3DLesionsLogicalMask) = dCTImageMin;
+    % dicomBuffer('set', aCTImage, dCTSerieOffset);
+    % mipBuffer('set', computeMIP(aCTImage), dCTSerieOffset);
+    % 
+    % asCTLabels = lower(cellfun(@(s) s.Label, atCTVoiInput, 'UniformOutput', false));           
+    % 
+    % adLiverLesions = find(contains(asCTLabels, 'lesion'));
+    % 
+    % dNbLesions = numel(adLiverLesions);
+    % 
+    % for jj=1:dNbLesions
+    % 
+    %     deleteContourObject(atCTVoiInput{adLiverLesions(jj)}.Tag, dCTSerieOffset);
+    % end
+    % 
+    % sRadiomicsFileName = sprintf('TriDFusion_CT_RADIOMICS_%s_%s_%s.xls', sPatientName, sAccession, sSeriesDescription);
+    % extractRadiomicsToXls(sprintf('%s/%s', sCTDirectory, sRadiomicsFileName), false, false, []);
+    % 
+    % % clear aCTImage;
     % clear a3DLesionsLogicalMask;
-
-    % Create the Liver mask
-
-    dLiverOffset = find(contains(asCTLabels, 'liver-liv'),1);
-    aLiverMask = voiTemplateToMask(atCTVoiInput{dLiverOffset}, atCTRoiInput, aCTImage);
-
-    aCTImage(~aLiverMask) = dCTImageMin;
-
-    % deleteContourObject(atCTVoiInput{dLiverOffset}.Tag, dCTSerieOffset);
-   
-    clear aLiverMask;
-
-    dicomBuffer('set', aCTImage, dCTSerieOffset);
-    mipBuffer('set', computeMIP(aCTImage), dCTSerieOffset);
-
-    % Export DICOM
-
-    sCTDirectory = sprintf('%s/CT_Statistics', sRootDirectory);
-    if ~exist(sCTDirectory, 'dir')
-
-        mkdir(sCTDirectory);
-    end
-
-    sCTDirectory = sprintf('%s/%s', sCTDirectory, sPatientName); 
-    if ~exist(sCTDirectory, 'dir')
-
-        mkdir(sCTDirectory);
-    end
-
-    sCTDirectory = sprintf('%s/%s', sCTDirectory, sAccession); 
-    if ~exist(sCTDirectory, 'dir')
-
-        mkdir(sCTDirectory);
-    end
-
-    sCTDirectory = sprintf('%s/%s', sCTDirectory, sSeriesDescription); 
-    if ~exist(sCTDirectory, 'dir')
-
-        mkdir(sCTDirectory);
-    end
-
-    sCTWriteDICOMDir = outputDir('get');
-
-    if isempty(sCTWriteDICOMDir)
-
-        sCTWriteDICOMDir = sprintf('%s/DCM_%s_%s_%s',sCTDirectory, sPatientName, sAccession, sSeriesDescription);
-
-        if ~exist(sCTWriteDICOMDir, 'dir')
-
-            mkdir(sCTWriteDICOMDir);
-        end
-    end
-
-    for tt=1:numel(atCTMetaData)
-
-        atCTMetaData{tt}.SeriesDescription = sprintf('%s - Transformed Image',atCTMetaData{tt}.SeriesDescription);
-    end
-
-    writeDICOM(aCTImage, atCTMetaData, sCTWriteDICOMDir, dCTSerieOffset, true);
-
-    % Export CT Statistics To Excel
-    
-    cropValue('set', -5000);
-
-    aCTImage(a3DLesionsLogicalMask) = cropValue('get');
-    dicomBuffer('set', aCTImage, dCTSerieOffset);
-    mipBuffer('set', computeMIP(aCTImage), dCTSerieOffset);
-
-    sContoursFileName = sprintf('TriDFusion_CT_CONTOURS_%s_%s_%s.csv', sPatientName, sAccession, sSeriesDescription);
-    exportLiverTomorZoningContoursReport(false, sprintf('%s/%s', sCTDirectory, sContoursFileName));
-
-    % Export CT Radiomics To Excel
-
-    cropValue('set', dCTImageMin);
-
-    aCTImage(a3DLesionsLogicalMask) = dCTImageMin;
-    dicomBuffer('set', aCTImage, dCTSerieOffset);
-    mipBuffer('set', computeMIP(aCTImage), dCTSerieOffset);
-
-    asCTLabels = lower(cellfun(@(s) s.Label, atCTVoiInput, 'UniformOutput', false));           
-
-    adLiverLesions = find(contains(asCTLabels, 'lesion'));
-
-    dNbLesions = numel(adLiverLesions);
-
-    for jj=1:dNbLesions
-
-        deleteContourObject(atCTVoiInput{adLiverLesions(jj)}.Tag, dCTSerieOffset);
-    end
-
-    sRadiomicsFileName = sprintf('TriDFusion_CT_RADIOMICS_%s_%s_%s.xls', sPatientName, sAccession, sSeriesDescription);
-    extractRadiomicsToXls(sprintf('%s/%s', sCTDirectory, sRadiomicsFileName), false, false, []);
-
     % clear aCTImage;
-    clear a3DLesionsLogicalMask;
-    clear aCTImage;
-
+    % 
     % Procesing the CT contrast series
 
     if get(uiSeriesPtr('get'), 'Value') ~= dPvCTSerieOffset
@@ -595,11 +632,11 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
         atPvCTMetaData = atInput(dPvCTSerieOffset).atDicomInfo;
     end
 
-    sCTDirectory = sprintf('%s/CT_Statistics', sRootDirectory);
+    % sCTDirectory = sprintf('%s/CT_Statistics', sRootDirectory);
     sAccession         = cleanString(atPvCTMetaData{1}.AccessionNumber, '_');
     sSeriesDescription = cleanString(atPvCTMetaData{1}.SeriesDescription, '_');
 
-    sPvCTDirectory = sprintf('%s/%s', sCTDirectory, sPatientName); 
+    sPvCTDirectory = sprintf('%s/%s', sRootDirectory, sPatientName); 
     if ~exist(sPvCTDirectory, 'dir')
 
         mkdir(sPvCTDirectory);
@@ -619,13 +656,14 @@ function createLiverTumorZoning(dMarginSize, bDisplayError)
 
     % Export CT PV Radiomics To Excel
     
-    sRadiomicsFileName = sprintf('TriDFusion_CT_RADIOMICS_%s_%s_%s.xls', sPatientName, sAccession, sSeriesDescription);
+    sRadiomicsFileName = sprintf('TriDFusion_PvCT_RADIOMICS_%s_%s_%s.xls', sPatientName, sAccession, sSeriesDescription);
     extractRadiomicsToXls(sprintf('%s/%s', sPvCTDirectory, sRadiomicsFileName), false, false, []);
 
     % Export CT PV Statistics To Excel
 
-    sContoursFileName = sprintf('TriDFusion_CT_CONTOURS_%s_%s_%s.csv', sPatientName, sAccession, sSeriesDescription);
-    exportLiverTomorZoningContoursReport(false, sprintf('%s/%s', sPvCTDirectory, sContoursFileName));
+    sStatisticsFileName = sprintf('TriDFusion_PvCT_STATISTICS_%s_%s_%s.csv', sPatientName, sAccession, sSeriesDescription);
+    % exportLiverTomorZoningContoursReport(false, sprintf('%s/%s', sPvCTDirectory, sContoursFileName));
+    exportContoursReport(false, false, false, false, sprintf('%s/%s', sPvCTDirectory, sStatisticsFileName), false);
 
     % Set TriDFusion to NM series for QA
 

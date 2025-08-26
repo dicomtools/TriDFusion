@@ -26,30 +26,30 @@ function display2nii(aBuffer, atMetaData, sNiiFolder, dOutFormat)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     % if 0
-    % 
+    %
     % atDcmDicomMeta{1}.Modality                = atMetaData{1}.Modality;
     % atDcmDicomMeta{1}.Units                   = atMetaData{1}.Units;
     % atDcmDicomMeta{1}.PixelSpacing            = atMetaData{1}.PixelSpacing;
-    % 
+    %
     % if numel(aBuffer) > 2
-    % 
+    %
     %     dSliceSPacing = computeSliceSpacing(atMetaData);
     %     if  dSliceSPacing == 0
     %         dSliceSPacing = 1;
     %     end
-    % 
+    %
     %     atDcmDicomMeta{1}.SpacingBetweenSlices = dSliceSPacing;
     %     atDcmDicomMeta{1}.SliceThickness       = dSliceSPacing;
     % end
-    % 
+    %
     % % Axial
     % aImageOrientationPatient = zeros(6,1);
-    % 
+    %
     % aImageOrientationPatient(1) = 1;
     % aImageOrientationPatient(5) = 1;
-    % 
+    %
     % atDcmDicomMeta{1}.Rows                    = atMetaData{1}.Rows;
     % atDcmDicomMeta{1}.Columns                 = atMetaData{1}.Columns;
     % atDcmDicomMeta{1}.PatientName             = atMetaData{1}.PatientName;
@@ -65,7 +65,7 @@ function display2nii(aBuffer, atMetaData, sNiiFolder, dOutFormat)
     % %     atDcmDicomMeta{1}.ImageOrientationPatient = atMetaData{1}.ImageOrientationPatient;
     % atDcmDicomMeta{1}.ImageOrientationPatient = aImageOrientationPatient;
     % %     atDcmDicomMeta{1}.MediaStorageSOPClassUID     = atMetaData{1}.MediaStorageSOPClassUID;
-    % %     atDcmDicomMeta{1}.MediaStorageSOPInstanceUID  = atMetaData{1}.MediaStorageSOPInstanceUID;      
+    % %     atDcmDicomMeta{1}.MediaStorageSOPInstanceUID  = atMetaData{1}.MediaStorageSOPInstanceUID;
     % atDcmDicomMeta{1}.SOPClassUID             = atMetaData{1}.SOPClassUID;
     % atDcmDicomMeta{1}.SOPInstanceUID          = atMetaData{1}.SOPInstanceUID;
     % atDcmDicomMeta{1}.SeriesInstanceUID       = dicomuid;
@@ -75,23 +75,24 @@ function display2nii(aBuffer, atMetaData, sNiiFolder, dOutFormat)
     % atDcmDicomMeta{1}.SeriesDate              = char(datetime('now','TimeZone','local','Format','yyyyMMddHHmmss'));
     % atDcmDicomMeta{1}.AcquisitionTime         = atMetaData{1}.AcquisitionTime;
     % atDcmDicomMeta{1}.AcquisitionDate         = atMetaData{1}.AcquisitionDate;
-    % 
+    %
     % atDcmDicomMeta{1}.RescaleIntercept = 0;
     % atDcmDicomMeta{1}.RescaleSlope = 1;
-    % 
+    %
     % else
         atDcmDicomMeta = atMetaData;
 
         sTime = char(datetime('now','TimeZone','local','Format','HHmmss'));
-        sDate = char(datetime('now','TimeZone','local','Format','yyyyMMddHHmmss'));    
+        sDate = char(datetime('now','TimeZone','local','Format','yyyyMMddHHmmss'));
 
         for jj=1:numel(atMetaData)
             atDcmDicomMeta{jj}.SeriesTime = sTime;
-            atDcmDicomMeta{jj}.SeriesDate = sDate;        
+            atDcmDicomMeta{jj}.SeriesDate = sDate;
         end
     % end
 
-    sTmpDir = sprintf('%stemp_dicom_%s//', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss-MS'));
+  %  sTmpDir = sprintf('%stemp_dicom_%s//', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss-MS'));
+    sTmpDir = sprintf('%s//', tempname(viewerTempDirectory('get')));
 
     if exist(char(sTmpDir), 'dir')
 
@@ -105,9 +106,9 @@ function display2nii(aBuffer, atMetaData, sNiiFolder, dOutFormat)
         aBuffer = aBuffer(:,:,end:-1:1);
     end
 
-    writeOtherFormatToDICOM(aBuffer, atDcmDicomMeta, sTmpDir, true);   
-    
+    writeOtherFormatToDICOM(aBuffer, atDcmDicomMeta, sTmpDir, true);
+
     dicm2nii(sTmpDir, sNiiFolder, dOutFormat);
-    
+
     rmdir(char(sTmpDir), 's');
 end

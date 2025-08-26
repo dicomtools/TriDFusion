@@ -367,6 +367,9 @@ function processWorkflow(sWorkflowName)
 
         case 'createlivertumorzoningcallback' % createLiverTumorZoningCallback.m
             createLiverTumorZoningCallback();
+
+        case 'normalliverlobedratiocallback' % normalLiverLobedRatioCallback.m
+            normalLiverLobedRatioCallback();     
     end
 
 end

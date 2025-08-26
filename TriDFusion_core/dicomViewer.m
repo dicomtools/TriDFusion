@@ -299,6 +299,7 @@ function resize = dicomViewer()
     % HAI Zoning
 
     haiZoningMarginDistanceValue('set', 5); % In mm
+    haiPercentOfNormalLiverValue('set', 20);
 
     % Liver Ablation
 

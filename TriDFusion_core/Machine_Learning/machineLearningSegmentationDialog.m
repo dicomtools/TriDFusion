@@ -3543,9 +3543,12 @@ function [nestedLoad, nestedProceed, nestedDelete, nestedCancel] = machineLearni
 
     if CLASSES_CT == true
 
-        if exist(sprintf('%s/icons/previous-page.png', viewerRootPath('get')), 'file')
-           [aImgPreviousPageIcon,~] = imread(sprintf('%s/icons/previous-page.png', viewerRootPath('get')));
-            aImgPreviousPageIcon = double(aImgPreviousPageIcon)/255;
+        sPreviousPageIcon = sprintf('%s/icons/previous-page.png', viewerRootPath('get'));     
+        if exist(sPreviousPageIcon, 'file')
+           % [aImgPreviousPageIcon,~] = imread(sprintf('%s/icons/previous-page.png', viewerRootPath('get')));
+           %  aImgPreviousPageIcon = double(aImgPreviousPageIcon)/255;
+            bg  = reshape(viewerBackgroundColor('get'),1,1,3);
+            aImgPreviousPageIcon =  makeIcon(sPreviousPageIcon, [38 127], bg, 1);
         else
             aImgPreviousPageIcon = [];
         end    
@@ -3589,9 +3592,11 @@ function [nestedLoad, nestedProceed, nestedDelete, nestedCancel] = machineLearni
                      'CallBack'       , @btnPreviousPageMachineSegmentationCallback ...
                      );
 
-         if exist(sprintf('%s/icons/next-page.png', viewerRootPath('get')), 'file')
-           [aImgNextPageIcon,~] = imread(sprintf('%s/icons/next-page.png', viewerRootPath('get')));
-            aImgNextPageIcon = double(aImgNextPageIcon)/255;
+        sNextPageIcon = sprintf('%s/icons/next-page.png', viewerRootPath('get'));     
+        if exist(sNextPageIcon, 'file')
+           % [aImgNextPageIcon,~] = imread(sprintf('%s/icons/next-page.png', viewerRootPath('get')));
+            bg  = reshape(viewerBackgroundColor('get'),1,1,3);
+            aImgNextPageIcon =  makeIcon(sNextPageIcon, [38 127], bg, 1);
         else
             aImgNextPageIcon = [];
         end    
