@@ -1,7 +1,7 @@
 
 <div align="center">
   <h1>TriDFusion (3DF) Image Viewer</h1>
-<p><strong>The TriDFusion (3DF) Image Viewer</strong> is a multi-fusion image viewer for research, developed at <a href="https://www.mskcc.org/">Memorial Sloan Kettering Cancer Center</a> and provided by <a href="https://daniellafontaine.com/">Daniel Lafontaine</a>, published by <a href="https://ejnmmiphys.springeropen.com/articles/10.1186/s40658-022-00501-y">EJNMMI Physics</a>. Full-text access is available for download <a href="https://rdcu.be/cXP9i/">here</a>.</p>
+<p><strong>The TriDFusion (3DF) Image Viewer</strong> is a multi-fusion image viewer for educational, research, and not-for-profit use, developed at <a href="https://www.mskcc.org/">Memorial Sloan Kettering Cancer Center</a> and provided by <a href="https://daniellafontaine.com/">Daniel Lafontaine</a>, published by <a href="https://ejnmmiphys.springeropen.com/articles/10.1186/s40658-022-00501-y">EJNMMI Physics</a>. Full-text access is available for download <a href="https://rdcu.be/cXP9i/">here</a>.</p>
 </div>
   
   
