@@ -254,28 +254,28 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
         origin  = double(dcmMeta.ImagePositionPatient(:));
         spacing = double(dcmMeta.PixelSpacing(:));   % [row; col]
         if numel(spacing) < 2 || all(spacing==0), spacing = [1;1]; end
-        
+
         szDcm = computeSliceSpacing(atDcmMetaData);
         if isempty(szDcm) || ~isfinite(szDcm) || szDcm<=0, szDcm = 1; end
-        
+
         xlim = [ origin(1) - spacing(2)/2, origin(1) + (dimsDcm(2)-1)*spacing(2) + spacing(2)/2 ];
         ylim = [ origin(2) - spacing(1)/2, origin(2) + (dimsDcm(1)-1)*spacing(1) + spacing(1)/2 ];
         zlim = [ origin(3) - szDcm/2,      origin(3) + max(dimsDcm(3)-1,0)*szDcm + szDcm/2      ];
         Rdcm = imref3d(dimsDcm, xlim, ylim, zlim);
-        
+
         refMeta    = atRefMetaData{1};
         originRef  = double(refMeta.ImagePositionPatient(:));
         spacingRef = double(refMeta.PixelSpacing(:));
         if numel(spacingRef) < 2 || all(spacingRef==0), spacingRef = [1;1]; end
-        
+
         szRef = computeSliceSpacing(atRefMetaData);
         if isempty(szRef) || ~isfinite(szRef) || szRef<=0, szRef = 1; end
-        
+
         xlimRef = [ originRef(1) - spacingRef(2)/2, originRef(1) + (dimsRef(2)-1)*spacingRef(2) + spacingRef(2)/2 ];
         ylimRef = [ originRef(2) - spacingRef(1)/2, originRef(2) + (dimsRef(1)-1)*spacingRef(1) + spacingRef(1)/2 ];
         zlimRef = [ originRef(3) - szRef/2,         originRef(3) + max(dimsRef(3)-1,0)*szRef     + szRef/2         ];
         Rref = imref3d(dimsRef, xlimRef, ylimRef, zlimRef);
-        
+
         % If X or Y extent differs, your pipeline wants OutputView mode
         if (round(Rdcm.ImageExtentInWorldX) ~= round(Rref.ImageExtentInWorldX)) || ...
            (round(Rdcm.ImageExtentInWorldY) ~= round(Rref.ImageExtentInWorldY))
@@ -283,7 +283,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
                 dRefOutputView = 2;
             end
         end
-        
+
         % --- TRUE DICOM-based transform (intrinsic -> intrinsic) ---
         % For single-slice series (SPECT etc.), do NOT try to infer a slice direction from slice #2.
         % Use identity in Z and only scale/translate XY if desired.
@@ -292,7 +292,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
         else
             Mvox = localDicomIntrinsicToIntrinsic(atDcmMetaData, atRefMetaData, szDcm, szRef);
         end
-        
+
         % If you keep source Z, you must neutralize Z fully (not only M(3,3))
         if dRefOutputView == false
             if localIsNearAxial(dcmMeta) && localIsNearAxial(refMeta)
@@ -302,35 +302,65 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
                 Mvox(4,3)   = 0;
             end
         end
-        
+
         % --- Make matrix valid for affine3d (fixes your crash) ---
         Mvox = double(Mvox);
-        
+
         % Upgrade 3x4 -> 4x4
         if isequal(size(Mvox), [3 4])
             Mvox = [Mvox; 0 0 0 1];
         end
-        
+
         % If translation is in last column, move to last row
         if isequal(size(Mvox), [4 4]) && any(abs(Mvox(1:3,4)) > 1e-12) && all(abs(Mvox(4,1:3)) < 1e-12)
             t = Mvox(1:3,4).';
             Mvox(1:3,4) = 0;
             Mvox(4,1:3) = t;
         end
-        
+
         % Enforce affine3d constraint
         Mvox(1:3,4) = 0;
         Mvox(4,4)   = 1;
-        
+
         % Guard against NaN/Inf
         if any(~isfinite(Mvox(:)))
             Mvox = eye(4);  % safest fallback
         end
-        
+
         % IMPORTANT: this TF is intrinsic->intrinsic
         TF = affine3d(Mvox);
 
-        
+
+
+    % % % % % % % % % % DICOM volume spatial reference
+    % % % % % % % % % dcmMeta = atDcmMetaData{1};
+    % % % % % % % % % origin    = dcmMeta.ImagePositionPatient;     % [x0, y0, z0]
+    % % % % % % % % % spacing   = dcmMeta.PixelSpacing;             % [rowSpacing; colSpacing]
+    % % % % % % % % % % dimsDcm = [nRows, nCols, nSlices]
+    % % % % % % % % % Rdcm = imref3d( dimsDcm, ...
+    % % % % % % % % %     ... % XWorldLimits along columns uses col‐spacing = spacing(2)
+    % % % % % % % % %     [ origin(1), origin(1) + (dimsDcm(2)-1) * spacing(2) ], ...
+    % % % % % % % % %     ... % YWorldLimits along rows uses row‐spacing = spacing(1)
+    % % % % % % % % %     [ origin(2), origin(2) + (dimsDcm(1)-1) * spacing(1) ], ...
+    % % % % % % % % %     ... % ZWorldLimits from first‐ to last‐slice center
+    % % % % % % % % %     [ origin(3), origin(3) + (dimsDcm(3)-1) * dcmSliceThickness ] );
+    % % % % % % % % % 
+    % % % % % % % % % % Reference volume spatial reference
+    % % % % % % % % % refMeta    = atRefMetaData{1};
+    % % % % % % % % % originRef  = refMeta.ImagePositionPatient;    % [x0, y0, z0]
+    % % % % % % % % % spacingRef = refMeta.PixelSpacing;            % [rowSpacing; colSpacing]
+    % % % % % % % % % % dimsRef = [nRows, nCols, nSlices]
+    % % % % % % % % % Rref = imref3d( dimsRef, ...
+    % % % % % % % % %     ... % XWorldLimits along columns
+    % % % % % % % % %     [ originRef(1), originRef(1) + (dimsRef(2)-1) * spacingRef(2) ], ...
+    % % % % % % % % %     ... % YWorldLimits along rows
+    % % % % % % % % %     [ originRef(2), originRef(2) + (dimsRef(1)-1) * spacingRef(1) ], ...
+    % % % % % % % % %     ... % ZWorldLimits from first‐ to last‐slice center
+    % % % % % % % % %     [ originRef(3), originRef(3) + (dimsRef(3)-1) * refSliceThickness ] );
+    % % % % % % % % % 
+    % % % % % % % % % [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
+    % % % % % % % % % TF = affine3d(M);
+
         % If you want to guarantee correct alignment when CT-DX is oblique/different IOP:
         % force the intrinsic OutputView branch automatically.
         if ~localSameOrientation(dcmMeta, refMeta)
@@ -354,8 +384,23 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
     %    else
 
         if dRefOutputView == 2 
+            
+            dDcmFirstZ = getImageZPosition(atDcmMetaData, dcmImage);
+            dRefFirstZ = getImageZPosition(atRefMetaData, refImage);
+    
+            deltaZ_mm = dRefFirstZ - dDcmFirstZ;   % a positive or negative number (mm)
+            T = eye(4);
+            T(4,3) = deltaZ_mm;
+            TF = affine3d(T);
 
-           [resampImage, RB] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef)); 
+            [resampImage, RB] = imwarp( ...
+                dcmImage, Rdcm, TF, ...
+                'Interp',    sMode, ...
+                'FillValues',double(min(dcmImage(:))), ...
+                'OutputView',Rref ...
+            );
+
+   %        [resampImage, RB] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef)); 
         else       
            [resampImage, RB] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
         end
@@ -376,7 +421,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
         if numel(atDcmMetaData) ~= 1
 
             if dimsRsp(3) < numel(atDcmMetaData)
-                
+
                 atDcmMetaData = atDcmMetaData(1:dimsRsp(3)); % Remove excess slices
             else
                 for cc = 1:(dimsRsp(3) - numel(atDcmMetaData))
@@ -384,7 +429,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
                 end
             end
         end
-                
+
         % Update metadata entries based on spatial reference
         for jj = 1:numel(atDcmMetaData)
 
@@ -396,19 +441,19 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
 
             % atDcmMetaData{jj}.ImageOrientationPatient = ref.ImageOrientationPatient;
             atDcmMetaData{jj}.PixelSpacing           = refMeta.PixelSpacing;
-            atDcmMetaData{jj}.Rows                   = dimsRef(1);
-            atDcmMetaData{jj}.Columns                = dimsRef(2);
+            atDcmMetaData{jj}.Rows                   = dimsRsp(1);
+            atDcmMetaData{jj}.Columns                = dimsRsp(2);
             atDcmMetaData{jj}.SpacingBetweenSlices   = RB.PixelExtentInWorldZ;
             atDcmMetaData{jj}.SliceThickness         = RB.PixelExtentInWorldZ;
             atDcmMetaData{jj}.InstanceNumber         = jj;
-            atDcmMetaData{jj}.NumberOfSlices         = dimsRef(3);
+            atDcmMetaData{jj}.NumberOfSlices         = dimsRsp(3);
 
             % % Compute X/Y origin differently for the OutputView case
             if dRefOutputView == 2
 
                 shiftX = (Rdcm.PixelExtentInWorldX - Rref.PixelExtentInWorldX) / 2;
                 shiftY = (Rdcm.PixelExtentInWorldY - Rref.PixelExtentInWorldY) / 2;
-                
+
                 % Apply to the reference ImagePositionPatient:
                 origIPP = refMeta.ImagePositionPatient;
                 x0      = origIPP(1) - shiftX;
@@ -420,19 +465,19 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
                 % Reference origin and spacing
                 origIPP     = atRefMetaData{1}.ImagePositionPatient;  % [x; y; z]
                 origSpacing = atRefMetaData{1}.PixelSpacing;          % [row; col]
-            
-    
+
+
                 % Compute world-coordinate of the reference grid’s center:
                 centerX = origIPP(1) + ((dimsRef(2)-1) * origSpacing(2)) / 2;  % along cols
                 centerY = origIPP(2) + ((dimsRef(1)-1) * origSpacing(1)) / 2;  % along rows
-            
+
                 % Get the **actual** spacing of your resampled image:
                 newSpacing = atDcmMetaData{jj}.PixelSpacing;  % [row; col]
-            
+
                 % Compute half-extent of the resampled grid in world-units:
                 halfX = ((dimsRsp(2)-1) * newSpacing(2)) / 2;  % along cols
                 halfY = ((dimsRsp(1)-1) * newSpacing(1)) / 2;  % along rows
-            
+
                 % Subtract half-extent and then add half a pixel (in mm) to land on the center
                 x0 = centerX - halfX + newSpacing(2)/2;
                 y0 = centerY - halfY + newSpacing(1)/2;
@@ -444,7 +489,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             if bUpdateDescription
 
                 s = atDcmMetaData{jj}.SeriesDescription;
-            
+
                 % Only add if it doesn't already start with "RSP" (allow "RSP " or "RSP_..." etc.)
                 if isempty(regexpi(s, '^\s*RSP(\s|$)', 'once'))
                     atDcmMetaData{jj}.SeriesDescription = sprintf('RSP %s', strtrim(s));
@@ -452,7 +497,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             end
 
         end
-    
+
         computedSliceThickness = refSliceThickness;
 
          % Align first-slice Z per DICOM when using OutputView
@@ -476,7 +521,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             end
 
 
-            
+
         end
 
         % Update slice positions along Z
@@ -489,6 +534,152 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
                 atDcmMetaData{cc+1}.SliceLocation           = atDcmMetaData{cc}.SliceLocation - computedSliceThickness;
             end
         end
+
+        % % % % % --- Ensure metadata length matches resampled volume slices (dimsRsp(3)) ---
+        % % % % nRsp  = dimsRsp(3);
+        % % % % nMeta = numel(atDcmMetaData);
+        % % % % 
+        % % % % if nMeta > nRsp
+        % % % %     atDcmMetaData = atDcmMetaData(1:nRsp);   % Remove excess slices
+        % % % % elseif nMeta < nRsp
+        % % % %     tmpl = atDcmMetaData{end};
+        % % % %     % Determine direction (+1 or -1) from existing InstanceNumber sequence (fallback +1)
+        % % % %     if nMeta >= 2 && isfield(atDcmMetaData{1},'InstanceNumber') && isfield(atDcmMetaData{2},'InstanceNumber')
+        % % % %         step = sign(double(atDcmMetaData{2}.InstanceNumber) - double(atDcmMetaData{1}.InstanceNumber));
+        % % % %         if step == 0, step = 1; end
+        % % % %     else
+        % % % %         step = 1;
+        % % % %     end
+        % % % % 
+        % % % %     lastInstance = [];
+        % % % %     if isfield(atDcmMetaData{end},'InstanceNumber')
+        % % % %         lastInstance = double(atDcmMetaData{end}.InstanceNumber);
+        % % % %     end
+        % % % % 
+        % % % %     for k = (nMeta+1):nRsp
+        % % % %         newMeta = tmpl;
+        % % % % 
+        % % % %         % Unique instance UID(s) if you ever write DICOM out
+        % % % %         newUID = dicomuid;
+        % % % %         if isfield(newMeta,'SOPInstanceUID'),             newMeta.SOPInstanceUID = newUID; end
+        % % % %         if isfield(newMeta,'MediaStorageSOPInstanceUID'), newMeta.MediaStorageSOPInstanceUID = newUID; end
+        % % % % 
+        % % % %         % Keep InstanceNumber monotonic if present
+        % % % %         if ~isempty(lastInstance)
+        % % % %             lastInstance = lastInstance + step;
+        % % % %             newMeta.InstanceNumber = lastInstance;
+        % % % %         end
+        % % % % 
+        % % % %         atDcmMetaData{k} = newMeta;
+        % % % %     end
+        % % % % end
+        % % % % 
+        % % % % if dRefOutputView == 2
+        % % % %     computedSliceThickness = refSliceThickness;
+        % % % % else
+        % % % %     computedSliceThickness = dcmSliceThickness;   % or szDcm / computeSliceSpacing(atDcmMetaData)
+        % % % % end
+        % % % % 
+        % % % % % sanity fallback: if those are bad, use RB
+        % % % % if isempty(computedSliceThickness) || ~isfinite(computedSliceThickness) || computedSliceThickness <= 0
+        % % % %     computedSliceThickness = RB.PixelExtentInWorldZ;
+        % % % % end
+        % % % % if isempty(computedSliceThickness) || ~isfinite(computedSliceThickness) || computedSliceThickness <= 0
+        % % % %     computedSliceThickness = 1;
+        % % % % end
+        % % % % 
+        % % % % % --- Update metadata entries based on spatial reference ---
+        % % % % for jj = 1:numel(atDcmMetaData)
+        % % % % 
+        % % % %     if numel(atRefMetaData) == numel(atDcmMetaData)
+        % % % %         refMeta = atRefMetaData{jj};
+        % % % %     else
+        % % % %         refMeta = atRefMetaData{1};
+        % % % %     end
+        % % % % 
+        % % % %     atDcmMetaData{jj}.PixelSpacing         = refMeta.PixelSpacing;
+        % % % %     atDcmMetaData{jj}.Rows                 = dimsRsp(1);
+        % % % %     atDcmMetaData{jj}.Columns              = dimsRsp(2);
+        % % % %     atDcmMetaData{jj}.SpacingBetweenSlices = computedSliceThickness;
+        % % % %     atDcmMetaData{jj}.SliceThickness       = computedSliceThickness;
+        % % % %     atDcmMetaData{jj}.InstanceNumber       = jj;
+        % % % %     atDcmMetaData{jj}.NumberOfSlices       = dimsRsp(3);
+        % % % % 
+        % % % %     % Compute X/Y origin differently for the OutputView case
+        % % % %     if dRefOutputView == 2
+        % % % %         shiftX = (Rdcm.PixelExtentInWorldX - Rref.PixelExtentInWorldX) / 2;
+        % % % %         shiftY = (Rdcm.PixelExtentInWorldY - Rref.PixelExtentInWorldY) / 2;
+        % % % % 
+        % % % %         origIPP = refMeta.ImagePositionPatient;
+        % % % %         x0      = origIPP(1) - shiftX;
+        % % % %         y0      = origIPP(2) - shiftY;
+        % % % %     else
+        % % % %         % Center original volume in-plane using half-pixel world-offsets
+        % % % %         origIPP     = atRefMetaData{1}.ImagePositionPatient;  % [x; y; z]
+        % % % %         origSpacing = atRefMetaData{1}.PixelSpacing;          % [row; col]
+        % % % % 
+        % % % %         centerX = origIPP(1) + ((dimsRef(2)-1) * origSpacing(2)) / 2;  % along cols
+        % % % %         centerY = origIPP(2) + ((dimsRef(1)-1) * origSpacing(1)) / 2;  % along rows
+        % % % % 
+        % % % %         newSpacing = atDcmMetaData{jj}.PixelSpacing;  % [row; col]
+        % % % %         halfX = ((dimsRsp(2)-1) * newSpacing(2)) / 2; % along cols
+        % % % %         halfY = ((dimsRsp(1)-1) * newSpacing(1)) / 2; % along rows
+        % % % % 
+        % % % %         x0 = centerX - halfX + newSpacing(2)/2;
+        % % % %         y0 = centerY - halfY + newSpacing(1)/2;
+        % % % %     end
+        % % % % 
+        % % % %     atDcmMetaData{jj}.ImagePositionPatient(1) = x0;
+        % % % %     atDcmMetaData{jj}.ImagePositionPatient(2) = y0;
+        % % % % 
+        % % % %     if bUpdateDescription
+        % % % %         s = atDcmMetaData{jj}.SeriesDescription;
+        % % % %         if isempty(regexpi(s, '^\s*RSP(\s|$)', 'once'))
+        % % % %             atDcmMetaData{jj}.SeriesDescription = sprintf('RSP %s', strtrim(s));
+        % % % %         end
+        % % % %     end
+        % % % % end
+        % % % % 
+        % % % % % --- Align first-slice Z per DICOM when using OutputView (guarded) ---
+        % % % % if dRefOutputView == 2 && dimsRsp(3) ~= dimsDcm(3) && ~isempty(atRefMetaData) && ~isempty(atDcmMetaData)
+        % % % %     iop     = atRefMetaData{1}.ImageOrientationPatient;
+        % % % %     rowOri  = iop(1:3);
+        % % % %     colOri  = iop(4:6);
+        % % % %     normOri = cross(rowOri, colOri);
+        % % % % 
+        % % % %     refZ   = atRefMetaData{1}.ImagePositionPatient(3);
+        % % % %     origZ  = atDcmMetaData{1}.ImagePositionPatient(3);
+        % % % %     deltaZ = refZ - origZ;
+        % % % % 
+        % % % %     if deltaZ * normOri(3) < 0
+        % % % %         atDcmMetaData{1}.ImagePositionPatient(3) = origZ - deltaZ;
+        % % % %         if isfield(atDcmMetaData{1},'SliceLocation')
+        % % % %             atDcmMetaData{1}.SliceLocation = atDcmMetaData{1}.SliceLocation - deltaZ;
+        % % % %         end
+        % % % %     end
+        % % % % end
+        % % % % 
+        % % % % % --- Update slice positions along Z (safe for single-slice) ---
+        % % % % if numel(atDcmMetaData) >= 2
+        % % % %     increasing = atDcmMetaData{1}.ImagePositionPatient(3) < atDcmMetaData{2}.ImagePositionPatient(3);
+        % % % % 
+        % % % %     for cc = 1:(numel(atDcmMetaData) - 1)
+        % % % %         if increasing
+        % % % %             atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) + computedSliceThickness;
+        % % % %             if isfield(atDcmMetaData{cc},'SliceLocation') && isfield(atDcmMetaData{cc+1},'SliceLocation')
+        % % % %                 atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation + computedSliceThickness;
+        % % % %             end
+        % % % %         else
+        % % % %             atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) - computedSliceThickness;
+        % % % %             if isfield(atDcmMetaData{cc},'SliceLocation') && isfield(atDcmMetaData{cc+1},'SliceLocation')
+        % % % %                 atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation - computedSliceThickness;
+        % % % %             end
+        % % % %         end
+        % % % %     end
+        % % % % end
+
+
+
     end
     
     if bUpdateDescription == true
