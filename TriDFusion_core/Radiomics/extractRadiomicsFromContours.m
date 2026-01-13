@@ -82,11 +82,13 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
     % Validate images
 
+    % Validate images
+
+    aInputImages = inputBuffer('get');
     aImages = dicomBuffer('get', [], dSeriesOffset);
 
     if isempty(aImages)
 
-        aInputImages = inputBuffer('get');
         aImages = aInputImages{dSeriesOffset};
 
         if isempty(aImages)
@@ -100,12 +102,29 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
     % Resample ROI to original image size
 
-    aDicomImage = dicomBuffer('get', [], dSeriesOffset);
+    aDicomImage = aInputImages{dSeriesOffset};
 
-    if ~isequal(size(aImages), size(aDicomImage))
+    s = atInput(dSeriesOffset);
+    
+    % (optional) safe handling for the nested field:
+    movementApplied = isfield(s,'tMovement') && ...
+                      isfield(s.tMovement,'bMovementApplied') && ...
+                      s.tMovement.bMovementApplied;
+    
+    flags = [ movementApplied, ...
+              s.bFlipLeftRight, ...
+              s.bFlipAntPost, ...
+              s.bFlipHeadFeet, ...
+              s.bMathApplied ];
 
+    if ~isequal(size(aImages), size(aDicomImage)) && ~any(flags)
+
+        aImages = aInputImages{dSeriesOffset};
         [atRoiInput, atVoiInput] = resampleROIs(aDicomImage, atDicomMeta, aImages, atMetaData, atRoiInput, false, atVoiInput, dSeriesOffset);
     end
+
+    clear aDicomImage;
+    clear aInputImages;
 
     asPatientInfoHeader{1,1} = sprintf('Patient Name');
     asPatientInfoHeader{2,1} = sprintf('Patient ID');
