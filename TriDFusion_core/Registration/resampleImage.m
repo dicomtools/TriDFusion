@@ -293,7 +293,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             Mvox = localDicomIntrinsicToIntrinsic(atDcmMetaData, atRefMetaData, szDcm, szRef);
         end
 
-        % If you keep source Z, you must neutralize Z fully (not only M(3,3))
+        % If you keep source Z, we must neutralize Z fully (not only M(3,3))
         if dRefOutputView == false
             if localIsNearAxial(dcmMeta) && localIsNearAxial(refMeta)
                 Mvox(1:2,3) = 0;
@@ -448,18 +448,18 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             atDcmMetaData{jj}.InstanceNumber         = jj;
             atDcmMetaData{jj}.NumberOfSlices         = dimsRsp(3);
 
-            % % Compute X/Y origin differently for the OutputView case
-            if dRefOutputView == 2
-
-                shiftX = (Rdcm.PixelExtentInWorldX - Rref.PixelExtentInWorldX) / 2;
-                shiftY = (Rdcm.PixelExtentInWorldY - Rref.PixelExtentInWorldY) / 2;
-
-                % Apply to the reference ImagePositionPatient:
-                origIPP = refMeta.ImagePositionPatient;
-                x0      = origIPP(1) - shiftX;
-                y0      = origIPP(2) - shiftY;
-
-            else
+            % % % Compute X/Y origin differently for the OutputView case
+            % if dRefOutputView == 2
+            % 
+            %     shiftX = (Rdcm.PixelExtentInWorldX - Rref.PixelExtentInWorldX) / 2;
+            %     shiftY = (Rdcm.PixelExtentInWorldY - Rref.PixelExtentInWorldY) / 2;
+            % 
+            %     % Apply to the reference ImagePositionPatient:
+            %     origIPP = refMeta.ImagePositionPatient;
+            %     x0      = origIPP(1) - shiftX;
+            %     y0      = origIPP(2) - shiftY;
+            % 
+            % else
 
                 % Center original volume in-plane using half-pixel world-offsets
                 % Reference origin and spacing
@@ -481,7 +481,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
                 % Subtract half-extent and then add half a pixel (in mm) to land on the center
                 x0 = centerX - halfX + newSpacing(2)/2;
                 y0 = centerY - halfY + newSpacing(1)/2;
-            end
+            % end
 
             atDcmMetaData{jj}.ImagePositionPatient(1) = x0;
             atDcmMetaData{jj}.ImagePositionPatient(2) = y0;
@@ -519,9 +519,6 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
                 atDcmMetaData{1}.ImagePositionPatient(3) = origZ - deltaZ;
                 atDcmMetaData{1}.SliceLocation           = atDcmMetaData{1}.SliceLocation - deltaZ;
             end
-
-
-
         end
 
         % Update slice positions along Z
