@@ -35,15 +35,14 @@ function aRspMip = resample3DMIP(aRspMip, atRspMetaData, aRefMip, atRefMetaData,
     if dimsRef ~= dimsRsp % Z is different
 
         dMinMipFusion = min(aRspMip, [], 'all');
-        if dimsRef > dimsRsp
-            dRatio = dimsRsp/dimsRef*100;
-        else
-            dRatio = dimsRef/dimsRsp*100;
-        end
+        % if dimsRef > dimsRsp
+        %     dRatio = dimsRsp/dimsRef*100;
+        % else
+        %     dRatio = dimsRef/dimsRsp*100;
+        % end
 
         if strcmpi(atRspMetaData{1}.Modality, 'nm') || ...
-           strcmpi(atRefMetaData{1}.Modality, 'nm') || ...
-           dRatio < 70  % The z is to far, need to change the method 
+           strcmpi(atRefMetaData{1}.Modality, 'nm') 
             
             aResampledMip = resampleMipTransformMatrix(aRspMip, atRspMetaData, aRefMip, atRefMetaData, sInterpolation, false);  
         else

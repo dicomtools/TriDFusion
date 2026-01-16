@@ -927,19 +927,7 @@ end
                     tRegistration  = registrationTemplate('get');
                     sInterpolation = tRegistration.Interpolation;
                    
-                    if isVsplash('get') == false
-
-                        aRefMip = mipBuffer('get', [], dSeriesOffset);
-                        aMip    = mipBuffer('get', [], dFusionSeriesOffset);
-
-%                         if ~isequal(size(aRefMip), size(aMip))
-
-                            aResampledMip = resample3DMIP(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation);
-%                         else
-%                             aResampledMip = aMip;
-%                         end
-                 
-                    end         
+      
 
 
 %                     if ~isequal(size(A), size(B))
@@ -975,7 +963,21 @@ end
                         end                                                    
                     end
 %                     end
-            
+                    if isVsplash('get') == false
+
+                    %    aRefMip = mipBuffer('get', [], dSeriesOffset);
+                    %    aMip    = mipBuffer('get', [], dFusionSeriesOffset);
+
+%                         if ~isequal(size(aRefMip), size(aMip))
+
+                    %        aResampledMip = resample3DMIP(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation);
+					        aResampledMip = computeMIP(B);
+
+%                         else
+%                             aResampledMip = aMip;
+%                         end
+                 
+                    end            
 
                 fusionBuffer('set', B, dFusionSeriesOffset);  
                 fusionMetaData('set', atFusionMetaData, dFusionSeriesOffset);  

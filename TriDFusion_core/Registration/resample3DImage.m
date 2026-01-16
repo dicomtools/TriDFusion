@@ -38,15 +38,15 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
     
     if dimsRef ~= dimsRsp % Z is different
     
-        if dimsRef > dimsRsp
-            dRatio = dimsRsp/dimsRef*100;
-        else
-            dRatio = dimsRef/dimsRsp*100;
-        end
+        % if dimsRef > dimsRsp
+        %     dRatio = dimsRsp/dimsRef*100;
+        % else
+        %     dRatio = dimsRef/dimsRsp*100;
+        % end
 
         if strcmpi(atRspMetaData{1}.Modality, 'nm') || ...
-           strcmpi(atRefMetaData{1}.Modality, 'nm') || ...
-           dRatio < 70  % The z is to far, need to change the method 
+           strcmpi(atRefMetaData{1}.Modality, 'nm') 
+ %          dRatio < 70  % The z is to far, need to change the method 
             
             [aRspImage, atRspMetaData] = ...
                 resampleImageTransformMatrix(aRspImage, ...
@@ -99,19 +99,19 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
             dimsRsp = size(aRspImage);         
             xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
             yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
-    
+
             if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-    
+
                 xPixelSizeRatio = atRspMetaDataTemp{1}.PixelSpacing(1);
                 yPixelSizeRatio = atRspMetaDataTemp{1}.PixelSpacing(2);
 %                 zPixelSizeRatio = computeSliceSpacing(atRspMetaDataTemp);
            else                              
-    
+
                 xPixelSizeRatio = atRefMetaData{1}.PixelSpacing(1);
                 yPixelSizeRatio = atRefMetaData{1}.PixelSpacing(2);                                    
 %                 zPixelSizeRatio = computeSliceSpacing(atRefMetaData);
            end
-    
+
             clear Btemp;
             clear atRspMetaDataTemp;                                 
         end
@@ -169,7 +169,7 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
         end
 
         dimsRsp = size(aRspImage); 
-       
+
         xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
         yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
 %         zMoveOffset = (dimsRsp(3)-dimsRef(3))/2;
@@ -178,7 +178,7 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
   %      yMoveOffset = -startIndex(2);
 
         if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-            
+
             if xMoveOffset < 1 && yMoveOffset < 1
 
                if xMoveOffset > 0 && yMoveOffset > 0  
@@ -199,7 +199,7 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
     yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
 %     zMoveOffset = (dimsRsp(3)-dimsRef(3));
     zMoveOffset = 0;
-  
+
     if xMoveOffset ~= 0 || yMoveOffset ~= 0 || zMoveOffset ~= 0
 
         if xMoveOffset < 0 || yMoveOffset < 0 || zMoveOffset < 0 

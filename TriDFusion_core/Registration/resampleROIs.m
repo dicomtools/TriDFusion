@@ -275,17 +275,17 @@ function [atRoi, atVoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage
         atRoi = atRoi(sortIdx);
     end
 
-    % % ================= REBUILD VOI COR/SAG LINES (NEW PART) =============
-    % % Only if we are updating graphics, have VOIs, and a true 3-D volume.
-    % if bUpdateObject && ~isempty(atVoi) && numel(aRefSize) >= 3 && aRefSize(3) ~= 1
-    %     imSizeOverride = aRefSize;   % [ny nx nz]
-    %     for v = 1:numel(atVoi)
-    %         if isempty(atVoi{v})
-    %             continue;
-    %         end
-    %         atVoi{v} = rebuildVoiMaskAndLines(atVoi{v}, atRoi, dSeriesOffset, imSizeOverride);
-    %     end
-    % end
+    % ================= REBUILD VOI COR/SAG LINES (NEW PART) =============
+    % Only if we are updating graphics, have VOIs, and a true 3-D volume.
+    if bUpdateObject && ~isempty(atVoi) && numel(aRefSize) >= 3 && aRefSize(3) ~= 1 
+        imSizeOverride = aRefSize;   % [ny nx nz]
+        for v = 1:numel(atVoi)
+            if isempty(atVoi{v})
+                continue;
+            end
+            atVoi{v} = rebuildVoiMaskAndLines(atVoi{v}, atRoi, dSeriesOffset, imSizeOverride);
+        end
+    end
 end
 
 function s = rmfield_if_exists(s, field)
