@@ -184,49 +184,96 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
         %                Xlimits, ...
         %                Ylimits, ...
         %                Zlimits );
-        dxD = double(atDcmMetaData{1}.PixelSpacing(2)); % col spacing
-        dyD = double(atDcmMetaData{1}.PixelSpacing(1)); % row spacing
-        dzD = sliceSpacingFromIPP(atDcmMetaData);
+
+
+        % % % dxD = double(atDcmMetaData{1}.PixelSpacing(2)); % col spacing
+        % % % dyD = double(atDcmMetaData{1}.PixelSpacing(1)); % row spacing
+        % % % dzD = sliceSpacingFromIPP(atDcmMetaData);
+        % % % 
+        % % % dxR = double(atRefMetaData{1}.PixelSpacing(2));
+        % % % dyR = double(atRefMetaData{1}.PixelSpacing(1));
+        % % % dzR = sliceSpacingFromIPP(atRefMetaData);
+        % % % 
+        % % % Rdcm = imref3d(size(dcmImage), ...
+        % % %     [-dxD/2, (size(dcmImage,2)-0.5)*dxD], ...
+        % % %     [-dyD/2, (size(dcmImage,1)-0.5)*dyD], ...
+        % % %     [-dzD/2, (size(dcmImage,3)-0.5)*dzD]);
+        % % % 
+        % % % Rref = imref3d(size(refImage), ...
+        % % %     [-dxR/2, (size(refImage,2)-0.5)*dxR], ...
+        % % %     [-dyR/2, (size(refImage,1)-0.5)*dyR], ...
+        % % %     [-dzR/2, (size(refImage,3)-0.5)*dzR]);
+        % % % 
+        % % % 
+        % % % % image(mm) -> patient(mm)
+        % % % [Rm, tm] = imgAxesToPatient(atDcmMetaData); % moving
+        % % % [Rf, tf] = imgAxesToPatient(atRefMetaData); % fixed/ref
+        % % % 
+        % % % A = (Rm') * Rf;                 % 3x3
+        % % % b = (tm - tf)' * Rf;            % 1x3
+        % % % 
+        % % % T = eye(4);
+        % % % T(1:3,1:3) = A;                 % NO transpose here
+        % % % T(4,1:3)   = b;
+        % % % 
+        % % % % --- Remove Y from the transform in fixed-mm axes:
+        % % % % Force y' = y and block any y-coupling into x'/z'
+        % % % T(:,2) = [0; 1; 0; 0];   % y' = y, no y-translation, no mixing into y'
+        % % % T(2,1) = 0;              % no y -> x'
+        % % % T(2,3) = 0;              % no y -> z'
+        % % % TF = affine3d(T);
+        % % % 
+        % % % [resampImage, RB] = imwarp( ...
+        % % %     dcmImage, Rdcm, TF, ...
+        % % %     'Interp', sMode, ...
+        % % %     'FillValues', double(min(dcmImage(:))), ...
+        % % %     'OutputView', Rref );
+        
+        dxD = double(atDcmMetaData{1}.PixelSpacing(2));   % col spacing (mm)
+        dzD = sliceSpacingFromIPP(atDcmMetaData);         % slice spacing (mm)
         
         dxR = double(atRefMetaData{1}.PixelSpacing(2));
-        dyR = double(atRefMetaData{1}.PixelSpacing(1));
         dzR = sliceSpacingFromIPP(atRefMetaData);
         
+        % --- MIP stack: dim1 = angle, so give it a dummy spacing (must match!)
+        dAng = 1;   % “angle spacing” in world units (arbitrary, but consistent)
+        
         Rdcm = imref3d(size(dcmImage), ...
-            [-dxD/2, (size(dcmImage,2)-0.5)*dxD], ...
-            [-dyD/2, (size(dcmImage,1)-0.5)*dyD], ...
-            [-dzD/2, (size(dcmImage,3)-0.5)*dzD]);
+            [-dxD/2, (size(dcmImage,2)-0.5)*dxD], ...          % X = columns
+            [-dAng/2,(size(dcmImage,1)-0.5)*dAng], ...         % Y = angle index
+            [-dzD/2, (size(dcmImage,3)-0.5)*dzD]);             % Z = slices
         
         Rref = imref3d(size(refImage), ...
             [-dxR/2, (size(refImage,2)-0.5)*dxR], ...
-            [-dyR/2, (size(refImage,1)-0.5)*dyR], ...
+            [-dAng/2,(size(refImage,1)-0.5)*dAng], ...
             [-dzR/2, (size(refImage,3)-0.5)*dzR]);
         
-        
-        % image(mm) -> patient(mm)
+        % image(mm axes) -> patient(mm)
         [Rm, tm] = imgAxesToPatient(atDcmMetaData); % moving
-        [Rf, tf] = imgAxesToPatient(atRefMetaData); % fixed/ref
-
-        A = (Rm') * Rf;                 % 3x3
-        b = (tm - tf)' * Rf;            % 1x3
+        [Rf, tf] = imgAxesToPatient(atRefMetaData); % fixed
+        
+        % --- moving image-axes -> fixed image-axes (row-vector convention)
+        A = Rm * (Rf');                 % <-- NOTE: this order
+        b = (tm - tf)' * (Rf');         % <-- and this transpose
         
         T = eye(4);
-        T(1:3,1:3) = A;                 % NO transpose here
+        T(1:3,1:3) = A;
         T(4,1:3)   = b;
-                
-        % --- Remove Y from the transform in fixed-mm axes:
-        % Force y' = y and block any y-coupling into x'/z'
-        T(:,2) = [0; 1; 0; 0];   % y' = y, no y-translation, no mixing into y'
-        T(2,1) = 0;              % no y -> x'
-        T(2,3) = 0;              % no y -> z'
+        
+        % --- Remove the “row” axis effect (your Y) since Y=angle in the MIP stack
+        % Make y' = y and remove any coupling/translation involving y:
+        T(:,2)   = [0;1;0;0];   % y' = y
+        T(2,1)   = 0;           % no y -> x'
+        T(2,3)   = 0;           % no y -> z'
+        T(4,2)   = 0;           % no y translation (safety)
+        
         TF = affine3d(T);
-
-        [resampImage, RB] = imwarp( ...
-            dcmImage, Rdcm, TF, ...
+        
+        [resampImage, RB] = imwarp(dcmImage, Rdcm, TF, ...
             'Interp', sMode, ...
             'FillValues', double(min(dcmImage(:))), ...
-            'OutputView', Rref );
-        
+            'OutputView', Rref);
+             
     else
 
         dcmMeta = atDcmMetaData{1};
@@ -326,7 +373,7 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
     
     dimsRsp = size(resampImage);
     if dRefOutputView 
-        
+
         if dimsRsp(1)~=dimsRef(1) || ...
            dimsRsp(2)~=dimsRef(2) || ...     
            dimsRsp(3)~=dimsRef(3)

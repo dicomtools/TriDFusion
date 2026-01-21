@@ -487,8 +487,7 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset, zMoveOffsetRemai
             [-dxD/2, (size(dcmImage,2)-0.5)*dxD], ...
             [-dyD/2, (size(dcmImage,1)-0.5)*dyD], ...
             [-dzD/2, (size(dcmImage,3)-0.5)*dzD]);
-        
-
+            
         [resampImage, RB] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
     
     end

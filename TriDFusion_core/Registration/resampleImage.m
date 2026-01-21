@@ -580,14 +580,16 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             dyD = double(atDcmMetaData{1}.PixelSpacing(1)); % row spacing
             dzD = sliceSpacingFromIPP(atDcmMetaData);
 
-            
             Rdcm = imref3d(size(dcmImage), ...
                 [-dxD/2, (size(dcmImage,2)-0.5)*dxD], ...
                 [-dyD/2, (size(dcmImage,1)-0.5)*dyD], ...
                 [-dzD/2, (size(dcmImage,3)-0.5)*dzD]);
-        
+       
+            [resampImage, RB] = imwarp(dcmImage, Rdcm, TF, ...
+                'Interp', sMode, ...
+                'FillValues', double(min(dcmImage,[],'all')));
 
-           [resampImage, RB] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+  %         [resampImage, RB] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
         end
 
         dimsRsp = size(resampImage);
@@ -623,15 +625,28 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             else
                 refMeta = atRefMetaData{1};
             end
+            
+            if dRefOutputView 
 
             % atDcmMetaData{jj}.ImageOrientationPatient = ref.ImageOrientationPatient;
             atDcmMetaData{jj}.PixelSpacing           = refMeta.PixelSpacing;
             atDcmMetaData{jj}.Rows                   = dimsRsp(1);
             atDcmMetaData{jj}.Columns                = dimsRsp(2);
-            atDcmMetaData{jj}.SpacingBetweenSlices   = RB.PixelExtentInWorldZ;
-            atDcmMetaData{jj}.SliceThickness         = RB.PixelExtentInWorldZ;
+            atDcmMetaData{jj}.SpacingBetweenSlices   = RB.PixelExtentInWorldZ; % refSliceThickness
+            atDcmMetaData{jj}.SliceThickness         = RB.PixelExtentInWorldZ; % refSliceThickness
             atDcmMetaData{jj}.InstanceNumber         = jj;
             atDcmMetaData{jj}.NumberOfSlices         = dimsRsp(3);
+            else
+
+            % atDcmMetaData{jj}.ImageOrientationPatient = ref.ImageOrientationPatient;
+            atDcmMetaData{jj}.PixelSpacing           = refMeta.PixelSpacing;
+            atDcmMetaData{jj}.Rows                   = dimsRsp(1);
+            atDcmMetaData{jj}.Columns                = dimsRsp(2);
+            atDcmMetaData{jj}.SpacingBetweenSlices   = RB.PixelExtentInWorldZ; % refSliceThickness 
+            atDcmMetaData{jj}.SliceThickness         = RB.PixelExtentInWorldZ; % refSliceThickness
+            atDcmMetaData{jj}.InstanceNumber         = jj;
+            atDcmMetaData{jj}.NumberOfSlices         = dimsRsp(3);                
+            end
 
             % % % Compute X/Y origin differently for the OutputView case
             % if dRefOutputView == 2
