@@ -37,6 +37,8 @@ function setFusionCallback(~, ~)
         mainToolBarEnable('off');
     end
     
+    atInputTemplate = inputTemplate('get');
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
@@ -57,7 +59,6 @@ function setFusionCallback(~, ~)
 
             set(btnFusionPtr('get'), 'CData', resizeTopBarIcon('fusion_white.png'));           
 
-            atInputTemplate  = inputTemplate('get');
             dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
             atFusionMetaData = atInputTemplate(dFusionSeriesOffset).atDicomInfo;
 
@@ -186,7 +187,6 @@ function setFusionCallback(~, ~)
        end
     else
         
-        atInputTemplate = inputTemplate('get');
         if numel(atInputTemplate) == 0
 
             isFusion('set', false);
@@ -2574,8 +2574,14 @@ end
             textFusionColorbarIntensityMaxPtr('set', []);
             textFusionColorbarIntensityMinPtr('set', []);            
 
-            delete(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
-            axesFusionColorbarPtr('set', [], get(uiFusedSeriesPtr('get'), 'Value'));
+            % delete(axesFusionColorbarPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+            % axesFusionColorbarPtr('set', [], get(uiFusedSeriesPtr('get'), 'Value'));
+            for jj=1: numel(atInputTemplate)
+                if ~isempty(axesFusionColorbarPtr('get', [], jj))
+                    delete(axesFusionColorbarPtr('get', [], jj));
+                    axesFusionColorbarPtr('set', [], jj);
+                end
+            end
 
             delete(uiFusionColorbarPtr('get'));
             uiFusionColorbarPtr('set', []);
